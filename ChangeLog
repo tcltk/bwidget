@@ -1,3 +1,31 @@
+2002-06-04  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* README.txt: 
+	* configure.in: 
+	* pkgIndex.tcl: up'ed version to 1.4.1
+
+	* listbox.tcl: corrected use of 'end' as move index. [Bug #561391]
+	* buttonbox.tcl: 
+	* tree.tcl: force frame -padx/-pady to 0 to handle 8.4+ frame
+	padding options. [Bug #545119]
+
+	* scrollframe.tcl: corrected scrollregion configuration on
+	Configure of frame to use full width/height of canvas when the
+	canvas is larger.  This ensures that scrolling "anchors" properly
+	to topleft.
+
+	* dialog.tcl: prevent dialog from freezing on Windows with tkwait
+	visibility on withdrawn toplevels. [Patch #521386] (chevreux)
+
+	* font.tcl: reworked loadfont to not sort font names unless
+	requested.  [Patch #524353] (kienzle, hobbs)
+
+	* panedw.tcl: corrected handling of weighted panes following a
+	Configure event. [Patch #513320] (decoster)
+
+	* progressbar.tcl: Fixed display of vertical progressbar.
+	[Patch #561403]
+
 2002-05-29  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* combobox.tcl: Changed relief of popup list to ridge, for Win*
