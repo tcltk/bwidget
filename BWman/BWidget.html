@@ -112,6 +112,32 @@ Description text
  <I>h</I>
  ?<I>arg...</I>?
 </DT><DD>
-Description text
-</DD></DL>
+Used to position and resise the widget specified by
+<I>path</I>. <I>w</I> and <I>h</I> are used to specify the requested
+width and height of the <I>path</I> widget for use by <B>wm
+geometry</B>. The placement of the widget relative to other widgets or
+the screen is controlled by additional arguments:
+<DL>
+ <DT><B>at</B> <I>x</I> <I>y</I></DT>
+ <DD>Place the widget specified by the <I>path</I> argument at screen
+ position x,y. See <B>wm geometry</B> for information about window
+ placement values.</DD>
+
+ <DT><B>center</B> <I>?widget?</I></DT>
+ <DD>Place the <I>path</I> widget centered against <I>widget</I> or against the
+ root widget if <I>widget</I> is not given.</DD>
+
+ <DT><B>left</B> <I>?widget?</I></DT>
+ <DT><B>right</B> <I>?widget?</I></DT>
+ <DD>Place the <I>path</I> widget either left or right of the
+ reference widget (or the root widget if <I>widget</I> is not
+ specified). If the reference widget's position is such that the newly
+ placed window might be obscured then the opposite side will be tried.</DD>
+
+ <DT><B>above</B> <I>?widget?</I></DT>
+ <DT><B>below</B> <I>?widget?</I></DT>
+ <DD>As for left/right above, this option causes the widget to be
+ placed either above or below the reference widget with the opposite
+ placement being attempted if the newly placed widget will not be visible.
+</DL>
 </BODY></HTML>
