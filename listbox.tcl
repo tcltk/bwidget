@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.6 2001/12/29 02:06:08 hobbs Exp $
+#  $Id: listbox.tcl,v 1.7 2002/01/16 02:19:39 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -1103,7 +1103,7 @@ proc ListBox::_drop_cmd { path source X Y op type dnddata } {
     }
     $path.c delete drop
     set data(dnd,scroll) ""
-    if { [llength $data(dnd,item)] } {
+    if { [llength $data(dnd,item)] || ![llength $data(items)] } {
         if { [set cmd [Widget::getoption $path -dropcmd]] != "" } {
             return [uplevel \#0 $cmd [list $path $source $data(dnd,item) $op $type $dnddata]]
         }
