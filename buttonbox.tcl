@@ -277,3 +277,23 @@ proc ButtonBox::_destroy { path } {
     unset data
     rename $path {}
 }
+
+# ::ButtonBox::gettags --
+#
+#	Return a list of all the tags on all the buttons in a buttonbox.
+#
+# Arguments:
+#	path      the buttonbox to query.
+#
+# Results:
+#	taglist   a list of tags on the buttons in the buttonbox
+
+proc ::ButtonBox::gettags {path} {
+    upvar ::ButtonBox::$path data
+    set taglist {}
+    foreach tag [array names data "tags,*"] {
+	lappend taglist [string range $tag 5 end]
+    }
+    return $taglist
+}
+

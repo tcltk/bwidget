@@ -1,5 +1,10 @@
 1999-10-29  Eric Melski  <ericm@scriptics.com>
 
+	* buttonbox.tcl: Added a gettags function, which allows the user to query
+	the tags that are used on buttons in the buttonbox.
+
+1999-10-29  Eric Melski  <ericm@scriptics.com>
+
 	* font.tcl: Added one new flag: -querysystem.  This lets the user 
 	control whether the font selector queries the system (via font families)
 	for the list of fonts, or if it uses a preset list of fonts (which is
