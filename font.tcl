@@ -126,9 +126,8 @@ proc SelectFont::create { path args } {
     # Initialize the internal rep of the widget options
     Widget::init SelectFont "$path#SelectFont" $args
 
-    if { ![info exists _families(all)] && \
-	    [Widget::getoption "$path#SelectFont" -querysystem] } {
-        loadfont
+    if { [Widget::getoption "$path#SelectFont" -querysystem] } {
+        loadfont [Widget::getoption "$path#SelectFont" -families]
     }
 
     set bg [Widget::getoption "$path#SelectFont" -background]
@@ -322,27 +321,24 @@ proc SelectFont::cget { path option } {
 # ----------------------------------------------------------------------------
 #  Command SelectFont::loadfont
 # ----------------------------------------------------------------------------
-proc SelectFont::loadfont { } {
+proc SelectFont::loadfont {{which all}} {
     variable _families
 
     # initialize families
-    set _families(all) {}
-    set _families(fixed) {}
-    set _families(variable) {}
-    set lfont     [font families]
-    lappend lfont times courier helvetica
-    foreach font $lfont {
-        set family [font actual [list $font] -family]
-        if { [lsearch -exact $_families(all) $family] == -1 } {
-            lappend _families(all) $family
-        }
+    if {![info exists _families(all)]} {
+	set _families(all) [lsort -dictionary [font families]]
     }
-    set _families(all) [lsort $_families(all)]
-    foreach family $_families(all) {
-	if { [font metrics [list $family] -fixed] } {
-	    lappend _families(fixed) $family
-	} else {
-	    lappend _families(variable) $family
+    if {[regexp {fixed|variable} $which] \
+	    && ![info exists _families($which)]} {
+	# initialize families
+	set _families(fixed) {}
+	set _families(variable) {}
+	foreach family $_families(all) {
+	    if { [font metrics [list $family] -fixed] } {
+		lappend _families(fixed) $family
+	    } else {
+		lappend _families(variable) $family
+	    }
 	}
     }
     return
