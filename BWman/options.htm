@@ -13,6 +13,7 @@
 <DD><A HREF="options.htm#M-bitmap" NAME="L9">-bitmap, bitmap, Bitmap</A>
 <DD><A HREF="options.htm#M-borderwidth" NAME="L10">-borderwidth or -bd, borderWidth, BorderWidth</A>
 <DD><A HREF="options.htm#M-cursor" NAME="L11">-cursor, cursor, Cursor</A>
+<DD><A HREF="options.htm#M-disabledbackground" NAME="L12">-disabledbackground, disabledBackground, DisabledBackground</A>
 <DD><A HREF="options.htm#M-disabledforeground" NAME="L12">-disabledforeground, disabledForeground, DisabledForeground</A>
 <DD><A HREF="options.htm#M-exportselection" NAME="L13">-exportselection, exportSelection, ExportSelection</A>
 <DD><A HREF="options.htm#M-font" NAME="L14">-font, font, Font</A>
@@ -140,6 +141,14 @@ The value may have any of the forms acceptable to <B><A HREF="../TkLib/GetPixels
 <DD>Specifies the mouse cursor to be used for the widget.
 The value may have any of the forms acceptable to <B><A HREF="../TkLib/GetCursor.htm">Tk_GetCursor</A></B>.
 <P><DT>Command-Line Name: <B><A NAME="M-disabledforeground">-disabledforeground</A></B>
+<P><DT>Command-Line Name: <B><A NAME="M-disabledbackground">-disabledbackground</A></B>
+<DT>Database Name: <B>disabledBackground</B>
+<DT>Database Class: <B>DisabledBackground</B>
+<DD>Specifies background color to use when drawing a disabled element.
+If the option is specified as an empty string (which is typically the
+case on monochrome displays), disabled elements are drawn with the
+normal background color but they are dimmed by drawing them
+with a stippled fill pattern.
 <DT>Database Name: <B>disabledForeground</B>
 <DT>Database Class: <B>DisabledForeground</B>
 <DD>Specifies foreground color to use when drawing a disabled element.

@@ -108,16 +108,24 @@
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-autocomplete">-autocomplete</A></TD>
-<TD>&nbsp;&nbsp;<A HREF="#-expand">-expand</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-bwlistbox">-bwlistbox</A></TD>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-expand">-expand</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TD>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-hottrack">-hottrack</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-images">-images</A></TD>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-listboxwidth">-listboxwidth</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="#-modifycmd">-modifycmd</A></TD>
+<TD></TD>
 </TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-postcommand">-postcommand</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="#-values">-values</A></TD>
-<TD></TD>
 </TR>
 </TABLE></DD>
 </DL>
@@ -132,11 +140,17 @@
 <DD><I>pathName</I> <A HREF="#configure"><B>configure</B></A>
  ?<I>option</I>? ?<I>value</I> <I>option</I> <I>value</I> ...?
 </DD>
-<DD><I>pathName</I> <A HREF="#getvalue"><B>getvalue</B></A>
+<DD><I>pathName</I> <A HREF="#get"><B>get</B></A></DD>
+<DD><I>pathName</I> <A HREF="#getlistbox"><B>getlistbox</B></A></DD>
+<DD><I>pathName</I> <A HREF="#getvalue"><B>getvalue</B></A></DD>
+<DD><I>pathName</I> <A HREF="#icursor"><B>icursor</B></A>
+<I>index</I>
 </DD>
+<DD><I>pathName</I> <A HREF="#post"><B>post</B></A></DD>
 <DD><I>pathName</I> <A HREF="#setvalue"><B>setvalue</B></A>
  <I>index</I>
 </DD>
+<DD><I>pathName</I> <A HREF="#unpost"><B>unpost</B></A></DD>
 </DL>
 <BR><HR WIDTH="100%"><BR>
 <B><A NAME="descr"></A>DESCRIPTION</B><BR>
@@ -166,6 +180,16 @@ value is displayed.
     into the entry.
     </DD>
 </DL>
+
+<DL>
+    <DT><A NAME="-bwlistbox"><B>-bwlistbox</B></A></DT>
+    <DD>
+    Specifies that the combobox should use a BWidget listbox in its drop
+    down instead of the standard Tk option.  This option is enabled by
+    default if the <b>-images</b> option is not empty.
+    </DD>
+</DL>
+
 <DL><DT><A NAME="-expand"><B>-expand</B></A></DT>
 <DD>
 
@@ -175,6 +199,7 @@ a Tab binding is added to attempt to expand the current value based on
 the other values in <B>-values</B>.
 </DD>
 </DL>
+
 <DL><DT><A NAME="-height"><B>-height</B></A></DT>
 <DD>
 
@@ -182,6 +207,33 @@ Specifies the desired height for the window, in lines. If zero or less,
 then the desired height for the window is made just large enough to hold
 all the elements in the listbox.
 </DD>
+
+<DL>
+    <DT><A NAME="-hottrack"><B>-hottrack</B></A></DT>
+    <DD>
+    The selection in the drop down listbox will follow the mouse cursor
+    as it moves.
+    </DD>
+</DL>
+
+<DL>
+    <DT><A NAME="-images"><B>-images</B></A></DT>
+    <DD>
+    A list of images that correspond to the <b>-values</b> option.  Each
+    image will be drawn next to its value in the drop down.  This option
+    enables the <b>-bwlistbox</b> by default as it is needed to display
+    images.
+    </DD>
+</DL>
+
+<DL>
+    <DT><A NAME="-listboxwidth"><B>-listboxwidth</B></A></DT>
+    <DD>
+    Specifies the width of the listbox in the drop down.  Defaults to the
+    same size as the combobox.
+    </DD>
+</DL>
+
 </DL>
 <DL><DT><A NAME="-modifycmd"><B>-modifycmd</B></A></DT>
 <DD>
@@ -233,6 +285,21 @@ returns an empty string.  <I>Option</I> may have any of the values accepted
 by the creation command.  Read-only options are not be modified.
 
 </DD></DL>
+
+<DL><DT><A NAME="get"><I>pathName</I> <B>get</B></A>
+</DT><DD>
+
+Returns the current contents of the entry.
+
+</DD></DL>
+
+<DL><DT><A NAME="getlistbox"><I>pathName</I> <B>getlistbox</B></A>
+</DT><DD>
+
+Returns the path to the listbox in the drop down.
+
+</DD></DL>
+
 <DL><DT><A NAME="getvalue"><I>pathName</I> <B>getvalue</B></A>
 </DT><DD>
 
@@ -240,6 +307,23 @@ Returns the index of the current text of the ComboBox in the list of values,
 or -1 if it doesn't match any value.
 
 </DD></DL>
+
+<DL><DT><A NAME="icursor"><I>pathName</I> <B>icursor</B></A>
+ <I>index</I>
+</DT><DD>
+
+Arrange for the insertion cursor to be displayed just before the
+character given by <i>index</i>.  Returns an empty string.
+
+</DD></DL>
+
+<DL><DT><A NAME="post"><I>pathName</I> <B>post</B></A>
+</DT><DD>
+
+Post the drop down.
+
+</DD></DL>
+
 <DL><DT><A NAME="setvalue"><I>pathName</I> <B>setvalue</B></A>
  <I>index</I>
 </DT><DD>
@@ -271,6 +355,14 @@ Specifies the integer index in the list of values.
 </DL>
 
 </DD></DL>
+
+<DL><DT><A NAME="unpost"><I>pathName</I> <B>unpost</B></A>
+</DT><DD>
+
+Unpost the drop down.
+
+</DD></DL>
+
 <HR><BR><B>BINDINGS</B><BR><BR>
 
 When Entry of the ComboBox has the input focus, it has the following bindings, in addition

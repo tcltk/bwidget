@@ -7,8 +7,14 @@
 </DD></DL>
 <DL>
 <DT><I><A HREF="#wc">COMMAND</A></I></DT>
+<DD>DynamicHelp::<A HREF="#add"><B>add</B></A>
+<i>widget</i> ?<I>option value ...</I>?
+</DD>
 <DD>DynamicHelp::<A HREF="#configure"><B>configure</B></A>
  ?<I>option</I>? ?<I>value</I> <I>option</I> <I>value</I> ...?
+</DD>
+<DD>DynamicHelp::<A HREF="#delete"><B>delete</B></A>
+<i>widget</i>
 </DD>
 <DD>DynamicHelp::<A HREF="#include"><B>include</B></A>
  <I>class</I>
@@ -32,6 +38,85 @@ Description text
 </P>
 <HR WIDTH="50%"><BR>
 <B><A NAME="wc">COMMAND</A></B><BR>
+
+<DL><DT><A NAME="add">DynamicHelp::<B>add</B></A>
+ ?<I>option value ...</I>?
+</DT><DD>
+<p>
+This command adds dynamic help to the given <i>widget</i>.
+</p>
+    <DL><DT><A NAME="add-command"><B>-command</B></A></DT>
+    <DD>
+    	If specified, refers to a command to execute to get the help
+	text to display.  The command must return a string to display.
+	If the command returns an empty string, no help is displayed.
+    </DD>
+    </DL>
+
+    <DL><DT><A NAME="add-index"><B>-index</B></A></DT>
+    <DD>
+	If specified, refers to a menu index to bind the help to instead of
+	a widget.  If <b>-type</b> is not menu, this option is ignored.
+    </DD>
+    </DL>
+
+    <DL><DT><A NAME="add-item"><B>-item</B></A></DT>
+    <DD>
+	If specified, refers to an item or tag on a canvas to bind the
+	help to instead of a widget.
+    </DD>
+    </DL>
+
+    <DL><DT><A NAME="add-type"><B>-type</B></A></DT>
+    <DD>
+	Specifies the type of help.  Can be:
+	<b>balloon</b>, <b>variable</b> or <b>menu</b>.
+	Default is <b>balloon</b>.
+    </DD>
+    </DL>
+
+    <DL><DT><A NAME="add-text"><B>-text</B></A></DT>
+    <DD>
+    	The text to be displayed as help.
+    </DD>
+    </DL>
+
+    <DL><DT><A NAME="add-variable"><B>-variable</B></A></DT>
+    <DD>
+    	Specifies a variable name that contains the help string to
+	be displayed.
+    </DD>
+    </DL>
+
+    <p>
+    Creating dynamic help for a menu is a two-step process.  The menu
+    itself must first be added and then each menu entry must be added
+    separately.  Here is a brief example.
+    </p>
+
+    <TABLE BORDER=2 CELLSPACING=2 WIDTH="80%">
+    <TR><TD><PRE>
+    <FONT COLOR=red><I># create menu</I></FONT>
+    menu .m -type menubar
+    <FONT COLOR=red><I># associate menubar to toplevel BEFORE DynamicHelp::register</I></FONT>
+    <FONT COLOR=red><I># to make it works with menu clone name</I></FONT>
+    . configure -menu .m
+    .m add cascade -label "File" -menu .m.file
+    menu .m.file
+    .m.file add command -label "Open..."
+    .m.file add command -label "Quit"
+    <FONT COLOR=red><I># create label for help, using variable varinfo</I></FONT>
+    label .l -textvariable varinfo
+    <FONT COLOR=red><I># associate all entries of menu .m.file to variable varinfo</I></FONT>
+    DynamicHelp::add .m.file -type menu -variable varinfo
+    <FONT COLOR=red><I># then declare entries of .m.file</I></FONT>
+    DynamicHelp::add .m.file -type menu -index 0 -text "Detach menu"
+    DynamicHelp::add .m.file -type menu -index 1 -text "Open a file"
+    DynamicHelp::add .m.file -type menu -index 2 -text "Exit demo"
+    </PRE></TD></TR></TABLE></CENTER>
+
+</DL>
+
 <DL><DT><A NAME="configure">DynamicHelp::<B>configure</B></A>
  ?<I>option</I>? ?<I>value</I> <I>option</I> <I>value</I> ...?
 </DT><DD>
@@ -80,6 +165,13 @@ The background color of the toplevel window created for a balloon.
 </TR>
 </TABLE></DD>
 </DD></DL>
+
+<DL><DT><A NAME="delete">DynamicHelp::<B>delete</B></A>
+ <I>widget</I>
+</DT><DD>
+    Delete all dynamic help for the given <i>widget</i>.
+</DD></DL>
+
 <DL><DT><A NAME="include">DynamicHelp::<B>include</B></A>
  <I>class</I>
  <I>type</I>
@@ -91,6 +183,10 @@ Description text
  <I>type</I>
  ?<I>arg...</I>?
 </DT><DD>
+<p>
+<b>Its use is deprecated.  Use <i>DynamicHelp::add</i> instead.</b>
+</p>
+
 Register a help text to the widget <I>path</I>.
 <I>type</I> determines the type of the help or the type of the widget.
 Depending on <I>type</I>, other options must be provided.

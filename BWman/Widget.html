@@ -28,9 +28,19 @@
  <I>path</I>
  <I>options</I>
 </DD>
+<DD>Widget::<A HREF="#create"><B>create</B></A>
+ <I>class</I>
+ <I>path</I>
+ ?<I>rename</I>?
+</DD>
 <DD>Widget::<A HREF="#declare"><B>declare</B></A>
  <I>class</I>
  <I>optlist</I>
+</DD>
+<DD>Widget::<A HREF="#define"><B>define</B></A>
+ <I>class</I>
+ <I>filename</I>
+ ?<I>class ...</I>?
 </DD>
 <DD>Widget::<A HREF="#destroy"><B>destroy</B></A>
  <I>path</I>
@@ -211,6 +221,28 @@ Typically called by the BWidget <B>cget</B> command.
 </DT><DD>
 Description text
 </DD></DL>
+
+<DL><DT><A NAME="create">Widget::<B>create</B></A>
+ <I>class</I>
+ <I>path</I>
+ ?<I>rename</I>?
+</DT><DD>
+    The standard method for creating a BWidget.  The real widget path
+    is renamed to $path:cmd, and a new proc is created to replace the
+    path which points to the BWidget's commands.
+
+    <p>
+    If <i>rename</i> is false, the path will not be renamed, but the
+    proc will still be created.  This is useful when inheriting another
+    BWidget who will already have renamed the widget.
+    </p>
+
+    <p>
+    The command returns the widget path.  This command is usually the
+    last command executed in the ::create command for the widget.
+    </p>
+</DD></DL>
+
 <DL><DT><A NAME="declare">Widget::<B>declare</B></A>
  <I>class</I>
  <I>optlist</I>
@@ -287,9 +319,45 @@ string defining the set.
 <DD>
 <DD><I>option</I> is a synonym of option <I>args</I>. <I>value</I> has no effect here.
 </DD>
-
 </DL>
 </DD></DL>
+
+<DL><DT><A NAME="define">Widget::<B>define</B></A>
+ <I>class</I>
+ <I>filename</I>
+ ?<I>class ...</I>?
+</DT><DD>
+
+    <p>
+    This command is used to define a new BWidget class.  It is
+    usually the first command executed in a new widget definition.
+    </p>
+
+<ul>
+    <li><i>class</i> is the name of the new widget class.</li>
+    <li><i>filename</i> is the name of the file (without extension) in the
+    BWidget distribution that defines this class.</li>
+</ul>
+
+    <p>
+    Each class defined after the filename is a class that this widget
+    depends on.  The ::use command will be called for each of these
+    classes after the new widget has been defined.
+    </p>
+
+    <p>
+    This command does several things to setup the new class.  First, it
+    creates an alias in the global namespace for the name of the class
+    that points to the class's ::create subcommand.  Second, it defines
+    a ::use subcommand for the class which other classes can use to load
+    this class on the fly.  Lastly, it creates a default binding to the
+    &lt;Destroy&gt; event for the class that calls Widget::destroy on
+    the path.  This is the default setup for almost all widgets in the
+    BWidget package.
+    </p>
+
+</DD></DL>
+
 <DL><DT><A NAME="destroy">Widget::<B>destroy</B></A>
  <I>path</I>
 </DT><DD>

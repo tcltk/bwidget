@@ -26,6 +26,7 @@
 </TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-spacing">-spacing</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-state">-state</A></TR>
 </TABLE></DD>
 </DL>
 <DL>
@@ -39,8 +40,14 @@
 <DD><I>pathName</I> <A HREF="#configure"><B>configure</B></A>
  ?<I>option</I>? ?<I>value</I> <I>option</I> <I>value</I> ...?
 </DD>
+<DD><I>pathName</I> <A HREF="#delete"><B>delete</B></A>
+ <I>index</I>
+</DD>
 <DD><I>pathName</I> <A HREF="#index"><B>index</B></A>
  <I>index</I>
+</DD>
+<DD><I>pathName</I> <A HREF="#insert"><B>insert</B></A>
+  <i>index</i> ?<I>option value...</I>?
 </DD>
 <DD><I>pathName</I> <A HREF="#invoke"><B>invoke</B></A>
  <I>index</I>
@@ -78,6 +85,16 @@ Indicates the last item added.
 <DT><B>default</B>
 <DD>
 Indicates the default Button.
+
+<DT>
+<i>name</i>
+<DD>
+Indicates the button whose <b>-name</b> option is <i>name</i>.
+
+<DT>
+<i>text</i>
+<DD>
+Indicates the button whose <b>-text</b> option is <i>text</i>.
 </DL>
 
 </P>
@@ -141,6 +158,15 @@ call to <B>add</B>.
 
 </DD>
 </DL>
+
+<DL><DT><A NAME="-state"><B>-state</B></A></DT>
+<DD>
+
+Specifies a state for all the buttons in the button box.  Can be any state supported by buttons.
+
+</DD>
+</DL>
+
 <HR WIDTH="50%"><BR>
 <B><A NAME="wc">WIDGET COMMAND</A></B><BR>
 <DL><DT><A NAME="add"><I>pathName</I> <B>add</B></A>
@@ -173,6 +199,15 @@ option(s) to have the given value(s); in this case the command returns an empty 
 Read-only options are not be modified.
 
 </DD></DL>
+
+<DL><DT><A NAME="delete"><I>pathName</I> <B>delete</B></A>
+ <I>index</I>
+</DT><DD>
+
+Delete the button at <i>index</i> from the button box.
+
+</DD></DL>
+
 <DL><DT><A NAME="index"><I>pathName</I> <B>index</B></A>
  <I>index</I>
 </DT><DD>
@@ -180,6 +215,15 @@ Read-only options are not be modified.
 Return the numerical index corresponding to the item.
 
 </DD></DL>
+
+<DL><DT><A NAME="insert"><I>pathName</I> <B>insert</B></A>
+ <I>index</I> ?<I>option value...</I>?
+</DT><DD>
+
+Insert a new button into the button box before the given index.
+
+</DD></DL>
+
 <DL><DT><A NAME="invoke"><I>pathName</I> <B>invoke</B></A>
  <I>index</I>
 </DT><DD>
