@@ -1,3 +1,21 @@
+2003-02-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* scrollw.tcl: complete rewrite of ScrolledWindow widget to
+	address infinite loop scrollbar problems.  This one is much
+	simpler and does not suffer the infinite loop.  There still seems
+	to be an issue with shrinking smaller than one scrollbar width /
+	height in size, but that's not common (nor fatal).  Addresses
+	[Patch #671821, #520903] [Bug #472718, #564691]
+
+	* widget.tcl: code cleanup
+	* scrollframe.tcl: code cleanup
+
+2003-02-24  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* panedw.tcl (_realize): only allow _realize to be called once the
+	Configure binding has triggered once. [Bug #613134]
+	[Patch #63500] (decoster)
+
 2003-02-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* font.tcl: comment out the adding of default style bits for bold
