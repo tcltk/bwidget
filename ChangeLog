@@ -1,3 +1,8 @@
+2005-01-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* notebook.tcl: reverted lester patch - too many bugs related to
+	deleting and reinsertion of tabs.
+
 2004-12-01  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* notebook.tcl: speed improvements via array hashing for many tabs

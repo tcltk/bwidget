@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.22 2004/12/01 14:34:03 gwlester Exp $
+#  $Id: notebook.tcl,v 1.23 2005/01/26 01:01:26 hobbs Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -107,18 +107,16 @@ namespace eval NoteBook {
 proc NoteBook::create { path args } {
     variable $path
     upvar 0  $path data
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
 
     Widget::init NoteBook $path $args
 
     set data(base)     0
     set data(select)   ""
     set data(pages)    {}
+    set data(pages)    {}
     set data(cpt)      0
     set data(realized) 0
     set data(wpage)    0
-    array set pageToIndex {}
 
     _compute_height $path
 
@@ -254,10 +252,8 @@ proc NoteBook::compute_size { path } {
 proc NoteBook::insert { path index page args } {
     variable $path
     upvar 0  $path data
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
 
-    if { [info exists pageToIndex($page)] } {
+    if { [lsearch -exact $data(pages) $page] != -1 } {
         return -code error "page \"$page\" already exists"
     }
 
@@ -265,20 +261,6 @@ proc NoteBook::insert { path index page args } {
     Widget::init NoteBook::Page $f $args
 
     set data(pages) [linsert $data(pages) $index $page]
-    ##
-    ## See if pages need to be renumbered
-    ##
-    set newPos [llength [lrange $data(pages) 0 $index]]
-    set pageToIndex($page) [expr {$newPos - 1}]
-    if {[llength $data(pages)] != $newPos} {
-	##
-	## Insert in middle, so renumber
-	##
-	foreach tmpPage [lrange $data(pages) $newPos end] {
-	    set pageToIndex($page) $newPos
-	    incr newPos 1
-	}
-    }
     # If the page doesn't exist, create it; if it does reset its bg and ibd
     if { ![winfo exists $f] } {
         frame $f \
@@ -307,22 +289,9 @@ proc NoteBook::insert { path index page args } {
 proc NoteBook::delete { path page {destroyframe 1} } {
     variable $path
     upvar 0  $path data
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
 
     set pos [_test_page $path $page]
     set data(pages) [lreplace $data(pages) $pos $pos]
-    unset pageToIndex($page)
-    set newPos $pos
-    ##
-    ## Renumber
-    ##
-    foreach tmpPage [lrange $data(pages) $newPos end] {
-	set pageToIndex($page) $newPos
-	incr newPos 1
-    }
-    
-    
     _compute_width $path
     $path.c delete p:$page
     if { $data(select) == $page } {
@@ -381,11 +350,6 @@ proc NoteBook::move { path page index } {
 
     set pos [_test_page $path $page]
     set data(pages) [linsert [lreplace $data(pages) $pos $pos] $index $page]
-    foreach tmpPage [lrange $data(pages) $pos end] {
-	set pageToIndex($page) $pos
-	incr pos 1
-    }
-    
     _redraw $path
 }
 
@@ -470,14 +434,10 @@ proc NoteBook::pages { path {first ""} {last ""}} {
 #  Command NoteBook::index
 # ---------------------------------------------------------------------------
 proc NoteBook::index { path page } {
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
+    variable $path
+    upvar 0  $path data
 
-    if { [info exists pageToIndex($page)] } {
-	return $pageToIndex($page)
-    } else {
-	return -1
-    }
+    return [lsearch -exact $data(pages) $page]
 }
 
 
@@ -487,15 +447,12 @@ proc NoteBook::index { path page } {
 proc NoteBook::_destroy { path } {
     variable $path
     upvar 0  $path data
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
 
     foreach page $data(pages) {
         Widget::destroy $path.f$page
     }
     Widget::destroy $path
     unset data
-    unset pageToIndex
 }
 
 
@@ -511,13 +468,13 @@ proc NoteBook::getframe { path page } {
 #  Command NoteBook::_test_page
 # ---------------------------------------------------------------------------
 proc NoteBook::_test_page { path page } {
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
+    variable $path
+    upvar 0  $path data
 
-    if { ![info exists pageToIndex($page)] } {
+    if { [set pos [lsearch -exact $data(pages) $page]] == -1 } {
         return -code error "page \"$page\" does not exists"
     }
-    return $pageToIndex($page)
+    return $pos
 }
 
 proc NoteBook::_getoption { path page option } {
@@ -771,11 +728,9 @@ proc NoteBook::_redraw { path } {
 proc NoteBook::_draw_page { path page create } {
     variable $path
     upvar 0  $path data
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
 
     # --- calcul des coordonnees et des couleurs de l'onglet ------------------
-    set pos $pageToIndex($page)
+    set pos [lsearch -exact $data(pages) $page]
     set bg  [_getoption $path $page -background]
 
     # lookup the tab colors
@@ -1054,8 +1009,6 @@ proc NoteBook::_draw_arrows { path } {
 proc NoteBook::_draw_area { path } {
     variable $path
     upvar 0  $path data
-    variable ${path}Array
-    upvar 0  ${path}Array pageToIndex
 
     set w   [expr {[winfo width  $path] - 1}]
     set h   [expr {[winfo height $path] - 1}]
@@ -1084,7 +1037,7 @@ proc NoteBook::_draw_area { path } {
         set xf  $xd
         set lbg $data(dbg)
     } else {
-        set xd [_get_x_page $path $pageToIndex($data(select))]
+        set xd [_get_x_page $path [lsearch -exact $data(pages) $data(select)]]
         set xf [expr {$xd + $data($sel,width) + $arcRadius + 1}]
         set lbg $data(lbg)
     }
