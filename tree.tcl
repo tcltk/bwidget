@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.15 2000/02/28 18:37:50 ericm Exp $
+#  $Id: tree.tcl,v 1.16 2000/03/01 20:16:03 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -131,7 +131,8 @@ proc Tree::create { path args } {
     set data(dnd,selnodes) {}
     set data(dnd,node)     ""
 
-    frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat
+    frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat \
+	    -takefocus 0
     eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
     pack $path.c -expand yes -fill both
     $path.c bind cross <ButtonPress-1> [list Tree::_cross_event $path]
@@ -153,7 +154,7 @@ proc Tree::create { path args } {
 
     bind $path <Configure> "Tree::_update_scrollregion $path"
     bind $path <Destroy>   "Tree::_destroy $path"
-    bind $path <FocusIn>   "focus $path.c"
+    bind $path <FocusIn>   [list after idle {BWidget::refocus %W %W.c}]
 
     DragSite::setdrag $path $path.c Tree::_init_drag_cmd \
 	    [Widget::cget $path -dragendcmd] 1

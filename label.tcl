@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.3 2000/03/01 02:12:39 ericm Exp $
+#  $Id: label.tcl,v 1.4 2000/03/01 20:16:03 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - BWLabel::create
@@ -55,7 +55,7 @@ namespace eval BWLabel {
 proc BWLabel::create { path args } {
     array set maps [list BWLabel {} .l {}]
     array set maps [Widget::parseArgs BWLabel $args]
-    frame $path -class BWLabel
+    frame $path -class BWLabel -borderwidth 0 -highlightthickness 0 -relief flat
     Widget::initFromODB BWLabel $path $maps(BWLabel)
 
     bind $path <Destroy> {Widget::destroy %W; rename %W {}}
@@ -92,7 +92,7 @@ proc BWLabel::create { path args } {
         bind [winfo toplevel $path] <Alt-$accel> "BWLabel::setfocus $path"
     }
 
-    bindtags $path.l [list $path.l Label BwLabel [winfo toplevel $path] all]
+    bindtags $path [list $path BwLabel [winfo toplevel $path] all]
     pack $path.l -expand yes -fill both
 
     DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd [Widget::cget $path -dragendcmd] 1
@@ -180,8 +180,8 @@ proc BWLabel::cget { path option } {
 #  Command BWLabel::setfocus
 # ------------------------------------------------------------------------------
 proc BWLabel::setfocus { path } {
-    if { ![string compare [Widget::getoption $path -state] "normal"] } {
-        set w [Widget::getoption $path -focus]
+    if { ![string compare [Widget::cget $path -state] "normal"] } {
+        set w [Widget::cget $path -focus]
         if { [winfo exists $w] && [Widget::focusOK $w] } {
             focus $w
         }

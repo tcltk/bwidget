@@ -45,7 +45,7 @@ namespace eval SpinBox {
 		-repeatinterval {} -repeatdelay {}
     }
 
-    ::bind BwSpinBox <FocusIn> {focus %W.labf}
+    ::bind BwSpinBox <FocusIn> [list after idle {BWidget::refocus %W %W.labf}]
     ::bind BwSpinBox <Destroy> {SpinBox::_destroy %W}
 
     proc ::SpinBox { path args } { return [eval SpinBox::create $path $args] }

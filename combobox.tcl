@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.11 2000/02/29 02:41:35 ericm Exp $
+#  $Id: combobox.tcl,v 1.12 2000/03/01 20:16:03 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -48,7 +48,7 @@ namespace eval ComboBox {
     Widget::syncoptions ComboBox Entry .e {-text {}}
     Widget::syncoptions ComboBox LabelFrame .labf {-label -text -underline {}}
 
-    ::bind BwComboBox <FocusIn> {focus %W.labf}
+    ::bind BwComboBox <FocusIn> [list after idle {BWidget::refocus %W %W.labf}]
     ::bind BwComboBox <Destroy> {Widget::destroy %W; rename %W {}}
 
     proc ::ComboBox { path args } { return [eval ComboBox::create $path $args] }
@@ -56,20 +56,29 @@ namespace eval ComboBox {
 }
 
 
-# ------------------------------------------------------------------------------
-#  Command ComboBox::create
-# ------------------------------------------------------------------------------
-proc ComboBox::create { path args } {
-    Widget::init ComboBox $path $args
+# ComboBox::create --
+#
+#	Create a combobox widget with the given options.
+#
+# Arguments:
+#	path	name of the new widget.
+#	args	optional arguments to the widget.
+#
+# Results:
+#	path	name of the new widget.
 
-    eval frame $path [Widget::subcget $path :cmd] \
-        -highlightthickness 0 -bd 0 -relief flat -takefocus 0 -class ComboBox
+proc ComboBox::create { path args } {
+    array set maps [list ComboBox {} :cmd {} .labf {} .e {} .a {}]
+    array set maps [Widget::parseArgs ComboBox $args]
+
+    eval frame $path $maps(:cmd) -highlightthickness 0 -bd 0 -relief flat \
+	    -takefocus 0 -class ComboBox
+    Widget::initFromODB ComboBox $path $maps(ComboBox)
 
     bindtags $path [list $path BwComboBox [winfo toplevel $path] all]
 
-    set labf  [eval LabelFrame::create $path.labf [Widget::subcget $path .labf] \
-                   -focus $path.e]
-    set entry [eval Entry::create $path.e [Widget::subcget $path .e] \
+    set labf  [eval LabelFrame::create $path.labf $maps(.labf) -focus $path.e]
+    set entry [eval Entry::create $path.e $maps(.e) \
                    -relief flat -borderwidth 0 -takefocus 1]
     ::bind $path.e <FocusIn> "$path _focus_in"
     ::bind $path.e <FocusOut> "$path _focus_out"
@@ -82,7 +91,7 @@ proc ComboBox::create { path args } {
         set width 15
     }
     set height [winfo reqheight $entry]
-    set arrow [eval ArrowButton::create $path.a [Widget::subcget $path .a] \
+    set arrow [eval ArrowButton::create $path.a $maps(.a) \
                    -width $width -height $height \
                    -highlightthickness 0 -borderwidth 1 -takefocus 0 \
                    -dir   bottom \
@@ -389,7 +398,7 @@ proc ComboBox::_focus_in { path } {
     variable background
     variable foreground
 
-    if { [Widget::getoption $path -editable] == 0 } {
+    if { [Widget::cget $path -editable] == 0 } {
         set value  [Entry::cget $path.e -text]
         if {[string equal $value ""]} {
             # If the entry is empty, we need to do some magic to

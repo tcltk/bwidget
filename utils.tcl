@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: utils.tcl,v 1.2 2000/03/01 20:16:04 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -405,4 +405,24 @@ proc BWidget::focus { option path } {
         lappend _fstack [::focus]
         ::focus -force $path
     }
+}
+
+# BWidget::refocus --
+#
+#	Helper function used to redirect focus from a container frame in 
+#	a megawidget to a component widget.  Only redirects focus if
+#	focus is already on the container.
+#
+# Arguments:
+#	container	container widget to redirect from.
+#	component	component widget to redirect to.
+#
+# Results:
+#	None.
+
+proc BWidget::refocus {container component} {
+    if { [string equal $container [::focus]] } {
+	::focus $component
+    }
+    return
 }
