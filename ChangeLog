@@ -1,3 +1,9 @@
+2000-03-03  Eric Melski  <ericm@scriptics.com>
+
+	* spinbox.tcl: Added a call in setvalue to scan the current value into
+	a float to trim out any 0 padding on the number (otherwise the zero's 
+	make it look like octal to tcl, which chokes on numbers > 8)
+
 2000-03-07  Sven Delmas  <sven@scriptics.com>
 
 	* passwddlg.tcl: Reenabled the <Return> binding to activate the ok
@@ -7,11 +13,18 @@
 	procedure to guard against a motion event that (sometimes) arrives
 	before the press event. This fixes bug # 4324.
 
+2000-03-03  Eric Melski  <ericm@scriptics.com>
+
+	* spinbox.tcl: Removed LabelFrame from SpinBox (BACKWARDS
+	INCOMPATIBLE) to speed creation; updated configure proc to use
+	hasChangedX instead of hasChanged, as it didn't really need the
+	values of the options it was checking.
+
 2000-03-01  Eric Melski  <ericm@scriptics.com>
 
-	* spinbox.tcl: Changed bindings to be on class SpinBox instead of BwSpinBox,
-	and added class SpinBoxEntry to the bindtags of the SpinBox entry 
-	component.
+	* spinbox.tcl: Changed bindings to be on class SpinBox instead of
+	BwSpinBox, and added class SpinBoxEntry to the bindtags of the
+	SpinBox entry component.
 
 	* configure.in:
 	* pkgIndex.tcl: Bumped version to 1.3.0.

@@ -6,7 +6,7 @@
 # Copyright (c) 2000 by Scriptics Corporation.
 # All rights reserved.
 # 
-# RCS: @(#) $Id: spinbox.tcl,v 1.6 2000/03/03 23:54:14 ericm Exp $
+# RCS: @(#) $Id: spinbox.tcl,v 1.7 2000/03/08 01:55:08 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - SpinBox::create
@@ -192,6 +192,9 @@ proc SpinBox::setvalue { path index } {
     } else {
         # --- -range SpinBox ---
 	foreach {vmin vmax incr} [Widget::cget $path -range] {break}
+	# Allow zero padding on the value; strip it out for calculation by
+	# scanning the value into a floating point number.
+	scan $value %f value
         switch -- $index {
             next {
                 if { [catch {expr {double($value-$vmin)/$incr}} idx] } {
