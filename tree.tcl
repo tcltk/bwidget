@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.18 2000/03/09 19:41:15 sven Exp $
+#  $Id: tree.tcl,v 1.19 2000/03/11 02:19:14 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -699,7 +699,7 @@ proc Tree::nodes { path node {first ""} {last ""} } {
 }
 
 
-# Tree::allnodes --
+# Tree::visiblenodes --
 #
 #	Retrieve a list of all the nodes in a tree.
 #
@@ -709,14 +709,17 @@ proc Tree::nodes { path node {first ""} {last ""} } {
 # Results:
 #	nodes	list of nodes in the tree.
 
-proc Tree::allnodes { path } {
+proc Tree::visiblenodes { path } {
     variable $path
     upvar 0  $path data
 
-#    update
     set result ""
-    foreach element [$path.c find withtag node] {
-        lappend result [lindex [string range [$path.c gettags $element] 7 end] 0]
+    foreach element [array names data] {
+        if {![catch {Widget::cget $path.$element -open} exp]} {
+            if {$exp} {
+                lappend result $element
+            }
+        }
     }
     return $result
 }
