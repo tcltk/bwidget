@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.23 2003/06/06 23:02:34 damonc Exp $
+#  $Id: combobox.tcl,v 1.24 2003/06/23 20:27:24 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -582,11 +582,12 @@ proc ComboBox::_focus_out { path } {
 }
 
 proc ComboBox::_auto_complete { path key } {
-    ## Anything that's greater in length than 1 char is a command
-    ## key of some kind, and we want to ignore those.
-    if {[string length $key] > 1 && $key != "space"} { return }
+    ## Anything that is all lowercase is either a letter, number
+    ## or special key we're ok with.  Everything else is a
+    ## functional key of some kind.
+    if {[string tolower $key] != $key} { return }
 
-    set text [$path.e get]
+    set text [string map [list {[} {\[} {]} {\]}] [$path.e get]]
     if {[string equal $text ""]} { return }
     set values [Widget::cget $path -values]
     set x [lsearch $values $text*]
