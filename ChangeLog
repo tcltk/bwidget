@@ -1,3 +1,7 @@
+2001-10-14  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* pagesmgr.tcl: reverted fix of 2001-10-11 - it was bogus.
+
 2001-10-11  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* pagesmgr.tcl: allowed the ability to specify page by name,
