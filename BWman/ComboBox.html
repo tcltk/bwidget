@@ -107,12 +107,16 @@
 <DT><I><A HREF="#wso">WIDGET-SPECIFIC OPTIONS</A></I></DT>
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-modifycmd">-modifycmd</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-expand">-expand</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-postcommand">-postcommand</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-values">-values</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-modifycmd">-modifycmd</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-postcommand">-postcommand</A></TD>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-values">-values</A></TD>
+<TD></TD>
 </TR>
 </TABLE></DD>
 </DL>
@@ -152,6 +156,15 @@ value is displayed.
 </P>
 <BR><HR WIDTH="50%"><BR>
 <B><A NAME="wso">WIDGET-SPECIFIC OPTIONS</A></B><BR>
+<DL><DT><A NAME="-expand"><B>-expand</B></A></DT>
+<DD>
+
+Specifies the value expansion behavior for the window. It must be
+<B>none</B> (default) or <B>tab</B>. If <B>tab</B> is specified, then
+a Tab binding is added to attempt to expand the current value based on
+the other values in <B>-values</B>.
+</DD>
+</DL>
 <DL><DT><A NAME="-height"><B>-height</B></A></DT>
 <DD>
 

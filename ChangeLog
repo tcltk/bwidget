@@ -1,3 +1,12 @@
+2003-04-11  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* combobox.tcl (ComboBox::_expand): add tab expansion behavior
+	when -expand tab is specified
+	(ComboBox::_focus_in): autohighlight full contents only when no
+	existing selection exists. [Bug #720024]
+
+	* BWman/ComboBox.html: doc -expand none|tab
+
 2003-03-12  Damon Courtney <damon@unreality.com>
 
 	* listbox.tcl: Added dynamic help support to listbox items.
