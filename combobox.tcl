@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.6 2000/02/19 02:12:40 ericm Exp $
+#  $Id: combobox.tcl,v 1.7 2000/02/23 00:32:31 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -242,13 +242,18 @@ proc ComboBox::_create_popup { path } {
             set h $len
         }
     }
+    if { $::tcl_platform(platform) == "unix" } {
+	set sbwidth 11
+    } else {
+	set sbwidth 15
+    }
     if {![winfo exists $path.shell]} {
         set shell [toplevel $path.shell -relief sunken -bd 2]
         wm overrideredirect $shell 1
         wm transient $shell [winfo toplevel $path]
         wm withdraw  $shell
 
-        set sw     [ScrolledWindow $shell.sw -managed 0 -size 11 -ipad 0]
+        set sw     [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
         set listb  [listbox $shell.listb \
                         -relief flat -borderwidth 0 -highlightthickness 0 \
                         -exportselection false \
@@ -264,7 +269,7 @@ proc ComboBox::_create_popup { path } {
     } else {
         set listb $shell.listb
         destroy $shell.sw
-        set sw [ScrolledWindow $shell.sw -managed 0 -size 11 -ipad 0]
+        set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
         $listb configure -height $h -font [Widget::getoption $path -font]
         pack $sw -fill both -expand yes
         $sw setwidget $listb
