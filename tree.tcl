@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.27 2000/05/03 01:22:20 ericm Exp $
+#  $Id: tree.tcl,v 1.28 2000/05/05 21:15:27 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -105,6 +105,7 @@ namespace eval Tree {
 	option add *Tree.c.background SystemWindow widgetDefault
 	option add *TreeNode.fill SystemWindowText widgetDefault
     }
+
     proc ::Tree { path args } { return [eval Tree::create $path $args] }
     proc use {} {}
 
@@ -134,14 +135,8 @@ proc Tree::create { path args } {
     frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat \
 	    -takefocus 0
     eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
-    
     pack $path.c -expand yes -fill both
     $path.c bind cross <ButtonPress-1> [list Tree::_cross_event $path]
-
-    set frameBindtag "[string range $path 1 end]#Real#"
-    bindtags $path [list $frameBindtag TreeFrame [winfo toplevel $path] all]
-    bindtags $path.c [list $path $path.c Tree \
-	    Canvas [winfo toplevel $path] all]
 
     # Added by ericm@scriptics.com
     # These allow keyboard traversal of the tree
@@ -158,13 +153,9 @@ proc Tree::create { path args } {
     bind $path.c <Control-KeyPress-Right> "$path.c xview scroll  1 units"
     # ericm@scriptics.com
 
-    bind $frameBindtag <FocusIn> [list after idle \
-	    [list BWidget::refocus $path $path.c]]
-    bind $path.c <FocusOut> [list after idle \
-	    [list BWidget::refocus $path $path.c]]
-
-    bind $frameBindtag <Configure> "Tree::_update_scrollregion $path"
-    bind $frameBindtag <Destroy>   "Tree::_destroy $path"
+    bind $path <Configure> "Tree::_update_scrollregion $path"
+    bind $path <Destroy>   "Tree::_destroy $path"
+    bind $path <FocusIn>   [list after idle {BWidget::refocus %W %W.c}]
 
     DragSite::setdrag $path $path.c Tree::_init_drag_cmd \
 	    [Widget::cget $path -dragendcmd] 1
