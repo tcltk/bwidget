@@ -1,3 +1,8 @@
+2000-09-07  Sven Delmas  <sven@scriptics.com>
+
+	* mainframe.tcl: Fixed the typo of Alt (Atl) as reported in bug #
+	6079.
+
 2000-09-05  Eric Melski  <ericm@ajubasolutions.com>
 
 	* label.tcl: Corrected bindtags for BWidgets Label components:
