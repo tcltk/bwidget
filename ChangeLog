@@ -1,7 +1,9 @@
 2000-02-28  Sven Delmas  <sven@scriptics.com>
 
 	* tree.tcl: Added a procedure called "allnodes" to retrieve the
-	names of all currently defined treenodes.
+	names of all currently defined treenodes. Apparently the internal
+	widget structure of tree was changed recently. I adjusted the
+	"allnodes" procedure to that.
 
 2000-02-25  Eric Melski  <ericm@scriptics.com>
 
