@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.7 2002/01/16 02:19:39 hobbs Exp $
+#  $Id: listbox.tcl,v 1.8 2002/06/04 22:04:36 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -112,6 +112,8 @@ proc ListBox::create { path args } {
     upvar 0  $path data
 
     frame $path -class ListBox -bd 0 -highlightthickness 0 -relief flat
+    # For 8.4+ we don't want to inherit the padding
+    catch {$path configure -padx 0 -pady 0}
     # widget informations
     set data(nrows) -1
 
@@ -234,11 +236,7 @@ proc ListBox::insert { path index item args } {
 
     Widget::init ListBox::Item $path.$item $args
 
-    if { ![string compare $index "end"] } {
-        lappend data(items) $item
-    } else {
-        set data(items) [linsert $data(items) $index $item]
-    }
+    set data(items) [linsert $data(items) $index $item]
     set data(upd,create,$item) $item
 
     _redraw_idle $path 2
@@ -285,11 +283,7 @@ proc ListBox::multipleinsert { path index args } {
 	    Widget::copyinit ListBox::Item $firstpath $path.$item $iargs
 	}
 
-	if { ![string compare $index "end"] } {
-	    eval lappend data(items) $item
-	} else {
-	    set data(items) [linsert $data(items) $index $item]
-	}
+	set data(items) [linsert $data(items) $index $item]
 	set data(upd,create,$item) $item
 
 	incr count
@@ -455,12 +449,7 @@ proc ListBox::move { path item index } {
         return -code error "item \"$item\" does not exist"
     }
 
-    set data(items) [lreplace $data(items) $idx $idx]
-    if { ![string compare $index "end"] } {
-        lappend data($path,item) $item
-    } else {
-        set data(items) [linsert $data(items) $index $item]
-    }
+    set data(items) [linsert [lreplace $data(items) $idx $idx] $index $item]
 
     _redraw_idle $path 2
 }
