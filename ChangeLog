@@ -1,3 +1,11 @@
+2002-01-26  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* utils.tcl: Modified BWidget::place to support multiple screens
+	under Windows. Better support would require Tk modifications.
+	* demo/tree.tcl: Fixed for starting on secondary monitor under
+	windows.
+	* BWMan/BWidget.html: added documentation for BWidget::place.
+	
 2002-01-22  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	**** BWidget 1.4.0 tagged ****

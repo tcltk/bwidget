@@ -56,17 +56,20 @@ proc DemoTree::create { nb } {
     $nb itemconfigure demoTree \
         -createcmd "DemoTree::init $tree $list" \
         -raisecmd  {
-            regexp {[0-9]+x[0-9]+([+-][0-9]+)([+-][0-9]+)} [wm geom .] \
-                global_foo global_w global_h
-            BWidget::place .top 0 0 at [expr {$global_w-[winfo screenwidth .]}] $global_h
+            # on windows you can get 100x100+-200+200 [PT]
+            regexp {[0-9]+x[0-9]+([+-]{1,2}[0-9]+)([+-]{1,2}[0-9]+)} \
+                [wm geom .] global_foo global_w global_h
+            # {}'s left off on purpose. [PT]
+            BWidget::place .top 0 0 at [expr $global_w-[winfo screenwidth .]] $global_h
             wm deiconify .top
             bind . <Unmap> {wm withdraw .top}
             bind . <Map>   {wm deiconify .top}
             bind . <Configure> {
                 if { ![string compare %W "."] } {
-                    regexp {[0-9]+x[0-9]+([+-][0-9]+)([+-][0-9]+)} [wm geom .] \
-                        global_foo global_w global_h
-                    BWidget::place .top 0 0 at [expr {$global_w-[winfo screenwidth .]}] $global_h
+                    # see above re: windows geometry
+                    regexp {[0-9]+x[0-9]+([+-]{1,2}[0-9]+)([+-]{1,2}[0-9]+)} \
+                        [wm geom .] global_foo global_w global_h
+                    BWidget::place .top 0 0 at [expr $global_w-[winfo screenwidth .]] $global_h
                 }
             }
         } \

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.4 2001/12/29 02:06:25 hobbs Exp $
+#  $Id: utils.tcl,v 1.5 2002/01/28 21:56:32 patthoyts Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -229,6 +229,19 @@ proc BWidget::XLFDfont { cmd args } {
 # ------------------------------------------------------------------------------
 #  Command BWidget::place
 # ------------------------------------------------------------------------------
+#
+# Notes:
+#  For Windows systems with more than one monitor the available screen area may
+#  have negative positions. Geometry settings with negative numbers are used
+#  under X to place wrt the right or bottom of the screen. On windows, Tk
+#  continues to do this. However, a geometry such as 100x100+-200-100 can be
+#  used to place a window onto a secondary monitor. Passing the + gets Tk
+#  to pass the remainder unchanged so the Windows manager then handles -200
+#  which is a position on the left hand monitor.
+#  I've tested this for left, right, above and below the primary monitor.
+#  Currently there is no way to ask Tk the extent of the Windows desktop in 
+#  a multi monitor system. Nor what the legal co-ordinate range might be.
+#
 proc BWidget::place { path w h args } {
     variable _top
 
@@ -251,17 +264,28 @@ proc BWidget::place { path w h args } {
         }
         if { $idx == 0 } {
             set err [catch {
-                set x [expr {int([lindex $args 1])}]
-                set y [expr {int([lindex $args 2])}]
+                # purposely removed the {} around these expressions - [PT]
+                set x [expr int([lindex $args 1])]
+                set y [expr int([lindex $args 2])]
             }]
             if { $err } {
                 return -code error "BWidget::place: incorrect position"
             }
-            if { $x >= 0 } {
-                set x "+$x"
-            }
-            if { $y >= 0 } {
-                set y "+$y"
+            if {$::tcl_platform(platform) == "windows"} {
+                # handle windows multi-screen. -100 != +-100
+                if {[string index [lindex $args 1] 0] != "-"} {
+                    set x "+$x"
+                }
+                if {[string index [lindex $args 2] 0] != "-"} {
+                    set y "+$y"
+                }                    
+            } else {
+                if { $x >= 0 } {
+                    set x "+$x"
+                }
+                if { $y >= 0 } {
+                    set y "+$y"
+                }
             }
         } else {
             if { $arglen == 2 } {
@@ -286,10 +310,12 @@ proc BWidget::place { path w h args } {
                 }
                 set x "+$x0"
                 set y "+$y0"
-                if { $x0+$w > $sw } {set x "-0"; set x0 [expr {$sw-$w}]}
-                if { $x0 < 0 }      {set x "+0"}
-                if { $y0+$h > $sh } {set y "-0"; set y0 [expr {$sh-$h}]}
-                if { $y0 < 0 }      {set y "+0"}
+                if {$::tcl_platform(platform) != "windows"} {
+                    if { $x0+$w > $sw } {set x "-0"; set x0 [expr {$sw-$w}]}
+                    if { $x0 < 0 }      {set x "+0"}
+                    if { $y0+$h > $sh } {set y "-0"; set y0 [expr {$sh-$h}]}
+                    if { $y0 < 0 }      {set y "+0"}
+                }
             } else {
                 set x0 [winfo rootx $widget]
                 set y0 [winfo rooty $widget]
@@ -297,8 +323,10 @@ proc BWidget::place { path w h args } {
                 set y1 [expr {$y0 + [winfo height $widget]}]
                 if { $idx == 2 || $idx == 3 } {
                     set y "+$y0"
-                    if { $y0+$h > $sh } {set y "-0"; set y0 [expr {$sh-$h}]}
-                    if { $y0 < 0 }      {set y "+0"}
+                    if {$::tcl_platform(platform) != "windows"} {
+                        if { $y0+$h > $sh } {set y "-0"; set y0 [expr {$sh-$h}]}
+                        if { $y0 < 0 }      {set y "+0"}
+                    }
                     if { $idx == 2 } {
                         # try left, then right if out, then 0 if out
                         if { $x0 >= $w } {
@@ -320,8 +348,10 @@ proc BWidget::place { path w h args } {
                     }
                 } else {
                     set x "+$x0"
-                    if { $x0+$w > $sw } {set x "-0"; set x0 [expr {$sw-$w}]}
-                    if { $x0 < 0 }      {set x "+0"}
+                    if {$::tcl_platform(platform) != "windows"} {
+                        if { $x0+$w > $sw } {set x "-0"; set x0 [expr {$sw-$w}]}
+                        if { $x0 < 0 }      {set x "+0"}
+                    }
                     if { $idx == 4 } {
                         # try top, then bottom, then 0
                         if { $h <= $y0 } {
