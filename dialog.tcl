@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.8 2000/06/15 00:45:15 kuchler Exp $
+#  $Id: dialog.tcl,v 1.9 2001/12/29 02:04:52 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -18,6 +18,8 @@
 #     - Dialog::withdraw
 #     - Dialog::_destroy
 # ------------------------------------------------------------------------------
+
+# JDC: added -transient and -place flag
 
 namespace eval Dialog {
     ButtonBox::use
@@ -38,6 +40,8 @@ namespace eval Dialog {
         {-side        Enum       bottom   1 {bottom left top right}}
         {-anchor      Enum       c        1 {n e w s c}}
 	{-class       String     Dialog   1}
+        {-transient   Boolean    1        1}
+        {-place       Enum       center   0 {none center left right above below}}
     }
 
     Widget::addmap Dialog "" :cmd   {-background {}}
@@ -87,7 +91,10 @@ proc Dialog::create { path args } {
     if { ![winfo exists $parent] } {
         set parent [winfo parent $path]
     }
-    wm transient $path [winfo toplevel $parent]
+   # JDC: made transient optional
+    if { [Widget::getoption $path -transient] } {
+	wm transient $path [winfo toplevel $parent]
+    }
     wm withdraw $path
 
     set side [Widget::cget $path -side]
@@ -250,11 +257,14 @@ proc Dialog::draw { path {focus ""} {overrideredirect 0} {geometry ""}} {
     }
 
     if { [string equal $geometry ""] && ($geom == "") } {
-        if { [winfo exists $parent] } {
-            BWidget::place $path 0 0 center $parent
-        } else {
-            BWidget::place $path 0 0 center
-        }
+	set place [Widget::getoption $path -place]
+	if { ![string equal $place none] } {
+	    if { [winfo exists $parent] } {
+		BWidget::place $path 0 0 $place $parent
+	    } else {
+		BWidget::place $path 0 0 $place
+	    }
+	}
     } else {
 	if { $geom != "" } {
 	    wm geometry $path $geom

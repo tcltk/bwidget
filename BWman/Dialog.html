@@ -41,11 +41,15 @@
 </TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-parent">-parent</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-separator">-separator</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-place">-place</A></TR>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-separator">-separator</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-side">-side</A></TR>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-title">-title</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-transient">-transient</A></TR>
 </TR>
 </TABLE></DD>
 </DL>
@@ -162,8 +166,17 @@ specifies the grab mode of the dialog and how works Dialog::<B>draw</B>.
 <DL><DT><A NAME="-parent"><B>-parent</B></A></DT>
 <DD>
 
-Parent of the Dialog. Dialog is centered in its parent. If empty, it is centered in
-root window.
+Parent of the Dialog. Dialog is placed relative to its parent. If empty, it is
+placed relative to the root window. Also see <B>place</B> option.
+
+</DD>
+</DL>
+<DL><DT><A NAME="-place"><B>-place</B></A></DT>
+<DD>
+Specifies where to draw the Dialog toplevel relative to the dialog's
+parent. Must be one of <B>none</B>, <B>center</B>, <B>left</B>, <B>right</B>,
+<B>above</B>, <B>below</B>. Default value of <B>place</B> is <I>center</I>.
+
 </DD>
 </DL>
 <DL><DT><A NAME="-separator"><B>-separator (read-only)</B></A></DT>
@@ -184,6 +197,14 @@ Specifies where to draw the ButtonBox relative to the user frame. Must be one of
 <DD>
 
 Title of the Dialog toplevel.
+
+</DD>
+</DL>
+<DL><DT><A NAME="-transient"><B>-transient (read-only)</B></A></DT>
+<DD>
+
+Specifies if the Dialog Toplevel should be a transient window or not. Default
+value of <B>transient</B> is <I>true</I>.
 
 </DD>
 </DL>
