@@ -10,7 +10,7 @@ namespace eval ProgressDlg {
     Dialog::use
     ProgressBar::use
 
-    Widget::bwinclude ProgressDlg Dialog "" \
+    Widget::bwinclude ProgressDlg Dialog :cmd \
         remove {
             -modal -image -bitmap -side -anchor -cancel -default
             -homogeneous -padx -pady -spacing
@@ -28,7 +28,7 @@ namespace eval ProgressDlg {
         {-command      String "" 0}
     }
 
-    Widget::addmap ProgressDlg "" .frame.msg \
+    Widget::addmap ProgressDlg :cmd .frame.msg \
         {-width {} -height {} -textvariable {} -font {} -background {}}
 
     proc ::ProgressDlg { path args } { return [eval ProgressDlg::create $path $args] }
@@ -42,7 +42,7 @@ namespace eval ProgressDlg {
 proc ProgressDlg::create { path args } {
     Widget::init ProgressDlg "$path#ProgressDlg" $args
 
-    eval Dialog::create $path [Widget::subcget "$path#ProgressDlg" ""] \
+    eval Dialog::create $path [Widget::subcget "$path#ProgressDlg" :cmd] \
         -image [Bitmap::get hourglass] -modal none -side bottom -anchor c
     wm protocol $path WM_DELETE_WINDOW {;}
 

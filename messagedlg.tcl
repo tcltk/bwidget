@@ -15,7 +15,7 @@ namespace eval MessageDlg {
         rename     {-text -message} \
         initialize {-aspect 800 -anchor c -justify center}
 
-    Widget::bwinclude MessageDlg Dialog "" \
+    Widget::bwinclude MessageDlg Dialog :cmd \
         remove {-modal -image -bitmap -side -anchor -separator \
                     -homogeneous -padx -pady -spacing}
 
@@ -72,7 +72,7 @@ proc MessageDlg::create { path args } {
         } else {
             set image ""
         }
-        eval Dialog::create $path [Widget::subcget "$path#Message" ""] \
+        eval Dialog::create $path [Widget::subcget "$path#Message" :cmd] \
             -image $image -modal local -side bottom -anchor c
         set idbut 0
         foreach but $lbut {
