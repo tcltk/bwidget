@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.2 1999/10/22 00:09:04 ericm Exp $
+#  $Id: tree.tcl,v 1.3 1999/10/22 17:49:56 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -131,6 +131,8 @@ proc Tree::create { path args } {
     # Added by ericm@scriptics.com
     bind $path <KeyPress-Up>    "Tree::_keynav up %W"
     bind $path <KeyPress-Down>  "Tree::_keynav down %W"
+    bind $path <KeyPress-Right> "Tree::_keynav right %W"
+    bind $path <KeyPress-Left>  "Tree::_keynav left %W"
     bind $path <KeyPress-space> "Tree::_keynav space %W"
     # ericm@scriptics.com
 
@@ -1419,97 +1421,107 @@ proc Tree::_scroll { path cmd dir } {
 #	Handle navigational keypresses on the tree.
 #
 # Arguments:
-#	which      one of up, down or space.
+#	which      tag indicating the direction of motion:
+#                  up         move to the node graphically above current
+#                  down       move to the node graphically below current
+#                  left       close current if open, else move to parent
+#                  right      open current if closed, else move to child
+#                  open       open current if closed, close current if open
 #       win        name of the tree widget
 #
 # Results:
 #	None.
 
 proc Tree::_keynav {which win} {
-    set node     [$win selection get]
+    # Keyboard navigation is riddled with special cases.  In order to avoid
+    # the complex logic, we will instead make a list of all the visible,
+    # selectable nodes, then do a simple next or previous operation.
+
+    # One easy way to get all of the visible nodes is to query the canvas
+    # object for all the items with the "node" tag; since the tree is always
+    # completely redrawn, this list will be in vertical order.
+    set nodes {}
+    foreach nodeItem [$win:cmd find withtag node] {
+	set node [string range [lindex [$win:cmd gettags $nodeItem] 1] 2 end]
+	if { [Widget::getoption $win.$node -selectable] } {
+	    lappend nodes $node
+	}
+    }
+	
+    # Keyboard navigation is all relative to the current node
+    set node      [$win selection get]
+
     switch -exact -- $which {
 	"up" {
-	    # If nothing is selected, do nothing??
+	    # Up goes to the node that is vertically above the current node
+	    # (NOT necessarily the current node's parent)
 	    if { [string equal $node ""] } {
 		return
 	    }
-
-	    # If this node has a previous sibling, go to it
-	    set parent   [$win parent $node]
-	    set siblings [$win nodes $parent]
-	    set index    [lsearch $siblings $node]
-	    set newIndex [expr {$index - 1}]
-	    if { $newIndex >= 0 } {
-		set node [lindex $siblings $newIndex]
-		# If the previous sibling is open and has children, go to its
-		# last child
-		if { [$win itemcget $node -open] } {
-		    if { [llength [$win nodes $node]] } {
-			set node [lindex [$win nodes $node] end]
-		    }
-		}
-		$win selection clear
-		$win selection set $node
-		$win see $node
+	    set index [lsearch $nodes $node]
+	    incr index -1
+	    if { $index >= 0 } {
+		$win selection set [lindex $nodes $index]
 		return
 	    }
-
-	    # Otherwise, go to this node's parent, unless that is "root"
-	    if { ![string equal $parent "root"] } {
-		$win selection clear
-		$win selection set $parent
-		$win see $parent
-		return
-	    }
-
 	}
 	"down" {
-	    # If nothing is selected, select the first node
+	    # Down goes to the node that is vertically below the current node
 	    if { [string equal $node ""] } {
-		set node [lindex [$win nodes root] 0]
-		if { ![string equal $node ""] } {
-		    $win selection set $node
-		    $win see $node
-		}
+		$win selection set [lindex $nodes 0]
 		return
 	    }
 
+	    set index [lsearch $nodes $node]
+	    incr index
+	    if { $index < [llength $nodes] } {
+		$win selection set [lindex $nodes $index]
+		return
+	    }
+	}
+	"right" {
+	    # On a right arrow, if the current node is closed, open it.
+	    # If the current node is open, go to its first child
+	    if { [string equal $node ""] } {
+		return
+	    }
 	    set open [$win itemcget $node -open]
-	    # If this node is open, select its first child (if it has any)
-	    # Otherwise, fallthrough to the "closed node" state
+	    if { [llength [$win nodes $node]] } {
+		if { $open } {
+		    set index [lsearch $nodes $node]
+		    incr index
+		    if { $index < [llength $nodes] } {
+			$win selection set [lindex $nodes $index]
+			return
+		    }
+		} else {
+		    $win itemconfigure $node -open 1
+		    return
+		}
+	    }
+	}
+	"left" {
+	    # On a left arrow, if the current node is open, close it.
+	    # If the current node is closed, go to its parent.
+	    if { [string equal $node ""] } {
+		return
+	    }
+	    set open [$win itemcget $node -open]
 	    if { $open } {
-		set children [$win nodes $node]
-		if { [llength $children] } {
-		    set node [lindex $children 0]
-		    $win selection clear
-		    $win selection set $node
-		    $win see $node
-		    return
-		}
-	    }
-
-	    # If the node is not open, go to its next sibling, if it has one
-	    set parent   [$win parent $node]
-	    set siblings [$win nodes $parent]
-	    set index    [lsearch $siblings $node]
-	    set newIndex [expr {$index + 1 }]
-	    # If the node was the last of the children, go to the next sibling
-	    # of the parent
-	    while { $newIndex >= [llength $siblings] } {
-		set node $parent
-		if { [string equal $node "root"] } {
-		    return
-		}
+		$win itemconfigure $node -open 0
+		return
+	    } else {
 		set parent [$win parent $node]
-		set siblings [$win nodes $parent]
-		set index [lsearch $siblings $node]
-		set newIndex [expr {$index + 1}]
+		while { ![$win itemcget $parent -selectable] } {
+		    set parent [$win parent $parent]
+		    if { [string equal $parent "root"] } {
+			set parent $node
+			break
+		    }
+		}
+		$win selection set $parent
+		return
 	    }
-
-	    set newNode  [lindex $siblings $newIndex]
-	    $win selection clear
-	    $win selection set $newNode
-	    $win see $newNode
 	}
 	"space" {
 	    if { [string equal $node ""] } {

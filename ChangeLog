@@ -1,3 +1,8 @@
+1999-10-22  Eric Melski  <ericm@scriptics.com>
+
+	* tree.tcl: Fixed some problems with keyboard traversal.  Added
+	support for left/right arrows a la MS Explorer.
+
 1999-10-21  Eric Melski  <ericm@scriptics.com>
 
 	* tree.tcl: Added a -selectable option to tree nodes, which
