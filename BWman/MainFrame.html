@@ -102,7 +102,7 @@ will not request any size at all.
 <DD>
 
 This option describes the menu. This is a list whose each five elements describe
-one cascad menu. It has the following form:
+one cascade menu. It has the following form:
 {<I>menuname</I> <I>tags</I> <I>menuId</I> <I>tearoff</I> <I>menuentries</I>...}
 where <I>menuentries</I> is a list where each element describe one menu entry, which can be:
 <UL>
@@ -114,8 +114,8 @@ where <I>menuentries</I> is a list where each element describe one menu entry, w
   {<B>checkbutton</B> <I>menuname</I> ?<I>tags</I>? ?<I>description</I>? ?<I>accelerator</I>? ?<I>option</I> <I>value</I>? ...}
 <LI>for a radio button:<BR>
   {<B>radiobutton</B> <I>menuname</I> ?<I>tags</I>? ?<I>description</I>? ?<I>accelerator</I> ?<I>option</I> <I>value</I>? ...}
-<LI>for a cascad menu:<BR>
-  {<B>cascad</B> <I>menuname</I> <I>tags</I> <I>menuId</I> <I>tearoff</I> <I>menuentries</I>}
+<LI>for a cascade menu:<BR>
+  {<B>cascade</B> <I>menuname</I> <I>tags</I> <I>menuId</I> <I>tearoff</I> <I>menuentries</I>}
 </UL>
 where:
 <UL>
@@ -144,12 +144,12 @@ set descmenu {
         {command "&New"     {} "Create a new document"     {Ctrl n} -command Menu::new}
         {command "&Open..." {} "Open an existing document" {Ctrl o} -command Menu::open}
         {command "&Save"    open "Save the document" {Ctrl s} -command Menu::save}
-        {cascad  "&Export"  {} export 0 {
+        {cascade  "&Export"  {} export 0 {
             {command "Format &1" open "Export document to format 1" {} -command {Menu::export 1}}
             {command "Format &2" open "Export document to format 2" {} -command {Menu::export 2}}
         }}
         {separator}
-        {cascad "&Recent files" {} recent 0 {}}
+        {cascade "&Recent files" {} recent 0 {}}
         {separator}
         {command "E&xit" {} "Exit the application" {} -command Menu::exit}
     }

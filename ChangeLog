@@ -1,3 +1,19 @@
+2004-02-03  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* scrollw.tcl (ScrolledWindow::create): correctly set -relief and
+	-bd at creation time. [Bug #873666]
+
+	* init.tcl: don't modify *Listbox.background and *Button.padY
+	options - leave core widgets alone.
+
+	* mainframe.tcl (MainFrame::_create_menubar): set the bg for menus
+	only on unix (otherwise disturbs menu native L&F)
+	Correct some eval/list issues.
+
+	* BWman/MainFrame.html: 
+	* mainframe.tcl (MainFrame::_create_entries): correct 'cascade'
+	spelling, but support old 'cascad' as well.
+
 2004-01-28  Reinhard Max  <max@suse.de>
 
 	* configure.in: bumped to v1.7.
@@ -7,14 +23,14 @@
 
 2004-01-05  Damon Courtney  <damon@unreality.com>
 
-        * init.tcl: Added a binding to the Tk spinbox to handle
-        traversal as loading BWidgets seems to screw up the default
-        handling for Tk.  [Bug #867604]
+	* init.tcl: Added a binding to the Tk spinbox to handle
+	traversal as loading BWidgets seems to screw up the default
+	handling for Tk.  [Bug #867604]
 
-        * utils.tcl: Fixed a bug that would cause some geometry calculations
-        in BWidget::place to behave incorrectly.  This would occasionally
-        make it appear as though a drawn dialog would freeze the application.
-        [Bug #868315]
+	* utils.tcl: Fixed a bug that would cause some geometry calculations
+	in BWidget::place to behave incorrectly.  This would occasionally
+	make it appear as though a drawn dialog would freeze the application.
+	[Bug #868315]
 
 2003-12-18  Bob Techentin <techentin@sourceforge.net>
 

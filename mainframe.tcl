@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.15 2003/10/20 21:23:52 damonc Exp $
+#  $Id: mainframe.tcl,v 1.16 2004/02/04 00:11:43 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -86,12 +86,15 @@ proc MainFrame::create { path args } {
         set relief flat
         set bd     0
     }
-    set topframe  [eval frame $path.topf -relief flat -borderwidth 0 \
-	    [Widget::subcget $path .topf]]
-    set userframe [eval frame $path.frame [Widget::subcget $path .frame] \
+    set topframe  [eval [list frame $path.topf] \
+		       -relief flat -borderwidth 0 \
+		       [Widget::subcget $path .topf]]
+    set userframe [eval [list frame $path.frame] \
+		       [Widget::subcget $path .frame] \
                        -relief $relief -borderwidth $bd]
-    set botframe  [eval frame $path.botf -relief $relief -borderwidth $bd \
-	    [Widget::subcget $path .botf]]
+    set botframe  [eval [list frame $path.botf] \
+		       -relief $relief -borderwidth $bd \
+		       [Widget::subcget $path .botf]]
 
     pack $topframe -fill x
     grid columnconfigure $topframe 0 -weight 1
@@ -110,7 +113,7 @@ proc MainFrame::create { path args } {
         }
     }
 
-    # --- status bar -------------------------------------------------------------------
+    # --- status bar ---------------------------------------------------------
     if {[string length [Widget::getoption $path -statusbarfont]] >0 } {
 	set sbfnt [list -font [Widget::getoption $path -statusbarfont]]
     } else {
@@ -132,7 +135,8 @@ proc MainFrame::create { path args } {
     pack  $prgframe -in $indframe -side left -padx 2
     $status configure -height [winfo reqheight $label]
 
-    set progress [eval ProgressBar::create $status.prg [Widget::subcget $path .status.prg] \
+    set progress [eval [list ProgressBar::create $status.prg] \
+		      [Widget::subcget $path .status.prg] \
                       -width       50 \
                       -height      [expr {[winfo reqheight $label]-2}] \
                       -borderwidth 1 \
@@ -169,15 +173,17 @@ proc MainFrame::configure { path args } {
     }
 
     if { [Widget::hasChanged $path -background bg] } {
-        set listmenu [$_widget($path,top) cget -menu]
-        while { [llength $listmenu] } {
-            set newlist {}
-            foreach menu $listmenu {
-                $menu configure -background $bg
-                set newlist [concat $newlist [winfo children $menu]]
-            }
-            set listmenu $newlist
-        }
+	if {$::tcl_platform(platform) == "unix"} {
+	    set listmenu [$_widget($path,top) cget -menu]
+	    while { [llength $listmenu] } {
+		set newlist {}
+		foreach menu $listmenu {
+		    $menu configure -background $bg
+		    set newlist [concat $newlist [winfo children $menu]]
+		}
+		set listmenu $newlist
+	    }
+	}
         foreach sep {.sep .botf.sep} {
             if { [winfo exists $path.$sep] } {
                 Separator::configure $path.$sep -background $bg
@@ -461,8 +467,7 @@ proc MainFrame::_create_menubar { path descmenu } {
     variable _widget
     global    tcl_platform
 
-    set bg      [Widget::getoption $path -background]
-    set top     $_widget($path,top)
+    set top $_widget($path,top)
 
     foreach {v x} {mbfnt -menubarfont mefnt -menuentryfont} {
 	if {[string length [Widget::getoption $path $x]]} {
@@ -473,16 +478,19 @@ proc MainFrame::_create_menubar { path descmenu } {
     }
 
     if {$tcl_platform(platform) == "unix"} {
-	lappend mbfnt -borderwidth 1
+	set menuopts [list -background [Widget::getoption $path -background] \
+			  -borderwidth 1]
+    } else {
+	set menuopts [list]
     }
-    set menubar [eval [list menu $top.menubar -tearoff 0 \
-	    -background $bg] $mbfnt]
+    set menubar [eval [list menu $top.menubar -tearoff 0] $menuopts $mbfnt]
     $top configure -menu $menubar
 
     set count 0
     foreach {name tags menuid tearoff entries} $descmenu {
         set opt  [_parse_name $name]
-        if { [string length $menuid] && ![info exists _widget($path,menuid,$menuid)] } {
+        if {[string length $menuid]
+	    && ![info exists _widget($path,menuid,$menuid)] } {
             # menu has identifier
 	    # we use it for its pathname, to enable special menu entries
 	    # (help, system, ...)
@@ -491,7 +499,7 @@ proc MainFrame::_create_menubar { path descmenu } {
 	    set menu $menubar.menu$count
 	}
         eval [list $menubar add cascade] $opt [list -menu $menu]
-        eval [list menu $menu -tearoff $tearoff -background $bg] $mefnt
+        eval [list menu $menu -tearoff $tearoff] $menuopts $mefnt
         foreach tag $tags {
             lappend _widget($path,tags,$tag) $menubar $count
 	    # ericm@scriptics:  Add a tagstate tracker
@@ -499,14 +507,14 @@ proc MainFrame::_create_menubar { path descmenu } {
 		set _widget($path,tagstate,$tag) 1
 	    }
         }
-	# ericm@scriptics.com:  Add mapping from menu items to tags
+	# ericm@scriptics:  Add mapping from menu items to tags
 	set _widget($path,menutags,[list $menubar $count]) $tags
-	    
+
         if { [string length $menuid] } {
             # menu has identifier
             set _widget($path,menuid,$menuid) $menu
         }
-        _create_entries $path $menu $bg $entries
+        _create_entries $path $menu $menuopts $entries
         incr count
     }
 }
@@ -515,7 +523,7 @@ proc MainFrame::_create_menubar { path descmenu } {
 # ----------------------------------------------------------------------------
 #  Command MainFrame::_create_entries
 # ----------------------------------------------------------------------------
-proc MainFrame::_create_entries { path menu bg entries } {
+proc MainFrame::_create_entries { path menu menuopts entries } {
     variable _widget
 
     set count      [$menu cget -tearoff]
@@ -540,20 +548,20 @@ proc MainFrame::_create_entries { path menu bg entries } {
 		set _widget($path,tagstate,$tag) 1
 	    }
         }
-	# ericm@scriptics.com:  Add mapping from menu items to tags
+	# ericm@scriptics:  Add mapping from menu items to tags
 	set _widget($path,menutags,[list $menu $count]) $tags
 
-        if { [string equal $type "cascad"] } {
+        if {[string equal $type "cascade"] || [string equal $type "cascad"]} {
             set menuid  [lindex $entry 3]
             set tearoff [lindex $entry 4]
             set submenu $menu.menu$count
             eval [list $menu add cascade] $opt [list -menu $submenu]
-            menu $submenu -tearoff $tearoff -background $bg
+            eval [list menu $submenu -tearoff $tearoff] $menuopts
             if { [string length $menuid] } {
                 # menu has identifier
                 set _widget($path,menuid,$menuid) $submenu
             }
-            _create_entries $path $submenu $bg [lindex $entry 5]
+            _create_entries $path $submenu $menuopts [lindex $entry 5]
             incr count
             continue
         }
@@ -577,7 +585,7 @@ proc MainFrame::_create_entries { path menu bg entries } {
 
         # user options
         set useropt [lrange $entry 5 end]
-        if { [string equal $type "command"] || 
+        if { [string equal $type "command"] ||
              [string equal $type "radiobutton"] ||
              [string equal $type "checkbutton"] } {
             eval [list $menu add $type] $opt $useropt
