@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.6 2000/05/30 23:44:46 ericm Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.7 2002/09/25 22:55:52 hobbs Exp $
 
 
 BWIDGET_SOURCES = \
@@ -66,13 +66,16 @@ PKGINDEX_TCL = \
 SHELL = @SHELL@
 EXEEXT	= @EXEEXT@
 
+DESTDIR =
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
 
-pkglibdir = ${prefix}/lib/@PACKAGE@@VERSION@
+libdir = @libdir@
+pkglibdir = $(libdir)/@PACKAGE@@VERSION@
 
 top_builddir = .
 
@@ -114,31 +117,31 @@ depend:
 install-binaries:
 
 install-libraries: installdirs
-	@echo "Installing script files in $(pkglibdir)"
+	@echo "Installing script files in $(DESTDIR)$(pkglibdir)"
 	@for i in $(BWIDGET_SOURCES) ; do \
-	    $(INSTALL_SCRIPT) $(srcdir)/$$i $(pkglibdir) ; \
+	    $(INSTALL_SCRIPT) $(srcdir)/$$i $(DESTDIR)$(pkglibdir) ; \
 	done;
-	@echo "Installing language files in $(pkglibdir)/lang"
+	@echo "Installing language files in $(DESTDIR)$(pkglibdir)/lang"
 	@for i in $(srcdir)/lang/*.rc ; do \
-	    $(INSTALL_SCRIPT) $$i $(pkglibdir)/lang ; \
+	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir)/lang ; \
 	done;
-	@echo "Installing image files in $(pkglibdir)/images"
+	@echo "Installing image files in $(DESTDIR)$(pkglibdir)/images"
 	@for i in $(srcdir)/images/*.gif $(srcdir)/images/*.xbm ; do \
-	    $(INSTALL_SCRIPT) $$i $(pkglibdir)/images ; \
+	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir)/images ; \
 	done;
-	$(INSTALL_SCRIPT) $(PKGINDEX_TCL) $(pkglibdir)
+	$(INSTALL_SCRIPT) $(PKGINDEX_TCL) $(DESTDIR)$(pkglibdir)
 
 install-doc:
-	@echo "Installing html documentation in $(prefix)/doc/$(PACKAGE)$(VERSION)"
+	@echo "Installing html documentation in $(DESTDIR)$(pkglibdir)/htmldoc"
 	@for i in $(srcdir)/BWman/*.html ; do \
-	    $(INSTALL_SCRIPT) $$i $(prefix)/doc/$(PACKAGE)$(VERSION) ; \
+	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir)/htmldoc ; \
 	done;
 
 installdirs:
-	$(mkinstalldirs) $(pkglibdir)
-	$(mkinstalldirs) $(pkglibdir)/lang
-	$(mkinstalldirs) $(pkglibdir)/images
-	$(mkinstalldirs) $(prefix)/doc/$(PACKAGE)$(VERSION)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/lang
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/images
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/htmldoc
 
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
