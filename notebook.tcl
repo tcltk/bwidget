@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.19 2003/10/20 21:23:52 damonc Exp $
+#  $Id: notebook.tcl,v 1.20 2003/11/26 18:42:24 hobbs Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -333,7 +333,7 @@ proc NoteBook::itemcget { path page option } {
 # ---------------------------------------------------------------------------
 proc NoteBook::bindtabs { path event script } {
     if { $script != "" } {
-	append script " \[NoteBook::_get_page_name [list $path] current 2\]"
+	append script " \[NoteBook::_get_page_name [list $path] current 1\]"
         $path.c bind "page" $event $script
     } else {
         $path.c bind "page" $event {}

@@ -1,3 +1,7 @@
+2003-11-26  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* notebook.tcl (NoteBook::bindtabs): correct tab name returned.	(groth)
+
 2003-11-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* entry.tcl (Entry::create): add missing line continuation.
