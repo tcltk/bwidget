@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.18 2001/12/29 01:40:34 hobbs Exp $
+#  $Id: widget.tcl,v 1.19 2001/12/29 02:06:46 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1036,10 +1036,12 @@ proc Widget::_get_tkwidget_options { tkwidget } {
                     }
                 }
                 set syn [lindex [lindex $config $idx] 0]
-                set def [lindex [lindex $config $idx] 3]
+		# JDC: used 4 (was 3) to get def from optiondb
+                set def [lindex [lindex $config $idx] 4]
                 lappend _tk_widget($tkwidget) [list $opt $syn $def]
             } else {
-                set def [lindex $optlist 3]
+		# JDC: used 4 (was 3) to get def from optiondb
+                set def [lindex $optlist 4]
                 lappend _tk_widget($tkwidget) [list $opt $def]
                 set _optiondb($opt)    [lindex $optlist 1]
                 set _optionclass($opt) [lindex $optlist 2]
