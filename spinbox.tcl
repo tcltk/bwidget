@@ -3,10 +3,10 @@
 #	BWidget SpinBox implementation.
 #
 # Copyright (c) 1999 by Unifix
-# Copyright (c) 2000 by Scriptics Corporation.
+# Copyright (c) 2000 by Ajuba Solutions
 # All rights reserved.
 # 
-# RCS: @(#) $Id: spinbox.tcl,v 1.9 2000/03/14 20:20:14 ericm Exp $
+# RCS: @(#) $Id: spinbox.tcl,v 1.10 2000/05/30 23:44:46 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - SpinBox::create
