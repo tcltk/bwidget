@@ -1,3 +1,9 @@
+2000-05-14  Dan Kuchler  <kuchler@scriptics.com>
+
+        * tree.tcl: Fixed a typing error in the Tree::find procedure.
+        The procedure wouldn't work because there was a 'llengh' where there
+        should have been a 'llength'.
+
 2000-05-08  Dan Kuchler  <kuchler@scriptics.com>
 
         * titleframe.tcl: Added a '-state' flag that is associated to the

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.30 2000/05/09 01:53:10 ericm Exp $
+#  $Id: tree.tcl,v 1.31 2000/05/14 20:39:10 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -655,7 +655,7 @@ proc Tree::find {path findInfo {confine ""}} {
 
     set found  0
     set region [$path.c bbox all]
-    if {[llengh $region]} {
+    if {[llength $region]} {
         set xi [lindex $region 0]
         set xs [lindex $region 2]
         foreach id [$path.c find overlapping $xi $y $xs $y] {
