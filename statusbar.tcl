@@ -58,6 +58,18 @@ namespace eval StatusBar {
 
     # -background, -borderwidth and -relief apply to outer frame, but relief
     # should be left flat for proper look
+    Widget::addmap StatusBar "" :cmd {
+	-background {} -width {} -height {} -borderwidth {} -relief {}
+    }
+    Widget::addmap StatusBar "" .sbar {
+	-background {}
+    }
+    Widget::addmap StatusBar "" .resize {
+	-background {}
+    }
+    Widget::addmap StatusBar "" .hsep {
+	-background {}
+    }
 
     # -pad provides general padding around the status bar
     # -ipad provides padding around each status bar item
@@ -102,33 +114,33 @@ proc StatusBar::create { path args } {
     variable _widget
     variable HaveMarlett
 
-    # Allow for img::png loaded after us
+    # Allow for img::png loaded after initial source
     if {[package provide img::png] != ""} {
+	variable pngdata
 	::StatusBar::resizer configure -format PNG -data $pngdata
     }
-    array set maps [list StatusBar {} :cmd {} .resize {}]
-    array set maps [Widget::parseArgs StatusBar $args]
-    eval [list frame $path -class StatusBar] $maps(:cmd)
 
-    Widget::initFromODB StatusBar $path $maps(StatusBar)
+    Widget::init StatusBar $path $args
+
+    eval [list frame $path -class StatusBar] [Widget::subcget $path :cmd]
 
     foreach {padx pady} [_padval [Widget::cget $path -pad]] \
 	{ipadx ipady} [_padval [Widget::cget $path -ipad]] { break }
 
-    set bg [Widget::cget $path -background]
-    $path configure -bg $bg
     if {[package provide tile] != ""} {
 	set sbar   [tile::frame $path.sbar -padding [list $padx $pady]]
     } else {
-	set sbar   [frame $path.sbar -padx $padx -pady $pady -bg $bg]
+	set sbar   [eval [list frame $path.sbar -padx $padx -pady $pady] \
+			[Widget::subcget $path .sbar]]
     }
     if {[string equal $::tcl_platform(platform) "windows"]} {
 	set cursor size_nw_se
     } else {
 	set cursor sizing; # bottom_right_corner ??
     }
-    set resize [eval [list label $path.resize] $maps(.resize) \
-		    [list -bg $bg -borderwidth 0 -relief flat -anchor se \
+    set resize [eval [list label $path.resize] \
+		    [Widget::subcget $path .resize] \
+		    [list -borderwidth 0 -relief flat -anchor se \
 			 -cursor $cursor -anchor se -padx 0 -pady 0]]
     if {$HaveMarlett} {
 	$resize configure -font "Marlett -16" -text \u006f
@@ -140,7 +152,8 @@ proc StatusBar::create { path args } {
     if {[package provide tile] != ""} {
 	set fsep [tile::separator $path.hsep -orient horizontal]
     } else {
-	set fsep [frame $path.hsep -bd 1 -height 2 -relief sunken]
+	set fsep [eval [list frame $path.hsep -bd 1 -height 2 -relief sunken] \
+		      [Widget::subcget $path .hsep]]
     }
     set sep  [_sep $path sepresize {}]
 
@@ -171,9 +184,9 @@ proc StatusBar::configure { path args } {
 
     set res [Widget::configure $path $args]
 
-    foreach {chshow chshowrsep chshowsep chipad chpad chbg chbd chrelief} \
+    foreach {chshow chshowrsep chshowsep chipad chpad} \
 	[Widget::hasChangedX $path -showresize -showresizesep -showseparator \
-	     -ipad -pad -background -borderwidth -relief] { break }
+	     -ipad -pad] { break }
 
     if {$chshow} {
 	set show [Widget::cget $path -showresize]
@@ -207,20 +220,6 @@ proc StatusBar::configure { path args } {
 	} else {
 	    $path.sbar configure -padx $padx -pady $pady
 	}
-    }
-    if {$chbd} {
-	set bd [Widget::cget $path -borderwidth]
-	$path:cmd configure -bd $bd
-    }
-    if {$chrelief} {
-	set relief [Widget::cget $path -relief]
-	$path:cmd configure -relief $relief
-    }
-    if {$chbg} {
-	set bg [Widget::cget $path -background]
-	$path:cmd configure -bg $bg
-	$path.sbar configure -bg $bg
-	$path.resize configure -bg $bg
     }
     return $res
 }
@@ -290,6 +289,10 @@ proc StatusBar::add {path w args} {
 proc StatusBar::remove {path args} {
     variable _widget
 
+    set destroy [string equal [lindex $args 0] "-destroy"]
+    if {$destroy} {
+	set args [lrange $args 1 end]
+    }
     foreach w $args {
 	set idx [lsearch -exact $_widget($path,items) $w]
 	if {$idx == -1 || ![winfo exists $w]} {
@@ -308,7 +311,11 @@ proc StatusBar::remove {path args} {
 	    grid forget $sep
 	    destroy $sep
 	}
-	grid forget $w
+	if {$destroy} {
+	    destroy $w
+	} else {
+	    grid forget $w
+	}
 	set _widget($path,items) [lreplace $_widget($path,items) $sidx $idx]
     }
 }
@@ -317,32 +324,12 @@ proc StatusBar::remove {path args} {
 #  Command StatusBar::delete
 # ------------------------------------------------------------------------
 proc StatusBar::delete {path args} {
-    variable _widget
-
-    foreach w $args {
-	set idx [lsearch -exact $_widget($path,items) $w]
-	if {$idx == -1 || ![winfo exists $w]} {
-	    # ignore unknown or non-widget items (like our separators)
-	    continue
-	}
-	# separator is always previous item
-	set sidx [expr {$idx - 1}]
-	set sep  [lindex $_widget($path,items) $sidx]
-	if {[string match .* $sep]} {
-	    # not one of our separators
-	    incr sidx
-	} else {
-	    # destroy separator too
-	    set sep $path.sbar.$sep
-	    grid forget $sep
-	    destroy $sep
-	}
-	grid forget $w
-	destroy $w
-	set _widget($path,items) [lreplace $_widget($path,items) $sidx $idx]
-    }
+    return [StatusBar::remove $path -destroy $args]
 }
 
+# ------------------------------------------------------------------------
+#  Command StatusBar::items
+# ------------------------------------------------------------------------
 proc StatusBar::items {path} {
     variable _widget
     return $_widget($path,items)
