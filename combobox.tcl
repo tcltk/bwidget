@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.22 2003/04/15 01:21:20 hobbs Exp $
+#  $Id: combobox.tcl,v 1.23 2003/06/06 23:02:34 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -32,13 +32,14 @@ namespace eval ComboBox {
 	rename {-background -entrybg}
 
     Widget::declare ComboBox {
-	{-height      TkResource 0    0 listbox}
-	{-values      String	 ""   0}
-	{-images      String	 ""   0}
-	{-indents     String	 ""   0}
-	{-modifycmd   String	 ""   0}
-	{-postcommand String	 ""   0}
-	{-expand      Enum	 none 0 {none tab}}
+	{-height       TkResource 0    0 listbox}
+	{-values       String	  ""   0}
+	{-images       String	  ""   0}
+	{-indents      String	  ""   0}
+	{-modifycmd    String	  ""   0}
+	{-postcommand  String	  ""   0}
+	{-expand       Enum	  none 0 {none tab}}
+	{-autocomplete Boolean	  0    0}
     }
 
     Widget::addmap ComboBox ArrowButton .a {
@@ -80,6 +81,10 @@ proc ComboBox::create { path args } {
 		   -relief flat -borderwidth 0 -takefocus 1]
     ::bind $path.e <FocusIn>  [list $path _focus_in]
     ::bind $path.e <FocusOut> [list $path _focus_out]
+
+    if {[Widget::cget $path -autocomplete]} {
+	::bind $path.e <KeyRelease> [list $path _auto_complete %K]
+    }
 
     if {[string equal $::tcl_platform(platform) "unix"]} {
 	set ipadx 0
@@ -574,4 +579,21 @@ proc ComboBox::_focus_out { path } {
             unset foreground
         }
     }
+}
+
+proc ComboBox::_auto_complete { path key } {
+    ## Anything that's greater in length than 1 char is a command
+    ## key of some kind, and we want to ignore those.
+    if {[string length $key] > 1 && $key != "space"} { return }
+
+    set text [$path.e get]
+    if {[string equal $text ""]} { return }
+    set values [Widget::cget $path -values]
+    set x [lsearch $values $text*]
+    if {$x < 0} { return }
+
+    set idx [$path.e index insert]
+    $path.e configure -text [lindex $values $x]
+    $path.e icursor $idx
+    $path.e select range insert end
 }
