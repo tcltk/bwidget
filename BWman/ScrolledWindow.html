@@ -106,8 +106,9 @@ of <I>pathName</I>.
  <I>widget</I>
 </DT><DD>
 
-Associate <I>widget</I> to the the scrollbars. <I>widget</I> is packed
-in  with option <B>expand</B> to <I>yes</I> and <B>fill</B> to <I>both</I>.
+Associate <I>widget</I> to the the scrollbars. <I>widget</I> becomes
+managed by the ScrolledWindow.  The user should not attempt to manage
+<I>widget</I> until it is no longer managed by the ScrolledWindow.
 <I>widget</I> must be a scrollable widget, i.e. have the options
 <B>xscrollcommand</B>/<B>yscrollcommand</B> and the command <B>xview</B>/<B>yview</B>,
 such as canvas or text.
