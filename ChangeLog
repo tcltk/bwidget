@@ -1,6 +1,12 @@
+2003-04-23  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tree.tcl: liberal use of list where appropriate to make the code
+	safe for space-containing node names.
+	Make use of string equal instead of !string compare.
+
 2003-04-15  Damon Courtney <damon@unreality.com>
 
-        * listbox.tcl
+	* listbox.tcl
 	* tree.tcl: Added a #auto substitution for inserting new items
 	into a tree or listbox.
 

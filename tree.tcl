@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.42 2003/04/16 03:41:51 damonc Exp $
+#  $Id: tree.tcl,v 1.43 2003/04/24 00:53:21 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -69,11 +69,11 @@ namespace eval Tree {
     Widget::tkinclude Tree canvas .c \
 	    remove     {
 	-insertwidth -insertbackground -insertborderwidth -insertofftime
-	-insertontime -selectborderwidth -closeenough -confine -scrollregion 
+	-insertontime -selectborderwidth -closeenough -confine -scrollregion
 	-xscrollincrement -yscrollincrement -width -height
     } \
 	    initialize {
-	-relief sunken -borderwidth 2 -takefocus 1 
+	-relief sunken -borderwidth 2 -takefocus 1
 	-highlightthickness 1 -width 200
     }
 
@@ -117,14 +117,14 @@ namespace eval Tree {
 	    break
 	}
     }
-    
+
     bind TreeSentinalEnd <Button-1> {
 	set ::Tree::sentinal(%W) 0
     }
-    
+
     bind TreeFocus <Button-1> [list focus %W]
 
-    proc ::Tree { path args } { return [eval Tree::create $path $args] }
+    proc ::Tree { path args } { return [eval [list Tree::create $path] $args] }
     proc use {} {}
 
     variable _edit
@@ -140,7 +140,7 @@ proc Tree::create { path args } {
 
     Widget::init Tree $path $args
     set ::Tree::sentinal($path.c) 0
-    
+
     Widget::getVariable $path autoIndex
     set autoIndex 0
 
@@ -158,7 +158,7 @@ proc Tree::create { path args } {
 	    -takefocus 0
     # For 8.4+ we don't want to inherit the padding
     catch {$path configure -padx 0 -pady 0}
-    eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
+    eval [list canvas $path.c] [Widget::subcget $path .c] -xscrollincrement 8
     bindtags $path.c [list TreeSentinalStart TreeFocus $path.c Canvas \
 	    [winfo toplevel $path] all TreeSentinalEnd]
     pack $path.c -expand yes -fill both
@@ -166,21 +166,21 @@ proc Tree::create { path args } {
 
     # Added by ericm@scriptics.com
     # These allow keyboard traversal of the tree
-    bind $path.c <KeyPress-Up>    "Tree::_keynav up $path"
-    bind $path.c <KeyPress-Down>  "Tree::_keynav down $path"
-    bind $path.c <KeyPress-Right> "Tree::_keynav right $path"
-    bind $path.c <KeyPress-Left>  "Tree::_keynav left $path"
-    bind $path.c <KeyPress-space> "+Tree::_keynav space $path"
+    bind $path.c <KeyPress-Up>    [list Tree::_keynav up $path]
+    bind $path.c <KeyPress-Down>  [list Tree::_keynav down $path]
+    bind $path.c <KeyPress-Right> [list Tree::_keynav right $path]
+    bind $path.c <KeyPress-Left>  [list Tree::_keynav left $path]
+    bind $path.c <KeyPress-space> [list +Tree::_keynav space $path]
 
     # These allow keyboard control of the scrolling
-    bind $path.c <Control-KeyPress-Up>    "$path.c yview scroll -1 units"
-    bind $path.c <Control-KeyPress-Down>  "$path.c yview scroll  1 units"
-    bind $path.c <Control-KeyPress-Left>  "$path.c xview scroll -1 units"
-    bind $path.c <Control-KeyPress-Right> "$path.c xview scroll  1 units"
+    bind $path.c <Control-KeyPress-Up>    [list $path.c yview scroll -1 units]
+    bind $path.c <Control-KeyPress-Down>  [list $path.c yview scroll  1 units]
+    bind $path.c <Control-KeyPress-Left>  [list $path.c xview scroll -1 units]
+    bind $path.c <Control-KeyPress-Right> [list $path.c xview scroll  1 units]
     # ericm@scriptics.com
 
-    bind $path <Configure> "Tree::_update_scrollregion $path"
-    bind $path <Destroy>   "Tree::_destroy $path"
+    bind $path <Configure> [list Tree::_update_scrollregion $path]
+    bind $path <Destroy>   [list Tree::_destroy $path]
     bind $path <FocusIn>   [list after idle {BWidget::refocus %W %W.c}]
 
     DragSite::setdrag $path $path.c Tree::_init_drag_cmd \
@@ -188,7 +188,7 @@ proc Tree::create { path args } {
     DropSite::setdrop $path $path.c Tree::_over_cmd Tree::_drop_cmd 1
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval Tree::\$cmd $path \$args\]"
+    proc ::$path { cmd args } "return \[eval Tree::\$cmd [list $path] \$args\]"
 
     set w [Widget::cget $path -width]
     set h [Widget::cget $path -height]
@@ -197,10 +197,10 @@ proc Tree::create { path args } {
 
     # ericm
     # Bind <Button-1> to select the clicked node -- no reason not to, right?
-    Tree::bindText  $path <Button-1> "$path selection set"
-    Tree::bindImage $path <Button-1> "$path selection set"
-    Tree::bindText  $path <Control-Button-1> "$path selection toggle"
-    Tree::bindImage $path <Control-Button-1> "$path selection toggle"
+    Tree::bindText  $path <Button-1> [list $path selection set]
+    Tree::bindImage $path <Button-1> [list $path selection set]
+    Tree::bindText  $path <Control-Button-1> [list $path selection toggle]
+    Tree::bindImage $path <Control-Button-1> [list $path selection toggle]
 
 
     # Add sentinal bindings for double-clicking on items, to handle the 
@@ -213,7 +213,7 @@ proc Tree::create { path args } {
     # other event to be handled in between when the button clicks are examined
     # for the canvas)
     $path.c bind TreeItemSentinal <Double-Button-1> \
-	    "set ::Tree::sentinal($path.c) 1"
+	[list set ::Tree::sentinal($path.c) 1]
     # ericm
 
     return $path
@@ -299,7 +299,7 @@ proc Tree::insert { path index parent node args } {
     }
 
     Widget::init Tree::Node $path.$node $args
-    if { ![string compare $index "end"] } {
+    if {[string equal $index "end"]} {
         lappend data($parent) $node
     } else {
         incr index
@@ -307,7 +307,7 @@ proc Tree::insert { path index parent node args } {
     }
     set data($node) [list $parent]
 
-    if { ![string compare $parent "root"] } {
+    if { [string equal $parent "root"] } {
         _redraw_idle $path 3
     } elseif { [visible $path $parent] } {
         # parent is visible...
@@ -332,7 +332,7 @@ proc Tree::itemconfigure { path node args } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare $node "root"] || ![info exists data($node)] } {
+    if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
 
@@ -358,7 +358,7 @@ proc Tree::itemconfigure { path node args } {
                 # force a redraw of the plus/minus sign
                 set flag [expr {$flag | 8}]
             }
-        } 
+        }
 
 	if {$data(upd,level) < 3 && [Widget::hasChanged $path.$node -padx x]} {
 	    _redraw_idle $path 3
@@ -385,7 +385,7 @@ proc Tree::itemconfigure { path node args } {
 proc Tree::itemcget { path node option } {
     # Instead of upvar'ing $path as data for this test, just directly refer to
     # it, as that is faster.
-    if { ![string compare $node "root"] || \
+    if { [string equal $node "root"] || \
 	    ![info exists ::Tree::${path}($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -400,7 +400,7 @@ proc Tree::itemcget { path node option } {
 proc Tree::bindText { path event script } {
     if { $script != "" } {
         $path.c bind "node" $event \
-            "$script \[Tree::_get_node_name $path current 2\]"
+            "$script \[Tree::_get_node_name [list $path] current 2\]"
     } else {
         $path.c bind "node" $event {}
     }
@@ -413,7 +413,7 @@ proc Tree::bindText { path event script } {
 proc Tree::bindImage { path event script } {
     if { $script != "" } {
         $path.c bind "img" $event \
-		"$script \[Tree::_get_node_name $path current 2\]"
+	    "$script \[Tree::_get_node_name [list $path] current 2\]"
     } else {
         $path.c bind "img" $event {}
     }
@@ -429,7 +429,7 @@ proc Tree::delete { path args } {
 
     foreach lnodes $args {
 	foreach node $lnodes {
-	    if { [string compare $node "root"] && [info exists data($node)] } {
+	    if { ![string equal $node "root"] && [info exists data($node)] } {
 		set parent [lindex $data($node) 0]
 		set idx	   [lsearch $data($parent) $node]
 		set data($parent) [lreplace $data($parent) $idx $idx]
@@ -449,15 +449,15 @@ proc Tree::move { path parent node index } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare $node "root"] || ![info exists data($node)] } {
+    if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
     if { ![info exists data($parent)] } {
         return -code error "node \"$parent\" does not exist"
     }
     set p $parent
-    while { [string compare $p "root"] } {
-        if { ![string compare $p $node] } {
+    while { ![string equal $p "root"] } {
+        if { [string equal $p $node] } {
             return -code error "node \"$parent\" is a descendant of \"$node\""
         }
         set p [parent $path $p]
@@ -467,15 +467,15 @@ proc Tree::move { path parent node index } {
     set idx         [lsearch $data($oldp) $node]
     set data($oldp) [lreplace $data($oldp) $idx $idx]
     set data($node) [concat [list $parent] [lrange $data($node) 1 end]]
-    if { ![string compare $index "end"] } {
+    if { [string equal $index "end"] } {
         lappend data($parent) $node
     } else {
         incr index
         set data($parent) [linsert $data($parent) $index $node]
     }
-    if { (![string compare $oldp "root"] ||
+    if { ([string equal $oldp "root"] ||
           ([visible $path $oldp] && [Widget::getoption $path.$oldp   -open])) ||
-         (![string compare $parent "root"] ||
+         ([string equal $parent "root"] ||
           ([visible $path $parent] && [Widget::getoption $path.$parent -open])) } {
         _redraw_idle $path 3
     }
@@ -711,7 +711,7 @@ proc Tree::index { path node } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare $node "root"] || ![info exists data($node)] } {
+    if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
     set parent [lindex $data($node) 0]
@@ -745,9 +745,9 @@ proc Tree::find {path findInfo {confine ""}} {
         foreach id [$path.c find overlapping $xi $y $xs $y] {
             set ltags [$path.c gettags $id]
             set item  [lindex $ltags 1]
-            if { ![string compare $item "node"] ||
-                 ![string compare $item "img"]  ||
-                 ![string compare $item "win"] } {
+            if { [string equal $item "node"] ||
+                 [string equal $item "img"]  ||
+                 [string equal $item "win"] } {
                 # item is the label or image/window of the node
                 set node  [Tree::_get_node_name $path $id 2]
                 set found 1
@@ -757,7 +757,7 @@ proc Tree::find {path findInfo {confine ""}} {
     }
 
     if {$found} {
-        if {[string compare $confine "confine"] == 0} {
+        if {[string equal $confine "confine"]} {
             # test if x stand inside node bbox
 	    set padx [_get_node_padx $path $node]
             set xi [expr {[lindex [$path.c coords n:$node] 0] - $padx}]
@@ -832,7 +832,7 @@ proc Tree::visiblenodes { path } {
     set st [lrange $data(root) 1 end]
     set result $st
 
-    while { [llength $st] } { 
+    while {[llength $st]} {
 	set node [lindex $st end]
 	set st [lreplace $st end end]
 	# Danger, danger!  Using getMegawidgetOption is fragile, but much
@@ -872,7 +872,7 @@ proc Tree::opentree { path node {recursive 1} } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare $node "root"] || ![info exists data($node)] } {
+    if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
 
@@ -888,7 +888,7 @@ proc Tree::closetree { path node {recursive 1} } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare $node "root"] || ![info exists data($node)] } {
+    if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
 
@@ -945,7 +945,8 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
         pack $ent -ipadx 8 -anchor w
 
         set idw [$path.c create window $x $y -window $frame -anchor w]
-        trace variable Tree::_edit(text) w "Tree::_update_edit_size $path $ent $idw $wmax"
+        trace variable Tree::_edit(text) w \
+	    [list Tree::_update_edit_size $path $ent $idw $wmax]
         tkwait visibility $ent
         grab  $frame
         BWidget::focus set $ent
@@ -962,7 +963,7 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
         bind $ent <Escape> {set Tree::_edit(wait) 0}
         bind $ent <Return> {set Tree::_edit(wait) 1}
         if { $clickres == 0 || $clickres == 1 } {
-            bind $frame <Button>  "set Tree::_edit(wait) $clickres"
+            bind $frame <Button>  [list set Tree::_edit(wait) $clickres]
         }
 
         set ok 0
@@ -974,7 +975,8 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
             }
         }
 
-        trace vdelete Tree::_edit(text) w "Tree::_update_edit_size $path $ent $idw $wmax"
+        trace vdelete Tree::_edit(text) w \
+	    [list Tree::_update_edit_size $path $ent $idw $wmax]
         grab release $frame
         BWidget::focus release $ent
         destroy $frame
@@ -994,7 +996,7 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
 #  Command Tree::xview
 # ----------------------------------------------------------------------------
 proc Tree::xview { path args } {
-    return [eval $path.c xview $args]
+    return [eval [list $path.c xview] $args]
 }
 
 
@@ -1002,7 +1004,7 @@ proc Tree::xview { path args } {
 #  Command Tree::yview
 # ----------------------------------------------------------------------------
 proc Tree::yview { path args } {
-    return [eval $path.c yview $args]
+    return [eval [list $path.c yview] $args]
 }
 
 
@@ -1081,7 +1083,7 @@ proc Tree::_recexpand { path node expand recursive cmd } {
     if { [Widget::getoption $path.$node -open] != $expand } {
         Widget::setoption $path.$node -open $expand
         if { $cmd != "" } {
-            uplevel \#0 $cmd $node
+            uplevel \#0 $cmd [list $node]
         }
     }
 
@@ -1172,12 +1174,12 @@ proc Tree::_cross_event { path } {
     if { [Widget::getoption $path.$node -open] } {
         Tree::itemconfigure $path $node -open 0
         if { [set cmd [Widget::getoption $path -closecmd]] != "" } {
-            uplevel \#0 $cmd $node
+            uplevel \#0 $cmd [list $node]
         }
     } else {
         Tree::itemconfigure $path $node -open 1
         if { [set cmd [Widget::getoption $path -opencmd]] != "" } {
-            uplevel \#0 $cmd $node
+            uplevel \#0 $cmd [list $node]
         }
     }
 }
@@ -1214,7 +1216,7 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
                     [expr {$x0+$deltax}] $y0 $deltax $deltay $padx $showlines]
     }
 
-    if { [string compare $dc "never"] && ($len || ![string compare $dc "allways"]) } {
+    if {![string equal $dc "never"] && ($len || [string equal $dc "allways"])} {
         if { $exp } {
             set bmp [file join $::BWIDGET::LIBRARY "images" "minus.xbm"]
         } else {
@@ -1224,7 +1226,7 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
             -bitmap     @$bmp \
             -background [$path.c cget -background] \
             -foreground [Widget::getoption $path -crossfill] \
-            -tags       "cross c:$node" -anchor c
+            -tags       [list cross c:$node] -anchor c
     }
 
     if { [set win [Widget::getoption $path.$node -window]] != "" } {
@@ -1291,7 +1293,7 @@ proc Tree::_update_nodes { path } {
             set idi  [$path.c find withtag i:$node]
             set type [lindex [$path.c gettags $idi] 1]
             if { [string length $win] } {
-                if { ![string compare $type "win"] } {
+                if { [string equal $type "win"] } {
                     $path.c itemconfigure $idi -window $win
                 } else {
                     $path.c delete $idi
@@ -1300,7 +1302,7 @@ proc Tree::_update_nodes { path } {
 			    	[list win i:$node]]
                 }
             } elseif { [string length $img] } {
-                if { ![string compare $type "img"] } {
+                if { [string equal $type "img"] } {
                     $path.c itemconfigure $idi -image $img
                 } else {
                     $path.c delete $idi
@@ -1320,7 +1322,7 @@ proc Tree::_update_nodes { path } {
             set exp [Widget::getoption $path.$node -open]
             set idc [$path.c find withtag c:$node]
 
-            if { [string compare $dc "never"] && ($len || ![string compare $dc "allways"]) } {
+            if {![string equal $dc "never"] && ($len || [string equal $dc "allways"])} {
                 if { $exp } {
                     set bmp [file join $::BWIDGET::LIBRARY "images" "minus.xbm"]
                 } else {
@@ -1331,7 +1333,7 @@ proc Tree::_update_nodes { path } {
                         -bitmap     @$bmp \
                         -background [$path.c cget -background] \
                         -foreground [Widget::getoption $path -crossfill] \
-                        -tags       "cross c:$node" -anchor c
+                        -tags       [list cross c:$node] -anchor c
                 } else {
                     $path.c itemconfigure $idc -bitmap @$bmp
                 }
@@ -1422,8 +1424,9 @@ proc Tree::_redraw_selection { path } {
             if {$fill} {
                 set bbox [list 0 [lindex $bbox 1] $xmax [lindex $bbox 3]]
             }
-            set id [eval $path.c create rectangle $bbox \
-		    -fill $selbg -outline $selbg -tags [list "sel s:$node"]]
+            set id [eval [list $path.c create rectangle] $bbox \
+			[list -fill $selbg -outline $selbg \
+			     -tags [list sel s:$node]]]
             $path.c itemconfigure "n:$node" -fill $selfg
             $path.c lower $id
         }
@@ -1455,9 +1458,9 @@ proc Tree::_init_drag_cmd { path X Y top } {
     set path [winfo parent $path]
     set ltags [$path.c gettags current]
     set item  [lindex $ltags 1]
-    if { ![string compare $item "node"] ||
-         ![string compare $item "img"]  ||
-         ![string compare $item "win"] } {
+    if { [string equal $item "node"] ||
+         [string equal $item "img"]  ||
+         [string equal $item "win"] } {
         set node [Tree::_get_node_name $path current 2]
         if { [set cmd [Widget::getoption $path -draginitcmd]] != "" } {
             return [uplevel \#0 $cmd [list $path $node $top]]
@@ -1505,7 +1508,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare $event "leave"] } {
+    if { [string equal $event "leave"] } {
         # we leave the window tree
         $path.c delete drop
         if { [string length $data(dnd,afterid)] } {
@@ -1516,7 +1519,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
         return 0
     }
 
-    if { ![string compare $event "enter"] } {
+    if { [string equal $event "enter"] } {
         # we enter the window tree - dnd data initialization
         set mode [Widget::getoption $path -dropovermode]
         set data(dnd,mode) 0
@@ -1571,9 +1574,9 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
         foreach id [$path.c find overlapping $xi $yi $xs $ys] {
             set ltags [$path.c gettags $id]
             set item  [lindex $ltags 1]
-            if { ![string compare $item "node"] ||
-                 ![string compare $item "img"]  ||
-                 ![string compare $item "win"] } {
+            if { [string equal $item "node"] ||
+                 [string equal $item "img"]  ||
+                 [string equal $item "win"] } {
                 # item is the label or image/window of the node
                 set node [Tree::_get_node_name $path $id 2]
 		set found 1
@@ -1645,11 +1648,11 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
         if { $code & 1 } {
             # update vmode
             set mode [lindex $res 1]
-            if { ($vmode & 1) && ![string compare $mode "node"] } {
+            if { ($vmode & 1) && [string equal $mode "node"] } {
                 set newmode 1
-            } elseif { ($vmode & 2) && ![string compare $mode "position"] } {
+            } elseif { ($vmode & 2) && [string equal $mode "position"] } {
                 set newmode 2
-            } elseif { ($vmode & 4) && ![string compare $mode "widget"] } {
+            } elseif { ($vmode & 4) && [string equal $mode "widget"] } {
                 set newmode 4
             }
         }
@@ -1658,7 +1661,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
         if { ($vmode & 3) == 3 } {
             # result have both item and position
             # we choose the preferred method
-            if { ![string compare [lindex $target 3] "position"] } {
+            if { [string equal [lindex $target 3] "position"] } {
                 set vmode [expr {$vmode & ~1}]
             } else {
                 set vmode [expr {$vmode & ~2}]
@@ -1729,7 +1732,7 @@ proc Tree::_auto_scroll { path x y } {
         }
     }
 
-    if { [string length $data(dnd,afterid)] && [string compare $data(dnd,scroll) $scroll] } {
+    if { [string length $data(dnd,afterid)] && ![string equal $data(dnd,scroll) $scroll] } {
         after cancel $data(dnd,afterid)
         set data(dnd,afterid) ""
     }
@@ -1790,7 +1793,7 @@ proc Tree::_keynav {which win} {
 	    lappend nodes $node
 	}
     }
-	
+
     # Keyboard navigation is all relative to the current node
     # surles: Get the current node for single or multiple selection schemas.
     set node [_get_current_node $win]
@@ -1850,7 +1853,7 @@ proc Tree::_keynav {which win} {
             } else {
                 $win itemconfigure $node -open 1
                 if { [set cmd [Widget::getoption $win -opencmd]] != "" } {
-                    uplevel \#0 $cmd $node
+                    uplevel \#0 $cmd [list $node]
                 }
                 return
             }
@@ -1865,7 +1868,7 @@ proc Tree::_keynav {which win} {
 	    if { $open } {
 		$win itemconfigure $node -open 0
                 if { [set cmd [Widget::getoption $win -closecmd]] != "" } {
-                    uplevel \#0 $cmd $node
+                    uplevel \#0 $cmd [list $node]
                 }
 		return
 	    } else {
@@ -1902,13 +1905,13 @@ proc Tree::_keynav {which win} {
 		    # Node was open, is now closed. Call the close-cmd
 
 		    if { [set cmd [Widget::getoption $win -closecmd]] != "" } {
-			uplevel \#0 $cmd $node
+			uplevel \#0 $cmd [list $node]
 		    }
 		} else {
 		    # Node was closed, is now open. Call the open-cmd
 
 		    if { [set cmd [Widget::getoption $win -opencmd]] != "" } {
-			uplevel \#0 $cmd $node
+			uplevel \#0 $cmd [list $node]
 		    }
                 }
 	    }
@@ -2028,7 +2031,7 @@ proc Tree::_get_node_deltax {path node} {
 # Results:
 #	list		The list of tags to apply to the canvas item
 proc Tree::_get_node_tags {path node {tags ""}} {
-    eval lappend list TreeItemSentinal $tags
+    eval [list lappend list TreeItemSentinal] $tags
     if {[Widget::getoption $path.$node -helptext] == ""} { return $list }
 
     switch -- [Widget::getoption $path.$node -helptype] {
@@ -2058,7 +2061,7 @@ proc Tree::_set_help { path node } {
 
     set item $path.$node
     set opts [list -helptype -helptext -helpvar]
-    foreach {cty ctx cv} [eval Widget::hasChangedX $item $opts] break
+    foreach {cty ctx cv} [eval [list Widget::hasChangedX $item] $opts] break
     set text [Widget::getoption $item -helptext]
 
     ## If we've never set help for this item before, and text is not blank,
