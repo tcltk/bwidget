@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.11 2003/04/16 03:41:51 damonc Exp $
+#  $Id: listbox.tcl,v 1.12 2003/06/06 00:50:09 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -343,14 +343,16 @@ proc ListBox::itemconfigure { path item args } {
                 $path.c itemconfigure $idi -window $win
             } else {
                 $path.c delete $idi
-                $path.c create window $x0 $y0 -window $win -anchor w -tags "win i:$item"
+                $path.c create window $x0 $y0 -window $win -anchor w \
+		    -tags [list win i:$item]
             }
         } elseif { [string length $img] } {
             if { ![string compare $type "img"] } {
                 $path.c itemconfigure $idi -image $img
             } else {
                 $path.c delete $idi
-                $path.c create image $x0 $y0 -image $img -anchor w -tags "img i:$item"
+                $path.c create image $x0 $y0 -image $img -anchor w \
+		    -tags [list img i:$item]
             }
         } else {
             $path.c delete $idi
@@ -899,13 +901,13 @@ proc ListBox::_draw_item { path item x0 x1 y } {
         -fill   [_getoption        $path $item -foreground] \
         -font   [_getoption        $path $item -font] \
         -anchor w \
-        -tags   "item n:$item"
+        -tags   [list item n:$item]
     if { [set win [Widget::getoption $path.$item -window]] != "" } {
         $path.c create window [expr {$x0+$indent}] $y \
-            -window $win -anchor w -tags "win i:$item"
+            -window $win -anchor w -tags [list win i:$item]
     } elseif { [set img [Widget::getoption $path.$item -image]] != "" } {
         $path.c create image [expr {$x0+$indent}] $y \
-            -image $img -anchor w -tags "img i:$item"
+            -image $img -anchor w -tags [list img i:$item]
     }
 
     _set_help $path $item
@@ -987,7 +989,8 @@ proc ListBox::_redraw_selection { path } {
         set bbox [$path.c bbox "n:$item"]
         if { [llength $bbox] } {
             set id [eval $path.c create rectangle $bbox \
-                        -fill $selbg -outline $selbg -tags [list "sel s:$item"]]
+                        -fill $selbg -outline $selbg \
+	    		-tags [list [list sel s:$item]]]
             $path.c itemconfigure "n:$item" -fill $selfg
             $path.c lower $id
         }
@@ -1422,7 +1425,7 @@ proc ListBox::_set_help { path node } {
 
     set item $path.$node
     set opts [list -helptype -helptext -helpvar]
-    foreach {cty ctx cv} [eval Widget::hasChangedX $item $opts] break
+    foreach {cty ctx cv} [eval Widget::hasChangedX [list $item] $opts] break
     set text [Widget::getoption $item -helptext]
 
     ## If we've never set help for this item before, and text is not blank,
