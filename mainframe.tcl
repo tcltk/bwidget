@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.3 1999/09/19 22:40:00 ericm Exp $
+#  $Id: mainframe.tcl,v 1.4 2000/01/24 16:35:38 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -13,6 +13,7 @@
 #     - MainFrame::addindicator
 #     - MainFrame::getindicator
 #     - MainFrame::getmenu
+#     - MainFrame::menuonly
 #     - MainFrame::showtoolbar
 #     - MainFrame::showstatusbar
 #     - MainFrame::_create_menubar
@@ -316,6 +317,17 @@ proc MainFrame::setmenustate { path tag state } {
 
 
 # ------------------------------------------------------------------------------
+#  Command MainFrame::menuonly
+# ------------------------------------------------------------------------------
+proc MainFrame::menuonly { path } {
+    variable _widget
+
+    catch {pack forget $path.sep}
+    catch {pack forget $path.botf.sep}
+    catch {pack forget $path.frame}
+}
+
+# ------------------------------------------------------------------------------
 #  Command MainFrame::showtoolbar
 # ------------------------------------------------------------------------------
 proc MainFrame::showtoolbar { path index bool } {
@@ -528,18 +540,21 @@ proc MainFrame::_parse_accelerator { desc } {
     if { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
         set key [lindex $desc 1]
+        if {![regexp {F[1]?[0-9]*} $key]} {
+            set key [string tolower $key]
+        }
         switch -- $seq {
             Ctrl {
                 set accel "Ctrl+[string toupper $key]"
-                set event "<Control-Key-[string tolower $key]>"
+                set event "<Control-Key-$key>"
             }
             Alt {
                 set accel "Atl+[string toupper $key]"
-                set event "<Alt-Key-[string tolower $key]>"
+                set event "<Alt-Key-$key>"
             }
             CtrlAlt {
                 set accel "Ctrl+Alt+[string toupper $key]"
-                set event "<Control-Alt-Key-[string tolower $key]>"
+                set event "<Control-Alt-Key-$key>"
             }
             default {
                 return -code error "invalid accelerator code $seq"
