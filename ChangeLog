@@ -1,3 +1,14 @@
+2004-09-24  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* color.tcl: use toplevel instead of menu for dropdown color menu
+	and do better focus/grab restoration.
+
+	* utils.tcl (BWidget::RestoreFocusGrab,SetFocusGrab): add BWidget
+	equivalents of what Tk uses for better stacked grab/focus mgmt.
+
+	* dialog.tcl (Dialog::create): withdraw topleve immediately after
+	creation.
+
 2004-09-14  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* listbox.tcl: add FocusIn redirector to %W.c, add explicit

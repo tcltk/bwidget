@@ -72,9 +72,11 @@ proc SelectColor::menu {path placement args} {
     variable _selection
 
     Widget::init SelectColor $path $args
-    set top [::menu $path]
+    set top [toplevel $path]
     wm withdraw  $top
     wm transient $top [winfo toplevel [winfo parent $top]]
+    wm overrideredirect $top 1
+    catch { wm attributes $shell -topmost 1 }
 
     set frame [frame $top.frame \
                    -highlightthickness 0 \
@@ -85,14 +87,13 @@ proc SelectColor::menu {path placement args} {
     set colors [concat $_baseColors $_userColors]
     foreach color $colors {
         set f [frame $frame.c$count \
-                   -highlightthickness 1 \
+                   -highlightthickness 2 \
                    -highlightcolor white \
                    -relief solid -borderwidth 1 \
                    -width 16 -height 16 -background $color]
-        bind $f <ButtonPress-1> [list set SelectColor::_selection $count]
-        bind $f <Enter>         {focus %W}
-        grid $f -column $col -row $row -padx 1 -pady 1
-        bindtags $f $f
+        bind $f <1>     "set SelectColor::_selection $count; break"
+        bind $f <Enter> {focus %W}
+        grid $f -column $col -row $row
         incr count
         if {[incr col] == 6 } {
             set  col 0
@@ -100,17 +101,19 @@ proc SelectColor::menu {path placement args} {
         }
     }
     set f [label $frame.c$count \
-               -highlightthickness 1 \
+               -highlightthickness 2 \
                -highlightcolor white \
                -relief flat -borderwidth 0 \
                -width 16 -height 16 -image [Bitmap::get palette]]
-    grid $f -column $col -row $row -padx 1 -pady 1
-    bind $f <ButtonPress-1> [list set SelectColor::_selection $count]
-    bind $f <Enter>         {focus %W}
+    grid $f -column $col -row $row
+    bind $f <1>     "set SelectColor::_selection $count; break"
+    bind $f <Enter> {focus %W}
     pack $frame
 
-    bind $frame <ButtonPress-1> {set SelectColor::_selection -1}
-    bind $frame <FocusOut>      {set SelectColor::_selection -2}
+    bind $top <1>      {set SelectColor::_selection -1}
+    bind $top <Escape> {set SelectColor::_selection -2}
+    bind $top <FocusOut> [subst {if {"%W" == "$top"} \
+				     {set SelectColor::_selection -2}}]
     eval [list BWidget::place $top 0 0] $placement
 
     wm deiconify $top
@@ -119,14 +122,10 @@ proc SelectColor::menu {path placement args} {
 	tkwait visibility $top
 	update
     }
-    focus -force $frame
-    BWidget::grab set $frame
+    BWidget::SetFocusGrab $top $frame.c0
 
-    tkwait variable SelectColor::_selection
-    update
-    BWidget::grab release $frame
-    destroy $top
-    update
+    vwait SelectColor::_selection
+    BWidget::RestoreFocusGrab $top $frame.c0 destroy
     Widget::destroy $top
     if {$_selection == $count} {
         return [eval [list dialog $path] $args]
