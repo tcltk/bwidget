@@ -1,3 +1,11 @@
+2000-02-16  Sven Delmas  <sven@scriptics.com>
+
+	* tree.tcl: Changed the <KeyPress-space> binding to use "+", so it
+	will not overwrite existing bindings (if there are any). Also
+	added some extra protection in the keynav procedure against the
+	user typing <Left> on a root node (this used to cause a stack
+	trace).
+
 2000-02-11  Eric Melski  <ericm@scriptics.com>
 
 	* tree.tcl: Integrated changes from Eric Boudaillier:
