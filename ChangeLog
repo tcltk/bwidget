@@ -1,3 +1,8 @@
+2002-05-09  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* dynhelp.tcl: Accepted patch for bug 528929. Reported by
+	  <bach@users.sourceforge.net>, patch also by him.
+
 2002-04-25  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* notebook.tcl: Accepted patch for bug #532246, fixing the

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.7 2001/06/11 23:58:40 hobbs Exp $
+#  $Id: dynhelp.tcl,v 1.8 2002/05/09 21:01:06 andreas_kupries Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -325,6 +325,8 @@ proc DynamicHelp::_show_help { path x y } {
         pack $_top.label -side left
         update idletasks
 
+	if {![winfo exists $_top]} {return}
+
         set  scrwidth  [winfo vrootwidth  .]
         set  scrheight [winfo vrootheight .]
         set  width     [winfo reqwidth  $_top]
@@ -341,6 +343,8 @@ proc DynamicHelp::_show_help { path x y } {
 
         wm geometry  $_top "+$x+$y"
         update idletasks
+
+	if {![winfo exists $_top]} {return}
         wm deiconify $_top
     }
 }
