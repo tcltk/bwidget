@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  pagesmgr.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: pagesmgr.tcl,v 1.3 2001/10/11 16:34:11 hobbs Exp $
+#  $Id: pagesmgr.tcl,v 1.4 2001/10/14 19:32:58 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - PagesManager::create
@@ -159,15 +159,9 @@ proc PagesManager::page { path first {last ""} } {
     variable $path
     upvar 0  $path data
 
-    if {![string is integer -strict $first]} {
-	set first [lsearch -exact $data(pages) $first]
-    }
     if { $last == "" } {
         return [lindex $data(pages) $first]
     } else {
-	if {![string is integer -strict $last]} {
-	    set last [lsearch -exact $data(pages) $last]
-	}
         return [lrange $data(pages) $first $last]
     }
 }
@@ -184,15 +178,9 @@ proc PagesManager::pages { path {first ""} {last ""} } {
 	return $data(pages)
     }
 
-    if {![string is integer -strict $first]} {
-	set first [lsearch -exact $data(pages) $first]
-    }
     if { ![string length $last] } {
         return [lindex $data(pages) $first]
     } else {
-	if {![string is integer -strict $last]} {
-	    set last [lsearch -exact $data(pages) $last]
-	}
         return [lrange $data(pages) $first $last]
     }
 }
