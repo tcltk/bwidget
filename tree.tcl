@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.37 2002/10/14 20:54:12 hobbs Exp $
+#  $Id: tree.tcl,v 1.38 2003/01/24 22:17:56 jenglish Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -404,25 +404,17 @@ proc Tree::delete { path args } {
     variable $path
     upvar 0  $path data
 
-    set sel $data(selnodes)
-
     foreach lnodes $args {
 	foreach node $lnodes {
 	    if { [string compare $node "root"] && [info exists data($node)] } {
 		set parent [lindex $data($node) 0]
 		set idx	   [lsearch $data($parent) $node]
 		set data($parent) [lreplace $data($parent) $idx $idx]
-		set idx	   [lsearch $sel $node]
-		if { $idx >= 0 } {
-		    set sel [lreplace $sel $idx $idx]
-		}
 		_subdelete $path [list $node]
 	    }
 	}
     }
 
-    set data(selnodes) {}
-    eval [list selection $path set] $sel
     _redraw_idle $path 3
 }
 
@@ -1084,6 +1076,8 @@ proc Tree::_subdelete { path lnodes } {
     variable $path
     upvar 0  $path data
 
+    set sel $data(selnodes)
+
     while { [llength $lnodes] } {
         set lsubnodes [list]
         foreach node $lnodes {
@@ -1091,6 +1085,10 @@ proc Tree::_subdelete { path lnodes } {
                 lappend lsubnodes $subnode
             }
             unset data($node)
+	    set idx [lsearch $sel $node]
+	    if { $idx >= 0 } {
+		set sel [lreplace $sel $idx $idx]
+	    }
             if { [set win [Widget::getoption $path.$node -window]] != "" } {
                 destroy $win
             }
@@ -1098,6 +1096,8 @@ proc Tree::_subdelete { path lnodes } {
         }
         set lnodes $lsubnodes
     }
+
+    set data(selnodes) $sel
 }
 
 
