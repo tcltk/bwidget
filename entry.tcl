@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.18 2003/10/20 21:23:52 damonc Exp $
+#  $Id: entry.tcl,v 1.19 2003/11/11 00:27:43 damonc Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -22,40 +22,38 @@ namespace eval Entry {
     # Note:  -textvariable is pulled off of the tk entry and put onto the
     # BW Entry so that we avoid the TkResource test for it, which screws up
     # the existance/non-existance bits of the -textvariable.
-    set remove  [list -state -background -foreground -textvariable]
-    set declare [list \
-	    [list -background		TkResource	""	0 entry] \
-	    [list -foreground		TkResource	""	0 entry] \
-	    [list -state	Enum	normal	0 [list normal disabled]] \
-	    [list -text			String	""	0] \
-	    [list -textvariable		String	""	0] \
-	    [list -editable		Boolean	1	0] \
-	    [list -command		String	""	0] \
-	    [list -relief		TkResource	""	0 entry] \
-	    [list -borderwidth		TkResource	""	0 entry] \
-	    [list -fg		Synonym		-foreground] \
-	    [list -bg		Synonym		-background] \
-	    [list -bd		Synonym		-borderwidth] \
-	    ]
+    Widget::tkinclude Entry entry :cmd \
+    	remove { -state -background -foreground -textvariable
+    		 -disabledforeground -disabledbackground }
 
-    if {[package vcompare [package provide Tk] 8.4] >= 0} {
-	#
-	#   Tk 8.4 added -disabledforeground and -disabledbackground
-	#   resources to the entry widget, but the BWidget Entry
-	#   handles the 'disabled' state in a different way.
-	#
-	lappend remove -disabledforeground -disabledbackground
-	lappend declare \
-	    [list -disabledforeground	TkResource	""	0 entry] \
-	    [list -disabledbackground	TkResource	""	0 entry]
+    set declare [list \
+	    [list -background   TkResource  ""	   0  entry] \
+	    [list -foreground   TkResource  ""	   0  entry] \
+	    [list -state        Enum        normal 0  [list normal disabled]] \
+	    [list -text         String      ""	   0] \
+	    [list -textvariable String      ""     0] \
+	    [list -editable     Boolean     1      0] \
+	    [list -command      String      ""     0] \
+	    [list -relief       TkResource  ""     0  entry] \
+	    [list -borderwidth  TkResource  ""     0  entry] \
+	    [list -fg           Synonym     -foreground] \
+	    [list -bg           Synonym     -background] \
+	    [list -bd           Synonym     -borderwidth] \
+	]
+
+    if {![package vsatisfies [package provide Tk] 8.4]} {
+	## If we're not running version 8.4 or higher, get our
+	## disabled resources from the button widget.
+	lappend declare [list -disabledforeground TkResource "" 0 button]
+	lappend declare [list -disabledbackground TkResource "" 0 \
+							{button -background}]
     } else {
-	lappend declare \
-	    [list -disabledforeground	TkResource	""	0 button]
+	lappend declare [list -disabledforeground TkResource "" 0 entry]
+	lappend declare [list -disabledbackground TkResource "" 0 entry]
     }
 
-    Widget::tkinclude Entry entry :cmd remove $remove
     Widget::declare Entry $declare
-    Widget::addmap Entry "" :cmd {-textvariable {}}
+    Widget::addmap Entry "" :cmd { -textvariable {} }
 
     DynamicHelp::include Entry balloon
     DragSite::include    Entry "" 3
