@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: mainframe.tcl,v 1.2 1999/09/17 17:46:47 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -282,11 +282,36 @@ proc MainFrame::getmenu { path menuid } {
 proc MainFrame::setmenustate { path tag state } {
     variable _widget
 
-    if { [info exists _widget($path,tags,$tag)] } {
-        foreach {menu entry} $_widget($path,tags,$tag) {
-            $menu entryconfigure $entry -state $state
-        }
+    #    if { [info exists _widget($path,tags,$tag)] } {
+    #        foreach {menu entry} $_widget($path,tags,$tag) {
+    #            $menu entryconfigure $entry -state $state
+    #        }
+    #    }
+	    
+    # We need a more sophisticated state system.
+    # The original model was this:  each menu item has a list of tags;
+    # whenever any one of those tags changed state, the menu item did too.
+    # This makes it hard to have items that are enabled only when both tagA and
+    # tagB are.  The new model therefore only sets the menustate to enabled
+    # when ALL of its tags are enabled.
+
+    # First see if this is a real tag
+    if { [info exists _widget($path,tagstate,$tag)] } {
+	set _widget($path,tagstate,$tag) $state
+	foreach {menu entry} $_widget($path,tags,$tag) {
+	    set expression "1"
+	    foreach menutag $_widget($path,menutags,[list $menu $entry]) {
+		append expression " && $_widget($path,tagstate,$menutag)"
+	    }
+	    if { [expr $expression] } {
+		set state normal
+	    } else {
+		set state disabled
+	    }
+	    $menu entryconfigure $entry -state $state
+	}
     }
+    return
 }
 
 
@@ -376,7 +401,14 @@ proc MainFrame::_create_menubar { path descmenu } {
         menu $menu -tearoff $tearoff -background $bg
         foreach tag $tags {
             lappend _widget($path,tags,$tag) $menubar $count
+	    # ericm@scriptics:  Add a tagstate tracker
+	    if { ![info exists _widget($path,tagstate,$tag)] } {
+		set _widget($path,tagstate,$tag) 0
+	    }
         }
+	# ericm@scriptics.com:  Add mapping from menu items to tags
+	set _widget($path,menutags,[list $menubar $count]) $tags
+	    
         if { [string length $menuid] } {
             # menu has identifier
             set _widget($path,menuid,$menuid) $menu
@@ -410,7 +442,13 @@ proc MainFrame::_create_entries { path menu bg entries } {
         set tags [lindex $entry 2]
         foreach tag $tags {
             lappend _widget($path,tags,$tag) $menu $count
+	    # ericm@scriptics:  Add a tagstate tracker
+	    if { ![info exists _widget($path,tagstate,$tag)] } {
+		set _widget($path,tagstate,$tag) 0
+	    }
         }
+	# ericm@scriptics.com:  Add mapping from menu items to tags
+	set _widget($path,menutags,[list $menu $count]) $tags
 
         if { ![string compare $type "cascad"] } {
             set menuid  [lindex $entry 3]
