@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: scrollframe.tcl,v 1.2 1999/10/14 20:23:21 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -120,11 +120,10 @@ proc ScrollableFrame::getframe { path } {
     return $path.frame
 }
 
-
 # ------------------------------------------------------------------------------
 #  Command ScrollableFrame::see
 # ------------------------------------------------------------------------------
-proc ScrollableFrame::see { path widget {vert top} {horz left}} {
+proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOffset 0}} {
     set x0  [winfo x $widget]
     set y0  [winfo y $widget]
     set x1  [expr {$x0+[winfo width  $widget]}]
@@ -135,7 +134,7 @@ proc ScrollableFrame::see { path widget {vert top} {horz left}} {
     set yb1 [$path:cmd canvasy [winfo height $path]]
     set dx  0
     set dy  0
-
+    
     if { ![string compare $horz "left"] } {
 	if { $x1 > $xb1 } {
 	    set dx [expr {$x1-$xb1}]
@@ -168,12 +167,12 @@ proc ScrollableFrame::see { path widget {vert top} {horz left}} {
 	}
     }
 
-    if { $dx != 0 } {
-	set x [expr {($xb0+$dx)/[winfo width $path.frame]}]
+    if { [expr {$dx + $xOffset}] != 0 } {
+	set x [expr {($xb0+$dx+$xOffset)/[winfo width $path.frame]}]
 	$path:cmd xview moveto $x
     }
-    if { $dy != 0 } {
-	set y [expr {($yb0+$dy)/[winfo height $path.frame]}]
+    if { [expr {$dy + $yOffset}] != 0 } {
+	set y [expr {($yb0+$dy+$yOffset)/[winfo height $path.frame]}]
 	$path:cmd yview moveto $y
     }
 }
