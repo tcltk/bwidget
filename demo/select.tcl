@@ -8,8 +8,7 @@ proc DemoSelect::create { nb } {
 
     set titf1 [TitleFrame $frame.titf1 -text SpinBox]
     set subf  [$titf1 getframe]
-    set spin  [SpinBox $subf.spin -label "spinbox" -underline 0 \
-                   -labelwidth 10 -labelanchor w \
+    set spin  [SpinBox $subf.spin \
                    -range {1 100 1} -textvariable DemoSelect::var(spin,var) \
                    -helptext "This is the SpinBox"]
     set ent   [LabelEntry $subf.ent -label "Linked var" -labelwidth 10 -labelanchor w \
@@ -32,8 +31,7 @@ proc DemoSelect::create { nb } {
 
     set titf2 [TitleFrame $frame.titf2 -text ComboBox]
     set subf  [$titf2 getframe]
-    set combo [ComboBox $subf.combo -label "combobox" -underline 0 \
-                   -labelwidth 10 -labelanchor w \
+    set combo [ComboBox $subf.combo \
                    -textvariable DemoSelect::var(combo,var) \
                    -values {"first value" "second value" "third value" "fourth value" "fifth value"} \
                    -helptext "This is the ComboBox"]
