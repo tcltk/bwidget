@@ -1,3 +1,9 @@
+2004-04-26  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tree.tcl (_update_nodes): align with _draw_nodes code,
+	specifically correcting placement of cross on new nodes and anchor
+	of changed window/image.
+
 2004-04-23  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* listbox.tcl (create): don't force -highlightthickness 1 as it

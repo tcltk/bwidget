@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.50 2004/04/22 21:29:14 hobbs Exp $
+#  $Id: tree.tcl,v 1.51 2004/04/26 18:42:03 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1285,7 +1285,6 @@ proc Tree::_draw_cross { path node open x y } {
 #  Command Tree::_draw_node
 # ----------------------------------------------------------------------------
 proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
-    global   env
     variable $path
     upvar 0  $path data
 
@@ -1312,7 +1311,8 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
                     [expr {$x0+$deltax}] $y0 $deltax $deltay $padx $showlines]
     }
 
-    if {![string equal $dc "never"] && ($len || [string equal $dc "allways"])} {
+    if {![string equal $dc "never"]
+	&& ($len || [string equal $dc "allways"])} {
         _draw_cross $path $node $exp $x0 $y0
     }
 
@@ -1370,73 +1370,70 @@ proc Tree::_draw_subnodes { path nodes x0 y0 deltax deltay padx showlines } {
 #  Command Tree::_update_nodes
 # ----------------------------------------------------------------------------
 proc Tree::_update_nodes { path } {
-    global   env
     variable $path
     upvar 0  $path data
 
-    set deltax [Widget::getoption $path -deltax]
-    set padx   [Widget::getoption $path -padx]
     foreach {node flag} $data(upd,nodes) {
-        set idn [$path.c find withtag "n:$node"]
-        if { $idn == "" } {
-            continue
-        }
+	set idn [$path.c find withtag "n:$node"]
+	if { $idn == "" } {
+	    continue
+	}
 	set padx   [_get_node_padx $path $node]
 	set deltax [_get_node_deltax $path $node]
-        set c  [$path.c coords $idn]
-        set x0 [expr {[lindex $c 0]-$padx}]
-        set y0 [lindex $c 1]
-        if { $flag & 48 } {
-            # -window or -image modified
-            set win  [Widget::getoption $path.$node -window]
-            set img  [Widget::getoption $path.$node -image]
-            set idi  [$path.c find withtag i:$node]
-            set type [lindex [$path.c gettags $idi] 1]
-            if { [string length $win] } {
-                if { [string equal $type "win"] } {
-                    $path.c itemconfigure $idi -window $win
-                } else {
-                    $path.c delete $idi
-                    $path.c create window $x0 $y0 -window $win -anchor w \
-			    -tags [Tree::_get_node_tags $path $node \
-			    	[list win i:$node]]
-                }
-            } elseif { [string length $img] } {
-                if { [string equal $type "img"] } {
-                    $path.c itemconfigure $idi -image $img
-                } else {
-                    $path.c delete $idi
-                    $path.c create image $x0 $y0 -image $img -anchor w \
-			    -tags [Tree::_get_node_tags $path $node \
-			    	[list img i:$node]]
-                }
-            } else {
-                $path.c delete $idi
-            }
-        }
+	set c  [$path.c coords $idn]
+	set x1 [expr {[lindex $c 0]-$padx}]
+	set x0 [expr {$x1-$deltax-5}]
+	set y0 [lindex $c 1]
+	if { $flag & 48 } {
+	    # -window or -image modified
+	    set win  [Widget::getoption $path.$node -window]
+	    set img  [Widget::getoption $path.$node -image]
+	    set anc  [Widget::cget $path.$node -anchor]
+	    set idi  [$path.c find withtag i:$node]
+	    set type [lindex [$path.c gettags $idi] 1]
+	    if { [string length $win] } {
+		if { [string equal $type "win"] } {
+		    $path.c itemconfigure $idi -window $win
+		} else {
+		    $path.c delete $idi
+		    $path.c create window $x1 $y0 -window $win -anchor $anc \
+			-tags [_get_node_tags $path $node [list win i:$node]]
+		}
+	    } elseif { [string length $img] } {
+		if { [string equal $type "img"] } {
+		    $path.c itemconfigure $idi -image $img
+		} else {
+		    $path.c delete $idi
+		    $path.c create image $x1 $y0 -image $img -anchor $anc \
+			-tags [_get_node_tags $path $node [list img i:$node]]
+		}
+	    } else {
+		$path.c delete $idi
+	    }
+	}
 
-        if { $flag & 8 } {
-            # -drawcross modified
-            set len [expr {[llength $data($node)] > 1}]
-            set dc  [Widget::getoption $path.$node -drawcross]
-            set exp [Widget::getoption $path.$node -open]
+	if { $flag & 8 } {
+	    # -drawcross modified
+	    set len [expr {[llength $data($node)] > 1}]
+	    set dc  [Widget::getoption $path.$node -drawcross]
+	    set exp [Widget::getoption $path.$node -open]
 
-            if {![string equal $dc "never"]
-                && ($len || [string equal $dc "allways"])} {
-                _draw_cross $path $node $exp $x0 $y0
-            } else {
+	    if {![string equal $dc "never"]
+		&& ($len || [string equal $dc "allways"])} {
+		_draw_cross $path $node $exp $x0 $y0
+	    } else {
 		set idc [$path.c find withtag c:$node]
-                $path.c delete $idc
-            }
-        }
+		$path.c delete $idc
+	    }
+	}
 
-        if { $flag & 7 } {
-            # -font, -text or -fill modified
-            $path.c itemconfigure $idn \
-                -text [Widget::getoption $path.$node -text] \
-                -fill [Widget::getoption $path.$node -fill] \
-                -font [Widget::getoption $path.$node -font]
-        }
+	if { $flag & 7 } {
+	    # -font, -text or -fill modified
+	    $path.c itemconfigure $idn \
+		-text [Widget::getoption $path.$node -text] \
+		-fill [Widget::getoption $path.$node -fill] \
+		-font [Widget::getoption $path.$node -font]
+	}
     }
 }
 
