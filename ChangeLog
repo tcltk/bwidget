@@ -1,5 +1,15 @@
 2000-03-13  Eric Melski  <ericm@scriptics.com>
 
+	* combobox.tcl: Tweaked bg/background options so that button
+	didn't pick up entry background.
+
+	* widget.tcl: Removed dead code; micro-optimizations to initFromODB.
+
+	* tree.tcl: Added option for default -fill of tree nodes on windows.
+
+	* notebook.tcl: Removed commented code.
+
+	* button.tcl: 
 	* tree.tcl: 
 	* spinbox.tcl: 
 	* entry.tcl: 
