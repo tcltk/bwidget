@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.14 2002/04/25 18:11:22 andreas_kupries Exp $
+#  $Id: notebook.tcl,v 1.15 2002/10/14 20:56:22 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -768,16 +768,16 @@ proc NoteBook::_draw_page { path page create } {
 	# Hrm... the canvas has an issue with drawing diagonal segments
 	# of lines from the bottom to the top, so we have to draw this line
 	# backwards (ie, lt is actually the bottom, drawn from right to left)
-        set lt  [list 					\
-		$rightPlusRadius	[expr {$h1-$h-1}]		\
-		[expr {$rightPlusRadius - $xBevel}]	[expr {$h1 + $topPlusRadius}]	\
-		[expr {$xf - $xBevel}]			[expr {$h1 + $top}]		\
-		[expr {$leftPlusRadius + $xBevel}]	[expr {$h1 + $top}]		\
+        set lt  [list \
+		$rightPlusRadius			[expr {$h1-$h-1}] \
+		[expr {$rightPlusRadius - $xBevel}]	[expr {$h1 + $topPlusRadius}] \
+		[expr {$xf - $xBevel}]			[expr {$h1 + $top}] \
+		[expr {$leftPlusRadius + $xBevel}]	[expr {$h1 + $top}] \
 		]
-        set lb  [list					\
-		[expr {$leftPlusRadius + $xBevel}]	[expr {$h1 + $top}]		\
-		[expr {$xd + $xBevel}]			[expr {$h1 + $topPlusRadius}]	\
-		$xd			[expr {$h1-$h-1}]	\
+        set lb  [list \
+		[expr {$leftPlusRadius + $xBevel}]	[expr {$h1 + $top}] \
+		[expr {$xd + $xBevel}]			[expr {$h1 + $topPlusRadius}] \
+		$xd					[expr {$h1-$h-1}] \
 		]
 	# Because we have to do this funky reverse order thing, we have to
 	# swap the top/bottom colors too.
@@ -785,16 +785,16 @@ proc NoteBook::_draw_page { path page create } {
 	set fgt $fgb
 	set fgb $tmp
     } else {
-	set lt [list					\
-		$xd			$h		\
-		[expr {$xd + $xBevel}]			$topPlusRadius		\
-		[expr {$leftPlusRadius + $xBevel}]	$top			\
-		[expr {$xf + 1 - $xBevel}]		$top			\
+	set lt [list \
+		$xd					$h \
+		[expr {$xd + $xBevel}]			$topPlusRadius \
+		[expr {$leftPlusRadius + $xBevel}]	$top \
+		[expr {$xf + 1 - $xBevel}]		$top \
 		]
-	set lb [list 						\
-		[expr {$xf + 1 - $xBevel}] 		[expr {$top + 1}]	\
-		[expr {$rightPlusRadius - $xBevel}]	$topPlusRadius		\
-		$rightPlusRadius	$h			\
+	set lb [list \
+		[expr {$xf + 1 - $xBevel}] 		[expr {$top + 1}] \
+		[expr {$rightPlusRadius - $xBevel}]	$topPlusRadius \
+		$rightPlusRadius			$h \
 		]
     }
 
@@ -835,48 +835,52 @@ proc NoteBook::_draw_page { path page create } {
     # Sven
     if { $create } {
 	# Create the tab region
-        eval $path.c create polygon [concat $lt $lb]		\
-		-tag		{"page p:$page $page:poly"}	\
-		-outline	$bg				\
-		-fill		$bg
-        eval $path.c create line $lt \
-            -tags {"page p:$page $page:top top"} -fill $fgt -width $bd
-        eval $path.c create line $lb \
-            -tags {"page p:$page $page:bot bot"} -fill $fgb -width $bd
+        eval [list $path.c create polygon] [concat $lt $lb] [list \
+		-tag		[list page p:$page $page:poly] \
+		-outline	$bg \
+		-fill		$bg \
+		]
+        eval [list $path.c create line] $lt [list \
+            -tags [list page p:$page $page:top top] -fill $fgt -width $bd]
+        eval [list $path.c create line] $lb [list \
+            -tags [list page p:$page $page:bot bot] -fill $fgb -width $bd]
         $path.c create text $xtext $ytext 			\
 		-text	[Widget::cget $path.f$page -text]	\
 		-font	[Widget::cget $path -font]		\
 		-fill	$fg					\
 		-anchor	nw					\
-		-tags	"page p:$page $page:text"
+		-tags	[list page p:$page $page:text]
 
-        $path.c bind p:$page <ButtonPress-1> "NoteBook::_select $path $page"
-        $path.c bind p:$page <Enter>         "NoteBook::_highlight on  $path $page"
-        $path.c bind p:$page <Leave>         "NoteBook::_highlight off $path $page"
+        $path.c bind p:$page <ButtonPress-1> \
+		[list NoteBook::_select $path $page]
+        $path.c bind p:$page <Enter> \
+		[list NoteBook::_highlight on  $path $page]
+        $path.c bind p:$page <Leave> \
+		[list NoteBook::_highlight off $path $page]
     } else {
         $path.c coords "$page:text" $xtext $ytext
 
-        $path.c itemconfigure "$page:text"    \
-            -text [Widget::cget $path.f$page -text]     \
-            -font [Widget::cget $path -font]    \
+        $path.c itemconfigure "$page:text" \
+            -text [Widget::cget $path.f$page -text] \
+            -font [Widget::cget $path -font] \
             -fill $fg
     }
-    eval $path.c coords "$page:poly" [concat $lt $lb]
-    eval $path.c coords "$page:top"  $lt
-    eval $path.c coords "$page:bot"  $lb
+    eval [list $path.c coords "$page:poly"] [concat $lt $lb]
+    eval [list $path.c coords "$page:top"]  $lt
+    eval [list $path.c coords "$page:bot"]  $lb
     $path.c itemconfigure "$page:poly" -fill $bg  -outline $bg
     $path.c itemconfigure "$page:top"  -fill $fgt -width $bd
     $path.c itemconfigure "$page:bot"  -fill $fgb -width $bd
     
     # Sven end
-        
+
     if { $img != "" } {
         # Sven
 	set id [$path.c find withtag $page:img]
 	if { [string equal $id ""] } {
 	    set id [$path.c create image $ximg $ytext \
 		    -anchor nw    \
-		    -tags   "page p:$page $page:img"]
+		    -tags   [list page p:$page $page:img]]
         }
         $path.c coords $id $ximg $ytext
         $path.c itemconfigure $id -image $img
