@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: dialog.tcl,v 1.2 1999/10/16 01:06:31 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -201,7 +201,7 @@ proc Dialog::enddialog { path result } {
 # ------------------------------------------------------------------------------
 #  Command Dialog::draw
 # ------------------------------------------------------------------------------
-proc Dialog::draw { path {focus ""}} {
+proc Dialog::draw { path {focus ""} {overrideredirect 0}} {
     variable _widget
 
     set parent [Widget::getoption $path -parent]
@@ -233,7 +233,7 @@ proc Dialog::draw { path {focus ""}} {
         BWidget::place $path 0 0 center
     }
     update idletasks
-    wm overrideredirect $path 0
+    wm overrideredirect $path $overrideredirect
     wm deiconify $path
 
     tkwait visibility $path

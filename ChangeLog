@@ -1,8 +1,7 @@
-1999-09-21  Eric Melski  <ericm@scriptics.com>
+1999-10-15  Eric Melski  <ericm@scriptics.com>
 
-	* buttonbox.tcl: Fixed ButtonBox::add input list, as the change I
-	made to allow tagging was not backwards compatible.  Now tags are
-	specified with -tags $tags, and all is well.
+	* dialog.tcl: Added an overrideredirect option to Dialog::draw, which
+	allows the user to control the overrideredirect state of the dialog.
 
 1999-09-19  Eric Melski  <ericm@scriptics.com>
 
