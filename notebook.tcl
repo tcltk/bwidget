@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.6 2000/02/17 18:37:19 ericm Exp $
+#  $Id: notebook.tcl,v 1.7 2000/02/26 01:56:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -53,6 +53,17 @@ namespace eval NoteBook {
         }
     }
 
+    Widget::bwinclude NoteBook ArrowButton .c.fg \
+	    include {-foreground -background -activeforeground \
+		-activebackground -disabledforeground -repeatinterval \
+		-repeatdelay -borderwidth} \
+	    initialize {-borderwidth 1}
+    Widget::bwinclude NoteBook ArrowButton .c.fd \
+	    include {-foreground -background -activeforeground \
+		-activebackground -disabledforeground -repeatinterval \
+		-repeatdelay -borderwidth} \
+	    initialize {-borderwidth 1}
+
     Widget::declare NoteBook {
 	{-foreground		TkResource "" 0 button}
         {-background		TkResource "" 0 button}
@@ -62,10 +73,10 @@ namespace eval NoteBook {
         {-font			TkResource "" 0 button}
         {-side			Enum       top 1 {top bottom}}
         {-homogeneous		Boolean 0   0}
-        {-borderwidth		Int 1   0 {=1 =2}}
- 	{-internalborderwidth	Int 10  0 {=0 ""}}
-        {-width			Int 0   0 {=0 ""}}
-        {-height		Int 0   0 {=0 ""}}
+        {-borderwidth		Int 1   0 "%d >= 1 && %d <= 2"}
+ 	{-internalborderwidth	Int 10  0 "%d >= 0"}
+        {-width			Int 0   0 "%d >= 0"}
+        {-height		Int 0   0 "%d >= 0"}
 
         {-repeatdelay        BwResource ""  0 ArrowButton}
         {-repeatinterval     BwResource ""  0 ArrowButton}
@@ -76,17 +87,17 @@ namespace eval NoteBook {
         {-ibd                Synonym -internalborderwidth}
     }
 
-    Widget::addmap NoteBook "" :cmd {-background {}}
-    Widget::addmap NoteBook ArrowButton .fg {
-        -foreground {} -background {} 
-	-activeforeground {} -activebackground {} -disabledforeground {}
-	-borderwidth {} -repeatinterval {} -repeatdelay {}
-    }
-    Widget::addmap NoteBook ArrowButton .fd {
-        -foreground {} -background {}
-        -activeforeground {} -activebackground {} -disabledforeground {}
-        -borderwidth {} -repeatinterval {} -repeatdelay {}
-    }
+    Widget::addmap NoteBook "" .c {-background {}}
+#    Widget::addmap NoteBook ArrowButton .c.fg {
+#        -foreground {} -background {} 
+#	-activeforeground {} -activebackground {} -disabledforeground {}
+#	-borderwidth {} -repeatinterval {} -repeatdelay {}
+#    }
+#    Widget::addmap NoteBook ArrowButton .c.fd {
+#        -foreground {} -background {}
+#        -activeforeground {} -activebackground {} -disabledforeground {}
+#        -borderwidth {} -repeatinterval {} -repeatdelay {}
+#    }
 
     variable _warrow 12
 
@@ -104,6 +115,7 @@ proc NoteBook::create { path args } {
 
     Widget::init NoteBook $path $args
 
+    set font [Widget::cget $path -font]
     set data(base)     0
     set data(select)   ""
     set data(pages)    {}
@@ -111,40 +123,41 @@ proc NoteBook::create { path args } {
     set data(cpt)      0
     set data(realized) 0
     set data(wpage)    0
-    set data(hpage)    [expr {[font metrics [Widget::getoption $path -font] -linespace] + 6}]
-    set bg             [Widget::getoption $path -background]
+    set data(hpage)    [expr {[font metrics $font -linespace] + 6}]
 
     # Create the canvas
-    set w [expr {[Widget::getoption $path -width]+4}]
-    set h [expr {[Widget::getoption $path -height]+$data(hpage)+4}]
-    canvas $path			\
+    set w [expr {[Widget::cget $path -width]+4}]
+    set h [expr {[Widget::cget $path -height]+$data(hpage)+4}]
+
+    frame $path -class NoteBook
+    eval canvas $path.c			\
+	    [Widget::subcget $path .c] \
 	    -relief flat		\
 	    -borderwidth 0		\
 	    -highlightthickness 0	\
-	    -background $bg		\
 	    -width $w			\
 	    -height $h
+    pack $path.c -expand yes -fill both
 
     # Create the arrow button
-    eval ArrowButton::create $path.fg [Widget::subcget $path .fg] \
+    eval ArrowButton::create $path.c.fg [Widget::subcget $path .c.fg] \
         -highlightthickness 0 \
         -type button  -dir left \
         -armcommand [list "NoteBook::_xview $path -1"]
 
-    eval ArrowButton::create $path.fd [Widget::subcget $path .fd] \
+    eval ArrowButton::create $path.c.fd [Widget::subcget $path .c.fd] \
         -highlightthickness 0 \
         -type button  -dir right \
         -armcommand [list "NoteBook::_xview $path 1"]
-
-    set col       [BWidget::get3dcolor $path $bg]
-    set data(dbg) [lindex $col 0]
-    set data(lbg) [lindex $col 1]
 
     bind $path <Configure> "NoteBook::_realize $path"
     bind $path <Destroy>   "NoteBook::_destroy $path"
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval NoteBook::\$cmd $path \$args\]"
+
+    set bg [Widget::cget $path -background]
+    foreach {data(dbg) data(lbg)} [BWidget::get3dcolor $path $bg] {break}
 
     return $path
 }
@@ -189,7 +202,7 @@ proc NoteBook::configure { path args } {
     set wc [Widget::hasChanged $path -width  w]
     set hc [Widget::hasChanged $path -height h]
     if { $wc || $hc } {
-        $path:cmd configure \
+        $path.c configure \
 		-width [expr {$w+4}] \
 		-height [expr {$h + $data(hpage)+4}]
     }
@@ -276,7 +289,7 @@ proc NoteBook::delete { path page {destroyframe 1} } {
     set pos [_test_page $path $page]
     set data(pages) [lreplace $data(pages) $pos $pos]
     _compute_width $path
-    $path:cmd delete p:$page
+    $path.c delete p:$page
     if { $data(select) == $page } {
         set data(select) ""
     }
@@ -316,10 +329,10 @@ proc NoteBook::itemcget { path page option } {
 # ------------------------------------------------------------------------------
 proc NoteBook::bindtabs { path event script } {
     if { $script != "" } {
-        $path:cmd bind "page" $event \
-            "$script \[string range \[lindex \[$path:cmd gettags current\] 1\] 2 end\]"
+        $path.c bind "page" $event \
+            "$script \[string range \[lindex \[$path.c gettags current\] 1\] 2 end\]"
     } else {
-        $path:cmd bind "page" $event {}
+        $path.c bind "page" $event {}
     }
 }
 
@@ -503,17 +516,17 @@ proc NoteBook::_compute_width { path } {
     set hmax $data(hpage)
     set wtot 0
     if { ![info exists data(textid)] } {
-        set data(textid) [$path:cmd create text 0 -100 -font [Widget::getoption $path -font] -anchor nw]
+        set data(textid) [$path.c create text 0 -100 -font [Widget::getoption $path -font] -anchor nw]
     }
     set id $data(textid)
-    $path:cmd itemconfigure $id -font [Widget::getoption $path -font]
+    $path.c itemconfigure $id -font [Widget::getoption $path -font]
     foreach page $data(pages) {
-        $path:cmd itemconfigure $id -text \
+        $path.c itemconfigure $id -text \
 		[Widget::getoption $path.f$page -text]
 	# Get the bbox for this text to determine its width, then substract
 	# 6 from the width to account for canvas bbox oddness w.r.t. widths of
 	# simple text.
-	foreach {x1 y1 x2 y2} [$path:cmd bbox $id] break
+	foreach {x1 y1 x2 y2} [$path.c bbox $id] break
 	set x2 [expr {$x2 - 6}]
         set  wtext [expr {$x2 - $x1 + 20}]
         if { [set img [Widget::getoption $path.f$page -image]] != "" } {
@@ -579,7 +592,7 @@ proc NoteBook::_xview { path inc } {
 
     if { $base >= 0 && $base < [llength $data(pages)] } {
         set data(base) $base
-        $path:cmd move page $dx 0
+        $path.c move page $dx 0
         _draw_area   $path
         _draw_arrows $path
     }
@@ -599,15 +612,15 @@ proc NoteBook::_highlight { type path page } {
 
     switch -- $type {
         on {
-            $path:cmd itemconfigure "$page:poly" \
+            $path.c itemconfigure "$page:poly" \
 		    -fill [_getoption $path $page -activebackground]
-            $path:cmd itemconfigure "$page:text" \
+            $path.c itemconfigure "$page:text" \
 		    -fill [_getoption $path $page -activeforeground]
         }
         off {
-            $path:cmd itemconfigure "$page:poly" \
+            $path.c itemconfigure "$page:poly" \
 		    -fill [_getoption $path $page -background]
-            $path:cmd itemconfigure "$page:text" \
+            $path.c itemconfigure "$page:text" \
 		    -fill [_getoption $path $page -foreground]
         }
     }
@@ -813,70 +826,70 @@ proc NoteBook::_draw_page { path page create } {
     # Sven
     if { $create } {
 	# Create the tab region
-        eval $path:cmd create polygon [concat $lt $lb]		\
+        eval $path.c create polygon [concat $lt $lb]		\
 		-tag		{"page p:$page $page:poly"}	\
 		-outline	$bg				\
 		-fill		$bg
-        eval $path:cmd create line $lt \
+        eval $path.c create line $lt \
             -tags {"page p:$page $page:top top"} -fill $fgt -width $bd
-        eval $path:cmd create line $lb \
+        eval $path.c create line $lb \
             -tags {"page p:$page $page:bot bot"} -fill $fgb -width $bd
-        $path:cmd create text $xtext $ytext 			\
+        $path.c create text $xtext $ytext 			\
 		-text	[Widget::getoption $path.f$page -text]	\
 		-font	[Widget::getoption $path -font]		\
 		-fill	$fg					\
 		-anchor	nw					\
 		-tags	"page p:$page $page:text"
 
-        $path:cmd bind p:$page <ButtonPress-1> "NoteBook::_select $path $page"
-        $path:cmd bind p:$page <Enter>         "NoteBook::_highlight on  $path $page"
-        $path:cmd bind p:$page <Leave>         "NoteBook::_highlight off $path $page"
+        $path.c bind p:$page <ButtonPress-1> "NoteBook::_select $path $page"
+        $path.c bind p:$page <Enter>         "NoteBook::_highlight on  $path $page"
+        $path.c bind p:$page <Leave>         "NoteBook::_highlight off $path $page"
     } else {
-        $path:cmd coords "$page:text" $xtext $ytext
+        $path.c coords "$page:text" $xtext $ytext
 
-        $path:cmd itemconfigure "$page:text"    \
+        $path.c itemconfigure "$page:text"    \
             -text [Widget::getoption $path.f$page -text]     \
             -font [Widget::getoption $path -font]    \
             -fill $fg
     }
-    eval $path:cmd coords "$page:poly" [concat $lt $lb]
-    eval $path:cmd coords "$page:top"  $lt
-    eval $path:cmd coords "$page:bot"  $lb
-    $path:cmd itemconfigure "$page:poly" -fill $bg  -outline $bg
-    $path:cmd itemconfigure "$page:top"  -fill $fgt -width $bd
-    $path:cmd itemconfigure "$page:bot"  -fill $fgb -width $bd
+    eval $path.c coords "$page:poly" [concat $lt $lb]
+    eval $path.c coords "$page:top"  $lt
+    eval $path.c coords "$page:bot"  $lb
+    $path.c itemconfigure "$page:poly" -fill $bg  -outline $bg
+    $path.c itemconfigure "$page:top"  -fill $fgt -width $bd
+    $path.c itemconfigure "$page:bot"  -fill $fgb -width $bd
     
     # Sven end
         
     if { $img != "" } {
         # Sven
-	set id [$path:cmd find withtag $page:img]
+	set id [$path.c find withtag $page:img]
 	if { [string equal $id ""] } {
-	    set id [$path:cmd create image $ximg $ytext \
+	    set id [$path.c create image $ximg $ytext \
 		    -anchor w    \
 		    -tags   "page p:$page $page:img"]
         }
-        $path:cmd coords $id $ximg $ytext
-        $path:cmd itemconfigure $id -image $img
+        $path.c coords $id $ximg $ytext
+        $path.c itemconfigure $id -image $img
         # Sven end
     } else {
-        $path:cmd delete $page:img
+        $path.c delete $page:img
     }
 
     if { $data(select) == $page } {
-        $path:cmd raise p:$page
+        $path.c raise p:$page
     } elseif { $pos == 0 } {
         if { $data(select) == "" } {
-            $path:cmd raise p:$page
+            $path.c raise p:$page
         } else {
-            $path:cmd lower p:$page p:$data(select)
+            $path.c lower p:$page p:$data(select)
         }
     } else {
         set pred [lindex $data(pages) [expr {$pos-1}]]
         if { $data(select) != $pred || $pos == 1 } {
-            $path:cmd lower p:$page p:$pred
+            $path.c lower p:$page p:$pred
         } else {
-            $path:cmd lower p:$page p:[lindex $data(pages) [expr {$pos-2}]]
+            $path.c lower p:$page p:[lindex $data(pages) [expr {$pos-2}]]
         }
     }
 }
@@ -908,39 +921,39 @@ proc NoteBook::_draw_arrows { path } {
 
     if { $data(base) > 0 } {
         # Sven 
-        if { ![llength [$path:cmd find withtag "leftarrow"]] } {
-            $path:cmd create window $xl $y0 \
+        if { ![llength [$path.c find withtag "leftarrow"]] } {
+            $path.c create window $xl $y0 \
                 -width  $_warrow            \
                 -height $h                  \
                 -anchor nw                  \
-                -window $path.fg            \
+                -window $path.c.fg            \
                 -tags   "leftarrow"
         } else {
-            $path:cmd coords "leftarrow" $xl $y0
-            $path:cmd itemconfigure "leftarrow" -width $_warrow -height $h
+            $path.c coords "leftarrow" $xl $y0
+            $path.c itemconfigure "leftarrow" -width $_warrow -height $h
         }
         # Sven end
     } else {
-        $path:cmd delete "leftarrow"
+        $path.c delete "leftarrow"
     }
 
     if { $data(base) < $nbpages-1 &&
          $data(wpage) + [_get_x_page $path 0] + 6 > $w } {
         # Sven
-        if { ![llength [$path:cmd find withtag "rightarrow"]] } {
-            $path:cmd create window $xr $y0 \
+        if { ![llength [$path.c find withtag "rightarrow"]] } {
+            $path.c create window $xr $y0 \
                 -width  $_warrow            \
                 -height $h                  \
-                -window $path.fd            \
+                -window $path.c.fd            \
                 -anchor nw                  \
                 -tags   "rightarrow"
         } else {
-            $path:cmd coords "rightarrow" $xr $y0
-            $path:cmd itemconfigure "rightarrow" -width $_warrow -height $h
+            $path.c coords "rightarrow" $xr $y0
+            $path.c itemconfigure "rightarrow" -width $_warrow -height $h
         }
         # Sven end
     } else {
-        $path:cmd delete "rightarrow"
+        $path.c delete "rightarrow"
     }
 }
 
@@ -981,50 +994,50 @@ proc NoteBook::_draw_area { path } {
     }
 
     # Sven
-    if { [llength [$path:cmd find withtag rect]] == 0} {
-        $path:cmd create line $xd $y0 $x0 $y0 $x0 $y1 \
+    if { [llength [$path.c find withtag rect]] == 0} {
+        $path.c create line $xd $y0 $x0 $y0 $x0 $y1 \
             -tags "rect toprect1" 
-        $path:cmd create line $w $y0 $xf $y0 \
+        $path.c create line $w $y0 $xf $y0 \
             -tags "rect toprect2"
-        $path:cmd create line 1 $h $w $h $w $y0 \
+        $path.c create line 1 $h $w $h $w $y0 \
             -tags "rect botrect"
     }
     if {"$side" == "bottom"} {
-        $path:cmd coords "toprect1" $w $y0 $x0 $y0 $x0 $y1
-        $path:cmd coords "toprect2" $x0 $y1 $xd $y1
-        $path:cmd coords "botrect"  $xf $y1 $w $y1 $w $y0
-        $path:cmd itemconfigure "toprect1" -fill $lbg -width $bd
-        $path:cmd itemconfigure "toprect2" -fill $dbg -width $bd
-        $path:cmd itemconfigure "botrect" -fill $dbg -width $bd
+        $path.c coords "toprect1" $w $y0 $x0 $y0 $x0 $y1
+        $path.c coords "toprect2" $x0 $y1 $xd $y1
+        $path.c coords "botrect"  $xf $y1 $w $y1 $w $y0
+        $path.c itemconfigure "toprect1" -fill $lbg -width $bd
+        $path.c itemconfigure "toprect2" -fill $dbg -width $bd
+        $path.c itemconfigure "botrect" -fill $dbg -width $bd
     } else {
-        $path:cmd coords "toprect1" $xd $y0 $x0 $y0 $x0 $y1
-        $path:cmd coords "toprect2" $w $y0 $xf $y0
-        $path:cmd coords "botrect"  $x0 $h $w $h $w $y0
-        $path:cmd itemconfigure "toprect1" -fill $lbg -width $bd
-        $path:cmd itemconfigure "toprect2" -fill $lbg -width $bd
-        $path:cmd itemconfigure "botrect" -fill $dbg -width $bd
+        $path.c coords "toprect1" $xd $y0 $x0 $y0 $x0 $y1
+        $path.c coords "toprect2" $w $y0 $xf $y0
+        $path.c coords "botrect"  $x0 $h $w $h $w $y0
+        $path.c itemconfigure "toprect1" -fill $lbg -width $bd
+        $path.c itemconfigure "toprect2" -fill $lbg -width $bd
+        $path.c itemconfigure "botrect" -fill $dbg -width $bd
     }
-    $path:cmd raise "rect"
+    $path.c raise "rect"
     # Sven end
 
     if { $sel != "" } {
         # Sven
-        if { [llength [$path:cmd find withtag "window"]] == 0 } {
-            $path:cmd create window 2 [expr {$y0+1}] \
+        if { [llength [$path.c find withtag "window"]] == 0 } {
+            $path.c create window 2 [expr {$y0+1}] \
                 -width  [expr {$w-3}]           \
                 -height [expr {$yo-3}]          \
                 -anchor nw                      \
                 -tags   "window"                \
                 -window $path.f$sel
         }
-        $path:cmd coords "window" 2 [expr {$y0+1}]
-        $path:cmd itemconfigure "window"    \
+        $path.c coords "window" 2 [expr {$y0+1}]
+        $path.c itemconfigure "window"    \
             -width  [expr {$w-3}]           \
             -height [expr {$yo-3}]          \
             -window $path.f$sel
         # Sven end
     } else {
-        $path:cmd delete "window"
+        $path.c delete "window"
     }
 }
 

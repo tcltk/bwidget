@@ -1,6 +1,40 @@
+2000-02-25  Eric Melski  <ericm@scriptics.com>
+
+	* arrow.tcl: 
+	* button.tcl: 
+	* buttonbox.tcl: 
+	* combobox.tcl: 
+	* dialog.tcl: 
+	* dynhelp.tcl: 
+	* entry.tcl: (also fixed validation)
+	* label.tcl: 
+	* labelframe.tcl: 
+	* listbox.tcl: 
+	* mainframe.tcl: 
+	* notebook.tcl: 
+	* pagesmgr.tcl: 
+	* panedw.tcl: 
+	* progressbar.tcl: 
+	* scrollview.tcl: 
+	* scrollw.tcl: 
+	* separator.tcl: 
+	* spinbox.tcl: 
+	* titleframe.tcl: 
+	* tree.tcl: Updated to new megawidget architecture.
+
+	* widget.tcl: Changed internal architecture.  When possible,
+	megawidget options are stored in component widgets instead of in
+	an intermediary array.  Also, made use of option database to make
+	megawidget creation more efficient.
+
 2000-02-24  Eric Melski  <ericm@scriptics.com>
 
 	* LICENSE.txt: Removed LGPL license; added Tcl-license terms.
+
+2000-02-23  Eric Melski  <ericm@scriptics.com>
+
+	* widget.tcl: Replaced _test_boolean function with a more efficient
+	implementation.
 
 2000-02-18  Eric Melski  <ericm@scriptics.com>
 

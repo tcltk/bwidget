@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.7 2000/02/23 00:32:31 ericm Exp $
+#  $Id: combobox.tcl,v 1.8 2000/02/26 01:56:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -62,8 +62,8 @@ namespace eval ComboBox {
 proc ComboBox::create { path args } {
     Widget::init ComboBox $path $args
 
-    frame $path -background [Widget::getoption $path -background] \
-        -highlightthickness 0 -bd 0 -relief flat -takefocus 0
+    eval frame $path [Widget::subcget $path :cmd] \
+        -highlightthickness 0 -bd 0 -relief flat -takefocus 0 -class ComboBox
 
     bindtags $path [list $path BwComboBox [winfo toplevel $path] all]
 

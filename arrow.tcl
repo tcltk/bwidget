@@ -24,35 +24,36 @@
 
 namespace eval ArrowButton {
 
-    Widget::tkinclude ArrowButton button :cmd \
+    Widget::tkinclude ArrowButton button .c \
 	    include [list \
 		-borderwidth -bd \
-		-background -bg -relief -highlightbackground \
+		-relief -highlightbackground \
 		-highlightcolor -highlightthickness -takefocus]
 
     Widget::declare ArrowButton [list \
 	    [list -type		Enum button 0 [list arrow button]] \
 	    [list -dir		Enum top    0 [list top bottom left right]] \
-	    [list -width	Int	15	0	[list =0]] \
-	    [list -height	Int	15	0	[list =0]] \
-	    [list -ipadx	Int	0	0	[list =0]] \
-	    [list -ipady	Int	0	0	[list =0]] \
-	    [list -clean	Int	2	0	[list =0 =2]] \
+	    [list -width	Int	15	0	"%d >= 0"] \
+	    [list -height	Int	15	0	"%d >= 0"] \
+	    [list -ipadx	Int	0	0	"%d >= 0"] \
+	    [list -ipady	Int	0	0	"%d >= 0"] \
+	    [list -clean	Int	2	0	"%d >= 0 && %d <= 2"] \
 	    [list -activeforeground	TkResource	""	0 button] \
 	    [list -activebackground	TkResource	""	0 button] \
 	    [list -disabledforeground 	TkResource	""	0 button] \
 	    [list -foreground		TkResource	""	0 button] \
+	    [list -background		TkResource	""	0 button] \
 	    [list -state		TkResource	""	0 button] \
 	    [list -troughcolor		TkResource	""	0 scrollbar] \
-	    [list -arrowbd	Int	1	0	[list =1 =2]] \
+	    [list -arrowbd	Int	1	0	"%d >= 0 && %d <= 2"] \
 	    [list -arrowrelief	Enum	raised	0	[list raised sunken]] \
 	    [list -command		String	""	0] \
 	    [list -armcommand		String	""	0] \
 	    [list -disarmcommand	String	""	0] \
-	    [list -repeatdelay		Int	0	0	[list =0]] \
-	    [list -repeatinterval	Int	0	0	[list =0]] \
-	    [list -bd	Synonym	-borderwidth] \
+	    [list -repeatdelay		Int	0	0	"%d >= 0"] \
+	    [list -repeatinterval	Int	0	0	"%d >= 0"] \
 	    [list -fg	Synonym	-foreground] \
+	    [list -bg	Synonym	-background] \
 	    ]
     DynamicHelp::include ArrowButton balloon
 
@@ -60,12 +61,12 @@ namespace eval ArrowButton {
 
     proc use {} {}
 
-    bind BwArrowButton <Enter>           {ArrowButton::_enter %W}
-    bind BwArrowButton <Leave>           {ArrowButton::_leave %W}
-    bind BwArrowButton <ButtonPress-1>   {ArrowButton::_press %W}
-    bind BwArrowButton <ButtonRelease-1> {ArrowButton::_release %W}
-    bind BwArrowButton <Key-space>       {ArrowButton::invoke %W; break}
-    bind BwArrowButton <Return>          {ArrowButton::invoke %W; break}
+    bind BwArrowButtonC <Enter>           {ArrowButton::_enter %W}
+    bind BwArrowButtonC <Leave>           {ArrowButton::_leave %W}
+    bind BwArrowButtonC <ButtonPress-1>   {ArrowButton::_press %W}
+    bind BwArrowButtonC <ButtonRelease-1> {ArrowButton::_release %W}
+    bind BwArrowButtonC <Key-space>       {ArrowButton::invoke %W; break}
+    bind BwArrowButtonC <Return>          {ArrowButton::invoke %W; break}
     bind BwArrowButton <Configure>       {ArrowButton::_redraw_whole %W %w %h}
     bind BwArrowButton <Destroy>         {ArrowButton::_destroy %W}
 
@@ -76,27 +77,37 @@ namespace eval ArrowButton {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ArrowButton::create
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ArrowButton::create { path args } {
-    variable _moved
+    # Initialize configuration mappings and parse arguments
+    array set submaps [list ArrowButton [list ] .c [list ]]
+    array set submaps [Widget::parseArgs ArrowButton $args]
 
-    Widget::init ArrowButton $path $args
+    # Create the class frame (so we can do the option db queries)
+    frame $path -class ArrowButton
+    Widget::initFromODB ArrowButton $path $submaps(ArrowButton)
 
-    set w   [Widget::getoption $path -width]
-    set h   [Widget::getoption $path -height]
-    set bd  [Widget::getoption $path -borderwidth]
-    set ht  [Widget::getoption $path -highlightthickness]
+    # Create the canvas with the initial options
+    eval canvas $path.c $submaps(.c)
+
+    # Compute the width and height of the canvas from the width/height
+    # of the ArrowButton and the borderwidth/hightlightthickness.
+    set w   [Widget::cget $path -width]
+    set h   [Widget::cget $path -height]
+    set bd  [Widget::cget $path -borderwidth]
+    set ht  [Widget::cget $path -highlightthickness]
     set pad [expr {2*($bd+$ht)}]
 
-    eval canvas $path [Widget::subcget $path :cmd] \
-        -width [expr {$w-$pad}] -height [expr {$h-$pad}]
+    $path.c configure -width [expr {$w-$pad}] -height [expr {$h-$pad}]
     bindtags $path [list $path BwArrowButton [winfo toplevel $path] all]
+    bindtags $path.c [list $path.c BwArrowButtonC [winfo toplevel $path.c] all]
+    pack $path.c -expand yes -fill both
 
-    DynamicHelp::sethelp $path $path 1
+    DynamicHelp::sethelp $path $path.c 1
 
-    set _moved($path) 0
+    set ::ArrowButton::_moved($path) 0
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval ArrowButton::\$cmd $path \$args\]"
@@ -105,9 +116,9 @@ proc ArrowButton::create { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ArrowButton::configure
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ArrowButton::configure { path args } {
     set res [Widget::configure $path $args]
 
@@ -124,24 +135,26 @@ proc ArrowButton::configure { path args } {
 
     if { $ch1 } {
         set pad [expr {2*($bd+$ht)}]
-        $path:cmd configure \
+        $path.c configure \
             -width [expr {$w-$pad}] -height [expr {$h-$pad}] \
             -borderwidth $bd -highlightthickness $ht
-    } elseif { $ch2 } {
+	set ch2 1
+    }
+    if { $ch2 } {
         _redraw_whole $path [winfo width $path] [winfo height $path]
     } else {
         _redraw_relief $path
         _redraw_state $path
     }
-    DynamicHelp::sethelp $path $path
+    DynamicHelp::sethelp $path $path.c
 
     return $res
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ArrowButton::cget
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ArrowButton::cget { path option } {
     return [Widget::cget $path $option]
 }
@@ -151,6 +164,7 @@ proc ArrowButton::cget { path option } {
 #  Command ArrowButton::invoke
 # ------------------------------------------------------------------------------
 proc ArrowButton::invoke { path } {
+    set path [winfo parent $path]
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         set oldstate [Widget::getoption $path -state]
         if { ![string compare [Widget::getoption $path -type] "button"] } {
@@ -189,19 +203,19 @@ proc ArrowButton::_redraw { path width height } {
     set _moved($path) 0
     set type  [Widget::getoption $path -type]
     set dir   [Widget::getoption $path -dir]
-    set bd    [expr {[$path:cmd cget -borderwidth] + [$path:cmd cget -highlightthickness] + 1}]
+    set bd    [expr {[$path.c cget -borderwidth] + [$path.c cget -highlightthickness] + 1}]
     set clean [Widget::getoption $path -clean]
     if { ![string compare $type "arrow"] } {
-        if { [set id [$path:cmd find withtag rect]] == "" } {
-            $path:cmd create rectangle $bd $bd [expr {$width-$bd-1}] [expr {$height-$bd-1}] -tags rect
+        if { [set id [$path.c find withtag rect]] == "" } {
+            $path.c create rectangle $bd $bd [expr {$width-$bd-1}] [expr {$height-$bd-1}] -tags rect
         } else {
-            $path:cmd coords $id $bd $bd [expr {$width-$bd-1}] [expr {$height-$bd-1}]
+            $path.c coords $id $bd $bd [expr {$width-$bd-1}] [expr {$height-$bd-1}]
         }
-        $path:cmd lower rect
+        $path.c lower rect
         set arrbd [Widget::getoption $path -arrowbd]
         set bd    [expr {$bd+$arrbd-1}]
     } else {
-        $path:cmd delete rect
+        $path.c delete rect
     }
     # w and h are max width and max height of arrow
     set w [expr {$width  - 2*([Widget::getoption $path -ipadx]+$bd)}]
@@ -250,102 +264,102 @@ proc ArrowButton::_redraw { path width height } {
     switch $dir {
         top {
             set xd [expr {($x0+$x1)/2}]
-            if { [set id [$path:cmd find withtag poly]] == "" } {
-                $path:cmd create polygon $x0 $y1 $x1 $y1 $xd $y0 -tags poly
+            if { [set id [$path.c find withtag poly]] == "" } {
+                $path.c create polygon $x0 $y1 $x1 $y1 $xd $y0 -tags poly
             } else {
-                $path:cmd coords $id $x0 $y1 $x1 $y1 $xd $y0
+                $path.c coords $id $x0 $y1 $x1 $y1 $xd $y0
             }
             if { ![string compare $type "arrow"] } {
-                if { [set id [$path:cmd find withtag bot]] == "" } {
-                    $path:cmd create line $x0 $y1 $x1 $y1 $xd $y0 -tags bot
+                if { [set id [$path.c find withtag bot]] == "" } {
+                    $path.c create line $x0 $y1 $x1 $y1 $xd $y0 -tags bot
                 } else {
-                    $path:cmd coords $id $x0 $y1 $x1 $y1 $xd $y0
+                    $path.c coords $id $x0 $y1 $x1 $y1 $xd $y0
                 }
-                if { [set id [$path:cmd find withtag top]] == "" } {
-                    $path:cmd create line $x0 $y1 $xd $y0 -tags top
+                if { [set id [$path.c find withtag top]] == "" } {
+                    $path.c create line $x0 $y1 $xd $y0 -tags top
                 } else {
-                    $path:cmd coords $id $x0 $y1 $xd $y0
+                    $path.c coords $id $x0 $y1 $xd $y0
                 }
-                $path:cmd itemconfigure top -width $arrbd
-                $path:cmd itemconfigure bot -width $arrbd
+                $path.c itemconfigure top -width $arrbd
+                $path.c itemconfigure bot -width $arrbd
             } else {
-                $path:cmd delete top
-                $path:cmd delete bot
+                $path.c delete top
+                $path.c delete bot
             }
         }
         bottom {
             set xd [expr {($x0+$x1)/2}]
-            if { [set id [$path:cmd find withtag poly]] == "" } {
-                $path:cmd create polygon $x1 $y0 $x0 $y0 $xd $y1 -tags poly
+            if { [set id [$path.c find withtag poly]] == "" } {
+                $path.c create polygon $x1 $y0 $x0 $y0 $xd $y1 -tags poly
             } else {
-                $path:cmd coords $id $x1 $y0 $x0 $y0 $xd $y1
+                $path.c coords $id $x1 $y0 $x0 $y0 $xd $y1
             }
             if { ![string compare $type "arrow"] } {
-                if { [set id [$path:cmd find withtag top]] == "" } {
-                    $path:cmd create line $x1 $y0 $x0 $y0 $xd $y1 -tags top
+                if { [set id [$path.c find withtag top]] == "" } {
+                    $path.c create line $x1 $y0 $x0 $y0 $xd $y1 -tags top
                 } else {
-                    $path:cmd coords $id $x1 $y0 $x0 $y0 $xd $y1
+                    $path.c coords $id $x1 $y0 $x0 $y0 $xd $y1
                 }
-                if { [set id [$path:cmd find withtag bot]] == "" } {
-                    $path:cmd create line $x1 $y0 $xd $y1 -tags bot
+                if { [set id [$path.c find withtag bot]] == "" } {
+                    $path.c create line $x1 $y0 $xd $y1 -tags bot
                 } else {
-                    $path:cmd coords $id $x1 $y0 $xd $y1
+                    $path.c coords $id $x1 $y0 $xd $y1
                 }
-                $path:cmd itemconfigure top -width $arrbd
-                $path:cmd itemconfigure bot -width $arrbd
+                $path.c itemconfigure top -width $arrbd
+                $path.c itemconfigure bot -width $arrbd
             } else {
-                $path:cmd delete top
-                $path:cmd delete bot
+                $path.c delete top
+                $path.c delete bot
             }
         }
         left {
             set yd [expr {($y0+$y1)/2}]
-            if { [set id [$path:cmd find withtag poly]] == "" } {
-                $path:cmd create polygon $x1 $y0 $x1 $y1 $x0 $yd -tags poly
+            if { [set id [$path.c find withtag poly]] == "" } {
+                $path.c create polygon $x1 $y0 $x1 $y1 $x0 $yd -tags poly
             } else {
-                $path:cmd coords $id $x1 $y0 $x1 $y1 $x0 $yd
+                $path.c coords $id $x1 $y0 $x1 $y1 $x0 $yd
             }
             if { ![string compare $type "arrow"] } {
-                if { [set id [$path:cmd find withtag bot]] == "" } {
-                    $path:cmd create line $x1 $y0 $x1 $y1 $x0 $yd -tags bot
+                if { [set id [$path.c find withtag bot]] == "" } {
+                    $path.c create line $x1 $y0 $x1 $y1 $x0 $yd -tags bot
                 } else {
-                    $path:cmd coords $id $x1 $y0 $x1 $y1 $x0 $yd
+                    $path.c coords $id $x1 $y0 $x1 $y1 $x0 $yd
                 }
-                if { [set id [$path:cmd find withtag top]] == "" } {
-                    $path:cmd create line $x1 $y0 $x0 $yd -tags top
+                if { [set id [$path.c find withtag top]] == "" } {
+                    $path.c create line $x1 $y0 $x0 $yd -tags top
                 } else {
-                    $path:cmd coords $id $x1 $y0 $x0 $yd
+                    $path.c coords $id $x1 $y0 $x0 $yd
                 }
-                $path:cmd itemconfigure top -width $arrbd
-                $path:cmd itemconfigure bot -width $arrbd
+                $path.c itemconfigure top -width $arrbd
+                $path.c itemconfigure bot -width $arrbd
             } else {
-                $path:cmd delete top
-                $path:cmd delete bot
+                $path.c delete top
+                $path.c delete bot
             }
         }
         right {
             set yd [expr {($y0+$y1)/2}]
-            if { [set id [$path:cmd find withtag poly]] == "" } {
-                $path:cmd create polygon $x0 $y1 $x0 $y0 $x1 $yd -tags poly
+            if { [set id [$path.c find withtag poly]] == "" } {
+                $path.c create polygon $x0 $y1 $x0 $y0 $x1 $yd -tags poly
             } else {
-                $path:cmd coords $id $x0 $y1 $x0 $y0 $x1 $yd
+                $path.c coords $id $x0 $y1 $x0 $y0 $x1 $yd
             }
             if { ![string compare $type "arrow"] } {
-                if { [set id [$path:cmd find withtag top]] == "" } {
-                    $path:cmd create line $x0 $y1 $x0 $y0 $x1 $yd -tags top
+                if { [set id [$path.c find withtag top]] == "" } {
+                    $path.c create line $x0 $y1 $x0 $y0 $x1 $yd -tags top
                 } else {
-                    $path:cmd coords $id $x0 $y1 $x0 $y0 $x1 $yd
+                    $path.c coords $id $x0 $y1 $x0 $y0 $x1 $yd
                 }
-                if { [set id [$path:cmd find withtag bot]] == "" } {
-                    $path:cmd create line $x0 $y1 $x1 $yd -tags bot
+                if { [set id [$path.c find withtag bot]] == "" } {
+                    $path.c create line $x0 $y1 $x1 $yd -tags bot
                 } else {
-                    $path:cmd coords $id $x0 $y1 $x1 $yd
+                    $path.c coords $id $x0 $y1 $x1 $yd
                 }
-                $path:cmd itemconfigure top -width $arrbd
-                $path:cmd itemconfigure bot -width $arrbd
+                $path.c itemconfigure top -width $arrbd
+                $path.c itemconfigure bot -width $arrbd
             } else {
-                $path:cmd delete top
-                $path:cmd delete bot
+                $path.c delete top
+                $path.c delete bot
             }
         }
     }
@@ -364,8 +378,8 @@ proc ArrowButton::_redraw_state { path } {
             disabled {set bg -background;       set fg -disabledforeground}
         }
         set fg [Widget::getoption $path $fg]
-        $path:cmd configure -background [Widget::getoption $path $bg]
-        $path:cmd itemconfigure poly -fill $fg -outline $fg
+        $path.c configure -background [Widget::getoption $path $bg]
+        $path.c itemconfigure poly -fill $fg -outline $fg
     } else {
         switch $state {
             normal   {set stipple "";     set bg [Widget::getoption $path -background] }
@@ -373,9 +387,9 @@ proc ArrowButton::_redraw_state { path } {
             disabled {set stipple gray50; set bg black }
         }
         set thrc [Widget::getoption $path -troughcolor]
-        $path:cmd configure -background [Widget::getoption $path -background]
-        $path:cmd itemconfigure rect -fill $thrc -outline $thrc
-        $path:cmd itemconfigure poly -fill $bg   -outline $bg -stipple $stipple
+        $path.c configure -background [Widget::getoption $path -background]
+        $path.c itemconfigure rect -fill $thrc -outline $thrc
+        $path.c itemconfigure poly -fill $bg   -outline $bg -stipple $stipple
     }
 }
 
@@ -389,12 +403,12 @@ proc ArrowButton::_redraw_relief { path } {
     if { ![string compare [Widget::getoption $path -type] "button"] } {
         if { ![string compare [Widget::getoption $path -relief] "sunken"] } {
             if { !$_moved($path) } {
-                $path:cmd move poly 1 1
+                $path.c move poly 1 1
                 set _moved($path) 1
             }
         } else {
             if { $_moved($path) } {
-                $path:cmd move poly -1 -1
+                $path.c move poly -1 -1
                 set _moved($path) 0
             }
         }
@@ -404,8 +418,8 @@ proc ArrowButton::_redraw_relief { path } {
             raised {set top [lindex $col3d 1]; set bot [lindex $col3d 0]}
             sunken {set top [lindex $col3d 0]; set bot [lindex $col3d 1]}
         }
-        $path:cmd itemconfigure top -fill $top
-        $path:cmd itemconfigure bot -fill $bot
+        $path.c itemconfigure top -fill $top
+        $path.c itemconfigure bot -fill $bot
     }
 }
 
@@ -437,7 +451,7 @@ proc ArrowButton::_destroy { path } {
 # ------------------------------------------------------------------------------
 proc ArrowButton::_enter { path } {
     variable _grab
-
+    set path [winfo parent $path]
     set _grab(current) $path
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         set _grab(oldstate) [Widget::getoption $path -state]
@@ -460,7 +474,7 @@ proc ArrowButton::_enter { path } {
 # ------------------------------------------------------------------------------
 proc ArrowButton::_leave { path } {
     variable _grab
-
+    set path [winfo parent $path]
     set _grab(current) ""
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         configure $path -state $_grab(oldstate)
@@ -480,7 +494,7 @@ proc ArrowButton::_leave { path } {
 # ------------------------------------------------------------------------------
 proc ArrowButton::_press { path } {
     variable _grab
-
+    set path [winfo parent $path]
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         set _grab(pressed) $path
             if { ![string compare [Widget::getoption $path -type] "button"] } {
@@ -506,7 +520,7 @@ proc ArrowButton::_press { path } {
 # ------------------------------------------------------------------------------
 proc ArrowButton::_release { path } {
     variable _grab
-
+    set path [winfo parent $path]
     if { $_grab(pressed) == $path } {
         set _grab(pressed) ""
             if { ![string compare [Widget::getoption $path -type] "button"] } {
@@ -531,7 +545,6 @@ proc ArrowButton::_release { path } {
 # ------------------------------------------------------------------------------
 proc ArrowButton::_repeat { path } {
     variable _grab
-
     if { $_grab(current) == $path && $_grab(pressed) == $path &&
          [string compare [Widget::getoption $path -state] "disabled"] &&
          [set cmd [Widget::getoption $path -armcommand]] != "" } {

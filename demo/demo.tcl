@@ -187,7 +187,7 @@ proc main {} {
     lappend auto_path ..
     package require BWidget
 
-    option add *TitleFrame.font {helvetica 11 bold italic}
+    option add *TitleFrame.l.font {helvetica 11 bold italic}
 
     wm withdraw .
     wm title . "BWidget demo"

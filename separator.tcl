@@ -26,28 +26,23 @@ namespace eval Separator {
 #  Command Separator::create
 # ------------------------------------------------------------------------------
 proc Separator::create { path args } {
-    Widget::init Separator $path $args
+    array set maps [list Separator {} :cmd {}]
+    array set maps [Widget::parseArgs Separator $args]
+    eval frame $path $maps(:cmd) -class Separator
+    Widget::initFromODB Separator $path $maps(Separator)
 
-    if { [Widget::getoption $path -relief] == "groove" } {
-        set relief sunken
+    if { [Widget::cget $path -orient] == "horizontal" } {
+	$path configure -borderwidth 1 -height 2
     } else {
-        set relief raised
+	$path configure -borderwidth 1 -width 2
     }
 
-    if { [Widget::getoption $path -orient] == "horizontal" } {
-        frame $path \
-            -background  [Widget::getoption $path -background] \
-            -borderwidth 1 \
-            -relief      $relief \
-            -height      2
-    } else {
-        frame $path \
-            -background  [Widget::getoption $path -background] \
-            -borderwidth 1 \
-            -relief      $relief \
-            -width       2
-    }
     bind $path <Destroy> {Widget::destroy %W; rename %W {}}
+    if { [string equal [Widget::cget $path -relief] "groove"] } {
+	$path configure -relief sunken
+    } else {
+	$path configure -relief raised
+    }
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval Separator::\$cmd $path \$args\]"

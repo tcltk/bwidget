@@ -19,18 +19,19 @@
 
 namespace eval Button {
     Widget::tkinclude Button button :cmd \
-        remove {-command -relief -text -textvariable -underline}
+        remove {-command -relief -text -textvariable -underline -state}
 
     Widget::declare Button {
         {-name            String "" 0}
         {-text            String "" 0}
         {-textvariable    String "" 0}
-        {-underline       Int    -1 0 {=-1}}
+        {-underline       Int    -1 0 "%d >= -1"}
         {-armcommand      String "" 0}
         {-disarmcommand   String "" 0}
         {-command         String "" 0}
-        {-repeatdelay     Int    0  0 {=0 ""}}
-        {-repeatinterval  Int    0  0 {=0 ""}}
+        {-state           TkResource "" 0 button}
+        {-repeatdelay     Int    0  0 "%d >= 0"}
+        {-repeatinterval  Int    0  0 "%d >= 0"}
         {-relief          Enum   raised  0 {raised sunken flat ridge solid groove link}}
     }
 

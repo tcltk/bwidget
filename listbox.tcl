@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.2 2000/02/11 22:54:26 ericm Exp $
+#  $Id: listbox.tcl,v 1.3 2000/02/26 01:56:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -45,7 +45,7 @@
 namespace eval ListBox {
     namespace eval Item {
         Widget::declare ListBox::Item {
-            {-indent     Int        0   0 {=0}}
+            {-indent     Int        0   0 "%d >= 0"}
             {-text       String     ""  0}
             {-font       String     ""  0}
             {-foreground String     ""  0}
@@ -58,7 +58,7 @@ namespace eval ListBox {
         }
     }
 
-    Widget::tkinclude ListBox canvas :cmd \
+    Widget::tkinclude ListBox canvas .c \
         remove {
             -insertwidth -insertbackground -insertborderwidth -insertofftime
             -insertontime -selectborderwidth -closeenough -confine -scrollregion
@@ -70,9 +70,9 @@ namespace eval ListBox {
         }
 
     Widget::declare ListBox {
-        {-deltax           Int 10 0 {=0 ""}}
-        {-deltay           Int 15 0 {=0 ""}}
-        {-padx             Int 20 0 {=0 ""}}
+        {-deltax           Int 10 0 "%d >= 0"}
+        {-deltay           Int 15 0 "%d >= 0"}
+        {-padx             Int 20 0 "%d >= 0"}
         {-foreground       TkResource "" 0 listbox}
         {-background       TkResource "" 0 listbox}
         {-selectbackground TkResource "" 0 listbox}
@@ -92,7 +92,7 @@ namespace eval ListBox {
         LISTBOX_ITEM {copy {} move {}}
     }
 
-    Widget::addmap ListBox "" :cmd {-deltay -yscrollincrement}
+    Widget::addmap ListBox "" .c {-deltay -yscrollincrement}
 
     proc ::ListBox { path args } { return [eval ListBox::create $path $args] }
     proc use {} {}
@@ -110,6 +110,7 @@ proc ListBox::create { path args } {
     variable $path
     upvar 0  $path data
 
+    frame $path -class ListBox -bd 0 -highlightthickness 0 -relief flat
     # widget informations
     set data(nrows) -1
 
@@ -128,19 +129,23 @@ proc ListBox::create { path args } {
     set data(dnd,afterid)  ""
     set data(dnd,item)     ""
 
-    eval canvas $path [Widget::subcget $path :cmd] \
-        -width  [expr {[Widget::getoption $path -width]*8}] \
-        -height [expr {[Widget::getoption $path -height]*[Widget::getoption $path -deltay]}] \
-        -xscrollincrement 8
+    eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
+    pack $path.c -expand yes -fill both
 
     bind $path <Configure> "ListBox::_resize  $path"
     bind $path <Destroy>   "ListBox::_destroy $path"
 
-    DragSite::setdrag $path $path ListBox::_init_drag_cmd [Widget::getoption $path -dragendcmd] 1
-    DropSite::setdrop $path $path ListBox::_over_cmd ListBox::_drop_cmd 1
+    DragSite::setdrag $path $path.c ListBox::_init_drag_cmd \
+	    [Widget::cget $path -dragendcmd] 1
+    DropSite::setdrop $path $path.c ListBox::_over_cmd ListBox::_drop_cmd 1
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval ListBox::\$cmd $path \$args\]"
+
+    set w [Widget::cget $path -width]
+    set h [Widget::cget $path -height]
+    set dy [Widget::cget $path -deltay]
+    $path.c configure -width [expr {$w*8}] -height [expr {$h*$dy}]
 
     return $path
 }
@@ -161,11 +166,11 @@ proc ListBox::configure { path args } {
 
     set redraw 0
     if { [Widget::hasChanged $path -height h] } {
-        $path:cmd configure -height [expr {$h*$dy}]
+        $path.c configure -height [expr {$h*$dy}]
         set redraw 1
     }
     if { [Widget::hasChanged $path -width w] } {
-        $path:cmd configure -width [expr {$w*8}]
+        $path.c configure -width [expr {$w*8}]
         set redraw 1
     }
 
@@ -185,8 +190,8 @@ proc ListBox::configure { path args } {
         _redraw_idle $path $lvl
     }
     set force [Widget::hasChanged $path -dragendcmd dragend]
-    DragSite::setdrag $path $path ListBox::_init_drag_cmd $dragend $force
-    DropSite::setdrop $path $path ListBox::_over_cmd ListBox::_drop_cmd
+    DragSite::setdrag $path $path.c ListBox::_init_drag_cmd $dragend $force
+    DropSite::setdrop $path $path.c ListBox::_over_cmd ListBox::_drop_cmd
 
     return $res
 }
@@ -245,7 +250,7 @@ proc ListBox::itemconfigure { path item args } {
     set cht   [Widget::hasChanged $path.$item -text txt]
     set chf   [Widget::hasChanged $path.$item -font fnt]
     set chfg  [Widget::hasChanged $path.$item -foreground fg]
-    set idn   [$path:cmd find withtag n:$item]
+    set idn   [$path.c find withtag n:$item]
 
     if { $idn == "" } {
         # item is not drawn yet
@@ -253,31 +258,31 @@ proc ListBox::itemconfigure { path item args } {
         return $res
     }
 
-    set oldb   [$path:cmd bbox $idn]
-    set coords [$path:cmd coords $idn]
+    set oldb   [$path.c bbox $idn]
+    set coords [$path.c coords $idn]
     set padx   [Widget::getoption $path -padx]
     set x0     [expr {[lindex $coords 0]-$padx-$oldind+$indent}]
     set y0     [lindex $coords 1]
     if { $chw || $chi } {
         # -window or -image modified
-        set idi  [$path:cmd find withtag i:$item]
-        set type [lindex [$path:cmd gettags $idi] 0]
+        set idi  [$path.c find withtag i:$item]
+        set type [lindex [$path.c gettags $idi] 0]
         if { [string length $win] } {
             if { ![string compare $type "win"] } {
-                $path:cmd itemconfigure $idi -window $win
+                $path.c itemconfigure $idi -window $win
             } else {
-                $path:cmd delete $idi
-                $path:cmd create window $x0 $y0 -window $win -anchor w -tags "win i:$item"
+                $path.c delete $idi
+                $path.c create window $x0 $y0 -window $win -anchor w -tags "win i:$item"
             }
         } elseif { [string length $img] } {
             if { ![string compare $type "img"] } {
-                $path:cmd itemconfigure $idi -image $img
+                $path.c itemconfigure $idi -image $img
             } else {
-                $path:cmd delete $idi
-                $path:cmd create image $x0 $y0 -image $img -anchor w -tags "img i:$item"
+                $path.c delete $idi
+                $path.c create image $x0 $y0 -image $img -anchor w -tags "img i:$item"
             }
         } else {
-            $path:cmd delete $idi
+            $path.c delete $idi
         }
     }
 
@@ -285,19 +290,19 @@ proc ListBox::itemconfigure { path item args } {
         # -text or -font modified, or -foreground modified
         set fnt [_getoption $path $item -font]
         set fg  [_getoption $path $item -foreground]
-        $path:cmd itemconfigure $idn -text $txt -font $fnt -fill $fg
+        $path.c itemconfigure $idn -text $txt -font $fnt -fill $fg
         _redraw_idle $path 1
     }
 
     if { $chind } {
         # -indent modified
-        $path:cmd coords $idn [expr {$x0+$padx}] $y0
-        $path:cmd coords i:$item $x0 $y0
+        $path.c coords $idn [expr {$x0+$padx}] $y0
+        $path.c coords i:$item $x0 $y0
         _redraw_idle $path 1
     }
 
     if { [Widget::getoption $path -multicolumn] && ($cht || $chf || $chind) } {
-        set bbox [$path:cmd bbox $idn]
+        set bbox [$path.c bbox $idn]
         if { [lindex $bbox 2] > [lindex $oldb 2] } {
             _redraw_idle $path 2
         }
@@ -320,10 +325,10 @@ proc ListBox::itemcget { path item option } {
 # ------------------------------------------------------------------------------
 proc ListBox::bindText { path event script } {
     if { $script != "" } {
-        $path:cmd bind "item" $event \
-            "$script \[string range \[lindex \[$path:cmd gettags current\] 1\] 2 end\]"
+        $path.c bind "item" $event \
+            "$script \[string range \[lindex \[$path.c gettags current\] 1\] 2 end\]"
     } else {
-        $path:cmd bind "item" $event {}
+        $path.c bind "item" $event {}
     }
 }
 
@@ -333,10 +338,10 @@ proc ListBox::bindText { path event script } {
 # ------------------------------------------------------------------------------
 proc ListBox::bindImage { path event script } {
     if { $script != "" } {
-        $path:cmd bind "img" $event \
-            "$script \[string range \[lindex \[$path:cmd gettags current\] 1\] 2 end\]"
+        $path.c bind "img" $event \
+            "$script \[string range \[lindex \[$path.c gettags current\] 1\] 2 end\]"
     } else {
-        $path:cmd bind "img" $event {}
+        $path.c bind "img" $event {}
     }
 }
 
@@ -488,8 +493,8 @@ proc ListBox::find {path findInfo {confine ""}} {
     upvar 0  $path widgetData
 
     if {[regexp -- {^@([0-9]+),([0-9]+)$} $findInfo match x y]} {
-        set x [$path:cmd canvasx $x]
-        set y [$path:cmd canvasy $y]
+        set x [$path.c canvasx $x]
+        set y [$path.c canvasy $y]
     } elseif {[regexp -- {^[0-9]+$} $findInfo lineNumber]} {
         set dy [Widget::getoption $path -deltay]
         set y  [expr {$dy*($lineNumber+0.5)}]
@@ -502,8 +507,8 @@ proc ListBox::find {path findInfo {confine ""}} {
     set xi    0
     foreach xs $widgetData(xlist) {
         if {$x <= $xs} {
-            foreach id [$path:cmd find overlapping $xi $y $xs $y] {
-                set ltags [$path:cmd gettags $id]
+            foreach id [$path.c find overlapping $xi $y $xs $y] {
+                set ltags [$path.c gettags $id]
                 set item  [lindex $ltags 0]
                 if { ![string compare $item "item"] ||
                      ![string compare $item "img"]  ||
@@ -522,8 +527,8 @@ proc ListBox::find {path findInfo {confine ""}} {
     if {$found} {
         if {[string compare $confine "confine" 0] == 0} {
             # test if x stand inside node bbox
-            set xi [expr {[lindex [$path:cmd coords n:$item] 0]-[Widget::getoption $path -padx]}]
-            set xs [lindex [$path:cmd bbox n:$item] 2]
+            set xi [expr {[lindex [$path.c coords n:$item] 0]-[Widget::getoption $path -padx]}]
+            set xs [lindex [$path.c bbox n:$item] 2]
             if {$x >= $xi && $x <= $xs} {
                 return $item
             }
@@ -580,7 +585,7 @@ proc ListBox::see { path item } {
         after cancel $data(upd,afterid)
         _redraw_listbox $path
     }
-    set idn [$path:cmd find withtag n:$item]
+    set idn [$path.c find withtag n:$item]
     if { $idn != "" } {
         ListBox::_see $path $idn right
         ListBox::_see $path $idn left
@@ -600,22 +605,22 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
         after cancel $data(upd,afterid)
         _redraw_listbox $path
     }
-    set idn [$path:cmd find withtag n:$item]
+    set idn [$path.c find withtag n:$item]
     if { $idn != "" } {
         ListBox::_see $path $idn right
         ListBox::_see $path $idn left
 
-        set oldfg  [$path:cmd itemcget $idn -fill]
+        set oldfg  [$path.c itemcget $idn -fill]
         set sbg    [Widget::getoption $path -selectbackground]
-        set coords [$path:cmd coords $idn]
+        set coords [$path.c coords $idn]
         set x      [lindex $coords 0]
         set y      [lindex $coords 1]
-        set bd     [expr {[$path:cmd cget -borderwidth]+[$path:cmd cget -highlightthickness]}]
+        set bd     [expr {[$path.c cget -borderwidth]+[$path.c cget -highlightthickness]}]
         set w      [expr {[winfo width $path] - 2*$bd}]
-        set wmax   [expr {[$path:cmd canvasx $w]-$x}]
+        set wmax   [expr {[$path.c canvasx $w]-$x}]
 
-	$path:cmd itemconfigure $idn    -fill [Widget::getoption $path -background]
-        $path:cmd itemconfigure s:$item -fill {} -outline {}
+	$path.c itemconfigure $idn    -fill [Widget::getoption $path -background]
+        $path.c itemconfigure s:$item -fill {} -outline {}
 
         set _edit(text) $text
         set _edit(wait) 0
@@ -636,7 +641,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
                         -textvariable       ListBox::_edit(text)]
         pack $ent -ipadx 8 -anchor w
 
-        set idw [$path:cmd create window $x $y -window $frame -anchor w]
+        set idw [$path.c create window $x $y -window $frame -anchor w]
         trace variable ListBox::_edit(text) w "ListBox::_update_edit_size $path $ent $idw $wmax"
         tkwait visibility $ent
         grab  $frame
@@ -668,9 +673,9 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
         grab release $frame
         BWidget::focus release $ent
         destroy $frame
-        $path:cmd delete $idw
-        $path:cmd itemconfigure $idn    -fill $oldfg
-        $path:cmd itemconfigure s:$item -fill $sbg -outline $sbg
+        $path.c delete $idw
+        $path.c itemconfigure $idn    -fill $oldfg
+        $path.c itemconfigure s:$item -fill $sbg -outline $sbg
 
         if { $_edit(wait) } {
             return $_edit(text)
@@ -684,7 +689,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
 #  Command ListBox::xview
 # ------------------------------------------------------------------------------
 proc ListBox::xview { path args } {
-    return [eval $path:cmd xview $args]
+    return [eval $path.c xview $args]
 }
 
 
@@ -692,7 +697,7 @@ proc ListBox::xview { path args } {
 #  Command ListBox::yview
 # ------------------------------------------------------------------------------
 proc ListBox::yview { path args } {
-    return [eval $path:cmd yview $args]
+    return [eval $path.c yview $args]
 }
 
 
@@ -702,9 +707,9 @@ proc ListBox::yview { path args } {
 proc ListBox::_update_edit_size { path entry idw wmax args } {
     set entw [winfo reqwidth $entry]
     if { $entw >= $wmax } {
-        $path:cmd itemconfigure $idw -width $wmax
+        $path.c itemconfigure $idw -width $wmax
     } else {
-        $path:cmd itemconfigure $idw -width 0
+        $path.c itemconfigure $idw -width 0
     }
 }
 
@@ -750,35 +755,35 @@ proc ListBox::_destroy { path } {
 #  Command ListBox::_see
 # ------------------------------------------------------------------------------
 proc ListBox::_see { path idn side } {
-    set bbox [$path:cmd bbox $idn]
-    set scrl [$path:cmd cget -scrollregion]
+    set bbox [$path.c bbox $idn]
+    set scrl [$path.c cget -scrollregion]
 
     set ymax [lindex $scrl 3]
-    set dy   [$path:cmd cget -yscrollincrement]
-    set yv   [$path:cmd yview]
+    set dy   [$path.c cget -yscrollincrement]
+    set yv   [$path.c yview]
     set yv0  [expr {round([lindex $yv 0]*$ymax/$dy)}]
     set yv1  [expr {round([lindex $yv 1]*$ymax/$dy)}]
-    set y    [expr {int([lindex [$path:cmd coords $idn] 1]/$dy)}]
+    set y    [expr {int([lindex [$path.c coords $idn] 1]/$dy)}]
     if { $y < $yv0 } {
-        $path:cmd yview scroll [expr {$y-$yv0}] units
+        $path.c yview scroll [expr {$y-$yv0}] units
     } elseif { $y >= $yv1 } {
-        $path:cmd yview scroll [expr {$y-$yv1+1}] units
+        $path.c yview scroll [expr {$y-$yv1+1}] units
     }
 
     set xmax [lindex $scrl 2]
-    set dx   [$path:cmd cget -xscrollincrement]
-    set xv   [$path:cmd xview]
+    set dx   [$path.c cget -xscrollincrement]
+    set xv   [$path.c xview]
     if { ![string compare $side "right"] } {
         set xv1 [expr {round([lindex $xv 1]*$xmax/$dx)}]
         set x1  [expr {int([lindex $bbox 2]/$dx)}]
         if { $x1 >= $xv1 } {
-            $path:cmd xview scroll [expr {$x1-$xv1+1}] units
+            $path.c xview scroll [expr {$x1-$xv1+1}] units
         }
     } else {
         set xv0 [expr {round([lindex $xv 0]*$xmax/$dx)}]
         set x0  [expr {int([lindex $bbox 0]/$dx)}]
         if { $x0 < $xv0 } {
-            $path:cmd xview scroll [expr {$x0-$xv0}] units
+            $path.c xview scroll [expr {$x0-$xv0}] units
         }
     }
 }
@@ -788,12 +793,12 @@ proc ListBox::_see { path idn side } {
 #  Command ListBox::_update_scrollregion
 # ------------------------------------------------------------------------------
 proc ListBox::_update_scrollregion { path } {
-    set bd   [expr {2*([$path:cmd cget -borderwidth]+[$path:cmd cget -highlightthickness])}]
+    set bd   [expr {2*([$path.c cget -borderwidth]+[$path.c cget -highlightthickness])}]
     set w    [expr {[winfo width  $path] - $bd}]
     set h    [expr {[winfo height $path] - $bd}]
-    set xinc [$path:cmd cget -xscrollincrement]
-    set yinc [$path:cmd cget -yscrollincrement]
-    set bbox [$path:cmd bbox all]
+    set xinc [$path.c cget -xscrollincrement]
+    set yinc [$path.c cget -yscrollincrement]
+    set bbox [$path.c bbox all]
     if { [llength $bbox] } {
         set xs [lindex $bbox 2]
         set ys [lindex $bbox 3]
@@ -812,7 +817,7 @@ proc ListBox::_update_scrollregion { path } {
         }
     }
 
-    $path:cmd configure -scrollregion [list 0 0 $w $h]
+    $path.c configure -scrollregion [list 0 0 $w $h]
 }
 
 
@@ -821,17 +826,17 @@ proc ListBox::_update_scrollregion { path } {
 # ------------------------------------------------------------------------------
 proc ListBox::_draw_item { path item x0 x1 y } {
     set indent [Widget::getoption $path.$item -indent]
-    $path:cmd create text [expr {$x1+$indent}] $y \
+    $path.c create text [expr {$x1+$indent}] $y \
         -text   [Widget::getoption $path.$item -text] \
         -fill   [_getoption        $path $item -foreground] \
         -font   [_getoption        $path $item -font] \
         -anchor w \
         -tags   "item n:$item"
     if { [set win [Widget::getoption $path.$item -window]] != "" } {
-        $path:cmd create window [expr {$x0+$indent}] $y \
+        $path.c create window [expr {$x0+$indent}] $y \
             -window $win -anchor w -tags "win i:$item"
     } elseif { [set img [Widget::getoption $path.$item -image]] != "" } {
-        $path:cmd create image [expr {$x0+$indent}] $y \
+        $path.c create image [expr {$x0+$indent}] $y \
             -image $img -anchor w -tags "img i:$item"
     }
 }
@@ -844,7 +849,8 @@ proc ListBox::_redraw_items { path } {
     variable $path
     upvar 0  $path data
 
-    $path:cmd configure -cursor watch
+    set cursor [$path.c cget -cursor]
+    $path.c configure -cursor watch
     set dx   [Widget::getoption $path -deltax]
     set dy   [Widget::getoption $path -deltay]
     set padx [Widget::getoption $path -padx]
@@ -860,7 +866,7 @@ proc ListBox::_redraw_items { path } {
         set nrows [llength $data(items)]
     }
     foreach item $data(upd,delete) {
-        $path:cmd delete i:$item n:$item s:$item
+        $path.c delete i:$item n:$item s:$item
     }
     foreach item $data(items) {
         if { [info exists data(upd,create,$item)] } {
@@ -868,15 +874,15 @@ proc ListBox::_redraw_items { path } {
             unset data(upd,create,$item)
         } else {
             set indent [Widget::getoption $path.$item -indent]
-            $path:cmd coords n:$item [expr {$x1+$indent}] $y0
-            $path:cmd coords i:$item [expr {$x0+$indent}] $y0
+            $path.c coords n:$item [expr {$x1+$indent}] $y0
+            $path.c coords i:$item [expr {$x0+$indent}] $y0
         }
         incr y0 $dy
         incr nitem
         lappend drawn n:$item
         if { $nitem == $nrows } {
             set y0    [expr {$dy/2}]
-            set bbox  [eval $path:cmd bbox $drawn]
+            set bbox  [eval $path.c bbox $drawn]
             set drawn {}
             set x0    [expr {[lindex $bbox 2]+$dx}]
             set x1    [expr {$x0+$padx}]
@@ -885,11 +891,11 @@ proc ListBox::_redraw_items { path } {
         }
     }
     if { $nitem && $nitem < $nrows } {
-        set bbox  [eval $path:cmd bbox $drawn]
+        set bbox  [eval $path.c bbox $drawn]
         lappend data(xlist) [lindex $bbox 2]
     }
     set data(upd,delete) {}
-    $path:cmd configure -cursor [Widget::getoption $path -cursor]
+    $path.c configure -cursor $cursor
 }
 
 
@@ -902,18 +908,18 @@ proc ListBox::_redraw_selection { path } {
 
     set selbg [Widget::getoption $path -selectbackground]
     set selfg [Widget::getoption $path -selectforeground]
-    foreach id [$path:cmd find withtag sel] {
-        set item [string range [lindex [$path:cmd gettags $id] 1] 2 end]
-        $path:cmd itemconfigure "n:$item" -fill [_getoption $path $item -foreground]
+    foreach id [$path.c find withtag sel] {
+        set item [string range [lindex [$path.c gettags $id] 1] 2 end]
+        $path.c itemconfigure "n:$item" -fill [_getoption $path $item -foreground]
     }
-    $path:cmd delete sel
+    $path.c delete sel
     foreach item $data(selitems) {
-        set bbox [$path:cmd bbox "n:$item"]
+        set bbox [$path.c bbox "n:$item"]
         if { [llength $bbox] } {
-            set id [eval $path:cmd create rectangle $bbox \
+            set id [eval $path.c create rectangle $bbox \
                         -fill $selbg -outline $selbg -tags [list "sel s:$item"]]
-            $path:cmd itemconfigure "n:$item" -fill $selfg
-            $path:cmd lower $id
+            $path.c itemconfigure "n:$item" -fill $selfg
+            $path.c lower $id
         }
     }
 }
@@ -966,9 +972,9 @@ proc ListBox::_resize { path } {
     upvar 0  $path data
 
     if { [Widget::getoption $path -multicolumn] } {
-        set bd    [expr {[$path:cmd cget -borderwidth]+[$path:cmd cget -highlightthickness]}]
+        set bd    [expr {[$path.c cget -borderwidth]+[$path.c cget -highlightthickness]}]
         set h     [expr {[winfo height $path] - 2*$bd}]
-        set nrows [expr {$h/[$path:cmd cget -yscrollincrement]}]
+        set nrows [expr {$h/[$path.c cget -yscrollincrement]}]
         if { $nrows == 0 } {
             set nrows 1
         }
@@ -992,7 +998,8 @@ proc ListBox::_resize { path } {
 #  Command ListBox::_init_drag_cmd
 # ------------------------------------------------------------------------------
 proc ListBox::_init_drag_cmd { path X Y top } {
-    set ltags [$path:cmd gettags current]
+    set path [winfo parent $path]
+    set ltags [$path.c gettags current]
     set item  [lindex $ltags 0]
     if { ![string compare $item "item"] ||
          ![string compare $item "img"]  ||
@@ -1017,6 +1024,7 @@ proc ListBox::_init_drag_cmd { path X Y top } {
 #  Command ListBox::_drop_cmd
 # ------------------------------------------------------------------------------
 proc ListBox::_drop_cmd { path source X Y op type dnddata } {
+    set path [winfo parent $path]
     variable $path
     upvar 0  $path data
 
@@ -1024,7 +1032,7 @@ proc ListBox::_drop_cmd { path source X Y op type dnddata } {
         after cancel $data(dnd,afterid)
         set data(dnd,afterid) ""
     }
-    $path:cmd delete drop
+    $path.c delete drop
     set data(dnd,scroll) ""
     if { [llength $data(dnd,item)] } {
         if { [set cmd [Widget::getoption $path -dropcmd]] != "" } {
@@ -1039,12 +1047,13 @@ proc ListBox::_drop_cmd { path source X Y op type dnddata } {
 #  Command ListBox::_over_cmd
 # ------------------------------------------------------------------------------
 proc ListBox::_over_cmd { path source event X Y op type dnddata } {
+    set path [winfo parent $path]
     variable $path
     upvar 0  $path data
 
     if { ![string compare $event "leave"] } {
         # we leave the window listbox
-        $path:cmd delete drop
+        $path.c delete drop
         if { [string length $data(dnd,afterid)] } {
             after cancel $data(dnd,afterid)
             set data(dnd,afterid) ""
@@ -1064,7 +1073,7 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
 
     set x [expr {$X-[winfo rootx $path]}]
     set y [expr {$Y-[winfo rooty $path]}]
-    $path:cmd delete drop
+    $path.c delete drop
     set data(dnd,item) ""
 
     # test for auto-scroll unless mode is widget only
@@ -1090,9 +1099,9 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
         # dropovermode includes item or position
         # we extract the box (xi,yi,xs,ys) where we can find item around x,y
         set len  [llength $data(items)]
-        set xc   [$path:cmd canvasx $x]
-        set yc   [$path:cmd canvasy $y]
-        set dy   [$path:cmd cget -yscrollincrement]
+        set xc   [$path.c canvasx $x]
+        set yc   [$path.c canvasy $y]
+        set dy   [$path.c cget -yscrollincrement]
         set line [expr {int($yc/$dy)}]
         set yi   [expr {$line*$dy}]
         set ys   [expr {$yi+$dy}]
@@ -1113,7 +1122,7 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
             }
             if { $pos < $len } {
                 set item [lindex $data(items) $pos]
-                set xi   [expr {[lindex [$path:cmd coords n:$item] 0]-[Widget::getoption $path -padx]-1}]
+                set xi   [expr {[lindex [$path.c coords n:$item] 0]-[Widget::getoption $path -padx]-1}]
                 if { $data(dnd,mode) & 1 } {
                     # dropovermode includes item
                     lappend target $item
@@ -1191,10 +1200,10 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
     if {[llength $data(items)]} {
         if { $vmode & 1 } {
             set data(dnd,item) [list "item" [lindex $target 1]]
-            $path:cmd create rectangle $xi $yi $xs $ys -tags drop
+            $path.c create rectangle $xi $yi $xs $ys -tags drop
         } elseif { $vmode & 2 } {
             set data(dnd,item) [concat "position" [lindex $target 2]]
-            $path:cmd create line $xi $yl $xs $yl -tags drop
+            $path.c create line $xi $yl $xs $yl -tags drop
         } elseif { $vmode & 4 } {
             set data(dnd,item) [list "widget"]
         } else {
@@ -1222,22 +1231,22 @@ proc ListBox::_auto_scroll { path x y } {
     set ymax   [winfo height $path]
     set scroll {}
     if { $y <= 6 } {
-        if { [lindex [$path:cmd yview] 0] > 0 } {
+        if { [lindex [$path.c yview] 0] > 0 } {
             set scroll [list yview -1]
             DropSite::setcursor sb_up_arrow
         }
     } elseif { $y >= $ymax-6 } {
-        if { [lindex [$path:cmd yview] 1] < 1 } {
+        if { [lindex [$path.c yview] 1] < 1 } {
             set scroll [list yview 1]
             DropSite::setcursor sb_down_arrow
         }
     } elseif { $x <= 6 } {
-        if { [lindex [$path:cmd xview] 0] > 0 } {
+        if { [lindex [$path.c xview] 0] > 0 } {
             set scroll [list xview -1]
             DropSite::setcursor sb_left_arrow
         }
     } elseif { $x >= $xmax-6 } {
-        if { [lindex [$path:cmd xview] 1] < 1 } {
+        if { [lindex [$path.c xview] 1] < 1 } {
             set scroll [list xview 1]
             DropSite::setcursor sb_right_arrow
         }
@@ -1263,8 +1272,8 @@ proc ListBox::_scroll { path cmd dir } {
     variable $path
     upvar 0  $path data
 
-    if { ($dir == -1 && [lindex [$path:cmd $cmd] 0] > 0) ||
-         ($dir == 1  && [lindex [$path:cmd $cmd] 1] < 1) } {
+    if { ($dir == -1 && [lindex [$path.c $cmd] 0] > 0) ||
+         ($dir == 1  && [lindex [$path.c $cmd] 1] < 1) } {
         $path $cmd scroll $dir units
         set data(dnd,afterid) [after 100 ListBox::_scroll $path $cmd $dir]
     } else {

@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.3 2000/02/11 22:54:28 ericm Exp $
+#  $Id: scrollw.tcl,v 1.4 2000/02/26 01:56:41 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -22,8 +22,8 @@ namespace eval ScrolledWindow {
         {-scrollbar   Enum       both 0 {none both vertical horizontal}}
         {-auto        Enum       both 0 {none both vertical horizontal}}
         {-sides       Enum       se   0 {ne en nw wn se es sw ws}}
-        {-size        Int        0    1 {=0}}
-        {-ipad        Int        1    1 {=0}}
+        {-size        Int        0    1 "%d >= 0"}
+        {-ipad        Int        1    1 "%d >= 0"}
         {-managed     Boolean    1    1}
         {-relief      TkResource flat 0 frame}
         {-borderwidth TkResource 0    0 frame}

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.3 2000/02/19 02:12:40 ericm Exp $
+#  $Id: entry.tcl,v 1.4 2000/02/26 01:56:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -19,7 +19,9 @@
 namespace eval Entry {
     Widget::tkinclude Entry entry :cmd \
 	    remove [list -state -cursor -foreground -textvariable]
-
+    # Note:  -textvariable is pulled off of the tk entry and put onto the
+    # BW Entry so that we avoid the TkResource test for it, which screws up
+    # the existance/non-existance bits of the -textvariable.
     Widget::declare Entry [list \
 	    [list -foreground		TkResource	""	0 entry] \
 	    [list -disabledforeground	TkResource	""	0 button] \
@@ -28,17 +30,12 @@ namespace eval Entry {
 	    [list -textvariable		String	""	0] \
 	    [list -editable		Boolean	1	0] \
 	    [list -command		String	""	0] \
-	    [list -invalidcommand	String	""	0 entry] \
-	    [list -validate	Enum	none	0	\
-		[list none focus focusin focusout key all]] \
-	    [list -validatecommand	String	""	0 entry] \
 	    [list -relief		TkResource	""	0 entry] \
 	    [list -borderwidth		TkResource	""	0 entry] \
 	    [list -fg		Synonym		-foreground] \
 	    [list -bd		Synonym		-borderwidth] \
-	    [list -invcmd	Synonym		-invalidcommand] \
-	    [list -vcmd		Synonym		-validatecommand] \
 	    ]
+    Widget::addmap Entry "" :cmd {-textvariable {}}
 
     DynamicHelp::include Entry balloon
     DragSite::include    Entry "" 3
@@ -71,25 +68,10 @@ proc Entry::create { path args } {
     Widget::init Entry $path $args
 
     set data(afterid) ""
-    if { [set varname [Widget::getoption $path -textvariable]] != "" } {
-        set data(varname) $varname
-    } else {
-        set data(varname) Entry::$path\(var\)
-    }
-
-    if { [GlobalVar::exists $data(varname)] } {
-        set curval [GlobalVar::getvar $data(varname)]
-        Widget::setoption $path -text $curval
-    } else {
-        set curval [Widget::getoption $path -text]
-        GlobalVar::setvar $data(varname) $curval
-    }
-
     eval entry $path [Widget::subcget $path :cmd]
-    uplevel \#0 $path configure -textvariable [list $data(varname)]
 
-    set state    [Widget::getoption $path -state]
-    set editable [Widget::getoption $path -editable]
+    set state    [Widget::cget $path -state]
+    set editable [Widget::cget $path -editable]
     if { $editable && ![string compare $state "normal"] } {
         bindtags $path [list $path BwEntry [winfo toplevel $path] all]
         $path configure -takefocus 1
@@ -101,22 +83,7 @@ proc Entry::create { path args } {
         $path configure -cursor left_ptr
     }
     if { ![string compare $state "disabled"] } {
-        $path configure -foreground [Widget::getoption $path -disabledforeground]
-    }
-
-    set validate [Widget::getoption $path -validate]
-    if { ![string equal $validate "none"]} {
-	set validatecommand [Widget::getoption $path -validatecommand]
-	set invalidcommand [Widget::getoption $path -invalidcommand]
-
-	$path configure -validate $validate
-
-	if { ![string equal $validatecommand ""]} {
-	    $path configure -validatecommand $validatecommand
-	}
-	if { ![string equal $invalidcommand ""]} {
-	    $path configure -invalidcommand $invalidcommand
-	}
+        $path configure -foreground [Widget::cget $path -disabledforeground]
     }
 
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd 1
@@ -137,16 +104,16 @@ proc Entry::configure { path args } {
     variable $path
     upvar 0  $path data
 
-    Widget::setoption $path -text [$path:cmd get]
-
     set res [Widget::configure $path $args]
+    set chstate    [Widget::hasChangedX $path -state]
+    set cheditable [Widget::hasChangedX $path -editable]
+    set chfg       [Widget::hasChangedX $path -foreground]
+    set chdfg      [Widget::hasChangedX $path -disabledforeground]
 
-    set chstate    [Widget::hasChanged $path -state state]
-    set cheditable [Widget::hasChanged $path -editable editable]
-    set chfg       [Widget::hasChanged $path -foreground fg]
-    set chdfg      [Widget::hasChanged $path -disabledforeground dfg]
+    set state [Widget::cget $path -state]
 
     if { $chstate || $cheditable } {
+	set editable [Widget::cget $path -editable]
         set btags [bindtags $path]
         if { $editable && ![string compare $state "normal"] } {
             set idx [lsearch $btags BwDisabledEntry]
@@ -168,8 +135,10 @@ proc Entry::configure { path args } {
 
     if { $chstate || $chfg || $chdfg } {
         if { ![string compare $state "disabled"] } {
+	    set dfg [Widget::cget $path -disabledforeground]
             $path:cmd configure -fg $dfg
         } else {
+	    set fg [Widget::cget $path -foreground]
             $path:cmd configure -fg $fg
         }
     }
@@ -182,29 +151,12 @@ proc Entry::configure { path args } {
         }
     }
 
-    if { [Widget::hasChanged $path -textvariable varname] } {
-        if { [string length $varname] } {
-            set data(varname) $varname
-        } else {
-            catch {unset data(var)}
-            set data(varname) Entry::$path\(var\)
-        }
-        if { [GlobalVar::exists $data(varname)] } {
-            set curval [GlobalVar::getvar $data(varname)]
-            Widget::setoption $path -text $curval
-        } else {
-            Widget::hasChanged $path -text curval
-            GlobalVar::setvar $data(varname) $curval
-        }
-        uplevel \#0 $path:cmd configure -textvariable [list $data(varname)]
-    }
-
-    if { [Widget::hasChanged $path -text curval] } {
-        if { [Widget::getoption $path -textvariable] == "" } {
-            GlobalVar::setvar $data(varname) $curval
-        } else {
-            Widget::setoption $path -text [GlobalVar::getvar $data(varname)]
-        }
+    if { [Widget::hasChangedX $path -text] } {
+	set validateState [$path:cmd cget -validate]
+	$path:cmd configure -validate none
+	$path:cmd delete 0 end
+	$path:cmd configure -validate $validateState
+	$path:cmd insert 0 [Widget::cget $path -text]
     }
 
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd
@@ -219,7 +171,7 @@ proc Entry::configure { path args } {
 #  Command Entry::cget
 # ------------------------------------------------------------------------------
 proc Entry::cget { path option } {
-    Widget::setoption $path -text [$path:cmd get]
+    Widget::configure $path [list -text [$path:cmd get]]
     return [Widget::cget $path $option]
 }
 

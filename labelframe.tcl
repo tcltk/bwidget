@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  labelframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelframe.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: labelframe.tcl,v 1.2 2000/02/26 01:56:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelFrame::create
@@ -49,8 +49,9 @@ namespace eval LabelFrame {
 proc LabelFrame::create { path args } {
     Widget::init LabelFrame $path $args
 
-    set path  [frame $path -background [Widget::getoption $path -background] \
-                   -relief flat -bd 0 -takefocus 0 -highlightthickness 0]
+    set path  [eval frame $path [Widget::subcget $path :cmd] \
+	    -relief flat -bd 0 -takefocus 0 -highlightthickness 0 \
+	    -class LabelFrame]
 
     set label [eval Label::create $path.l [Widget::subcget $path .l] \
                    -takefocus 0 -highlightthickness 0 -relief flat -borderwidth 0 \

@@ -13,7 +13,7 @@
 namespace eval ProgressBar {
     Widget::declare ProgressBar {
         {-type        Enum       normal     0 {normal incremental infinite}}
-        {-maximum     Int        100        0 {>0}}
+        {-maximum     Int        100        0 "%d >= 0"}
         {-background  TkResource ""         0 frame}
         {-foreground  TkResource blue       0 label}
         {-borderwidth TkResource 2          0 frame}

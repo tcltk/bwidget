@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: dynhelp.tcl,v 1.2 2000/02/26 01:56:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -23,7 +23,7 @@ namespace eval DynamicHelp {
         {-borderwidth TkResource 1             0 label}
         {-justify     TkResource left          0 label}
         {-font        TkResource "helvetica 8" 0 label}
-        {-delay       Int        600           0 {=100 =2000}}
+        {-delay       Int        600           0 "%d >= 100 & %d <= 2000"}
         {-bd          Synonym    -borderwidth}
         {-bg          Synonym    -background}
         {-fg          Synonym    -foreground}

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  scrollview.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollview.tcl,v 1.2 2000/02/11 22:54:28 ericm Exp $
+#  $Id: scrollview.tcl,v 1.3 2000/02/26 01:56:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -15,6 +15,11 @@
 # ------------------------------------------------------------------------------
 
 namespace eval ScrollView {
+    Widget::tkinclude ScrollView canvas :canvas \
+	    include {-relief -borderwidth -background -width -height -cursor} \
+	    initialize {-relief flat -borderwidth 0 -width 30 -height 30 \
+		-cursor crosshair}
+
     Widget::declare ScrollView {
         {-width       TkResource 30        0 canvas}
         {-height      TkResource 30        0 canvas}
@@ -30,10 +35,10 @@ namespace eval ScrollView {
         {-bd          Synonym    -borderwidth}
     }
 
-    Widget::addmap ScrollView "" :canvas {
-        -relief {} -borderwidth {} -background {}
-        -width {} -height {} -cursor {}
-    }
+#    Widget::addmap ScrollView "" :canvas {
+#        -relief {} -borderwidth {} -background {}
+#        -width {} -height {} -cursor {}
+#    }
 
     bind BwScrollView <ButtonPress-1> {ScrollView::_set_view %W set %x %y}
     bind BwScrollView <B1-Motion>     {ScrollView::_set_view %W motion %x %y}
@@ -57,11 +62,13 @@ proc ScrollView::create { path args } {
     variable _widget
 
     Widget::init ScrollView $path $args
+    eval canvas $path [Widget::subcget $path :canvas] -highlightthickness 0
+    rename $path ::$path:canvas
 
-    set w                     [Widget::getoption $path -window]
-    set _widget($path,bd)     [Widget::getoption $path -borderwidth]
-    set _widget($path,width)  [Widget::getoption $path -width]
-    set _widget($path,height) [Widget::getoption $path -height]
+    set w                     [Widget::cget $path -window]
+    set _widget($path,bd)     [Widget::cget $path -borderwidth]
+    set _widget($path,width)  [Widget::cget $path -width]
+    set _widget($path,height) [Widget::cget $path -height]
 
     if {[winfo exists $w]} {
         set _widget($path,oldxscroll) [$w cget -xscrollcommand]
@@ -70,15 +77,13 @@ proc ScrollView::create { path args } {
             -xscrollcommand "ScrollView::_set_hscroll $path" \
             -yscrollcommand "ScrollView::_set_vscroll $path"
     }
-    eval canvas $path [Widget::subcget $path :canvas] -highlightthickness 0
-    $path create rectangle -2 -2 -2 -2 \
-        -fill    [Widget::getoption $path -fill]       \
-        -outline [Widget::getoption $path -foreground] \
+    $path:canvas create rectangle -2 -2 -2 -2 \
+        -fill    [Widget::cget $path -fill]       \
+        -outline [Widget::cget $path -foreground] \
         -tags    view
 
     bindtags $path [list $path BwScrollView [winfo toplevel $path] all]
 
-    rename $path ::$path:canvas
     proc ::$path { cmd args } "return \[eval ScrollView::\$cmd $path \$args\]"
 
     return $path

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.5 2000/02/11 22:54:27 ericm Exp $
+#  $Id: mainframe.tcl,v 1.6 2000/02/26 01:56:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -78,7 +78,6 @@ proc MainFrame::create { path args } {
     }
     Widget::init MainFrame $path $args
 
-    set bg [Widget::getoption $path -background]
     if { $tcl_platform(platform) == "unix" } {
         set relief raised
         set bd     1
@@ -86,15 +85,18 @@ proc MainFrame::create { path args } {
         set relief flat
         set bd     0
     }
-    $path configure -background $bg
-    set topframe  [frame $path.topf -relief flat -borderwidth 0 -background $bg]
+    set topframe  [eval frame $path.topf -relief flat -borderwidth 0 \
+	    [Widget::subcget $path .topf]]
     set userframe [eval frame $path.frame [Widget::subcget $path .frame] \
                        -relief $relief -borderwidth $bd]
-    set botframe  [frame $path.botf -relief $relief -borderwidth $bd -background $bg]
+    set botframe  [eval frame $path.botf -relief $relief -borderwidth $bd \
+	    [Widget::subcget $path .botf]]
 
     pack $topframe -fill x
     grid columnconfigure $topframe 0 -weight 1
 
+    set bg [Widget::cget $path -background]
+    $path configure -background $bg
     if { $tcl_platform(platform) != "unix" } {
         set sepopt [Widget::getoption $path -separator]
         if { $sepopt == "both" || $sepopt == "top" } {

@@ -18,7 +18,7 @@ namespace eval TitleFrame {
         {-foreground  TkResource ""     0 label}
         {-background  TkResource ""     0 frame}
         {-text        String     ""     0}
-        {-ipad        Int        4      0 {=0 ""}}
+        {-ipad        Int        4      0 "%d >=0"}
         {-side        Enum       left   0 {left center right}}
         {-baseline    Enum       center 0 {top center bottom}}
         {-fg          Synonym    -foreground}
@@ -44,16 +44,20 @@ namespace eval TitleFrame {
 proc TitleFrame::create { path args } {
     Widget::init TitleFrame $path $args
 
-    set bg     [Widget::getoption $path -background]
-    set frame  [frame $path -background $bg]
-    set padtop [frame $path.p -relief flat -borderwidth 0 -background $bg]
+    set frame  [eval frame $path [Widget::subcget $path :cmd] \
+	    -class TitleFrame -relief flat -bd 0 -highlightthickness 0]
+
+    set padtop [eval frame $path.p [Widget::subcget $path :cmd] \
+	    -relief flat -borderwidth 0]
     set border [eval frame $path.b [Widget::subcget $path .b] -highlightthickness 0]
     set label  [eval label $path.l [Widget::subcget $path .l] \
                     -highlightthickness 0 \
                     -relief flat \
                     -bd     0 -padx 2 -pady 0]
-    set padbot [frame $border.p -relief flat -bd 0 -bg $bg -highlightthickness 0]
-    set frame  [frame $path.f -relief flat -bd 0 -bg $bg -highlightthickness 0]
+    set padbot [eval frame $border.p [Widget::subcget $path .p] \
+	    -relief flat -bd 0 -highlightthickness 0]
+    set frame  [eval frame $path.f [Widget::subcget $path .f] \
+	    -relief flat -bd 0 -highlightthickness 0]
     set height [winfo reqheight $label]
 
     switch [Widget::getoption $path -side] {
@@ -84,7 +88,7 @@ proc TitleFrame::create { path args } {
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval TitleFrame::\$cmd $path \$args\]"
-
+    
     return $path
 }
 

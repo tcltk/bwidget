@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: label.tcl,v 1.2 2000/02/26 01:56:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Label::create
@@ -14,14 +14,14 @@
 # ------------------------------------------------------------------------------
 
 namespace eval Label {
-    Widget::tkinclude Label label :cmd \
+    Widget::tkinclude Label label .l \
         remove {-foreground -text -textvariable -underline}
 
     Widget::declare Label {
         {-name               String     "" 0}
         {-text               String     "" 0}
         {-textvariable       String     "" 0}
-        {-underline          Int        -1 0 {=-1}}
+        {-underline          Int        -1 0 "%d >= -1"}
         {-focus              String     "" 0}
         {-foreground         TkResource "" 0 label}
         {-disabledforeground TkResource "" 0 button}
@@ -40,13 +40,12 @@ namespace eval Label {
         COLOR   {move {}}
     }
 
-    Widget::syncoptions Label "" :cmd {-text {} -underline {}}
+    Widget::syncoptions Label "" .l {-text {} -underline {}}
 
     proc ::Label { path args } { return [eval Label::create $path $args] }
     proc use {} {}
 
     bind BwLabel <FocusIn> {Label::setfocus %W}
-    bind BwLabel <Destroy> {Widget::destroy %W; rename %W {}}
 }
 
 
@@ -55,6 +54,10 @@ namespace eval Label {
 # ------------------------------------------------------------------------------
 proc Label::create { path args } {
     Widget::init Label $path $args
+
+    set path [frame $path -class Label]
+    bind $path <Destroy> {Widget::destroy %W; rename %W {}}
+    eval label $path.l [Widget::subcget $path .l]
 
     if { [Widget::getoption $path -state] == "normal" } {
         set fg [Widget::getoption $path -foreground]
@@ -79,19 +82,20 @@ proc Label::create { path args } {
         set text  ""
     }
 
-    eval label $path [Widget::subcget $path :cmd] \
-        [list -text $text -textvariable $var -underline $under -foreground $fg]
+    $path.l configure -text $text -textvariable $var \
+	    -underline $under -foreground $fg
 
     set accel [string tolower [string index $text $under]]
     if { $accel != "" } {
         bind [winfo toplevel $path] <Alt-$accel> "Label::setfocus $path"
     }
 
-    bindtags $path [list $path Label BwLabel [winfo toplevel $path] all]
+    bindtags $path.l [list $path.l Label BwLabel [winfo toplevel $path] all]
+    pack $path.l -expand yes -fill both
 
-    DragSite::setdrag $path $path Label::_init_drag_cmd [Widget::getoption $path -dragendcmd] 1
-    DropSite::setdrop $path $path Label::_over_cmd Label::_drop_cmd 1
-    DynamicHelp::sethelp $path $path 1
+    DragSite::setdrag $path $path.l Label::_init_drag_cmd [Widget::getoption $path -dragendcmd] 1
+    DropSite::setdrop $path $path.l Label::_over_cmd Label::_drop_cmd 1
+    DynamicHelp::sethelp $path $path.l 1
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval Label::\$cmd $path \$args\]"
@@ -104,9 +108,9 @@ proc Label::create { path args } {
 #  Command Label::configure
 # ------------------------------------------------------------------------------
 proc Label::configure { path args } {
-    set oldunder [$path:cmd cget -underline]
+    set oldunder [$path.l cget -underline]
     if { $oldunder != -1 } {
-        set oldaccel [string tolower [string index [$path:cmd cget -text] $oldunder]]
+        set oldaccel [string tolower [string index [$path.l cget -text] $oldunder]]
     } else {
         set oldaccel ""
     }
@@ -118,9 +122,9 @@ proc Label::configure { path args } {
 
     if { $cst || $cfg || $cdfg } {
         if { $state == "normal" } {
-            $path:cmd configure -fg $fg
+            $path.l configure -fg $fg
         } else {
-            $path:cmd configure -fg $dfg
+            $path.l configure -fg $dfg
         }
     }
 
@@ -150,12 +154,12 @@ proc Label::configure { path args } {
         if { $accel != "" } {
             bind $top <Alt-$accel> "Label::setfocus $path"
         }
-        $path:cmd configure -text $text -underline $under -textvariable $var
+        $path.l configure -text $text -underline $under -textvariable $var
     }
 
     set force [Widget::hasChanged $path -dragendcmd dragend]
-    DragSite::setdrag $path $path Label::_init_drag_cmd $dragend $force
-    DropSite::setdrop $path $path Label::_over_cmd Label::_drop_cmd
+    DragSite::setdrag $path $path.l Label::_init_drag_cmd $dragend $force
+    DropSite::setdrop $path $path.l Label::_over_cmd Label::_drop_cmd
     DynamicHelp::sethelp $path $path
 
     return $res
@@ -187,17 +191,18 @@ proc Label::setfocus { path } {
 #  Command Label::_init_drag_cmd
 # ------------------------------------------------------------------------------
 proc Label::_init_drag_cmd { path X Y top } {
-    if { [set cmd [Widget::getoption $path -draginitcmd]] != "" } {
+    set path [winfo parent $path]
+    if { [set cmd [Widget::cget $path -draginitcmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $X $Y $top]]
     }
-    if { [set data [$path:cmd cget -image]] != "" } {
+    if { [set data [$path.l cget -image]] != "" } {
         set type "IMAGE"
         pack [label $top.l -image $data]
-    } elseif { [set data [$path:cmd cget -bitmap]] != "" } {
+    } elseif { [set data [$path.l cget -bitmap]] != "" } {
         set type "BITMAP"
         pack [label $top.l -bitmap $data]
     } else {
-        set data [$path:cmd cget -text]
+        set data [$path.l cget -text]
         set type "TEXT"
     }
     set usertype [Widget::getoption $path -dragtype]
@@ -212,7 +217,8 @@ proc Label::_init_drag_cmd { path X Y top } {
 #  Command Label::_drop_cmd
 # ------------------------------------------------------------------------------
 proc Label::_drop_cmd { path source X Y op type data } {
-    if { [set cmd [Widget::getoption $path -dropcmd]] != "" } {
+    set path [winfo parent $path]
+    if { [set cmd [Widget::cget $path -dropcmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $source $X $Y $op $type $data]]
     }
     if { $type == "COLOR" || $type == "FGCOLOR" } {
@@ -228,7 +234,7 @@ proc Label::_drop_cmd { path source X Y op type data } {
             BITMAP  {set bitmap $data}
             default {
                 set text $data
-                if { [set var [$path:cmd cget -textvariable]] != "" } {
+                if { [set var [$path.l cget -textvariable]] != "" } {
                     configure $path -image "" -bitmap ""
                     GlobalVar::setvar $var $data
                     return
@@ -245,7 +251,8 @@ proc Label::_drop_cmd { path source X Y op type data } {
 #  Command Label::_over_cmd
 # ------------------------------------------------------------------------------
 proc Label::_over_cmd { path source event X Y op type data } {
-    if { [set cmd [Widget::getoption $path -dropovercmd]] != "" } {
+    set path [winfo parent $path]
+    if { [set cmd [Widget::cget $path -dropovercmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $source $event $X $Y $op $type $data]]
     }
     if { [Widget::getoption $path -state] == "normal" ||

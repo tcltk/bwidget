@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.3 2000/02/16 20:18:53 sven Exp $
+#  $Id: dialog.tcl,v 1.4 2000/02/26 01:56:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -32,7 +32,7 @@ namespace eval Dialog {
         {-bitmap      TkResource ""       1 label}
         {-image       TkResource ""       1 label}
         {-separator   Boolean    0        1}
-        {-cancel      Int        -1       0 {=-1 ""}}
+        {-cancel      Int        -1       0 "%d >= -1"}
         {-parent      String     ""       0}
         {-side        Enum       bottom   1 {bottom left top right}}
         {-anchor      Enum       c        1 {n e w s c}}
@@ -58,11 +58,10 @@ proc Dialog::create { path args } {
     variable _widget
 
     Widget::init Dialog $path $args
-    set bg [Widget::getoption $path -background]
     if { ![string compare $tcl_platform(platform) "unix"] } {
-        toplevel $path -relief raised -borderwidth 1 -background $bg
+        toplevel $path -relief raised -borderwidth 1
     } else {
-        toplevel $path -relief flat   -borderwidth 0 -background $bg
+        toplevel $path -relief flat   -borderwidth 0
     }
     bindtags $path [list $path BwDialog all]
     wm overrideredirect $path 1
@@ -83,8 +82,10 @@ proc Dialog::create { path args } {
 
     set bbox  [eval ButtonBox::create $path.bbox [Widget::subcget $path .bbox] \
                    -orient $orient]
-    set frame [frame $path.frame -relief flat -borderwidth 0 -background $bg]
-
+    set frame [frame $path.frame -relief flat -borderwidth 0]
+    set bg [Widget::cget $path -background]
+    $path configure -background $bg
+    $frame configure -background $bg
     if { [set bitmap [Widget::getoption $path -image]] != "" } {
         set label [label $path.label -image $bitmap -background $bg]
     } elseif { [set bitmap [Widget::getoption $path -bitmap]] != "" } {

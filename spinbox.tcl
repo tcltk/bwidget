@@ -31,22 +31,19 @@ namespace eval SpinBox {
         {-range          String ""  0}
         {-values         String ""  0}
         {-modifycmd      String ""  0}
-        {-repeatdelay    Int    400 0 {=0}}
-        {-repeatinterval Int    100 0 {=0}}
+        {-repeatdelay    Int    400 0 {%d >= 0}}
+        {-repeatinterval Int    100 0 {%d >= 0}}
     }
 
     Widget::addmap SpinBox "" :cmd {-background {}}
     Widget::addmap SpinBox ArrowButton .arrup {
-        -foreground {} -background {} -disabledforeground {} -state {}
-        -repeatdelay {} -repeatinterval {}
+        -foreground {} -background {} -disabledforeground {} -state {} \
+		-repeatinterval {} -repeatdelay {}
     }
     Widget::addmap SpinBox ArrowButton .arrdn {
-        -foreground {} -background {} -disabledforeground {} -state {}
-        -repeatdelay {} -repeatinterval {}
+        -foreground {} -background {} -disabledforeground {} -state {} \
+		-repeatinterval {} -repeatdelay {}
     }
-
-    Widget::syncoptions SpinBox Entry .e {-text {}}
-    Widget::syncoptions SpinBox LabelFrame .labf {-label -text -underline {}}
 
     ::bind BwSpinBox <FocusIn> {focus %W.labf}
     ::bind BwSpinBox <Destroy> {SpinBox::_destroy %W}
@@ -62,49 +59,43 @@ namespace eval SpinBox {
 #  Command SpinBox::create
 # -----------------------------------------------------------------------------
 proc SpinBox::create { path args } {
-    variable _widget
+    array set maps [list SpinBox {} :cmd {} .e {} .arrup {} .arrdn {} .labf {}]
+    array set maps [Widget::parseArgs SpinBox $args]
+    eval frame $path $maps(:cmd) -highlightthickness 0 -bd 0 -relief flat \
+	    -takefocus 0 -class SpinBox
+    Widget::initFromODB SpinBox $path $maps(SpinBox)
 
-    Widget::init SpinBox $path $args
-
-    _test_options $path
-    eval frame $path [Widget::subcget $path :cmd] \
-        -highlightthickness 0 -bd 0 -relief flat -takefocus 0
-    set labf [eval LabelFrame::create $path.labf [Widget::subcget $path .labf] \
-                  -focus $path.e]
-    set entry [eval Entry::create $path.e [Widget::subcget $path .e] \
-                   -relief flat -borderwidth 0]
+    set labf [eval LabelFrame::create $path.labf $maps(.labf) -focus $path.e]
+    set entry [eval Entry::create $path.e $maps(.e) -relief flat -bd 0]
     bindtags $path [list $path BwSpinBox [winfo toplevel $path] all]
 
     set farr   [frame $path.farr -relief flat -bd 0 -highlightthickness 0]
     set height [expr {[winfo reqheight $path.e]/2-2}]
     set width  11
     set arrup  [eval ArrowButton::create $path.arrup -dir top \
-                    [Widget::subcget $path .arrup] \
-                    -highlightthickness 0 -borderwidth 1 -takefocus 0 \
-                    -type button \
-                    -width $width -height $height \
-                    -armcommand    [list "SpinBox::_modify_value $path next arm"] \
-                    -disarmcommand [list "SpinBox::_modify_value $path next disarm"]]
+	    $maps(.arrup) \
+	    -highlightthickness 0 -borderwidth 1 -takefocus 0 \
+	    -type button \
+	    -width $width -height $height \
+	    -armcommand    [list "SpinBox::_modify_value $path next arm"] \
+	    -disarmcommand [list "SpinBox::_modify_value $path next disarm"]]
     set arrdn  [eval ArrowButton::create $path.arrdn -dir bottom \
-                    [Widget::subcget $path .arrdn] \
-                    -highlightthickness 0 -borderwidth 1 -takefocus 0 \
-                    -type button \
-                    -width $width -height $height \
-                    -armcommand    [list "SpinBox::_modify_value $path previous arm"] \
-                    -disarmcommand [list "SpinBox::_modify_value $path previous disarm"]]
+	    $maps(.arrdn) \
+	    -highlightthickness 0 -borderwidth 1 -takefocus 0 \
+	    -type button \
+	    -width $width -height $height \
+	    -armcommand    [list "SpinBox::_modify_value $path previous arm"] \
+	    -disarmcommand [list "SpinBox::_modify_value $path previous disarm"]]
     set frame [LabelFrame::getframe $path.labf]
 
-    # --- update -value ---
-    if { [set val [Entry::cget $path.e -text]] != "" } {
-        set _widget($path,curval) $val
+    # --- update SpinBox value ---
+    _test_options $path
+    set val [Entry::cget $path.e -text]
+    if { [string equal $val ""] } {
+	Entry::configure $path.e -text $::SpinBox::_widget($path,curval)
     } else {
-        if { [set var [Widget::getoption $path -textvariable]] != "" } {
-            GlobalVar::setvar $var $_widget($path,curval)
-        } else {
-            Entry::configure $path.e -text $_widget($path,curval)
-        }
+	set ::SpinBox::_widget($path,curval) $val
     }
-    Widget::setoption $path -text $_widget($path,curval)
 
     grid $arrup -in $farr -column 0 -row 0 -sticky nsew
     grid $arrdn -in $farr -column 0 -row 2 -sticky nsew
@@ -156,9 +147,9 @@ proc SpinBox::cget { path option } {
 proc SpinBox::setvalue { path index } {
     variable _widget
 
-    set values [Widget::getoption $path -values]
+    set values [Widget::cget $path -values]
     set value  [Entry::cget $path.e -text]
-
+    
     if { [llength $values] } {
         # --- -values SpinBox ---
         switch -- $index {
@@ -200,10 +191,7 @@ proc SpinBox::setvalue { path index } {
         }
     } else {
         # --- -range SpinBox ---
-        set range [Widget::getoption $path -range]
-        set vmin  [lindex $range 0]
-        set vmax  [lindex $range 1]
-        set incr  [lindex $range 2]
+	foreach {vmin vmax incr} [Widget::cget $path -range] {break}
         switch -- $index {
             next {
                 if { [catch {expr {double($value-$vmin)/$incr}} idx] } {
@@ -252,12 +240,7 @@ proc SpinBox::setvalue { path index } {
         }
     }
     set _widget($path,curval) $newval
-    Widget::setoption $path -text $newval
-    if { [set varname [Entry::cget $path.e -textvariable]] != "" } {
-        GlobalVar::setvar $varname $newval
-    } else {
-        Entry::configure $path.e -text $newval
-    }
+    Entry::configure $path.e -text $newval
     return 1
 }
 
@@ -268,17 +251,14 @@ proc SpinBox::setvalue { path index } {
 proc SpinBox::getvalue { path } {
     variable _widget
 
-    set values [Widget::getoption $path -values]
+    set values [Widget::cget $path -values]
     set value  [Entry::cget $path.e -text]
 
     if { [llength $values] } {
         # --- -values SpinBox ---
         return  [lsearch $values $value]
     } else {
-        set range [Widget::getoption $path -range]
-        set vmin  [lindex $range 0]
-        set vmax  [lindex $range 1]
-        set incr  [lindex $range 2]
+	foreach {vmin vmax incr} [Widget::cget $path -range] break
         if { ![catch {expr {double($value-$vmin)/$incr}} idx] &&
              $idx == int($idx) } {
             return [expr {int($idx)}]
@@ -316,7 +296,7 @@ proc SpinBox::_modify_value { path direction reason } {
         SpinBox::setvalue $path $direction
     }
     if { ($reason == "disarm" || $reason == "activate") &&
-         [set cmd [Widget::getoption $path -modifycmd]] != "" } {
+         [set cmd [Widget::cget $path -modifycmd]] != "" } {
         uplevel \#0 $cmd
     }
 }
@@ -327,14 +307,11 @@ proc SpinBox::_modify_value { path direction reason } {
 proc SpinBox::_test_options { path } {
     variable _widget
 
-    set values [Widget::getoption $path -values]
+    set values [Widget::cget $path -values]
     if { [llength $values] } {
         set _widget($path,curval) [lindex $values 0]
     } else {
-        set range [Widget::getoption $path -range]
-        set vmin  [lindex $range 0]
-        set vmax  [lindex $range 1]
-        set incr  [lindex $range 2]
+	foreach {vmin vmax incr} [Widget::cget $path -range] break
         if { [catch {expr {int($vmin)}}] } {
             set vmin 0
         }
@@ -344,7 +321,7 @@ proc SpinBox::_test_options { path } {
         if { [catch {expr {$incr<0}} res] || $res } {
             set incr 1
         }
-        Widget::setoption $path -range [list $vmin $vmax $incr]
+        Widget::configure $path [list -range [list $vmin $vmax $incr]]
         set _widget($path,curval) $vmin
     }
 }

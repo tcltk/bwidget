@@ -22,10 +22,10 @@ namespace eval ButtonBox {
         {-background  TkResource ""         0 frame}
         {-orient      Enum       horizontal 1 {horizontal vertical}}
         {-homogeneous Boolean    1          1}
-        {-spacing     Int        10         0 {=0}}
+        {-spacing     Int        10         0 "%d >= 0"}
         {-padx        TkResource ""         0 button}
         {-pady        TkResource ""         0 button}
-        {-default     Int        -1         0 {=-1}} 
+        {-default     Int        -1         0 "%d >= -1"} 
         {-bg          Synonym    -background}
     }
 

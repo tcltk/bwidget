@@ -18,15 +18,15 @@
 namespace eval PanedWindow {
     namespace eval Pane {
         Widget::declare PanedWindow::Pane {
-            {-minsize Int 0 0 {=0}}
-            {-weight  Int 1 0 {=0}}
+            {-minsize Int 0 0 "%d >= 0"}
+            {-weight  Int 1 0 "%d >= 0"}
         }
     }
 
     Widget::declare PanedWindow {
         {-side       Enum       top 1 {top left bottom right}}
-        {-width      Int        10  1 {=6 ""}}
-        {-pad        Int        4   1 {=0 ""}}
+        {-width      Int        10  1 "%d >=6"}
+        {-pad        Int        4   1 "%d >= 0"}
         {-background TkResource ""  0 frame}
         {-bg         Synonym    -background}
     }
@@ -47,8 +47,7 @@ proc PanedWindow::create { path args } {
 
     Widget::init PanedWindow $path $args
 
-    frame $path -background [Widget::getoption $path -background] \
-		-class PanedWindow
+    frame $path -background [Widget::cget $path -background] -class PanedWindow
     set _panedw($path,nbpanes) 0
 
     bind $path <Configure> "PanedWindow::_realize $path %w %h"
