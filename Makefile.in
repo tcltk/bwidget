@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.3 1999/09/14 05:44:58 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.4 1999/09/17 23:22:30 wart Exp $
 
 
 BWIDGET_SOURCES = \
@@ -83,7 +83,6 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
-TCLSH = @TCLSH@
 PROWRAP = @PROWRAP@
 AUTOCONF = autoconf
 CYGPATH=@CYGPATH@

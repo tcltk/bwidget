@@ -39,15 +39,5 @@ esac
 
 AC_SUBST(CYGPATH)
 
-#--------------------------------------------------------------------
-# Find tclsh so that we can run pkg_mkIndex to generate the pkgIndex.tcl
-# file during the install process.  Don't run the TCLSH through
-# ${CYGPATH} because it's being used directly by make.
-# Require that we use a tclsh shell version 8.2 or later since earlier
-# versions have bugs in the pkg_mkIndex routine.
-#--------------------------------------------------------------------
-
-SC_PROG_TCLSH
-
 AC_OUTPUT([Makefile],
 	chmod +x ${srcdir}/install-sh ${srcdir}/mkinstalldirs)
