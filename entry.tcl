@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.19 2003/11/11 00:27:43 damonc Exp $
+#  $Id: entry.tcl,v 1.20 2003/11/17 20:15:59 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -109,7 +109,7 @@ proc Entry::create { path args } {
     }
     if { [string equal $state "disabled"] } {
         $path configure \
-            -foreground [Widget::getMegawidgetOption $path -disabledforeground]
+            -foreground [Widget::getMegawidgetOption $path -disabledforeground] \
             -background [Widget::getMegawidgetOption $path -disabledbackground]
     } else {
 	$path configure \
