@@ -16,7 +16,10 @@ if { $tcl_platform(platform) == "windows" } {
 
 option read [file join $::BWIDGET::LIBRARY "lang" "en.rc"]
 
-bind Entry <<TraverseIn>> { %W selection range 0 end; %W icursor end }
+## Add a TraverseIn binding to standard Tk widgets to handle some of
+## the BWidget-specific things we do.
+bind Entry   <<TraverseIn>> { %W selection range 0 end; %W icursor end }
+bind Spinbox <<TraverseIn>> { %W selection range 0 end; %W icursor end }
 
 bind all <Key-Tab>       { Widget::traverseTo [Widget::focusNext %W] }
 bind all <Shift-Key-Tab> { Widget::traverseTo [Widget::focusPrev %W] }
