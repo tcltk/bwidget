@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.10 2002/06/04 22:03:24 hobbs Exp $
+#  $Id: dialog.tcl,v 1.11 2002/06/04 22:27:44 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -280,7 +280,8 @@ proc Dialog::draw { path {focus ""} {overrideredirect 0} {geometry ""}} {
     # As seen on Windows systems *sigh*
     # When the toplevel is withdrawn, the tkwait command will wait forever.
     #  So, check that we are not withdrawn
-    if {[wm state [winfo toplevel $parent]] != "withdrawn"} {
+    if {![winfo exists $parent] || \
+	    ([wm state [winfo toplevel $parent]] != "withdrawn")} {
 	tkwait visibility $path
     }
     BWidget::focus set $path
