@@ -1,3 +1,7 @@
+2003-01-17  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* labelentry.tcl: fixed -textvariable option [bug #649383]
+
 2002-10-14  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* pkgIndex.tcl:
