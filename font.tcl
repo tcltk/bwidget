@@ -1,7 +1,7 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  font.tcl
 #  This file is part of Unifix BWidget Toolkit
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - SelectFont::create
 #     - SelectFont::configure
@@ -12,7 +12,7 @@
 #     - SelectFont::_update
 #     - SelectFont::_getfont
 #     - SelectFont::_init
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval SelectFont {
     Dialog::use
@@ -154,7 +154,7 @@ proc SelectFont::create { path args } {
 	    set fam "preset"
 	    append fam [Widget::getoption "$path#SelectFont" -families]
 	}
-        eval $lbf insert end $_families($fam)
+        eval [list $lbf insert end] $_families($fam)
         set script "set SelectFont::$path\(family\) \[%W curselection\]; SelectFont::_update $path"
         bind $lbf <ButtonRelease-1> $script
         bind $lbf <space>           $script
@@ -168,7 +168,7 @@ proc SelectFont::create { path args } {
                        -height 5 -width 6 -exportselection false -selectmode browse]
         ScrolledWindow::setwidget $sw $lbs
         LabelFrame::configure $labf2 -focus $lbs
-        eval $lbs insert end $_sizes
+        eval [list $lbs insert end] $_sizes
         set script "set SelectFont::$path\(size\) \[%W curselection\]; SelectFont::_update $path"
         bind $lbs <ButtonRelease-1> $script
         bind $lbs <space>           $script
@@ -428,19 +428,17 @@ proc SelectFont::_update { path } {
         $path:cmd configure -cursor watch
     }
     if { [Widget::getoption "$path#SelectFont" -type] == "dialog" } {
-        set font [list \
-                      [lindex $_families($fams) $data(family)] \
-                      [lindex $_sizes $data(size)]]
+        set font [list [lindex $_families($fams) $data(family)] \
+		[lindex $_sizes $data(size)]]
     } else {
         set font [list $data(family) $data(size)]
     }
     foreach st $_styles {
         if { $data($st) } {
             lappend font $st
-        } else {
-	    if { [info exists _styleOff($st)] } {
-		lappend font $_styleOff($st)
-	    }
+        } elseif {[info exists _styleOff($st)]} {
+	    # This adds the default bold/italic value to a font
+	    #lappend font $_styleOff($st)
 	}
     }
     Widget::setoption "$path#SelectFont" -font $font
@@ -463,8 +461,8 @@ proc SelectFont::_getfont { path } {
     upvar 0  $path data
 
     array set font [font actual [Widget::getoption "$path#SelectFont" -font]]
-    set data(bold)    [expr {[string compare $font(-weight) "normal"] != 0}]
-    set data(italic)  [expr {[string compare $font(-slant)  "roman"]  != 0}]
+    set data(bold)       [expr {![string equal $font(-weight) "normal"]}]
+    set data(italic)     [expr {![string equal $font(-slant)  "roman"]}]
     set data(underline)  $font(-underline)
     set data(overstrike) $font(-overstrike)
     set _styles [Widget::getoption "$path#SelectFont" -styles]

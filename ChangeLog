@@ -1,3 +1,10 @@
+2003-02-17  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* font.tcl: comment out the adding of default style bits for bold
+	and italic.  The allows setting the font to something like
+	"Courier 8", clicking B on and off and getting "Courier 8" back
+	again (otherwise gave "Courier 8 normal roman").
+
 2003-02-08  Damon Courtney <damon@unreality.com>
 	* BWman/SelectColor.html
 	* color.tcl:   Cleaned up some of the documentation of SelectColor
