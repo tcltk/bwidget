@@ -1,7 +1,7 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  panedw.tcl
 #  This file is part of Unifix BWidget Toolkit
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - PanedWindow::create
 #     - PanedWindow::configure
@@ -14,7 +14,7 @@
 #     - PanedWindow::_move_sash
 #     - PanedWindow::_end_move_sash
 #     - PanedWindow::_realize
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 # JDC: added option to choose behavior of weights
 #    -weights extra : only apply weights to extra space (as current (>= 1.3.1) with grid command)
@@ -46,9 +46,9 @@ namespace eval PanedWindow {
 
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::create { path args } {
     variable _panedw
 
@@ -56,20 +56,22 @@ proc PanedWindow::create { path args } {
 
     frame $path -background [Widget::cget $path -background] -class PanedWindow
     set _panedw($path,nbpanes) 0
+    set _panedw($path,weights) ""
 
-    bind $path <Configure> "PanedWindow::_realize $path %w %h"
-    bind $path <Destroy>   "PanedWindow::_destroy $path"
+    bind $path <Configure> [list PanedWindow::_realize $path %w %h]
+    bind $path <Destroy>   [list PanedWindow::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval PanedWindow::\$cmd $path \$args\]"
+    proc ::$path { cmd args } "return \[eval PanedWindow::\$cmd\
+	    [list $path] \$args\]"
 
     return $path
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::configure { path args } {
     variable _panedw
 
@@ -91,17 +93,17 @@ proc PanedWindow::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::add
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::add { path args } {
     variable _panedw
 
@@ -194,14 +196,15 @@ proc PanedWindow::add { path args } {
     }
     pack $user -fill both -expand yes
     incr _panedw($path,nbpanes)
+    _realize $path [winfo width $path] [winfo height $path]
 
     return $user
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::getframe
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::getframe { path index } {
     if { [winfo exists $path.f$index.frame] } {
         return $path.f$index.frame
@@ -209,9 +212,9 @@ proc PanedWindow::getframe { path index } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::_destroy
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::_destroy { path } {
     variable _panedw
 
@@ -224,9 +227,9 @@ proc PanedWindow::_destroy { path } {
 }
     
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::_beg_move_sash
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::_beg_move_sash { path num x y } {
     variable _panedw
 
@@ -266,16 +269,18 @@ proc PanedWindow::_beg_move_sash { path num x y } {
 
         update idletasks
         grab set $top
-        bind $top <ButtonRelease-1> "PanedWindow::_end_move_sash $path $top $num $ymin $ymax %Y rooty height"
-        bind $top <Motion>          "PanedWindow::_move_sash $top $ymin $ymax %Y +$xr+%%d"
+        bind $top <ButtonRelease-1> [list PanedWindow::_end_move_sash \
+		$path $top $num $ymin $ymax %Y rooty height]
+        bind $top <Motion>          [list PanedWindow::_move_sash \
+		$top $ymin $ymax %Y +$xr+%%d]
         _move_sash $top $ymin $ymax $y "+$xr+%d"
     }
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::_move_sash
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::_move_sash { top min max v form } {
 
     if { $v < $min } {
@@ -287,9 +292,9 @@ proc PanedWindow::_move_sash { top min max v form } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::_end_move_sash
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::_end_move_sash { path top num min max v rootv size } {
     variable _panedw
 
@@ -321,9 +326,9 @@ proc PanedWindow::_end_move_sash { path top num min max v rootv size } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command PanedWindow::_realize
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc PanedWindow::_realize { path width height } {
     variable _panedw
 
@@ -341,11 +346,12 @@ proc PanedWindow::_realize { path width height } {
     bind $path <Configure> {}
 
     _apply_weights $path
+    return
 }
 
-# ------------------------------------------------------------------------------
-#  Command PanedWindow::apply_weights
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+#  Command PanedWindow::_apply_weights
+# ----------------------------------------------------------------------------
 proc PanedWindow::_apply_weights { path } {
     variable _panedw
 
@@ -374,4 +380,5 @@ proc PanedWindow::_apply_weights { path } {
 	set ps [expr {int($rw / $tw * $s)}]
 	$path.f$i configure -$size $ps
     }    
+    return
 }
