@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: entry.tcl,v 1.2 2000/02/08 17:48:17 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -28,10 +28,15 @@ namespace eval Entry {
         {-textvariable       String     "" 0}
         {-editable           Boolean    1  0}
         {-command            String     "" 0}
+        {-invalidcommand     String     "" 0 entry}
+        {-validate           Enum     none 0 {none focus focusin focusout key all}}
+        {-validatecommand    String     "" 0 entry}
         {-relief             TkResource "" 0 entry}
         {-borderwidth        TkResource "" 0 entry}
         {-fg                 Synonym -foreground}
         {-bd                 Synonym -borderwidth}
+        {-invcmd             Synonym -invalidcommand}
+        {-vcmd               Synonym -validatecommand}
     }
 
     DynamicHelp::include Entry balloon
@@ -96,6 +101,21 @@ proc Entry::create { path args } {
     }
     if { ![string compare $state "disabled"] } {
         $path configure -foreground [Widget::getoption $path -disabledforeground]
+    }
+
+    set validate [Widget::getoption $path -validate]
+    if { ![string equal $validate "none"]} {
+	set validatecommand [Widget::getoption $path -validatecommand]
+	set invalidcommand [Widget::getoption $path -invalidcommand]
+
+	$path configure -validate $validate
+
+	if { ![string equal $validatecommand ""]} {
+	    $path configure -validatecommand $validatecommand
+	}
+	if { ![string equal $invalidcommand ""]} {
+	    $path configure -invalidcommand $invalidcommand
+	}
     }
 
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd 1
