@@ -13,6 +13,7 @@
 package require Tk 8.3
 
 if {0} {
+    proc sample {} {
     # sample usage
     eval destroy [winfo children .]
     pack [text .t -width 0 -height 0] -fill both -expand 1
@@ -24,8 +25,7 @@ if {0} {
 
     # Specify -width 1 for the label widget so it truncates nicely
     # instead of requesting large sizes for long messages
-    set w [label $f.status -bd 1 -relief sunken -width 1 -anchor w \
-	       -textvariable ::STATUS]
+    set w [label $f.status -width 1 -anchor w -textvariable ::STATUS]
     set ::STATUS "This is a status message"
     # give the entry weight, as we want it to be the one that expands
     $sbar add $w -weight 1
@@ -35,24 +35,25 @@ if {0} {
 	       -variable ::PROGRESS -bd 1 -relief sunken]
     set ::PROGRESS 50
     $sbar add $w
+    }
 }
 
 namespace eval StatusBar {
     Widget::define StatusBar statusbar
 
     Widget::declare StatusBar {
-        {-background  TkResource ""     0 frame}
-        {-borderwidth TkResource 0      0 frame}
-        {-relief      TkResource flat   0 frame}
-        {-showseparator Boolean  1      0}
-        {-showresizesep Boolean  0      0}
-        {-showresize  Boolean    1      0}
-        {-width       TkResource 100    0 frame}
-        {-height      TkResource 18     0 frame}
-	{-ipad        String     1      0}
-	{-pad         String     0      0}
-        {-bg          Synonym    -background}
-        {-bd          Synonym    -borderwidth}
+	{-background  TkResource ""	0 frame}
+	{-borderwidth TkResource 0	0 frame}
+	{-relief      TkResource flat	0 frame}
+	{-showseparator Boolean	 1	0}
+	{-showresizesep Boolean	 0	0}
+	{-showresize  Boolean	 1	0}
+	{-width	      TkResource 100	0 frame}
+	{-height      TkResource 18	0 frame}
+	{-ipad	      String	 1	0}
+	{-pad	      String	 0	0}
+	{-bg	      Synonym	 -background}
+	{-bd	      Synonym	 -borderwidth}
     }
 
     # -background, -borderwidth and -relief apply to outer frame, but relief
@@ -115,6 +116,7 @@ proc StatusBar::create { path args } {
 	{ipadx ipady} [_padval [Widget::cget $path -ipad]] { break }
 
     set bg [Widget::cget $path -background]
+    $path configure -bg $bg
     if {[package provide tile] != ""} {
 	set sbar   [tile::frame $path.sbar -padding [list $padx $pady]]
     } else {
@@ -125,8 +127,9 @@ proc StatusBar::create { path args } {
     } else {
 	set cursor sizing; # bottom_right_corner ??
     }
-    set resize [eval [list label $path.resize] $maps(.resize) -bg $bg \
-		    -borderwidth 0 -relief flat -anchor se -cursor $cursor]
+    set resize [eval [list label $path.resize] $maps(.resize) \
+		    [list -bg $bg -borderwidth 0 -relief flat -anchor se \
+			 -cursor $cursor -anchor se -padx 0 -pady 0]]
     if {$HaveMarlett} {
 	$resize configure -font "Marlett -16" -text \u006f
     } else {
@@ -144,7 +147,7 @@ proc StatusBar::create { path args } {
     grid $fsep   -row 0 -column 0 -columnspan 3 -sticky ew
     grid $sbar   -row 1 -column 0 -sticky news
     grid $sep    -row 1 -column 1 -sticky ns -padx $ipadx -pady $ipady
-    grid $resize -row 1 -column 2 -sticky se -padx $ipadx -pady $ipady
+    grid $resize -row 1 -column 2 -sticky news
     grid columnconfigure $path 0 -weight 1
     if {![Widget::cget $path -showseparator]} {
 	grid remove $fsep
@@ -215,6 +218,9 @@ proc StatusBar::configure { path args } {
     }
     if {$chbg} {
 	set bg [Widget::cget $path -background]
+	$path:cmd configure -bg $bg
+	$path.sbar configure -bg $bg
+	$path.resize configure -bg $bg
     }
     return $res
 }
