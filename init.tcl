@@ -2,7 +2,6 @@
 if { $tcl_platform(platform) == "windows" } {
     option add *Listbox.background      SystemWindow widgetDefault
     option add *ListBox.background      SystemWindow widgetDefault
-    option add *Tree.background         SystemWindow widgetDefault
     option add *Button.padY             0 widgetDefault
     option add *ButtonBox.padY          0 widgetDefault
     option add *Dialog.padY             0 widgetDefault

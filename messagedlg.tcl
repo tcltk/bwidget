@@ -10,19 +10,26 @@ namespace eval MessageDlg {
     Dialog::use
 
     Widget::tkinclude MessageDlg message .frame.msg \
-        remove     {-cursor -highlightthickness -highlightbackground -highlightcolor \
-                        -relief -borderwidth -takefocus -textvariable} \
-        rename     {-text -message} \
-        initialize {-aspect 800 -anchor c -justify center}
+	    remove [list -cursor -highlightthickness		\
+		-highlightbackground -highlightcolor		\
+		-relief -borderwidth -takefocus -textvariable	\
+		] \
+	    rename [list -text -message]			\
+	    initialize [list -aspect 800 -anchor c -justify center]
 
     Widget::bwinclude MessageDlg Dialog :cmd \
-        remove {-modal -image -bitmap -side -anchor -separator \
-                    -homogeneous -padx -pady -spacing}
+	    remove [list -modal -image -bitmap -side -anchor -separator \
+		-homogeneous -padx -pady -spacing]
 
     Widget::declare MessageDlg {
         {-icon       Enum   info 0 {none error info question warning}}
-        {-type       Enum   user 0 {abortretryignore ok okcancel retrycancel yesno yesnocancel user}}
+        {-type       Enum   user 0 {abortretryignore ok okcancel \
+		retrycancel yesno yesnocancel user}}
         {-buttons    String ""   0}
+    }
+
+    Widget::addmap MessageDlg "" tkMBox {
+	-parent {} -message {} -default {} -title {}
     }
 
     proc ::MessageDlg { path args } { return [eval MessageDlg::create $path $args] }
@@ -36,10 +43,15 @@ namespace eval MessageDlg {
 proc MessageDlg::create { path args } {
     global tcl_platform
 
-    Widget::init MessageDlg "$path#Message" $args
-    set type  [Widget::getoption "$path#Message" -type]
-    set title [Widget::getoption "$path#Message" -title]
-    set icon  [Widget::getoption "$path#Message" -icon]
+    array set maps [list MessageDlg {} :cmd {} .frame.msg {} tkMBox {}]
+    array set maps [Widget::parseArgs MessageDlg $args]
+    Widget::initFromODB MessageDlg "$path#Message" $maps(MessageDlg)
+
+    array set dialogArgs $maps(:cmd)
+
+    set type  [Widget::cget "$path#Message" -type]
+    set icon  [Widget::cget "$path#Message" -icon]
+
     set defb  -1
     set canb  -1
     switch -- $type {
@@ -49,63 +61,71 @@ proc MessageDlg::create { path args } {
         retrycancel      {set lbut {retry cancel}; set defb 0; set canb 1}
         yesno            {set lbut {yes no}; set defb 0; set canb 1}
         yesnocancel      {set lbut {yes no cancel}; set defb 0; set canb 2}
-        user             {set lbut [Widget::getoption "$path#Message" -buttons]}
+        user             {set lbut [Widget::cget "$path#Message" -buttons]}
     }
-    if { [Widget::getoption "$path#Message" -default] == -1 } {
-        Widget::setoption "$path#Message" -default $defb
+
+    # If the user didn't specify a default button, use our type-specific
+    # default, adding its flag/value to the "user" settings and to the tkMBox
+    # settings
+    if { ![info exists dialogArgs(-default)] } {
+	lappend maps(:cmd) -default $defb
+	lappend maps(tkMBox) -default $defb
     }
-    if { [Widget::getoption "$path#Message" -cancel] == -1 } {
-        Widget::setoption "$path#Message" -cancel $canb
+    if { ![info exists dialogArgs(-cancel)] } {
+        lappend maps(:cmd) -cancel $canb
     }
-    if { $title == "" } {
+
+    # Same with title as with default
+    if { ![info exists dialogArgs(-title)] } {
         set frame [frame $path -class MessageDlg]
         set title [option get $frame "${icon}Title" MessageDlg]
         destroy $frame
         if { $title == "" } {
             set title "Message"
         }
+	lappend maps(:cmd) -title $title
+	lappend maps(tkMBox) -title $title
     }
-    Widget::setoption "$path#Message" -title $title
-    if { $tcl_platform(platform) == "unix" || $type == "user" } {
+
+    # Create the "user" type dialog
+    if { $type == "user" } {
         if { $icon != "none" } {
             set image [Bitmap::get $icon]
         } else {
             set image ""
         }
-        eval Dialog::create $path [Widget::subcget "$path#Message" :cmd] \
-            -image $image -modal local -side bottom -anchor c
-        set idbut 0
+        eval Dialog::create $path $maps(:cmd) -image $image -modal local \
+		-side bottom -anchor c
         foreach but $lbut {
             Dialog::add $path -text $but -name $but
         }
         set frame [Dialog::getframe $path]
 
-        eval message $frame.msg [Widget::subcget "$path#Message" .frame.msg] \
-            -relief flat -borderwidth 0 -highlightthickness 0 -textvariable {""}
+        eval message $frame.msg $maps(.frame.msg) \
+		-relief flat -borderwidth 0 -highlightthickness 0 \
+		-textvariable {{}}
         pack  $frame.msg -side left -padx 3m -pady 1m -fill x -expand yes
 
         set res [Dialog::draw $path]
+	destroy $path
     } else {
-        set parent [Widget::getoption "$path#Message" -parent]
-        set def    [lindex $lbut [Widget::getoption "$path#Message" -default]]
-        set opt    [list \
-                        -message [Widget::getoption "$path#Message" -message] \
-                        -type    $type  \
-                        -title   $title]
-        if { [winfo exists $parent] } {
-           lappend opt -parent $parent
-        }
-        if { $def != "" } {
-           lappend opt -default $def
-        }
-        if { $icon != "none" } {
-           lappend opt -icon $icon
-        }
-        set res [eval tk_messageBox $opt]
-        set res [lsearch $lbut $res]
+	# Do some translation of args into tk_messageBox syntax, then create
+	# the tk_messageBox
+	array set tkMBoxArgs $maps(tkMBox)
+	set tkMBoxArgs(-default) [lindex $lbut $tkMBoxArgs(-default)]
+	if { ![string equal $icon "none"] } {
+	    set tkMBoxArgs(-icon) $icon
+	}
+	if { [info exists tkMBoxArgs(-parent)] } {
+	    if { ![winfo exists tkMBoxArgs(-parent)] } {
+		unset tkMBoxArgs(-parent)
+	    }
+	}
+	set tkMBoxArgs(-type) $type
+	puts "[array get tkMBoxArgs]"
+	set res [eval tk_messageBox [array get tkMBoxArgs]]
+	set res [lsearch $lbut $res]
     }
     Widget::destroy "$path#Message"
-    destroy $path
-
     return $res
 }

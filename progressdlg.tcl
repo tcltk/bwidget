@@ -40,23 +40,25 @@ namespace eval ProgressDlg {
 #  Command ProgressDlg::create
 # ------------------------------------------------------------------------------
 proc ProgressDlg::create { path args } {
-    Widget::init ProgressDlg "$path#ProgressDlg" $args
+    array set maps [list ProgessDlg {} :cmd {} .frame.msg {} .frame.pb {}]
+    array set maps [Widget::parseArgs ProgressDlg $args]
+    
+    eval Dialog::create $path $maps(:cmd) -image [Bitmap::get hourglass] \
+	    -modal none -side bottom -anchor c -class ProgressDlg
 
-    eval Dialog::create $path [Widget::subcget "$path#ProgressDlg" :cmd] \
-        -image [Bitmap::get hourglass] -modal none -side bottom -anchor c
+    Widget::initFromODB ProgressDlg "$path#ProgressDlg" $maps(ProgressDlg)
+
     wm protocol $path WM_DELETE_WINDOW {;}
 
     set frame [Dialog::getframe $path]
     bind $frame <Destroy> "Widget::destroy $path#ProgressDlg"
     $frame configure -cursor watch
 
-    eval label $frame.msg [Widget::subcget "$path#ProgressDlg" .frame.msg] \
-        -relief flat -borderwidth 0 -highlightthickness 0 -anchor w -justify left
+    eval label $frame.msg $maps(.frame.msg) -relief flat -borderwidth 0 \
+	    -highlightthickness 0 -anchor w -justify left
     pack $frame.msg -side top -pady 3m -anchor nw -fill x -expand yes
 
-    set var [Widget::cget "$path#ProgressDlg" -variable]
-    eval ProgressBar::create $frame.pb [Widget::subcget "$path#ProgressDlg" .frame.pb] \
-        -width 100
+    eval ProgressBar::create $frame.pb $maps(.frame.pb) -width 100
     pack $frame.pb -side bottom -anchor w -fill x -expand yes
 
     set stop [Widget::cget "$path#ProgressDlg" -stop]

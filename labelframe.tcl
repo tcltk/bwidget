@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  labelframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelframe.tcl,v 1.2 2000/02/26 01:56:40 ericm Exp $
+#  $Id: labelframe.tcl,v 1.3 2000/03/01 02:12:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelFrame::create
@@ -12,9 +12,9 @@
 # ------------------------------------------------------------------------------
 
 namespace eval LabelFrame {
-    Label::use
+    BWLabel::use
 
-    Widget::bwinclude LabelFrame Label .l \
+    Widget::bwinclude LabelFrame BWLabel .l \
         remove     {
             -highlightthickness -highlightcolor -highlightbackground
             -takefocus -relief -borderwidth
@@ -35,7 +35,7 @@ namespace eval LabelFrame {
 
     Widget::syncoptions LabelFrame Label .l {-text {} -underline {}}
 
-    bind BwLabelFrame <FocusIn> {Label::setfocus %W.l}
+    bind BwLabelFrame <FocusIn> {BWLabel::setfocus %W.l}
     bind BwLabelFrame <Destroy> {Widget::destroy %W; rename %W {}}
 
     proc ::LabelFrame { path args } { return [eval LabelFrame::create $path $args] }
@@ -53,7 +53,7 @@ proc LabelFrame::create { path args } {
 	    -relief flat -bd 0 -takefocus 0 -highlightthickness 0 \
 	    -class LabelFrame]
 
-    set label [eval Label::create $path.l [Widget::subcget $path .l] \
+    set label [eval BWLabel::create $path.l [Widget::subcget $path .l] \
                    -takefocus 0 -highlightthickness 0 -relief flat -borderwidth 0 \
                    -dropenabled 0 -dragenabled 0]
     set frame [eval frame $path.f [Widget::subcget $path .f] \

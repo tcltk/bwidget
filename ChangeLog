@@ -1,4 +1,50 @@
+2000-02-29  Eric Melski  <ericm@scriptics.com>
+
+	* widget.tcl: Added bits to handle
+	$path#subclass_that_inherits_from_other_bw_class megawidget names.
+
+	* passwddlg.tcl:
+	* progressdlg.tcl: 
+	* progressbar.tcl: Changed init to parseArgs/initFromODB style.
+
+	* pkgIndex.tcl: Changed Label -> BWLabel
+
+	* messagedlg.tcl: Changed initialization to parseArgs/initFromODB
+	style.  Changed to use tk_messageBox on UNIX.
+	
+	* labelframe.tcl: Updated to use BWLabel instead of Label.
+
+	* labelentry.tcl: Added -class LabelEntry to widget.
+
+	* label.tcl: Changed class name to BWLabel (to avoid option db
+	clashes with tk labels), changed initialization	to
+	parseArgs/initFromODB style.
+
+	* init.tcl: dropped obsolete Tree option from init.
+
+	* dialog.tcl: changed initialization to parseArgs/initFromODB style.
+
+	* notebook.tcl: Added -bd 0 -highlightthickness 0 -relief flat to
+	the notebook container frame so geometries are correct.
+
+	* entry.tcl: Fixed a conflict with configuring the Entry -text and
+	textvariables.
+
+	* dialog.tcl: added a -class option to the dialog, to allow the
+	class of the dialog to be set (this enables proper optiondb use
+	for things like the PasswdDlg).
+
 2000-02-28  Eric Melski  <ericm@scriptics.com>
+
+	* widget.tcl: Added Widget::varForOption function, which returns a 
+	variable name that can be used to trace changes to an option for a
+	particular megawidget (such as the -values option of a combobox).
+	
+	* entry.tcl: Made cget -text a little more efficient by
+	shortcircuiting in that case.
+
+	* combobox.tcl: Fixed bug #4248 by making the listbox use a
+	-listvariable instead of trying to micromanage the listbox contents.
 
 	* tests/entry.test: tests for the Entry widget.
 

@@ -9,7 +9,7 @@ package ifneeded BWidget 1.2.1 "\
 {button.tcl source {Button Button::create Button::use}}
 {buttonbox.tcl source {ButtonBox ButtonBox::create ButtonBox::use}}
 {combobox.tcl source {ComboBox ComboBox::create ComboBox::use}}
-{label.tcl source {Label Label::create Label::use}}
+{label.tcl source {Label BWLabel::create BWLabel::use}}
 {entry.tcl source {Entry Entry::create Entry::use}}
 {pagesmgr.tcl source {PagesManager PagesManager::create PagesManager::use}}
 {notebook.tcl source {NoteBook NoteBook::create NoteBook::use}}

@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.2 2000/02/23 18:54:06 ericm Exp $
+#  $Id: passwddlg.tcl,v 1.3 2000/03/01 02:12:40 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -18,39 +18,39 @@ namespace eval PasswdDlg {
     LabelEntry::use
 
     Widget::bwinclude PasswdDlg Dialog :cmd \
-        remove     {-image -bitmap -side -default -cancel -separator} \
-        initialize {-modal local -anchor c}
-
+	    remove     {-image -bitmap -side -default -cancel -separator} \
+	    initialize {-modal local -anchor c}
+    
     Widget::bwinclude PasswdDlg LabelEntry .frame.lablog \
-        remove {
-            -command -editable -justify -name -show -side -state -takefocus
-            -width -xscrollcommand -padx -pady
-            -dragenabled -dragendcmd -dragevent -draginitcmd -dragtype
-            -dropenabled -dropcmd -dropovercmd -droptypes
-        } \
-        prefix     {login -helptext -helpvar -label -text -textvariable -underline} \
-        initialize {-relief sunken -borderwidth 2 -labelanchor w -width 15 -loginlabel "Login"}
-
-    Widget::bwinclude PasswdDlg LabelEntry .frame.labpass \
-        remove {
-            -command -width -show -side -takefocus -xscrollcommand
-            -dragenabled -dragendcmd -dragevent -draginitcmd -dragtype
-            -dropenabled -dropcmd -dropovercmd -droptypes -justify -padx -pady -name
-        } \
-        prefix {passwd -editable -helptext -helpvar -label -state -text -textvariable -underline} \
-        initialize {-relief sunken -borderwidth 2 -labelanchor w -width 15 -passwdlabel "Password"}
-
+	    remove [list -command -editable -justify -name -show -side	\
+		-state -takefocus -width -xscrollcommand -padx -pady	\
+		-dragenabled -dragendcmd -dragevent -draginitcmd	\
+		-dragtype -dropenabled -dropcmd -dropovercmd -droptypes	\
+		] \
+	    prefix [list login -helptext -helpvar -label -text 		\
+		-textvariable -underline				\
+		] \
+	    initialize [list -relief sunken -borderwidth 2		\
+		-labelanchor w -width 15 -loginlabel "Login"		\
+		]
+    
+    Widget::bwinclude PasswdDlg LabelEntry .frame.labpass		\
+	    remove [list -command -width -show -side -takefocus		\
+		-xscrollcommand -dragenabled -dragendcmd -dragevent	\
+		-draginitcmd -dragtype -dropenabled -dropcmd		\
+		-dropovercmd -droptypes -justify -padx -pady -name	\
+		] \
+	    prefix [list passwd -editable -helptext -helpvar -label	\
+		-state -text -textvariable -underline			\
+		] \
+	    initialize [list -relief sunken -borderwidth 2		\
+		-labelanchor w -width 15 -passwdlabel "Password"	\
+		]
+    
     Widget::declare PasswdDlg {
         {-type        Enum       ok           0 {ok okcancel}}
         {-labelwidth  TkResource -1           0 {label -width}}
         {-command     String     ""           0}
-    }
-
-    Widget::syncoptions PasswdDlg LabelEntry .frame.lablog  {
-        -logintext -text -loginlabel -label -loginunderline -underline
-    }
-    Widget::syncoptions PasswdDlg LabelEntry .frame.labpass {
-        -passwdtext -text -passwdlabel -label -passwdunderline -underline
     }
 
     proc ::PasswdDlg { path args } { return [eval PasswdDlg::create $path $args] }
@@ -63,12 +63,16 @@ namespace eval PasswdDlg {
 # -----------------------------------------------------------------------------
 proc PasswdDlg::create { path args } {
 
-    Widget::init PasswdDlg "$path#PasswdDlg" $args
-    set type      [Widget::getoption "$path#PasswdDlg" -type]
-    set loglabel  [Widget::getoption "$path#PasswdDlg" -loginlabel]
-    set passlabel [Widget::getoption "$path#PasswdDlg" -passwdlabel]
-    set labwidth  [Widget::getoption "$path#PasswdDlg" -labelwidth]
-    set cmd       [Widget::getoption "$path#PasswdDlg" -command]
+    array set maps [list PasswdDlg {} :cmd {} .frame.lablog {} \
+	    .frame.labpass {}]
+    array set maps [Widget::parseArgs PasswdDlg $args]
+
+    Widget::initFromODB PasswdDlg "$path#PasswdDlg" $maps(PasswdDlg)
+
+    # Extract the PasswdDlg megawidget options (those that don't map to a
+    # subwidget)
+    set type      [Widget::cget "$path#PasswdDlg" -type]
+    set cmd       [Widget::cget "$path#PasswdDlg" -command]
 
     set defb -1
     set canb -1
@@ -77,7 +81,7 @@ proc PasswdDlg::create { path args } {
         okcancel  { set lbut {ok cancel} ; set defb 0; set canb 1 }
     }
 
-    eval Dialog::create $path [Widget::subcget "$path#PasswdDlg" :cmd] \
+    eval Dialog::create $path $maps(:cmd) -class PasswdDlg \
         -image [Bitmap::get passwd] -side bottom -default $defb -cancel $canb
     foreach but $lbut {
         if { $but == "ok" && $cmd != "" } {
@@ -86,31 +90,27 @@ proc PasswdDlg::create { path args } {
             Dialog::add $path -text $but -name $but
         }
     }
+
     set frame [Dialog::getframe $path]
     bind $path  <Return>  ""
     bind $frame <Destroy> "Widget::destroy $path#PasswdDlg"
 
-    set lablog [eval LabelEntry::create $frame.lablog \
-                    [Widget::subcget "$path#PasswdDlg" .frame.lablog] \
-                    -label \"$loglabel\" -name login \
-                    -dragenabled 0 -dropenabled 0 \
-                    -command \"PasswdDlg::_verifonpasswd $path $frame.labpass\"]
+    set lablog [eval LabelEntry::create $frame.lablog $maps(.frame.lablog) \
+	    -name login -dragenabled 0 -dropenabled 0 \
+	    -command \"PasswdDlg::_verifonpasswd $path $frame.labpass\"]
 
-    set labpass [eval LabelEntry::create $frame.labpass \
-                     [Widget::subcget "$path#PasswdDlg" .frame.labpass] \
-                     -label \"$passlabel\" -name password -show "*" \
-                     -dragenabled 0 -dropenabled 0 \
-                     -command \"PasswdDlg::_verifonlogin $path $frame.lablog\"]
+    set labpass [eval LabelEntry::create $frame.labpass $maps(.frame.labpass) \
+	    -name password -show "*" -dragenabled 0 -dropenabled 0 \
+	    -command \"PasswdDlg::_verifonlogin $path $frame.lablog\"]
 
-    if { $labwidth == -1 } {
-        # les options -label sont mises a jour selon -name
-        set loglabel  [$lablog cget -label]
-        set passlabel [$labpass cget -label]
-        set labwidth  [PasswdDlg::_max [string length $loglabel] [string length $passlabel]]
-        incr labwidth 1
-        $lablog  configure -labelwidth $labwidth
-        $labpass configure -labelwidth $labwidth
-    }
+    # compute label width -- TODO: this should probably not override the
+    # cmdline arg
+    set loglabel  [$lablog cget -label]
+    set passlabel [$labpass cget -label]
+    set labwidth  [_max [string length $loglabel] [string length $passlabel]]
+    incr labwidth 1
+    $lablog  configure -labelwidth $labwidth
+    $labpass configure -labelwidth $labwidth
 
     proc ::$path { cmd args } "return \[eval PasswdDlg::\$cmd $path \$args\]"
 

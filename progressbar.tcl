@@ -30,7 +30,9 @@ namespace eval ProgressBar {
     }
 
     Widget::addmap ProgressBar "" :cmd {-background {} -width {} -height {}}
-    Widget::addmap ProgressBar "" .bar {-troughcolor -background -borderwidth {} -relief {}}
+    Widget::addmap ProgressBar "" .bar {
+	-troughcolor -background -borderwidth {} -relief {}
+    }
 
     variable _widget
 
@@ -45,12 +47,15 @@ namespace eval ProgressBar {
 proc ProgressBar::create { path args } {
     variable _widget
 
-    Widget::init ProgressBar $path $args
+    array set maps [list ProgressBar {} :cmd {} .bar {}]
+    array set maps [Widget::parseArgs ProgressBar $args]
+    eval frame $path $maps(:cmd) -class ProgressBar -bd 0 \
+	    -highlightthickness 0 -relief flat
+    Widget::initFromODB ProgressBar $path $maps(ProgressBar)
 
-    eval frame $path [Widget::subcget $path :cmd]
-    set c  [eval canvas $path.bar [Widget::subcget $path .bar] -highlightthickness 0]
-    set fg [Widget::getoption $path -foreground]
-    if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
+    set c  [eval canvas $path.bar $maps(.bar) -highlightthickness 0]
+    set fg [Widget::cget $path -foreground]
+    if { ![string compare [Widget::cget $path -orient] "horizontal"] } {
         $path.bar create rectangle -1 0 0 0 -fill $fg -outline $fg -tags rect
     } else {
         $path.bar create rectangle 0 1 0 0 -fill $fg -outline $fg -tags rect
@@ -58,7 +63,7 @@ proc ProgressBar::create { path args } {
 
     set _widget($path,val) 0
     set _widget($path,dir) 1
-    if { [set _widget($path,var) [Widget::getoption $path -variable]] != "" } {
+    if { [set _widget($path,var) [Widget::cget $path -variable]] != "" } {
         GlobalVar::tracevar variable $_widget($path,var) w "ProgressBar::_modify $path"
         after idle ProgressBar::_modify $path
     }

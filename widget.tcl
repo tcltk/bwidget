@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.7 2000/02/29 02:41:35 ericm Exp $
+#  $Id: widget.tcl,v 1.8 2000/03/01 02:12:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -168,6 +168,7 @@ proc Widget::tkinclude { class tkwidget subpath args } {
 		    set optionDbName "$subpath$optionDbName"
 		}
 		option add *${class}$optionDbName $value widgetDefault
+#		puts "TK: ${class}$optionDbName $value"
 		lappend exports($option) "$optionDbName"
 
 		# Store the forward and backward mappings for this
@@ -280,6 +281,7 @@ proc Widget::bwinclude { class subclass subpath args } {
 		    if { [info exists initialize($option)] } {
 			option add *${class}$optionDbName $value \
 				widgetDefault
+#			puts "BW: ${class}$optionDbName $value"
 		    }
 		    lappend exports($option) "$optionDbName"
 		}
@@ -379,12 +381,14 @@ proc Widget::declare { class optlist } {
             set classopt($option) [list TkResource $value $ro \
 		    [list $tkwidget $realopt]]
 	    set optionClass($option) [lindex [$foo configure $realopt] 1]
+#	    puts "DE: ${class}${optionDbName} $value"
 	    ::destroy $foo
             continue
         }
 
 	set optionDbName ".[lindex [_configure_option $option ""] 0]"
 	option add *${class}${optionDbName} $value widgetDefault
+#	puts "DE: ${class}${optionDbName} $value"
 	set exports($option) $optionDbName
         # for any other resource type, we keep original optdesc
         set classopt($option) [list $type $value $ro $arg]
@@ -577,7 +581,7 @@ proc Widget::initFromODB {class path options} {
     # We prefer to use the actual widget for option db queries, but if it
     # doesn't exist yet, do the next best thing:  create a widget of the
     # same class and use that.
-    set fpath $path
+    set fpath [_get_window $class $path]
     set rdbclass [string map [list :: ""] $class]
     if { ![winfo exists $path] } {
 	set fpath ".#BWidgetClass#$class"
@@ -666,6 +670,7 @@ proc Widget::configure { path options } {
         if { ![lindex $optdesc 2] } {
             set newval [$_optiontype($type) $option $value [lindex $optdesc 3]]
             if { [info exists classmap($option)] } {
+		set window [_get_window $class $window]
                 foreach {subpath subclass realopt} $classmap($option) {
                     if { [string length $subclass] } {
 			set curval [${subclass}::cget $window$subpath $realopt]
@@ -710,7 +715,7 @@ proc Widget::cget { path option } {
     }
 
     if { [info exists classmap($option)] } {
-	foreach {subpath class realopt} $classmap($option) {break}
+	foreach {subpath subclass realopt} $classmap($option) {break}
 	set path "[_get_window $class $path]$subpath"
 	return [$path cget $realopt]
     }

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.5 2000/02/29 22:05:22 ericm Exp $
+#  $Id: dialog.tcl,v 1.6 2000/03/01 02:12:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -36,7 +36,7 @@ namespace eval Dialog {
         {-parent      String     ""       0}
         {-side        Enum       bottom   1 {bottom left top right}}
         {-anchor      Enum       c        1 {n e w s c}}
-	{-class       String     ""       1}
+	{-class       String     Dialog   1}
     }
 
     Widget::addmap Dialog "" :cmd   {-background {}}
@@ -58,32 +58,45 @@ proc Dialog::create { path args } {
     global   tcl_platform
     variable _widget
 
-    Widget::init Dialog $path $args
-    set dialogClass [Widget::cget $path -class]
-    if { ![string compare $tcl_platform(platform) "unix"] } {
-        toplevel $path -relief raised -borderwidth 1 -class $dialogClass
-    } else {
-        toplevel $path -relief flat   -borderwidth 0 -class $dialogClass
+    array set maps [list Dialog {} .bbox {}]
+    array set maps [Widget::parseArgs Dialog $args]
+
+    # Check to see if the -class flag was specified
+    set dialogClass "Dialog"
+    array set dialogArgs $maps(Dialog)
+    if { [info exists dialogArgs(-class)] } {
+	set dialogClass $dialogArgs(-class)
     }
+
+    if { [string equal $tcl_platform(platform) "unix"] } {
+	set re raised
+	set bd 1
+    } else {
+	set re flat
+	set bd 0
+    }
+    toplevel $path -relief $re -borderwidth $bd -class $dialogClass
+
+    Widget::initFromODB Dialog $path $maps(Dialog)
+
     bindtags $path [list $path BwDialog all]
     wm overrideredirect $path 1
-    wm title $path [Widget::getoption $path -title]
-    set parent [Widget::getoption $path -parent]
+    wm title $path [Widget::cget $path -title]
+    set parent [Widget::cget $path -parent]
     if { ![winfo exists $parent] } {
         set parent [winfo parent $path]
     }
     wm transient $path [winfo toplevel $parent]
     wm withdraw $path
 
-    set side [Widget::getoption $path -side]
+    set side [Widget::cget $path -side]
     if { ![string compare $side "left"] || ![string compare $side "right"] } {
         set orient vertical
     } else {
         set orient horizontal
     }
 
-    set bbox  [eval ButtonBox::create $path.bbox [Widget::subcget $path .bbox] \
-                   -orient $orient]
+    set bbox  [eval ButtonBox::create $path.bbox $maps(.bbox) -orient $orient]
     set frame [frame $path.frame -relief flat -borderwidth 0]
     set bg [Widget::cget $path -background]
     $path configure -background $bg
@@ -251,7 +264,7 @@ proc Dialog::draw { path {focus ""} {overrideredirect 0} {geometry ""}} {
         ButtonBox::setfocus $path.bbox default
     }
 
-    if { [set grab [Widget::getoption $path -modal]] != "none" } {
+    if { [set grab [Widget::cget $path -modal]] != "none" } {
         BWidget::grab $grab $path
         catch {unset _widget($path,result)}
         tkwait variable Dialog::_widget($path,result)

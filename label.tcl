@@ -1,23 +1,23 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.2 2000/02/26 01:56:40 ericm Exp $
+#  $Id: label.tcl,v 1.3 2000/03/01 02:12:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
-#     - Label::create
-#     - Label::configure
-#     - Label::cget
-#     - Label::setfocus
-#     - Label::_drag_cmd
-#     - Label::_drop_cmd
-#     - Label::_over_cmd
+#     - BWLabel::create
+#     - BWLabel::configure
+#     - BWLabel::cget
+#     - BWLabel::setfocus
+#     - BWLabel::_drag_cmd
+#     - BWLabel::_drop_cmd
+#     - BWLabel::_over_cmd
 # ------------------------------------------------------------------------------
 
-namespace eval Label {
-    Widget::tkinclude Label label .l \
+namespace eval BWLabel {
+    Widget::tkinclude BWLabel label .l \
         remove {-foreground -text -textvariable -underline}
 
-    Widget::declare Label {
+    Widget::declare BWLabel {
         {-name               String     "" 0}
         {-text               String     "" 0}
         {-textvariable       String     "" 0}
@@ -29,9 +29,9 @@ namespace eval Label {
         {-fg                 Synonym    -foreground}
 
     }
-    DynamicHelp::include Label balloon
-    DragSite::include    Label "" 1
-    DropSite::include    Label {
+    DynamicHelp::include BWLabel balloon
+    DragSite::include    BWLabel "" 1
+    DropSite::include    BWLabel {
         TEXT    {move {}}
         IMAGE   {move {}}
         BITMAP  {move {}}
@@ -40,42 +40,44 @@ namespace eval Label {
         COLOR   {move {}}
     }
 
-    Widget::syncoptions Label "" .l {-text {} -underline {}}
+    Widget::syncoptions BWLabel "" .l {-text {} -underline {}}
 
-    proc ::Label { path args } { return [eval Label::create $path $args] }
+    proc ::Label { path args } { return [eval BWLabel::create $path $args] }
     proc use {} {}
 
-    bind BwLabel <FocusIn> {Label::setfocus %W}
+    bind BwLabel <FocusIn> {BWLabel::setfocus %W}
 }
 
 
 # ------------------------------------------------------------------------------
-#  Command Label::create
+#  Command BWLabel::create
 # ------------------------------------------------------------------------------
-proc Label::create { path args } {
-    Widget::init Label $path $args
+proc BWLabel::create { path args } {
+    array set maps [list BWLabel {} .l {}]
+    array set maps [Widget::parseArgs BWLabel $args]
+    frame $path -class BWLabel
+    Widget::initFromODB BWLabel $path $maps(BWLabel)
 
-    set path [frame $path -class Label]
     bind $path <Destroy> {Widget::destroy %W; rename %W {}}
-    eval label $path.l [Widget::subcget $path .l]
+    eval label $path.l $maps(.l)
 
-    if { [Widget::getoption $path -state] == "normal" } {
-        set fg [Widget::getoption $path -foreground]
+    if { [Widget::cget $path -state] == "normal" } {
+        set fg [Widget::cget $path -foreground]
     } else {
-        set fg [Widget::getoption $path -disabledforeground]
+        set fg [Widget::cget $path -disabledforeground]
     }
 
-    set var [Widget::getoption $path -textvariable]
+    set var [Widget::cget $path -textvariable]
     if {  $var == "" &&
-          [Widget::getoption $path -image] == "" &&
-          [Widget::getoption $path -bitmap] == ""} {
-        set desc [BWidget::getname [Widget::getoption $path -name]]
+          [Widget::cget $path -image] == "" &&
+          [Widget::cget $path -bitmap] == ""} {
+        set desc [BWidget::getname [Widget::cget $path -name]]
         if { $desc != "" } {
             set text  [lindex $desc 0]
             set under [lindex $desc 1]
         } else {
-            set text  [Widget::getoption $path -text]
-            set under [Widget::getoption $path -underline]
+            set text  [Widget::cget $path -text]
+            set under [Widget::cget $path -underline]
         }
     } else {
         set under -1
@@ -87,27 +89,27 @@ proc Label::create { path args } {
 
     set accel [string tolower [string index $text $under]]
     if { $accel != "" } {
-        bind [winfo toplevel $path] <Alt-$accel> "Label::setfocus $path"
+        bind [winfo toplevel $path] <Alt-$accel> "BWLabel::setfocus $path"
     }
 
     bindtags $path.l [list $path.l Label BwLabel [winfo toplevel $path] all]
     pack $path.l -expand yes -fill both
 
-    DragSite::setdrag $path $path.l Label::_init_drag_cmd [Widget::getoption $path -dragendcmd] 1
-    DropSite::setdrop $path $path.l Label::_over_cmd Label::_drop_cmd 1
+    DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd [Widget::cget $path -dragendcmd] 1
+    DropSite::setdrop $path $path.l BWLabel::_over_cmd BWLabel::_drop_cmd 1
     DynamicHelp::sethelp $path $path.l 1
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval Label::\$cmd $path \$args\]"
+    proc ::$path { cmd args } "return \[eval BWLabel::\$cmd $path \$args\]"
 
     return $path
 }
 
 
 # ------------------------------------------------------------------------------
-#  Command Label::configure
+#  Command BWLabel::configure
 # ------------------------------------------------------------------------------
-proc Label::configure { path args } {
+proc BWLabel::configure { path args } {
     set oldunder [$path.l cget -underline]
     if { $oldunder != -1 } {
         set oldaccel [string tolower [string index [$path.l cget -text] $oldunder]]
@@ -152,14 +154,14 @@ proc Label::configure { path args } {
         }
         set accel [string tolower [string index $text $under]]
         if { $accel != "" } {
-            bind $top <Alt-$accel> "Label::setfocus $path"
+            bind $top <Alt-$accel> "BWLabel::setfocus $path"
         }
         $path.l configure -text $text -underline $under -textvariable $var
     }
 
     set force [Widget::hasChanged $path -dragendcmd dragend]
-    DragSite::setdrag $path $path.l Label::_init_drag_cmd $dragend $force
-    DropSite::setdrop $path $path.l Label::_over_cmd Label::_drop_cmd
+    DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd $dragend $force
+    DropSite::setdrop $path $path.l BWLabel::_over_cmd BWLabel::_drop_cmd
     DynamicHelp::sethelp $path $path
 
     return $res
@@ -167,17 +169,17 @@ proc Label::configure { path args } {
 
 
 # ------------------------------------------------------------------------------
-#  Command Label::cget
+#  Command BWLabel::cget
 # ------------------------------------------------------------------------------
-proc Label::cget { path option } {
+proc BWLabel::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
 # ------------------------------------------------------------------------------
-#  Command Label::setfocus
+#  Command BWLabel::setfocus
 # ------------------------------------------------------------------------------
-proc Label::setfocus { path } {
+proc BWLabel::setfocus { path } {
     if { ![string compare [Widget::getoption $path -state] "normal"] } {
         set w [Widget::getoption $path -focus]
         if { [winfo exists $w] && [Widget::focusOK $w] } {
@@ -188,9 +190,9 @@ proc Label::setfocus { path } {
 
 
 # ------------------------------------------------------------------------------
-#  Command Label::_init_drag_cmd
+#  Command BWLabel::_init_drag_cmd
 # ------------------------------------------------------------------------------
-proc Label::_init_drag_cmd { path X Y top } {
+proc BWLabel::_init_drag_cmd { path X Y top } {
     set path [winfo parent $path]
     if { [set cmd [Widget::cget $path -draginitcmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $X $Y $top]]
@@ -214,9 +216,9 @@ proc Label::_init_drag_cmd { path X Y top } {
 
 
 # ------------------------------------------------------------------------------
-#  Command Label::_drop_cmd
+#  Command BWLabel::_drop_cmd
 # ------------------------------------------------------------------------------
-proc Label::_drop_cmd { path source X Y op type data } {
+proc BWLabel::_drop_cmd { path source X Y op type data } {
     set path [winfo parent $path]
     if { [set cmd [Widget::cget $path -dropcmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $source $X $Y $op $type $data]]
@@ -248,9 +250,9 @@ proc Label::_drop_cmd { path source X Y op type data } {
 
 
 # ------------------------------------------------------------------------------
-#  Command Label::_over_cmd
+#  Command BWLabel::_over_cmd
 # ------------------------------------------------------------------------------
-proc Label::_over_cmd { path source event X Y op type data } {
+proc BWLabel::_over_cmd { path source event X Y op type data } {
     set path [winfo parent $path]
     if { [set cmd [Widget::cget $path -dropovercmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $source $event $X $Y $op $type $data]]
