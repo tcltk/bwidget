@@ -1,14 +1,14 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  progressbar.tcl
 #  This file is part of Unifix BWidget Toolkit
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ProgressBar::create
 #     - ProgressBar::configure
 #     - ProgressBar::cget
 #     - ProgressBar::_destroy
 #     - ProgressBar::_modify
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval ProgressBar {
     Widget::declare ProgressBar {
@@ -36,14 +36,16 @@ namespace eval ProgressBar {
 
     variable _widget
 
-    proc ::ProgressBar { path args } { return [eval ProgressBar::create $path $args] }
+    proc ::ProgressBar { path args } {
+	return [eval ProgressBar::create $path $args]
+    }
     proc use {} {}
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ProgressBar::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ProgressBar::create { path args } {
     variable _widget
 
@@ -64,23 +66,25 @@ proc ProgressBar::create { path args } {
     set _widget($path,val) 0
     set _widget($path,dir) 1
     if { [set _widget($path,var) [Widget::cget $path -variable]] != "" } {
-        GlobalVar::tracevar variable $_widget($path,var) w "ProgressBar::_modify $path"
+        GlobalVar::tracevar variable $_widget($path,var) w \
+		[list ProgressBar::_modify $path]
         after idle ProgressBar::_modify $path
     }
 
-    bind $path.bar <Destroy>   "ProgressBar::_destroy $path"
-    bind $path.bar <Configure> "ProgressBar::_modify $path"
+    bind $path.bar <Destroy>   [list ProgressBar::_destroy $path]
+    bind $path.bar <Configure> [list ProgressBar::_modify $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval ProgressBar::\$cmd $path \$args\]"
+    proc ::$path { cmd args } \
+	    "return \[eval ProgressBar::\$cmd [list $path] \$args\]"
 
     return $path
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ProgressBar::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ProgressBar::configure { path args } {
     variable _widget
 
@@ -89,11 +93,13 @@ proc ProgressBar::configure { path args } {
     if { [Widget::hasChangedX $path -variable] } {
 	set newv [Widget::cget $path -variable]
         if { $_widget($path,var) != "" } {
-            GlobalVar::tracevar vdelete $_widget($path,var) w "ProgressBar::_modify $path"
+            GlobalVar::tracevar vdelete $_widget($path,var) w \
+		    [list ProgressBar::_modify $path]
         }
         if { $newv != "" } {
             set _widget($path,var) $newv
-            GlobalVar::tracevar variable $newv w "ProgressBar::_modify $path"
+            GlobalVar::tracevar variable $newv w \
+		    [list ProgressBar::_modify $path]
             after idle ProgressBar::_modify $path
         } else {
             set _widget($path,var) ""
@@ -114,22 +120,23 @@ proc ProgressBar::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ProgressBar::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ProgressBar::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ProgressBar::_destroy
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ProgressBar::_destroy { path } {
     variable _widget
 
     if { $_widget($path,var) != "" } {
-        GlobalVar::tracevar vdelete $_widget($path,var) w "ProgressBar::_modify $path"
+        GlobalVar::tracevar vdelete $_widget($path,var) w \
+		[list ProgressBar::_modify $path]
     }
     unset _widget($path,var)
     unset _widget($path,dir)
@@ -138,9 +145,9 @@ proc ProgressBar::_destroy { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ProgressBar::_modify
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ProgressBar::_modify { path args } {
     variable _widget
 
@@ -148,41 +155,44 @@ proc ProgressBar::_modify { path args } {
          [set val [GlobalVar::getvar $_widget($path,var)]] < 0 } {
         catch {place forget $path.bar}
     } else {
-	    place $path.bar -relx 0 -rely 0 -relwidth 1 -relheight 1
-	    set type [Widget::getoption $path -type]
-	    if { $val != 0 && [string compare $type "normal"] && [string compare $type "nonincremental_infinite"]} {
-		set val [expr {$val+$_widget($path,val)}]
-	    }
-	    set _widget($path,val) $val
-	    set max [Widget::getoption $path -maximum]
-	    set bd  [expr {2*[$path.bar cget -bd]}]
-	    set w   [winfo width  $path.bar]
-	    set h   [winfo height $path.bar]
-	    if { ![string compare $type "infinite"] || ![string compare $type "nonincremental_infinite"]} {
-		# JDC: New infinite behaviour
-		set tval [expr {$val % $max}]
-		if { $tval < ($max / 2.0) } {
-		    set x0 [expr {double($tval) / double($max) * 1.5}]
-		} else {
-		    set x0 [expr {(1.0 - (double($tval) / double($max))) * 1.5}]
-		}
-		set x1 [expr {$x0 + 0.25}]
-		if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
-		    $path.bar coords rect [expr {$x0*$w}] 0 [expr {$x1*$w}] $h
-		} else {
-		    $path.bar coords rect 0 [expr {$h-$x0*$h}] $w [expr {$x1*$h}]
-		}
-		
+	place $path.bar -relx 0 -rely 0 -relwidth 1 -relheight 1
+	set type [Widget::getoption $path -type]
+	if { $val != 0 && $type != "normal" && \
+		$type != "nonincremental_infinite"} {
+	    set val [expr {$val+$_widget($path,val)}]
+	}
+	set _widget($path,val) $val
+	set max [Widget::getoption $path -maximum]
+	set bd  [expr {2*[$path.bar cget -bd]}]
+	set w   [winfo width  $path.bar]
+	set h   [winfo height $path.bar]
+	if {$type == "infinite" || $type == "nonincremental_infinite"} {
+	    # JDC: New infinite behaviour
+	    set tval [expr {$val % $max}]
+	    if { $tval < ($max / 2.0) } {
+		set x0 [expr {double($tval) / double($max) * 1.5}]
 	    } else {
-		if { $val > $max } {set val $max}
-		if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
-		    $path.bar coords rect -1 0 [expr {$val*$w/$max}] $h
-		} else {
-		    $path.bar coords rect 0 [expr {$h+1}] $w [expr {$h*($max-$val)}]
-		}
+		set x0 [expr {(1.0-(double($tval) / double($max))) * 1.5}]
 	    }
+	    set x1 [expr {$x0 + 0.25}]
+	    if {[Widget::getoption $path -orient] == "horizontal"} {
+		$path.bar coords rect [expr {$x0*$w}] 0 [expr {$x1*$w}] $h
+	    } else {
+		$path.bar coords rect 0 [expr {$h-$x0*$h}] $w \
+			[expr {$x1*$h}]
+	    }
+	    
+	} else {
+	    if { $val > $max } {set val $max}
+	    if {[Widget::getoption $path -orient] == "horizontal"} {
+		$path.bar coords rect -1 0 [expr {$val*$w/$max}] $h
+	    } else {
+		$path.bar coords rect 0 [expr {$h+1}] $w \
+			[expr {$h*(1.0 - double($val)/$max)}]
+	    }
+	}
     }
     if {![Widget::cget $path -idle]} {
-        update
+	update
     }
 }
