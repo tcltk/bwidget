@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  labelentry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelentry.tcl,v 1.3 2000/03/08 03:26:19 ericm Exp $
+#  $Id: labelentry.tcl,v 1.4 2003/01/17 22:06:17 patthoyts Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelEntry::create
@@ -17,7 +17,7 @@ namespace eval LabelEntry {
     Widget::bwinclude LabelEntry LabelFrame .labf \
         remove {-relief -borderwidth -focus} \
         rename {-text -label} \
-        prefix {label -justify -width -anchor -height -font} \
+        prefix {label -justify -width -anchor -height -font -textvariable}
 
     Widget::bwinclude LabelEntry Entry .e \
         remove {-fg -bg} \
