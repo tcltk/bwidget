@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dragsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dragsite.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: dragsite.tcl,v 1.1.1.1.2.1 1999/11/12 04:12:46 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DragSite::include
@@ -159,7 +159,9 @@ proc DragSite::_init_drag { source state X Y } {
         }
         wm geometry $_topw +[expr $X+1]+[expr $Y+1]
         wm deiconify $_topw
-        tkwait visibility $_topw
+        if {[catch {tkwait visibility $_topw}]} {
+            return
+        }
         BWidget::grab  set $_topw
         BWidget::focus set $_topw
 
