@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.31 2000/05/14 20:39:10 kuchler Exp $
+#  $Id: tree.tcl,v 1.32 2001/06/22 01:56:50 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1737,8 +1737,8 @@ proc Tree::_keynav {which win} {
 		return
 	    }
 	    set open [$win itemcget $node -open]
-	    if { [llength [$win nodes $node]] } {
-		if { $open } {
+            if { $open } {
+                if { [llength [$win nodes $node]] } {
 		    set index [lsearch $nodes $node]
 		    incr index
 		    if { $index < [llength $nodes] } {
@@ -1747,11 +1747,14 @@ proc Tree::_keynav {which win} {
 			$win see [lindex $nodes $index]
 			return
 		    }
-		} else {
-		    $win itemconfigure $node -open 1
-		    return
-		}
-	    }
+                }
+            } else {
+                $win itemconfigure $node -open 1
+                if { [set cmd [Widget::getoption $win -opencmd]] != "" } {
+                    uplevel \#0 $cmd $node
+                }
+                return
+            }
 	}
 	"left" {
 	    # On a left arrow, if the current node is open, close it.
@@ -1762,6 +1765,9 @@ proc Tree::_keynav {which win} {
 	    set open [$win itemcget $node -open]
 	    if { $open } {
 		$win itemconfigure $node -open 0
+                if { [set cmd [Widget::getoption $win -closecmd]] != "" } {
+                    uplevel \#0 $cmd $node
+                }
 		return
 	    } else {
 		set parent [$win parent $node]
