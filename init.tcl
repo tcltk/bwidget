@@ -1,12 +1,12 @@
 
 if { $tcl_platform(platform) == "windows" } {
-    option add *Listbox.background      SystemWindow widgetDefault
+    #option add *Listbox.background      SystemWindow widgetDefault
     option add *ListBox.background      SystemWindow widgetDefault
-    option add *Button.padY             0 widgetDefault
+    #option add *Button.padY             0 widgetDefault
     option add *ButtonBox.padY          0 widgetDefault
     option add *Dialog.padY             0 widgetDefault
     option add *Dialog.anchor           e widgetDefault
-} else { 
+} else {
     option add *Scrollbar.width         12 widgetDefault
     option add *Scrollbar.borderWidth   1  widgetDefault
     option add *Dialog.separator        1  widgetDefault
