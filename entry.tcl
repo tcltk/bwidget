@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.9 2000/03/08 03:26:19 ericm Exp $
+#  $Id: entry.tcl,v 1.10 2000/03/10 00:49:21 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -119,6 +119,10 @@ proc Entry::create { path args } {
 proc Entry::configure { path args } {
     variable $path
     upvar 0  $path data
+
+    # Cheat by setting the -text value to the current contents of the entry
+    # This might be better hidden behind a function in ::Widget.
+    set Widget::Entry::${path}:opt(-text) [$path:cmd get]
 
     set res [Widget::configure $path $args]
     set chstate    [Widget::hasChangedX $path -state]

@@ -1,3 +1,9 @@
+2000-03-09  Eric Melski  <ericm@scriptics.com>
+
+	* entry.tcl: Added code to re-sync the -text option with the
+	contents of the entry widget before doing configuration; this
+	fixes [Bug: 4304].
+
 2000-03-09  Sven Delmas  <sven@scriptics.com>
 
 	* tree.tcl: Disabled the update before the find withtag in the
@@ -10,6 +16,15 @@
 
 	* tree.tcl: The new allnodes procedure was not handling the
 	"current" tag correctly. This is now stripped of.
+
+2000-03-07  Eric Melski  <ericm@scriptics.com>
+
+	* button.tcl: Added check for -state flag, to initialize it properly.
+
+	* entry.tcl: Changed to parseArgs/initFromODB format; added check
+	for -text flag to initialize it properly.
+
+	* labelentry.tcl: Changed to use parseArgs/initFromODB format.
 
 2000-03-03  Eric Melski  <ericm@scriptics.com>
 

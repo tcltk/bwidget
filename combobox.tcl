@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.12 2000/03/01 20:16:03 ericm Exp $
+#  $Id: combobox.tcl,v 1.13 2000/03/10 00:49:21 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -369,7 +369,7 @@ proc ComboBox::_select { path index } {
     _unmapliste $path
     if { $index != -1 } {
         if { [setvalue $path @$index] } {
-            if { [set cmd [Widget::getoption $path -modifycmd]] != "" } {
+            if { [set cmd [Widget::cget $path -modifycmd]] != "" } {
                 uplevel \#0 $cmd
             }
         }
