@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.21 2003/04/12 01:33:42 hobbs Exp $
+#  $Id: combobox.tcl,v 1.22 2003/04/15 01:21:20 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -298,16 +298,15 @@ proc ComboBox::_create_popup { path } {
     }
     if { $::tcl_platform(platform) == "unix" } {
 	set sbwidth 11
-	set sbrelief sunken
     } else {
 	set sbwidth 15
-	set sbrelief ridge
     }
     if {![winfo exists $path.shell]} {
-	set shell [toplevel $path.shell -relief $sbrelief -bd 2]
+	set shell [toplevel $path.shell -relief solid -bd 1]
 	wm overrideredirect $shell 1
 	wm transient $shell [winfo toplevel $path]
 	wm withdraw  $shell
+	catch {wm attributes $shell -topmost 1}
 
 	set sw	   [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
 	set listb  [listbox $shell.listb \
@@ -326,6 +325,10 @@ proc ComboBox::_create_popup { path } {
 	::bind $listb <ButtonRelease-1> "ComboBox::_select $path @%x,%y"
 	::bind $listb <Return>		"ComboBox::_select $path active; break"
 	::bind $listb <Escape>		"ComboBox::_unmapliste $path; break"
+	# when losing focus to some other app, make sure we drop the listbox
+	::bind $listb <FocusOut> \
+	    "if {\[focus\] == {}} {ComboBox::_unmapliste [list $path] 0};break"
+
     } else {
 	set listb $shell.listb
 	destroy $shell.sw
@@ -350,7 +353,7 @@ proc ComboBox::_create_popup { path } {
 proc ComboBox::_mapliste { path } {
     set listb $path.shell.listb
     if {[winfo exists $path.shell] &&
-        ![string compare [wm state $path.shell] "normal"]} {
+        [string equal [wm state $path.shell] "normal"]} {
 	_unmapliste $path
         return
     }
@@ -394,14 +397,16 @@ proc ComboBox::_mapliste { path } {
 # ----------------------------------------------------------------------------
 #  Command ComboBox::_unmapliste
 # ----------------------------------------------------------------------------
-proc ComboBox::_unmapliste { path } {
+proc ComboBox::_unmapliste { path {refocus 1} } {
     if {[winfo exists $path.shell] && \
-	    ![string compare [wm state $path.shell] "normal"]} {
+	    [string equal [wm state $path.shell] "normal"]} {
         BWidget::grab release $path
-        BWidget::focus release $path.shell.listb
+        BWidget::focus release $path.shell.listb $refocus
 	# Update now because otherwise [focus -force...] makes the app hang!
-	update
-	focus -force $path.e
+	if {$refocus} {
+	    update
+	    focus -force $path.e
+	}
         wm withdraw $path.shell
         ArrowButton::configure $path.a -relief raised
     }
@@ -557,6 +562,10 @@ proc ComboBox::_focus_out { path } {
     variable background
     variable foreground
 
+    if {[focus] == ""} {
+	# we lost focus to some other app, make sure we drop the listbox
+	_unmapliste $path 0
+    }
     if { [Widget::cget $path -editable] == 0 } {
         if {[info exists background]} {
             $path.e configure -bg $background
