@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.20 2003/11/26 18:42:24 hobbs Exp $
+#  $Id: notebook.tcl,v 1.21 2004/09/14 20:46:35 hobbs Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -791,6 +791,8 @@ proc NoteBook::_draw_page { path page create } {
     if {$bd < 1} { set bd 1 }
 
     if { $tabsOnBottom } {
+	# adjust to keep bottom edge in view
+	incr h1 -1
 	set top [expr {$top * -1}]
 	set topPlusRadius [expr {$topPlusRadius * -1}]
 	# Hrm... the canvas has an issue with drawing diagonal segments
