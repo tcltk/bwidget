@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.10 2003/10/20 21:23:53 damonc Exp $
+#  $Id: utils.tcl,v 1.11 2004/01/06 07:22:39 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -331,7 +331,7 @@ proc BWidget::place { path w h args } {
                     if { $idx == 2 } {
                         # try left, then right if out, then 0 if out
                         if { $x0 >= $w } {
-                            set x "+[expr {$x0-$sw}]"
+                            set x [expr {$x0-$sw}]
                         } elseif { $x1+$w <= $sw } {
                             set x "+$x1"
                         } else {
@@ -342,7 +342,7 @@ proc BWidget::place { path w h args } {
                         if { $x1+$w <= $sw } {
                             set x "+$x1"
                         } elseif { $x0 >= $w } {
-                            set x "+[expr {$x0-$sw}]"
+                            set x [expr {$x0-$sw}]
                         } else {
                             set x "-0"
                         }
@@ -356,7 +356,7 @@ proc BWidget::place { path w h args } {
                     if { $idx == 4 } {
                         # try top, then bottom, then 0
                         if { $h <= $y0 } {
-                            set y "+[expr {$y0-$sh}]"
+                            set y [expr {$y0-$sh}]
                         } elseif { $y1+$h <= $sh } {
                             set y "+$y1"
                         } else {
@@ -367,7 +367,7 @@ proc BWidget::place { path w h args } {
                         if { $y1+$h <= $sh } {
                             set y "+$y1"
                         } elseif { $h <= $y0 } {
-                            set y "+[expr {$y0-$sh}]"
+                            set y [expr {$y0-$sh}]
                         } else {
                             set y "-0"
                         }
@@ -375,6 +375,11 @@ proc BWidget::place { path w h args } {
                 }
             }
         }
+
+        ## If there's not a + or - in front of the number, we need to add one.
+        if {[string is integer [string index $x 0]]} { set x +$x }
+        if {[string is integer [string index $y 0]]} { set y +$y }
+
         wm geometry $path "${w}x${h}${x}${y}"
     } else {
         wm geometry $path "${w}x${h}"

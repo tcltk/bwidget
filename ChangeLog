@@ -1,3 +1,14 @@
+2004-01-05  Damon Courtney  <damon@unreality.com>
+
+        * init.tcl: Added a binding to the Tk spinbox to handle
+        traversal as loading BWidgets seems to screw up the default
+        handling for Tk.  [Bug #867604]
+
+        * utils.tcl: Fixed a bug that would cause some geometry calculations
+        in BWidget::place to behave incorrectly.  This would occasionally
+        make it appear as though a drawn dialog would freeze the application.
+        [Bug #868315]
+
 2003-12-18  Bob Techentin <techentin@sourceforge.net>
 
 	**** BWIDGET 1.7.0 TAGGED ****
