@@ -57,6 +57,11 @@
  <I>path</I>
  <I>option</I>
 </DD>
+<DD>Widget::<A HREF="#getVariable"><B>getVariable</B></A>
+ <I>path</I>
+ <I>varName</I>
+ <I>?myVarName?</I>
+</DD>
 <DD>Widget::<A HREF="#hasChanged"><B>hasChanged</B></A>
  <I>path</I>
  <I>option</I>
@@ -326,6 +331,26 @@ Description text
 Returns the value of <I>option</I> of BWidget <I>path</I>. This command does not test
 option existence, does not handle synonym and does not take care of synchronization with
 subwidget.
+
+</DD></DL>
+<DL><DT><A NAME="getVariable">Widget::<B>getVariable</B></A>
+ <I>path</I>
+ <I>varName</I>
+ <I>?myVarName?</I>
+</DT><DD>
+
+<p>
+Make the variable <i>varName</i> relational to <i>path</i> accessible in
+the current procedure.  The variable will be created in the widget namespace
+for <i>path</i> and can be used for storing widget-specific information.
+When <i>path</i> is destroyed, any variable accessed in this manner will be
+destroyed with it.
+</p>
+
+<p>
+If <i>myVarName</i> is specified, the variable will be accessible in the
+current procedure as that name.
+</p>
 
 </DD></DL>
 <DL><DT><A NAME="hasChanged">Widget::<B>hasChanged</B></A>

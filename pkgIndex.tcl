@@ -28,7 +28,8 @@ package ifneeded BWidget 1.5 "\
 {mainframe.tcl source {MainFrame MainFrame::create MainFrame::use}}
 {listbox.tcl source {ListBox ListBox::create ListBox::use}}
 {tree.tcl source {Tree Tree::create Tree::use}}
-{color.tcl source {SelectColor SelectColor::menu SelectColor::dialog}}
+{ctrlframe.tcl source {ControlFrame ControlFrame::create ControlFrame::use}}
+{color.tcl source {SelectColor SelectColor::menu SelectColor::dialog SelectColor::setcolor}}
 {dynhelp.tcl source {DynamicHelp::configure DynamicHelp::use DynamicHelp::register DynamicHelp::include}}
 {dialog.tcl source {Dialog Dialog::create Dialog::use}}
 {messagedlg.tcl source {MessageDlg MessageDlg::create MessageDlg::use}}

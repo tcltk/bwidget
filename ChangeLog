@@ -1,3 +1,31 @@
+2003-02-08  Damon Courtney <damon@unreality.com>
+	* BWman/SelectColor.html
+	* color.tcl:   Cleaned up some of the documentation of SelectColor
+	  and made it actually work like the documentation says it does.
+
+	* BWman/DynamicHelp.html
+	* dynhelp.tcl:  Added -topbackground, -padx and -pady options to
+	  allow a little more flexibility in the look-and-feel of balloons.
+
+	  Added the ability to bind dynamic help to individual items or tags
+	  on a canvas.
+
+	* BWman/Tree.html
+	* tree.tcl:  Added -padx and -deltax options to individual nodes
+	  within a tree.  Each option defaults to -1, meaning to take its
+	  value from the global option of the same name.
+
+	  Added dynamic help to nodes within a tree.  Adds the following
+	  options: -helptext, -helptype and -helpvar to each node.
+
+	* BWman/BWidget.html
+	* utils.tcl:  Added BWidget::badOptionString utility to return a
+	  standard error string when a given option doesn't match a list.
+
+	* BWman/Widget.html
+	* widget.tcl:  Added Widget::getVariable proc to create a reference
+	  to a variable relative to the given widget path.
+
 2003-01-26  Damon Courtney <damon@unreality.com>
 	* BWman/DynamicHelp.html:
 	* dynhelp.tcl:  Added -state option to disable help balloons on a

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.21 2002/10/14 20:54:52 hobbs Exp $
+#  $Id: widget.tcl,v 1.22 2003/02/08 10:21:17 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -699,6 +699,9 @@ proc Widget::destroy { path } {
     if {[info exists pathinit]} {
         unset pathinit
     }
+
+    ## Unset any variables used in this widget.
+    foreach var [info vars ::${class}::$path:*] { unset $var }
 }
 
 
@@ -1337,3 +1340,20 @@ proc Widget::varForOption {path option} {
     return $varname
 }
 
+# Widget::getVariable --
+#
+#       Get a variable from within the namespace of the widget.
+#
+# Arguments:
+#	path		Megawidget to get the variable for.
+#	varName		The variable name to retrieve.
+#       newVarName	The variable name to refer to in the calling proc.
+#
+# Results:
+#	Creates a reference to newVarName in the calling proc.
+proc Widget::getVariable { path varName {newVarName ""} } {
+    variable _class
+    set class $_class($path)
+    if {![string length $newVarName]} { set newVarName $varName }
+    uplevel 1 "upvar #0 ${class}::$path:$varName $newVarName"
+}
