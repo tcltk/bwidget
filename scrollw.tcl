@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.10 2003/10/30 17:43:06 hobbs Exp $
+#  $Id: scrollw.tcl,v 1.11 2004/02/04 00:11:29 hobbs Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -47,9 +47,10 @@ proc ScrolledWindow::create { path args } {
 
     set bg     [Widget::cget $path -background]
     set sbsize [Widget::cget $path -size]
-    set sw     [frame $path \
-	    -relief flat -borderwidth 0 -background $bg \
-	    -highlightthickness 0 -takefocus 0]
+    set sw     [eval [list frame $path \
+			  -relief flat -borderwidth 0 -background $bg \
+			  -highlightthickness 0 -takefocus 0] \
+		    [Widget::subcget $path :cmd]]
 
     scrollbar $path.hscroll \
 	    -highlightthickness 0 -takefocus 0 \
