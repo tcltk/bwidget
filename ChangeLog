@@ -1,3 +1,10 @@
+2000-04-26  Dan Kuchler  <kuchler@scriptics.com>
+
+        * button.tcl: Fixed the bindings that get setup on buttons with
+        an underline specified to be case insensitive (i.e  if 'A' or 'a'
+        was the underline character, Alt-A and Alt-a would both be bound
+        to the button.
+
 2000-03-29  Sven Delmas  <sven@scriptics.com>
 
 	* tree.tcl:  Added protection for the left arrow key click in case
