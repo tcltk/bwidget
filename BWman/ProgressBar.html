@@ -76,30 +76,45 @@ Specifies the maximum value of the variable.
 <DL><DT><A NAME="-type"><B>-type</B></A></DT>
 <DD>
 
-Specifies the type of the ProgressBar. Must be one of <B>normal</B>, <B>incremental</B> or
-<B>infinite</B>.
-<BR>If <B>type</B> is <I>normal</I>, the progress indicator is drawn proportional
-to the variable value and <B>maximum</B> option each time the variable is set.
-<BR>If <B>type</B> is <I>incremental</I>, the value of the progress indicator is maintained internally,
-and incremented each time the variable is set by its value. The progress indicator is drawn proportional
-to the internal value and <B>maximum</B> option.
-<BR>If <B>type</B> is <I>infinite</I>, the value of the progress indicator is maintained internally,
-and incremented each time the variable is set by its value. The progress indicator grow from left to
-right if internal value (modulo <B>maximum</B>) is less than <B>maximum</B>/2, and from right to left if
-internal value is greater than <B>maximum</B>/2.
-<BR>See <B>-variable</B> option for special case of its value,
+Specifies the type of the ProgressBar. Must be one of <B>normal</B>,
+<B>incremental</B>,  <B>infinite</B> or <B>nonincremental_infinite</B>.
+
+<BR><BR>If <B>type</B> is <I>normal</I>, the progress indicator is drawn
+proportional to the variable value and <B>maximum</B> option each time the
+variable is set.
+
+<BR><BR>If <B>type</B> is <I>incremental</I>, the value of the progress
+indicator is maintained internally, and incremented each time the variable is
+set by its value. The progress indicator is drawn proportional to the internal
+value and
+<B>maximum</B> option.
+
+<BR><BR>If <B>type</B> is <I>infinite</I>, the value of the progress indicator
+is maintained internally, and incremented each time the variable is set by its
+value. The progress indicator moves from left to right if internal value
+(modulo <B>maximum</B>) is less than <B>maximum</B>/2, and from right to left
+if internal value is greater than <B>maximum</B>/2.
+
+<BR><BR>If <B>type</B> is <I>nonincremental_infinite</I>, the value of the
+progress indicator taken from the variable value, The progress indicator moves
+from left to right if variable value (modulo <B>maximum</B>) is less than
+<B>maximum</B>/2, and from right to left if internal value is greater than
+<B>maximum</B>/2.
+
+<BR><BR>See <B>-variable</B> option for special case of its value,
+
+<BR><BR>Default value for <B>type</B> is <I>normal</I>.
 
 </DD>
 </DL>
 <DL><DT><A NAME="-variable"><B>-variable</B></A></DT>
 <DD>
 
-Specifies the variable attached to the progress indicator.
-Progress indicator is updated when the value of the variable changes.
-If the value of the variable is negative, the progress indicator is not
-displayed (it is drawn flat with <B>background</B> color
-- usefull for ProgressDlg to make it invisible). If its value 0, progress indicator
-is reinitialized.
+Specifies the variable attached to the progress indicator.  Progress indicator
+is updated when the value of the variable changes.  If the value of the
+variable is negative, the progress indicator is not displayed (it is drawn flat
+with <B>background</B> color - usefull for ProgressDlg to make it
+invisible). If its value 0, progress indicator is reinitialized.
 
 </DD>
 </DL>
