@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.21 2004/05/04 15:57:31 hobbs Exp $
+#  $Id: listbox.tcl,v 1.22 2004/09/14 23:43:45 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -101,6 +101,7 @@ namespace eval ListBox {
 
     Widget::addmap ListBox "" .c {-deltay -yscrollincrement}
 
+    bind ListBox <FocusIn>   [list after idle {BWidget::refocus %W %W.c}]
     bind ListBox <Destroy>   [list ListBox::_destroy %W]
     bind ListBox <Configure> [list ListBox::_resize  %W]
     bind ListBoxFocus <1>    [list focus %W]
@@ -120,7 +121,8 @@ proc ListBox::create { path args } {
     variable $path
     upvar 0  $path data
 
-    frame $path -class ListBox -bd 0 -highlightthickness 0 -relief flat
+    frame $path -class ListBox -bd 0 -highlightthickness 0 -relief flat \
+	-takefocus 0
     # For 8.4+ we don't want to inherit the padding
     catch {$path configure -padx 0 -pady 0}
     # widget informations
