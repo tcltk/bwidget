@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.4 2000/03/14 20:20:14 ericm Exp $
+#  $Id: dynhelp.tcl,v 1.5 2000/06/15 00:45:16 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -45,16 +45,16 @@ namespace eval DynamicHelp {
     bind BwHelpBalloon <Motion>  {DynamicHelp::_motion_balloon motion %W %X %Y}
     bind BwHelpBalloon <Leave>   {DynamicHelp::_motion_balloon leave  %W %X %Y}
     bind BwHelpBalloon <Button>  {DynamicHelp::_motion_balloon button %W %X %Y}
-    bind BwHelpBalloon <Destroy> {catch {unset DynamicHelp::_registered(%W)}}
+    bind BwHelpBalloon <Destroy> {if {[info exists DynamicHelp::_registered(%W)]} {unset DynamicHelp::_registered(%W)}}
 
     bind BwHelpVariable <Enter>   {DynamicHelp::_motion_info %W}
     bind BwHelpVariable <Motion>  {DynamicHelp::_motion_info %W}
     bind BwHelpVariable <Leave>   {DynamicHelp::_leave_info  %W}
-    bind BwHelpVariable <Destroy> {catch {unset DynamicHelp::_registered(%W)}}
+    bind BwHelpVariable <Destroy> {if {[info exists DynamicHelp::_registered(%W)]} {unset DynamicHelp::_registered(%W)}}
 
     bind BwHelpMenu <<MenuSelect>> {DynamicHelp::_menu_info select %W}
     bind BwHelpMenu <Unmap>        {DynamicHelp::_menu_info unmap  %W}
-    bind BwHelpMenu <Destroy>      {catch {unset DynamicHelp::_registered(%W)}}
+    bind BwHelpMenu <Destroy>      {if {[info exists DynamicHelp::_registered(%W)]} {unset DynamicHelp::_registered(%W)}}
 }
 
 
@@ -128,7 +128,9 @@ proc DynamicHelp::register { path type args } {
                     set _registered($path) $text
                     lappend evt BwHelpBalloon
                 } else {
-                    catch {unset _registered($path)}
+                    if {[info exists _registered($path)]} {
+                        unset _registered($path)
+                    }
                 }
                 bindtags $path $evt
                 return 1
@@ -141,7 +143,9 @@ proc DynamicHelp::register { path type args } {
                     set _registered($path) [list $var $text]
                     lappend evt BwHelpVariable
                 } else {
-                    catch {unset _registered($path)}
+                    if {[info exists _registered($path)]} { 
+                        unset _registered($path)
+                    }
                 }
                 bindtags $path $evt
                 return 1
@@ -157,7 +161,9 @@ proc DynamicHelp::register { path type args } {
                     set _registered($path) [list $var]
                     lappend evt BwHelpMenu
                 } else {
-                    catch {unset _registered($path)}
+                    if {[info exists _registered($path)]} {
+                        unset _registered($path)
+                    }
                 }
                 bindtags $path $evt
                 return 1
@@ -187,11 +193,15 @@ proc DynamicHelp::register { path type args } {
                 return 0
             }
         }
-        catch {unset _registered($path)}
+        if {[info exists _registered($path)]} {
+            unset _registered($path)
+        }
         bindtags $path $evt
         return 1
     } else {
-        catch {unset _registered($path)}
+        if {[info exists _registered($path)]} {
+            unset _registered($path)
+        }
         return 0
     }
 }

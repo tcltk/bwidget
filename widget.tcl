@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.13 2000/03/14 20:20:14 ericm Exp $
+#  $Id: widget.tcl,v 1.14 2000/06/15 00:45:16 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -628,9 +628,15 @@ proc Widget::destroy { path } {
     upvar 0 ${class}::$path:mod pathmod
     upvar 0 ${class}::$path:init pathinit
 
-    catch {unset pathopt}
-    catch {unset pathmod}
-    catch {unset pathinit}
+    if {[info exists pathopt]} {
+        unset pathopt
+    }
+    if {[info exists pathmod]} {
+        unset pathmod
+    }
+    if {[info exists pathinit]} {
+        unset pathinit
+    }
 }
 
 

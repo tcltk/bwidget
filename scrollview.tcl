@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  scrollview.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollview.tcl,v 1.3 2000/02/26 01:56:40 ericm Exp $
+#  $Id: scrollview.tcl,v 1.4 2000/06/15 00:45:16 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -154,8 +154,12 @@ proc ScrollView::_destroy { path } {
     unset _widget($path,bd)
     unset _widget($path,width)
     unset _widget($path,height)
-    catch {unset _widget($path,dx)}
-    catch {unset _widget($path,dy)}
+    if {[info exists _widget($path,dx)]} {
+        unset _widget($path,dx)
+    }
+    if {[info exists _widget($path,dy)]} {
+        unset _widget($path,dy)
+    }
     Widget::destroy $path
     rename $path {}
 }

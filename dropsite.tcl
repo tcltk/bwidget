@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dropsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dropsite.tcl,v 1.4 2000/03/13 18:21:48 ericm Exp $
+#  $Id: dropsite.tcl,v 1.5 2000/06/15 00:45:16 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DropSite::include
@@ -256,7 +256,9 @@ proc DropSite::_init_drag { top evt source state X Y type ops data } {
     variable _opw
     variable _evt
 
-    catch {unset _dragops}
+    if {[info exists _dragops]} {
+        unset _dragops
+    }
     array set _dragops {copy 1 move 0 link 0}
     foreach op $ops {
         set _dragops($op) 1

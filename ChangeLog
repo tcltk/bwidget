@@ -1,3 +1,14 @@
+
+2000-06-14  Dan Kuchler  <kuchler@scriptics.com>
+
+        * dialog.tcl
+        * dropsite.tcl
+        * dynhelp.tcl
+        * scrollview.tcl: Replaced several catch {unset varname} calls with
+        if {[info exists varname]} {unset varname}.  This avoids using the
+        catch, and also prevents the ::errorInfo corruption that was happening
+        in BWidgets.
+
 2000-05-14  Dan Kuchler  <kuchler@scriptics.com>
 
         * tree.tcl: Fixed a typing error in the Tree::find procedure.

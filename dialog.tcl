@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.7 2000/05/03 01:22:20 ericm Exp $
+#  $Id: dialog.tcl,v 1.8 2000/06/15 00:45:15 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -276,7 +276,9 @@ proc Dialog::draw { path {focus ""} {overrideredirect 0} {geometry ""}} {
 
     if { [set grab [Widget::cget $path -modal]] != "none" } {
         BWidget::grab $grab $path
-        catch {unset _widget($path,result)}
+        if {[info exists _widget($path,result)]} { 
+            unset _widget($path,result)
+        }
         tkwait variable Dialog::_widget($path,result)
         if { [info exists _widget($path,result)] } {
             set res $_widget($path,result)
@@ -311,7 +313,9 @@ proc Dialog::_destroy { path } {
 
     BWidget::grab  release $path
     BWidget::focus release $path
-    catch {unset _widget($path,result)}
+    if {[info exists _widget($path,result)]} {
+        unset _widget($path,result)
+    }
     unset _widget($path,realized)
     unset _widget($path,nbut)
 
