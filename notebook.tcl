@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.12 2001/09/13 17:28:44 andreas_kupries Exp $
+#  $Id: notebook.tcl,v 1.13 2001/12/29 01:40:10 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -71,7 +71,7 @@ namespace eval NoteBook {
         {-activeforeground	TkResource "" 0 button}
         {-disabledforeground	TkResource "" 0 button}
         {-font			TkResource "" 0 button}
-        {-side			Enum       top 1 {top bottom}}
+        {-side			Enum       top 0 {top bottom}}
         {-homogeneous		Boolean 0   0}
         {-borderwidth		Int 1   0 "%d >= 1 && %d <= 2"}
  	{-internalborderwidth	Int 10  0 "%d >= 0"}
@@ -85,6 +85,9 @@ namespace eval NoteBook {
         {-bg                 Synonym -background}
         {-bd                 Synonym -borderwidth}
         {-ibd                Synonym -internalborderwidth}
+
+	{-arcradius             Int 2   0 "%d >= 0 && %d <= 8"}
+	{-tabbevelsize          Int 0   0 "%d >= 0 && %d <= 8"}
     }
 
     Widget::addmap NoteBook "" .c {-background {}}
@@ -198,7 +201,10 @@ proc NoteBook::configure { path args } {
         set redraw 1
     }
     if { [Widget::hasChanged $path -foreground  fg] ||
-         [Widget::hasChanged $path -borderwidth bd] } {
+         [Widget::hasChanged $path -borderwidth bd] ||
+	 [Widget::hasChanged $path -arcradius radius] ||
+         [Widget::hasChanged $path -tabbevelsize bevel] ||
+         [Widget::hasChanged $path -side side] } {
         set redraw 1
     }
     set wc [Widget::hasChanged $path -width  w]
@@ -721,14 +727,15 @@ proc NoteBook::_draw_page { path page create } {
     #
     # where
     # c1 = $xd,	  $h
-    # c2 = $xd,	  4
-    # c3 = $xd+2, 2
-    # c4 = $xf+1, 2
-    # c5 = $xf+2, 4
-    # c6 = $xf+2, $h
+    # c2 = $xd+$xBevel,	           $arcRadius+2
+    # c3 = $xd+$xBevel+$arcRadius, $arcRadius
+    # c4 = $xf+1-$xBevel,          $arcRadius
+    # c5 = $xf+$arcRadius-$xBevel, $arcRadius+2
+    # c6 = $xf+$arcRadius,         $h
 
     set top		2
-    set arcRadius	2
+    set arcRadius	[Widget::cget $path -arcradius]
+    set xBevel		[Widget::cget $path -tabbevelsize]
 
     if { $data(select) != $page } {
 	# Non-selected pages have tabs 2 pixels lower than the selected one
@@ -762,13 +769,13 @@ proc NoteBook::_draw_page { path page create } {
 	# backwards (ie, lt is actually the bottom, drawn from right to left)
         set lt  [list 					\
 		$rightPlusRadius	[expr {$h1-$h-1}]		\
-		$rightPlusRadius	[expr {$h1 + $topPlusRadius}]	\
-		$xf			[expr {$h1 + $top}]		\
-		$leftPlusRadius		[expr {$h1 + $top}]		\
+		[expr {$rightPlusRadius - $xBevel}]	[expr {$h1 + $topPlusRadius}]	\
+		[expr {$xf - $xBevel}]			[expr {$h1 + $top}]		\
+		[expr {$leftPlusRadius + $xBevel}]	[expr {$h1 + $top}]		\
 		]
         set lb  [list					\
-		$leftPlusRadius		[expr {$h1 + $top}]		\
-		$xd			[expr {$h1 + $topPlusRadius}] \
+		[expr {$leftPlusRadius + $xBevel}]	[expr {$h1 + $top}]		\
+		[expr {$xd + $xBevel}]			[expr {$h1 + $topPlusRadius}]	\
 		$xd			[expr {$h1-$h-1}]	\
 		]
 	# Because we have to do this funky reverse order thing, we have to
@@ -779,13 +786,13 @@ proc NoteBook::_draw_page { path page create } {
     } else {
 	set lt [list					\
 		$xd			$h		\
-		$xd			$topPlusRadius	\
-		$leftPlusRadius		$top		\
-		[expr {$xf + 1}]	$top		\
+		[expr {$xd + $xBevel}]			$topPlusRadius		\
+		[expr {$leftPlusRadius + $xBevel}]	$top			\
+		[expr {$xf + 1 - $xBevel}]		$top			\
 		]
 	set lb [list 						\
-		[expr {$xf + 1}] 	[expr {$top + 1}]	\
-		$rightPlusRadius	$topPlusRadius		\
+		[expr {$xf + 1 - $xBevel}] 		[expr {$top + 1}]	\
+		[expr {$rightPlusRadius - $xBevel}]	$topPlusRadius		\
 		$rightPlusRadius	$h			\
 		]
     }
@@ -970,6 +977,9 @@ proc NoteBook::_draw_area { path } {
     set h   [expr {[winfo height $path]-1}]
     set bd  [Widget::cget $path -borderwidth]
     set x0  [expr {$bd-1}]
+
+    set arcRadius	[Widget::cget $path -arcradius]
+
     # Sven
     set side [Widget::cget $path -side]
     if {"$side" == "bottom"} {
@@ -990,7 +1000,7 @@ proc NoteBook::_draw_area { path } {
         set lbg $data(dbg)
     } else {
         set xd [_get_x_page $path [lsearch $data(pages) $data(select)]]
-        set xf [expr {$xd + $data($sel,width) + 3}]
+        set xf [expr {$xd + $data($sel,width) + $arcRadius + 1}]
         set lbg $data(lbg)
     }
 
