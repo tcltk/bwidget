@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.20 2002/10/14 20:54:01 hobbs Exp $
+#  $Id: combobox.tcl,v 1.21 2003/04/12 01:33:42 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -24,24 +24,25 @@ namespace eval ComboBox {
     Entry::use
 
     Widget::tkinclude ComboBox frame :cmd \
-	    include {-relief -borderwidth -bd -background} \
-	    initialize {-relief sunken -borderwidth 2} \
-	    
+	include {-relief -borderwidth -bd -background} \
+	initialize {-relief sunken -borderwidth 2} \
+
     Widget::bwinclude ComboBox Entry .e \
-        remove {-relief -bd -borderwidth -bg} \
-	    rename {-background -entrybg}
+	remove {-relief -bd -borderwidth -bg} \
+	rename {-background -entrybg}
 
     Widget::declare ComboBox {
-        {-height      TkResource 0  0 listbox}
-        {-values      String     "" 0}
-        {-images      String     "" 0}
-        {-indents     String     "" 0}
-        {-modifycmd   String     "" 0}
-        {-postcommand String     "" 0}
+	{-height      TkResource 0    0 listbox}
+	{-values      String	 ""   0}
+	{-images      String	 ""   0}
+	{-indents     String	 ""   0}
+	{-modifycmd   String	 ""   0}
+	{-postcommand String	 ""   0}
+	{-expand      Enum	 none 0 {none tab}}
     }
 
     Widget::addmap ComboBox ArrowButton .a {
-        -background {} -foreground {} -disabledforeground {} -state {}
+	-background {} -foreground {} -disabledforeground {} -state {}
     }
 
     Widget::syncoptions ComboBox Entry .e {-text {}}
@@ -49,7 +50,7 @@ namespace eval ComboBox {
     ::bind BwComboBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
     ::bind BwComboBox <Destroy> {Widget::destroy %W; rename %W {}}
 
-    proc ::ComboBox { path args } { return [eval ComboBox::create $path $args] }
+    proc ::ComboBox {path args} { return [eval ComboBox::create $path $args] }
     proc use {} {}
 }
 
@@ -70,53 +71,64 @@ proc ComboBox::create { path args } {
     array set maps [Widget::parseArgs ComboBox $args]
 
     eval frame $path $maps(:cmd) -highlightthickness 0 \
-	    -takefocus 0 -class ComboBox
+	-takefocus 0 -class ComboBox
     Widget::initFromODB ComboBox $path $maps(ComboBox)
 
     bindtags $path [list $path BwComboBox [winfo toplevel $path] all]
 
     set entry [eval Entry::create $path.e $maps(.e) \
-                   -relief flat -borderwidth 0 -takefocus 1]
-    ::bind $path.e <FocusIn> "$path _focus_in"
-    ::bind $path.e <FocusOut> "$path _focus_out"
+		   -relief flat -borderwidth 0 -takefocus 1]
+    ::bind $path.e <FocusIn>  [list $path _focus_in]
+    ::bind $path.e <FocusOut> [list $path _focus_out]
 
     if {[string equal $::tcl_platform(platform) "unix"]} {
-        set ipadx 0
-        set width 11
+	set ipadx 0
+	set width 11
     } else {
-        set ipadx 2
-        set width 15
+	set ipadx 2
+	set width 15
     }
     set height [winfo reqheight $entry]
     set arrow [eval ArrowButton::create $path.a $maps(.a) \
-                   -width $width -height $height \
-                   -highlightthickness 0 -borderwidth 1 -takefocus 0 \
-                   -dir   bottom \
-                   -type  button \
+		   -width $width -height $height \
+		   -highlightthickness 0 -borderwidth 1 -takefocus 0 \
+		   -dir	  bottom \
+		   -type  button \
 		   -ipadx $ipadx \
-                   -command [list "ComboBox::_mapliste $path"]]
+		   -command [list [list ComboBox::_mapliste $path]]]
 
     pack $arrow -side right -fill y
     pack $entry -side left  -fill both -expand yes
 
-    if { [Widget::cget $path -editable] } {
-	::bind $entry <ButtonPress-1> "ComboBox::_unmapliste $path"
-	Entry::configure $path.e -editable true
+    set editable [Widget::cget $path -editable]
+    Entry::configure $path.e -editable $editable
+    if {$editable} {
+	::bind $entry <ButtonPress-1> [list ComboBox::_unmapliste $path]
     } else {
-	::bind $entry <ButtonPress-1> "ArrowButton::invoke $path.a"
-	Entry::configure $path.e -editable false
+	::bind $entry <ButtonPress-1> [list ArrowButton::invoke $path.a]
 	if { ![string equal [Widget::cget $path -state] "disabled"] } {
 	    Entry::configure $path.e -takefocus 1
 	}
     }
 
-    ::bind $path  <ButtonPress-1> "ComboBox::_unmapliste $path"
-    ::bind $entry <Key-Up>        "ComboBox::_unmapliste $path"
-    ::bind $entry <Key-Down>      "ComboBox::_mapliste $path"
-    ::bind $entry <Control-Up>        "ComboBox::_modify_value $path previous"
-    ::bind $entry <Control-Down>      "ComboBox::_modify_value $path next"
-    ::bind $entry <Control-Prior>     "ComboBox::_modify_value $path first"
-    ::bind $entry <Control-Next>      "ComboBox::_modify_value $path last"
+    ::bind $path  <ButtonPress-1> [list ComboBox::_unmapliste $path]
+    ::bind $entry <Key-Up>	  [list ComboBox::_unmapliste $path]
+    ::bind $entry <Key-Down>	  [list ComboBox::_mapliste $path]
+    ::bind $entry <Control-Up>	  [list ComboBox::_modify_value $path previous]
+    ::bind $entry <Control-Down>  [list ComboBox::_modify_value $path next]
+    ::bind $entry <Control-Prior> [list ComboBox::_modify_value $path first]
+    ::bind $entry <Control-Next>  [list ComboBox::_modify_value $path last]
+
+    if {$editable} {
+	set expand [Widget::cget $path -expand]
+	if {[string equal "tab" $expand]} {
+	    # Expand entry value on Tab (from -values)
+	    ::bind $entry <Tab> "[list ComboBox::_expand $path]; break"
+	} elseif {[string equal "auto" $expand]} {
+	    # Expand entry value anytime (from -values)
+	    #::bind $entry <Key> "[list ComboBox::_expand $path]; break"
+	}
+    }
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval ComboBox::\$cmd $path \$args\]"
@@ -144,21 +156,38 @@ proc ComboBox::create { path args } {
 
 proc ComboBox::configure { path args } {
     set res [Widget::configure $path $args]
+    set entry $path.e
 
-    if { [Widget::hasChangedX $path -editable] } {
-        if { [Widget::cget $path -editable] } {
-            ::bind $path.e <ButtonPress-1> "ComboBox::_unmapliste $path"
-	    Entry::configure $path.e -editable true
+    set chgedit [Widget::hasChangedX $path -editable]
+    if {$chgedit} {
+        if {[Widget::cget $path -editable]} {
+            ::bind $entry <ButtonPress-1> [list ComboBox::_unmapliste $path]
+	    Entry::configure $entry -editable true
 	} else {
-	    ::bind $path.e <ButtonPress-1> "ArrowButton::invoke $path.a"
-	    Entry::configure $path.e -editable false
+	    ::bind $entry <ButtonPress-1> [list ArrowButton::invoke $path.a]
+	    Entry::configure $entry -editable false
 
 	    # Make sure that non-editable comboboxes can still be tabbed to.
 
 	    if { ![string equal [Widget::cget $path -state] "disabled"] } {
-		Entry::configure $path.e -takefocus 1
+		Entry::configure $entry -takefocus 1
 	    }
         }
+    }
+
+    if {$chgedit || [Widget::hasChangedX $path -expand]} {
+	# Unset what we may have created.
+	::bind $entry <Tab> {}
+	if {[Widget::cget $path -editable]} {
+	    set expand [Widget::cget $path -expand]
+	    if {[string equal "tab" $expand]} {
+		# Expand entry value on Tab (from -values)
+		::bind $entry <Tab> "[list ComboBox::_expand $path]; break"
+	    } elseif {[string equal "auto" $expand]} {
+		# Expand entry value anytime (from -values)
+		#::bind $entry <Key> "[list ComboBox::_expand $path]; break"
+	    }
+	}
     }
 
     # if the dropdown listbox is shown, simply force the actual entry
@@ -169,7 +198,7 @@ proc ComboBox::configure { path args } {
 		-bg [Widget::cget $path -entrybg] \
 		-fg [Widget::cget $path -foreground] \
 		-selectbackground [Widget::cget $path -selectbackground] \
-		-selectforeground [Widget::cget $path -selectforeground] 
+		-selectforeground [Widget::cget $path -selectforeground]
     }
 
     return $res
@@ -411,6 +440,87 @@ proc ComboBox::_modify_value { path direction } {
 }
 
 # ----------------------------------------------------------------------------
+#  Command ComboBox::_expand
+# ----------------------------------------------------------------------------
+proc ComboBox::_expand {path} {
+    set values [Widget::getMegawidgetOption $path -values]
+    if {![llength $values]} {
+	bell
+	return 0
+    }
+
+    set found  {}
+    set curval [Entry::cget $path.e -text]
+    set curlen [$path.e index insert]
+    if {$curlen < [string length $curval]} {
+	# we are somewhere in the middle of a string.
+	# if the full value matches some string in the listbox,
+	# reorder values to start matching after that string.
+	set idx [lsearch -exact $values $curval]
+	if {$idx >= 0} {
+	    set values [concat [lrange $values [expr {$idx+1}] end] \
+			    [lrange $values 0 $idx]]
+	}
+    }
+    if {$curlen == 0} {
+	set found $values
+    } else {
+	foreach val $values {
+	    if {[string equal -length $curlen $curval $val]} {
+		lappend found $val
+	    }
+	}
+    }
+    if {[llength $found]} {
+	Entry::configure $path.e -text [lindex $found 0]
+	if {[llength $found] > 1} {
+	    set best [_best_match $found [string range $curval 0 $curlen]]
+	    set blen [string length $best]
+	    $path.e icursor $blen
+	    $path.e selection range $blen end
+	}
+    } else {
+	bell
+    }
+    return [llength $found]
+}
+
+# best_match --
+#   finds the best unique match in a list of names
+#   The extra $e in this argument allows us to limit the innermost loop a
+#   little further.
+# Arguments:
+#   l		list to find best unique match in
+#   e		currently best known unique match
+# Returns:
+#   longest unique match in the list
+#
+proc ComboBox::_best_match {l {e {}}} {
+    set ec [lindex $l 0]
+    if {[llength $l]>1} {
+	set e  [string length $e]; incr e -1
+	set ei [string length $ec]; incr ei -1
+	foreach l $l {
+	    while {$ei>=$e && [string first $ec $l]} {
+		set ec [string range $ec 0 [incr ei -1]]
+	    }
+	}
+    }
+    return $ec
+}
+# possibly faster
+#proc match {string1 string2} {
+#   set i 1
+#   while {[string equal -length $i $string1 $string2]} { incr i }
+#   return [string range $string1 0 [expr {$i-2}]]
+#}
+#proc matchlist {list} {
+#   set list [lsort $list]
+#   return [match [lindex $list 0] [lindex $list end]]
+#}
+
+
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_focus_in
 # ----------------------------------------------------------------------------
 proc ComboBox::_focus_in { path } {
@@ -433,8 +543,10 @@ proc ComboBox::_focus_in { path } {
             $path.e configure -fg [$path.e cget -selectforeground]
         }
     }
-    $path.e selection clear
-    $path.e selection range 0 end
+    if {[$path.e selection present] != 1} {
+	# Autohighlight the selection, but not if one existed
+	$path.e selection range 0 end
+    }
 }
 
 
