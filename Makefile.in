@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.7 2002/09/25 22:55:52 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.8 2004/01/28 16:51:08 rmax Exp $
 
 
 BWIDGET_SOURCES = \
@@ -116,32 +116,30 @@ depend:
 
 install-binaries:
 
-install-libraries: installdirs
+install-libraries:
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)
 	@echo "Installing script files in $(DESTDIR)$(pkglibdir)"
 	@for i in $(BWIDGET_SOURCES) ; do \
-	    $(INSTALL_SCRIPT) $(srcdir)/$$i $(DESTDIR)$(pkglibdir) ; \
+	    $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)$(pkglibdir) ; \
 	done;
 	@echo "Installing language files in $(DESTDIR)$(pkglibdir)/lang"
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/lang
 	@for i in $(srcdir)/lang/*.rc ; do \
-	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir)/lang ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(pkglibdir)/lang ; \
 	done;
 	@echo "Installing image files in $(DESTDIR)$(pkglibdir)/images"
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/images
 	@for i in $(srcdir)/images/*.gif $(srcdir)/images/*.xbm ; do \
-	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir)/images ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(pkglibdir)/images ; \
 	done;
-	$(INSTALL_SCRIPT) $(PKGINDEX_TCL) $(DESTDIR)$(pkglibdir)
+	$(INSTALL_DATA) $(PKGINDEX_TCL) $(DESTDIR)$(pkglibdir)
 
 install-doc:
+	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/htmldoc
 	@echo "Installing html documentation in $(DESTDIR)$(pkglibdir)/htmldoc"
 	@for i in $(srcdir)/BWman/*.html ; do \
-	    $(INSTALL_SCRIPT) $$i $(DESTDIR)$(pkglibdir)/htmldoc ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(pkglibdir)/htmldoc ; \
 	done;
-
-installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)
-	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/lang
-	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/images
-	$(mkinstalldirs) $(DESTDIR)$(pkglibdir)/htmldoc
 
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
