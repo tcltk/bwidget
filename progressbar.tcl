@@ -65,10 +65,12 @@ proc ProgressBar::create { path args } {
 
     set _widget($path,val) 0
     set _widget($path,dir) 1
-    if { [set _widget($path,var) [Widget::cget $path -variable]] != "" } {
+    set _widget($path,var) [Widget::cget $path -variable]
+    if {$_widget($path,var) != ""} {
         GlobalVar::tracevar variable $_widget($path,var) w \
 		[list ProgressBar::_modify $path]
-        after idle ProgressBar::_modify $path
+        set _widget($path,afterid) \
+	    [after idle [list ProgressBar::_modify $path]]
     }
 
     bind $path.bar <Destroy>   [list ProgressBar::_destroy $path]
@@ -100,7 +102,10 @@ proc ProgressBar::configure { path args } {
             set _widget($path,var) $newv
             GlobalVar::tracevar variable $newv w \
 		    [list ProgressBar::_modify $path]
-            after idle ProgressBar::_modify $path
+	    if {![info exists _widget($path,afterid)]} {
+		set _widget($path,afterid) \
+		    [after idle [list ProgressBar::_modify $path]]
+	    }
         } else {
             set _widget($path,var) ""
         }
@@ -110,7 +115,10 @@ proc ProgressBar::configure { path args } {
 	    -orient -maximum] break
 
     if { $cbd || $cor || $cma } {
-        after idle ProgressBar::_modify $path
+	if {![info exists _widget($path,afterid)]} {
+	    set _widget($path,afterid) \
+		[after idle [list ProgressBar::_modify $path]]
+	}
     }
     if { [Widget::hasChangedX $path -foreground] } {
 	set fg [Widget::cget $path -foreground]
@@ -134,11 +142,17 @@ proc ProgressBar::cget { path option } {
 proc ProgressBar::_destroy { path } {
     variable _widget
 
-    if { $_widget($path,var) != "" } {
-        GlobalVar::tracevar vdelete $_widget($path,var) w \
-		[list ProgressBar::_modify $path]
+    if {[info exists _widget($path,afterid)]} {
+	after cancel $_widget($path,afterid)
+	unset _widget($path,afterid)
     }
-    unset _widget($path,var)
+    if {[info exists _widget($path,var)]} {
+	if {$_widget($path,var) != ""} {
+	    GlobalVar::tracevar vdelete $_widget($path,var) w \
+		[list ProgressBar::_modify $path]
+	}
+	unset _widget($path,var)
+    }
     unset _widget($path,dir)
     Widget::destroy $path
     rename $path {}
@@ -151,8 +165,9 @@ proc ProgressBar::_destroy { path } {
 proc ProgressBar::_modify { path args } {
     variable _widget
 
+    catch {unset _widget($path,afterid)}
     if { ![GlobalVar::exists $_widget($path,var)] ||
-         [set val [GlobalVar::getvar $_widget($path,var)]] < 0 } {
+	 [set val [GlobalVar::getvar $_widget($path,var)]] < 0 } {
         catch {place forget $path.bar}
     } else {
 	place $path.bar -relx 0 -rely 0 -relwidth 1 -relheight 1
