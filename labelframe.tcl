@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  labelframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelframe.tcl,v 1.3 2000/03/01 02:12:39 ericm Exp $
+#  $Id: labelframe.tcl,v 1.4 2002/10/14 20:54:41 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelFrame::create
@@ -18,7 +18,7 @@ namespace eval LabelFrame {
         remove     {
             -highlightthickness -highlightcolor -highlightbackground
             -takefocus -relief -borderwidth
-            -bitmap -image -cursor -textvariable
+            -cursor
             -dragenabled -draginitcmd -dragendcmd -dragevent -dragtype
             -dropenabled -droptypes -dropovercmd  -dropcmd} \
         initialize {-anchor w}
