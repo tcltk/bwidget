@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.5 2000/06/15 00:45:16 kuchler Exp $
+#  $Id: dynhelp.tcl,v 1.6 2000/10/10 21:17:53 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -307,7 +307,9 @@ proc DynamicHelp::_show_help { path x y } {
         destroy  $_top
         toplevel $_top -relief flat \
             -bg [Widget::getoption $_top -foreground] \
-            -bd [Widget::getoption $_top -borderwidth]
+            -bd [Widget::getoption $_top -borderwidth] \
+            -screen [winfo screen $path]
+
         wm overrideredirect $_top 1
         wm transient $_top
         wm withdraw $_top

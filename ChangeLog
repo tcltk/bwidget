@@ -1,3 +1,10 @@
+
+2000-10-10  Dan Kuchler  <kuchler@ajubasolutions.com>
+
+        * dynhelp.tcl: Added the '-screen' option to the toplevel that
+        is created to display the help text to fix a bug reported by
+        Tupone Alfredo.
+
 2000-10-01  Eric Melski  <ericm@ajubasolutions.com>
 
 	* notebook.tcl: Fixed typo in _draw_page that incorrectly placed
