@@ -1,0 +1,53 @@
+AC_INIT(init.tcl)
+
+PACKAGE=bwidget
+
+MAJOR_VERSION=1
+MINOR_VERSION=2
+PATCHLEVEL=.1
+
+VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
+NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
+
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+eval AC_DEFINE_UNQUOTED(VERSION, "${VERSION}")
+
+AC_PROG_INSTALL
+
+#--------------------------------------------------------------------
+# "cygpath" is used on windows to generate native path names for include
+# files.
+# These variables should only be used with the compiler and linker since
+# they generate native path names.
+#
+# Unix tclConfig.sh points SRC_DIR at the top-level directory of
+# the Tcl sources, while the Windows tclConfig.sh points SRC_DIR at
+# the win subdirectory.  Hence the different usages of SRC_DIR below.
+#
+# This must be done before calling SC_PUBLIC_TCL_HEADERS
+#--------------------------------------------------------------------
+
+case "`uname -s`" in
+    *win32* | *WIN32* | *CYGWIN_NT*)
+	CYGPATH="cygpath -w"
+    ;;
+    *)
+	CYGPATH=echo
+    ;;
+esac
+
+AC_SUBST(CYGPATH)
+
+#--------------------------------------------------------------------
+# Find tclsh so that we can run pkg_mkIndex to generate the pkgIndex.tcl
+# file during the install process.  Don't run the TCLSH through
+# ${CYGPATH} because it's being used directly by make.
+# Require that we use a tclsh shell version 8.2 or later since earlier
+# versions have bugs in the pkg_mkIndex routine.
+#--------------------------------------------------------------------
+
+SC_PROG_TCLSH
+
+AC_OUTPUT([Makefile],
+	chmod +x ${srcdir}/install-sh ${srcdir}/mkinstalldirs)
