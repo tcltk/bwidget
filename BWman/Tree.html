@@ -429,25 +429,27 @@ The node idenfier on which the event occurs is appended to the command.
 Returns the current value of the configuration option given by <I>option</I>.
 <I>Option</I> may have any of the values accepted by the creation command.
 </DD></DL>
-<DL><DT><A NAME="closetree"><I>pathName</I> <B>closetree</B></A>
- <I>node</I>
+<DL><DT><A NAME="closetree"><I>pathName</I> <B>closetree</B></A> <I>node</I>
+?<I>recurse</I>?
 </DT><DD>
 
-This command close all the subtree given by <I>node</I> (recurse
-through the tree starting at <I>node</I> and set <B>open</B> option to 0)
+This command close all the subtree given by <I>node</I>. Recurse
+through the tree starting at <I>node</I> and set <B>open</B> option to 0
+depending on <I>recurse</I>. Default value of <I>recurse</I> is <I>true</I>.
 
 </DD></DL>
 <DL><DT><A NAME="configure"><I>pathName</I> <B>configure</B></A>
  ?<I>option</I>? ?<I>value</I> <I>option</I> <I>value</I> ...?
 </DT><DD>
 
-Query or modify the configuration options of the widget. If no <I>option</I> is specified,
-returns a list describing all of the available options for <I>pathName</I>.
-If <I>option</I> is specified with no <I>value</I>, then the command returns a list
-describing the one named <I>option</I> (this list will be identical to the corresponding
-sublist of the value returned if no <I>option</I> is specified). If one or
-more <I>option-value</I> pairs are specified, then the command modifies the given widget
-option(s) to have the given value(s); in this case the command returns an empty string.
+Query or modify the configuration options of the widget. If no <I>option</I> is
+specified, returns a list describing all of the available options for
+<I>pathName</I>.  If <I>option</I> is specified with no <I>value</I>, then the
+command returns a list describing the one named <I>option</I> (this list will
+be identical to the corresponding sublist of the value returned if no
+<I>option</I> is specified). If one or more <I>option-value</I> pairs are
+specified, then the command modifies the given widget option(s) to have the
+given value(s); in this case the command returns an empty string.
 <I>Option</I> may have any of the values accepted by the creation command.
 Read-only options are not be modified.
 
@@ -621,12 +623,13 @@ inclusive. Both <I>first</I> and <I>last</I> may have any of the standard
 forms for indices.
 
 </DD></DL>
-<DL><DT><A NAME="opentree"><I>pathName</I> <B>opentree</B></A>
- <I>node</I>
+<DL><DT><A NAME="opentree"><I>pathName</I> <B>opentree</B></A> <I>node</I> ?<I>recurse</I>?
+
 </DT><DD>
 
-This command open all the subtree given by <I>node</I> (recurse
-through the tree starting at <I>node</I> and set <B>open</B> option to 1)
+This command open all the subtree given by <I>node</I>. Recurse through the
+tree starting at <I>node</I> and set <B>open</B> option to 1 depending on value
+of <I>recurse</I>. Default value of <I>recurse</I> is <I>true</I>.
 
 </DD></DL>
 <DL><DT><A NAME="parent"><I>pathName</I> <B>parent</B></A>
