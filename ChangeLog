@@ -1,5 +1,7 @@
 2002-06-04  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	**** BWIDGET 1.4.1 TAGGED ****
+
 	* README.txt: 
 	* configure.in: 
 	* pkgIndex.tcl: up'ed version to 1.4.1
