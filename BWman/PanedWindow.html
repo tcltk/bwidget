@@ -24,6 +24,7 @@
 <TD>&nbsp;&nbsp;<A HREF="#-side">-side</A></TR>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-weights">-weights</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TR>
 </TABLE></DD>
 </DL>
@@ -67,6 +68,17 @@ Specifies the side of the sash, which implies the layout: <B>top</B> or <B>botto
 (horizontal layout), <B>left</B> or <B>right</B> (vertical layout).
 </DD>
 </DL>
+<DL><DT><A NAME="-weights"><B>-weights (read-only)</B></A></DT>
+<DD>
+
+Specifies how the weights specified when adding panes should be used. Must be
+<B>extra</B> or <B>available</B>. When using <I>extra</I>, only extra space is
+devided among the diffferent panes relative to their weight. When using
+<I>available</I>, all space is devided among the diffferent panes relative to
+their weight. Default value for <B>weights</B> is <I>extra</I>.
+
+</DD>
+</DL>
 <DL><DT><A NAME="-width"><B>-width (read-only)</B></A></DT>
 <DD>
 
@@ -80,9 +92,9 @@ Specifies the width of the button of the sash.
  ?<I>option value...</I>?
 </DT><DD>
 
-This command add a new pane. The new pane is placed below the previous pane for vertical
-layout or at right for horizontal layout. This command returns a frame where user can place
-its widget. Valid options are:
+This command add a new pane. The new pane is placed below the previous pane for
+vertical layout or at right for horizontal layout. This command returns a frame
+where user can place its widget. Valid options are:
 <P>
 <DL><DT><A NAME="Pane-minsize"><B>-minsize</B></A></DT>
 <DD>

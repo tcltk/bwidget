@@ -8,12 +8,17 @@
 #     - PanedWindow::cget
 #     - PanedWindow::add
 #     - PanedWindow::getframe
+#     - PanedWindow::_apply_weights
 #     - PanedWindow::_destroy
 #     - PanedWindow::_beg_move_sash
 #     - PanedWindow::_move_sash
 #     - PanedWindow::_end_move_sash
 #     - PanedWindow::_realize
 # ------------------------------------------------------------------------------
+
+# JDC: added option to choose behavior of weights
+#    -weights extra : only apply weights to extra space (as current (>= 1.3.1) with grid command)
+#    -weights available : apply weights to total available space (as before (<1.3.1) with place command)
 
 namespace eval PanedWindow {
     namespace eval Pane {
@@ -24,12 +29,13 @@ namespace eval PanedWindow {
     }
 
     Widget::declare PanedWindow {
-        {-side       Enum       top 1 {top left bottom right}}
-        {-width      Int        10  1 "%d >=3"}
-        {-pad        Int        4   1 "%d >= 0"}
-        {-background TkResource ""  0 frame}
+        {-side       Enum       top   1 {top left bottom right}}
+        {-width      Int        10    1 "%d >=3"}
+        {-pad        Int        4     1 "%d >= 0"}
+        {-background TkResource ""    0 frame}
         {-bg         Synonym    -background}
-        {-activator  Enum       ""  1 {line button}}
+        {-activator  Enum       ""    1 {line button}}
+	{-weights    Enum       extra 1 {extra available}}
     }
 
     variable _panedw
@@ -103,10 +109,13 @@ proc PanedWindow::add { path args } {
     Widget::init PanedWindow::Pane $path.f$num $args
     set bg [Widget::getoption $path -background]
 
-    set wbut  [Widget::getoption $path -width]
-    set pad   [Widget::getoption $path -pad]
-    set width [expr {$wbut+2*$pad}]
-    set side  [Widget::getoption $path -side]
+    set wbut   [Widget::getoption $path -width]
+    set pad    [Widget::getoption $path -pad]
+    set width  [expr {$wbut+2*$pad}]
+    set side   [Widget::getoption $path -side]
+    set weight [Widget::getoption $path.f$num -weight]
+    lappend _panedw($path,weights) $weight
+
     if { $num > 0 } {
         set frame [frame $path.sash$num -relief flat -bd 0 \
 		-highlightthickness 0 -width $width -height $width -bg $bg]
@@ -178,12 +187,10 @@ proc PanedWindow::add { path args } {
 	    -highlightthickness 0 -bg $bg]
     if { ![string compare $side "top"] || ![string compare $side "bottom"] } {
         grid $pane -column [expr {2*$num}] -row 0 -sticky nsew
-        grid columnconfigure $path [expr {2*$num}] \
-            -weight  [Widget::getoption $path.f$num -weight]
+        grid columnconfigure $path [expr {2*$num}] -weight $weight
     } else {
         grid $pane -row [expr {2*$num}] -column 0 -sticky nsew
-        grid rowconfigure $path [expr {2*$num}] \
-            -weight  [Widget::getoption $path.f$num -weight]
+        grid rowconfigure $path [expr {2*$num}] -weight $weight
     }
     pack $user -fill both -expand yes
     incr _panedw($path,nbpanes)
@@ -332,4 +339,39 @@ proc PanedWindow::_realize { path width height } {
     }
 
     bind $path <Configure> {}
+
+    _apply_weights $path
+}
+
+# ------------------------------------------------------------------------------
+#  Command PanedWindow::apply_weights
+# ------------------------------------------------------------------------------
+proc PanedWindow::_apply_weights { path } {
+    variable _panedw
+
+    set weights [Widget::getoption $path -weights]
+    if { ![string compare $weights "extra"] } {
+	return
+    }
+
+    set side   [Widget::getoption $path -side]
+    if { ![string compare $side "top"] || ![string compare $side "bottom"] } {
+	set size width
+    } else {
+	set size height
+    }
+    set wsash [expr {[Widget::getoption $path -width] + 2*[Widget::getoption $path -pad]}]
+    set rs [winfo $size $path]
+    set s [expr {$rs - ($_panedw($path,nbpanes) - 1) * $wsash}]
+    
+    set tw 0.0
+    foreach w $_panedw($path,weights) { 
+	set tw [expr {$tw + $w}]
+    }
+
+    for {set i 0} {$i < $_panedw($path,nbpanes)} {incr i} {
+	set rw [lindex $_panedw($path,weights) $i]
+	set ps [expr {int($rw / $tw * $s)}]
+	$path.f$i configure -$size $ps
+    }    
 }
