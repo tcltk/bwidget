@@ -91,14 +91,14 @@ proc SelectColor::menu {path placement args} {
     update
     Widget::destroy $top
     if {$_selection == $count} {
-        return [eval dialogue $path $args]
+        return [eval dialog $path $args]
     } else {
         return [lindex $colors $_selection]
     }
 }
 
 
-proc SelectColor::dialogue {path args} {
+proc SelectColor::dialog {path args} {
     variable _baseColors
     variable _userColors
     variable _widget
@@ -194,7 +194,7 @@ proc SelectColor::dialogue {path args} {
     }
     $c1 create image  0 0 -anchor nw -image $_image
     $c1 create bitmap 0 0 \
-        -bitmap @[file join $::env(BWIDGET_LIBRARY) "images" "target.xbm"] \
+        -bitmap @[file join $::BWIDGET::LIBRARY "images" "target.xbm"] \
         -anchor nw -tags target
 
     set _selection -1

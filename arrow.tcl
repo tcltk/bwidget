@@ -25,37 +25,35 @@
 namespace eval ArrowButton {
 
     Widget::tkinclude ArrowButton button :cmd \
-        include {
-            -borderwidth -bd  -background -bg -relief
-            -highlightbackground -highlightcolor -highlightthickness -takefocus}
+	    include [list \
+		-borderwidth -bd \
+		-background -bg -relief -highlightbackground \
+		-highlightcolor -highlightthickness -takefocus]
 
-    Widget::declare ArrowButton {
-        {-type                Enum button 0 {arrow button}}
-        {-dir                 Enum top    0 {top bottom left right}}
-        {-width               Int 15 0 {=0}}
-        {-height              Int 15 0 {=0}}
-        {-ipadx               Int 0  0 {=0}}
-        {-ipady               Int 0  0 {=0}}
-        {-clean               Int 2  0 {=0 =2}}
-        {-activeforeground    TkResource "" 0 button}
-        {-activebackground    TkResource "" 0 button}
-        {-disabledforeground  TkResource "" 0 button}
-        {-foreground          TkResource "" 0 button}
-        {-state               TkResource "" 0 button}
-
-        {-troughcolor     TkResource ""     0 scrollbar}
-        {-arrowbd         Int        1      0 {=1 =2}}
-        {-arrowrelief     Enum       raised 0 {raised sunken}}
-
-        {-command         String "" 0}
-        {-armcommand      String "" 0}
-        {-disarmcommand   String "" 0}
-        {-repeatdelay     Int 0 0 {=0}}
-        {-repeatinterval  Int 0 0 {=0}}
-
-        {-bd              Synonym -borderwidth}
-        {-fg              Synonym -foreground}
-    }
+    Widget::declare ArrowButton [list \
+	    [list -type		Enum button 0 [list arrow button]] \
+	    [list -dir		Enum top    0 [list top bottom left right]] \
+	    [list -width	Int	15	0	[list =0]] \
+	    [list -height	Int	15	0	[list =0]] \
+	    [list -ipadx	Int	0	0	[list =0]] \
+	    [list -ipady	Int	0	0	[list =0]] \
+	    [list -clean	Int	2	0	[list =0 =2]] \
+	    [list -activeforeground	TkResource	""	0 button] \
+	    [list -activebackground	TkResource	""	0 button] \
+	    [list -disabledforeground 	TkResource	""	0 button] \
+	    [list -foreground		TkResource	""	0 button] \
+	    [list -state		TkResource	""	0 button] \
+	    [list -troughcolor		TkResource	""	0 scrollbar] \
+	    [list -arrowbd	Int	1	0	[list =1 =2]] \
+	    [list -arrowrelief	Enum	raised	0	[list raised sunken]] \
+	    [list -command		String	""	0] \
+	    [list -armcommand		String	""	0] \
+	    [list -disarmcommand	String	""	0] \
+	    [list -repeatdelay		Int	0	0	[list =0]] \
+	    [list -repeatinterval	Int	0	0	[list =0]] \
+	    [list -bd	Synonym	-borderwidth] \
+	    [list -fg	Synonym	-foreground] \
+	    ]
     DynamicHelp::include ArrowButton balloon
 
     proc ::ArrowButton { path args } { return [eval ArrowButton::create $path $args] }
