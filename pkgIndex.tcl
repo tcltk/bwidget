@@ -1,7 +1,7 @@
 if {[catch {package require Tcl}]} return
-package ifneeded BWidget 1.6 "\
+package ifneeded BWidget 1.7 "\
     package require Tk 8.1.1;\
-    [list tclPkgSetup $dir BWidget 1.6 {
+    [list tclPkgSetup $dir BWidget 1.7 {
 {arrow.tcl source {ArrowButton ArrowButton::create ArrowButton::use}}
 {labelframe.tcl source {LabelFrame LabelFrame::create LabelFrame::use}}
 {labelentry.tcl source {LabelEntry LabelEntry::create LabelEntry::use}}
@@ -9,7 +9,7 @@ package ifneeded BWidget 1.6 "\
 {button.tcl source {Button Button::create Button::use}}
 {buttonbox.tcl source {ButtonBox ButtonBox::create ButtonBox::use}}
 {combobox.tcl source {ComboBox ComboBox::create ComboBox::use}}
-{label.tcl source {Label BWLabel::create BWLabel::use}}
+{label.tcl source {Label Label::create Label::use}}
 {entry.tcl source {Entry Entry::create Entry::use}}
 {pagesmgr.tcl source {PagesManager PagesManager::create PagesManager::use}}
 {notebook.tcl source {NoteBook NoteBook::create NoteBook::use}}
@@ -30,11 +30,12 @@ package ifneeded BWidget 1.6 "\
 {tree.tcl source {Tree Tree::create Tree::use}}
 {ctrlframe.tcl source {ControlFrame ControlFrame::create ControlFrame::use}}
 {color.tcl source {SelectColor SelectColor::menu SelectColor::dialog SelectColor::setcolor}}
-{dynhelp.tcl source {DynamicHelp::configure DynamicHelp::use DynamicHelp::register DynamicHelp::include}}
+{dynhelp.tcl source {DynamicHelp::configure DynamicHelp::use DynamicHelp::register DynamicHelp::include DynamicHelp::add DynamicHelp::delete}}
 {dialog.tcl source {Dialog Dialog::create Dialog::use}}
 {messagedlg.tcl source {MessageDlg MessageDlg::create MessageDlg::use}}
 {font.tcl source {SelectFont SelectFont::create SelectFont::use SelectFont::loadfont}}
 {widgetdoc.tcl source {Widget::generate-doc Widget::generate-widget-doc}}
+{wizard.tcl source {Wizard Wizard::create Wizard::use SimpleWizard ClassicWizard}}
 {xpm2image.tcl source {xpm-to-image}}
 }]; \
 	[list namespace eval ::BWIDGET {}]; \

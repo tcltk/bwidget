@@ -11,11 +11,14 @@
 # ----------------------------------------------------------------------------
 
 namespace eval ProgressBar {
+    Widget::define ProgressBar progressbar
+
     Widget::declare ProgressBar {
-        {-type        Enum       normal     0 {normal incremental infinite nonincremental_infinite}}
+        {-type        Enum       normal     0
+                      {normal incremental infinite nonincremental_infinite}}
         {-maximum     Int        100        0 "%d >= 0"}
         {-background  TkResource ""         0 frame}
-        {-foreground  TkResource blue       0 label}
+        {-foreground  TkResource "blue"     0 label}
         {-borderwidth TkResource 2          0 frame}
         {-troughcolor TkResource ""         0 scrollbar}
         {-relief      TkResource sunken     0 label}
@@ -35,9 +38,6 @@ namespace eval ProgressBar {
     }
 
     variable _widget
-
-    Widget::redir_create_command ::ProgressBar
-    proc use {} {}
 }
 
 
@@ -74,10 +74,7 @@ proc ProgressBar::create { path args } {
     bind $path.bar <Destroy>   [list ProgressBar::_destroy $path]
     bind $path.bar <Configure> [list ProgressBar::_modify $path]
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path ProgressBar
-
-    return $path
+    return [Widget::create ProgressBar $path]
 }
 
 
@@ -134,29 +131,6 @@ proc ProgressBar::cget { path option } {
 
 
 # ----------------------------------------------------------------------------
-#  Command ProgressBar::_destroy
-# ----------------------------------------------------------------------------
-proc ProgressBar::_destroy { path } {
-    variable _widget
-
-    if {[info exists _widget($path,afterid)]} {
-	after cancel $_widget($path,afterid)
-	unset _widget($path,afterid)
-    }
-    if {[info exists _widget($path,var)]} {
-	if {$_widget($path,var) != ""} {
-	    GlobalVar::tracevar vdelete $_widget($path,var) w \
-		[list ProgressBar::_modify $path]
-	}
-	unset _widget($path,var)
-    }
-    unset _widget($path,dir)
-    Widget::destroy $path
-    rename $path {}
-}
-
-
-# ----------------------------------------------------------------------------
 #  Command ProgressBar::_modify
 # ----------------------------------------------------------------------------
 proc ProgressBar::_modify { path args } {
@@ -206,4 +180,26 @@ proc ProgressBar::_modify { path args } {
     if {![Widget::cget $path -idle]} {
 	update idletasks
     }
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command ProgressBar::_destroy
+# ----------------------------------------------------------------------------
+proc ProgressBar::_destroy { path } {
+    variable _widget
+
+    if {[info exists _widget($path,afterid)]} {
+	after cancel $_widget($path,afterid)
+	unset _widget($path,afterid)
+    }
+    if {[info exists _widget($path,var)]} {
+	if {$_widget($path,var) != ""} {
+	    GlobalVar::tracevar vdelete $_widget($path,var) w \
+		[list ProgressBar::_modify $path]
+	}
+	unset _widget($path,var)
+    }
+    unset _widget($path,dir)
+    Widget::destroy $path
 }

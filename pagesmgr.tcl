@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  pagesmgr.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: pagesmgr.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: pagesmgr.tcl,v 1.6 2003/10/20 21:23:52 damonc Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - PagesManager::create
@@ -23,16 +23,16 @@
 package require Tcl 8.1.1
 
 namespace eval PagesManager {
+    Widget::define PagesManager pagesmgr
+
     Widget::declare PagesManager {
         {-background TkResource "" 0 frame}
+        {-cursor     TkResource "" 0 frame}
         {-width      Int        0  0 "%d >= 0"}
         {-height     Int        0  0 "%d >= 0"}
     }
 
-    Widget::addmap PagesManager "" :cmd {-width {} -height {}}
-
-    Widget::redir_create_command ::PagesManager
-    proc use {} {}
+    Widget::addmap PagesManager "" :cmd { -width {} -height {} -cursor {} }
 }
 
 
@@ -57,10 +57,7 @@ proc PagesManager::create { path args } {
     bind $path <Configure> [list PagesManager::_realize $path]
     bind $path <Destroy>   [list PagesManager::_destroy $path]
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path PagesManager
-
-    return $path
+    return [Widget::create PagesManager $path]
 }
 
 
@@ -187,19 +184,6 @@ proc PagesManager::pages { path {first ""} {last ""} } {
 
 
 # ------------------------------------------------------------------------------
-#  Command PagesManager::_destroy
-# ------------------------------------------------------------------------------
-proc PagesManager::_destroy { path } {
-    variable $path
-    upvar 0  $path data
-
-    Widget::destroy $path
-    unset data
-    rename $path {}
-}
-
-
-# ------------------------------------------------------------------------------
 #  Command PagesManager::getframe
 # ------------------------------------------------------------------------------
 proc PagesManager::getframe { path page } {
@@ -296,4 +280,15 @@ proc PagesManager::_realize { path } {
     set data(realized) 1
     _draw_area $path
     bind $path <Configure> [list PagesManager::_draw_area $path]
+}
+
+
+# ------------------------------------------------------------------------------
+#  Command PagesManager::_destroy
+# ------------------------------------------------------------------------------
+proc PagesManager::_destroy { path } {
+    variable $path
+    upvar 0  $path data
+    Widget::destroy $path
+    unset data
 }

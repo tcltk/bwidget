@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.12 2003/05/07 08:24:04 hobbs Exp $
+#  $Id: dynhelp.tcl,v 1.13 2003/10/20 21:23:52 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -19,6 +19,8 @@
 # JDC: allow variable and ballon help at the same timees
 
 namespace eval DynamicHelp {
+    Widget::define DynamicHelp dynhelp -classonly
+
     Widget::declare DynamicHelp {
         {-foreground     TkResource black         0 label}
         {-topbackground  TkResource black         0 {label -foreground}}
@@ -54,16 +56,16 @@ namespace eval DynamicHelp {
     bind BwHelpBalloon <Motion>  {DynamicHelp::_motion_balloon motion %W %X %Y}
     bind BwHelpBalloon <Leave>   {DynamicHelp::_motion_balloon leave  %W %X %Y}
     bind BwHelpBalloon <Button>  {DynamicHelp::_motion_balloon button %W %X %Y}
-    bind BwHelpBalloon <Destroy> {if {[info exists DynamicHelp::_registered(%W,balloon)]} {unset DynamicHelp::_registered(%W,balloon)}}
+    bind BwHelpBalloon <Destroy> {DynamicHelp::_unset_help %W}
 
     bind BwHelpVariable <Enter>   {DynamicHelp::_motion_info %W}
     bind BwHelpVariable <Motion>  {DynamicHelp::_motion_info %W}
     bind BwHelpVariable <Leave>   {DynamicHelp::_leave_info  %W}
-    bind BwHelpVariable <Destroy> {if {[info exists DynamicHelp::_registered(%W,variable)]} {unset DynamicHelp::_registered(%W,variable)}}
+    bind BwHelpVariable <Destroy> {DynamicHelp::_unset_help  %W}
 
     bind BwHelpMenu <<MenuSelect>> {DynamicHelp::_menu_info select %W}
     bind BwHelpMenu <Unmap>        {DynamicHelp::_menu_info unmap  %W}
-    bind BwHelpMenu <Destroy>      {if {[info exists DynamicHelp::_registered(%W)]} {unset DynamicHelp::_registered(%W)}}
+    bind BwHelpMenu <Destroy>      {DynamicHelp::_unset_help %W}
 }
 
 
@@ -129,167 +131,274 @@ proc DynamicHelp::sethelp { path subpath {force 0}} {
 # ----------------------------------------------------------------------------
 proc DynamicHelp::register { path type args } {
     variable _registered
-    variable _canvases
 
     set len [llength $args]
     if {$type == "balloon"  && $len > 1} { set type canvasBalloon  }
     if {$type == "variable" && $len > 2} { set type canvasVariable }
 
-    if { [winfo exists $path] } {
-        set evt  [bindtags $path]
-        switch $type {
-            balloon {
-		set text [lindex $args 0]
-		set idx [lsearch $evt "BwHelpBalloon"]
-		set evt [lreplace $evt $idx $idx]
-                if { $text != "" } {
-		    set _registered($path,balloon) $text
-		    lappend evt BwHelpBalloon
-                } else {
-                    if {[info exists _registered($path,balloon)]} {
-                        unset _registered($path,balloon)
-                    }
-		}
-		bindtags $path $evt
-                return 1
-            }
-
-	    canvasBalloon {
-		set tagOrItem  [lindex $args 0]
-		set text       [lindex $args 1]
-		if { $text != "" } {
-		    set _registered($path,$tagOrItem,balloon) $text
-		} else {
-		    if {[info exists _registered($path,$tagOrItem,balloon)]} {
-			unset _registered($path,$tagOrItem,balloon)
-		    }
-		}
-
-		if {![info exists _canvases($path,balloon)]} {
-		    ## This canvas doesn't have the bindings yet.
-		    $path bind BwHelpBalloon <Enter> \
-			{DynamicHelp::_motion_balloon enter  %W %X %Y 1}
-		    $path bind BwHelpBalloon <Motion> \
-			{DynamicHelp::_motion_balloon motion %W %X %Y 1}
-		    $path bind BwHelpBalloon <Leave> \
-			{DynamicHelp::_motion_balloon leave  %W %X %Y 1}
-		    $path bind BwHelpBalloon <Button> \
-			{DynamicHelp::_motion_balloon button %W %X %Y 1}
-		    bind $path <Destroy> \
-			{DynamicHelp::_unset_help %W}
-		    set _canvases($path,balloon) 1
-		}
-		$path addtag BwHelpBalloon withtag $tagOrItem
-		return 1
-	    }
-
-            variable {
-		set idx  [lsearch $evt "BwHelpVariable"]
-		set evt  [lreplace $evt $idx $idx]
-                set var  [lindex $args 0]
-                set text [lindex $args 1]
-                if { $text != "" && $var != "" } {
-                    set _registered($path,variable) [list $var $text]
-                    lappend evt BwHelpVariable
-                } else {
-                    if {[info exists _registered($path,variable)]} {
-                        unset _registered($path,variable)
-                    }
-                }
-                bindtags $path $evt
-                return 1
-            }
-
-	    canvasVariable {
-		set tagOrItem  [lindex $args 0]
-		set var        [lindex $args 1]
-		set text       [lindex $args 2]
-		if { $text != "" && $var != "" } {
-		    set _registered($path,$tagOrItem,variable) [list $var $text]
-		} else {
-		    if {[info exists _registered($path,$tagOrItem,variable)]} {
-			unset _registered($path,$tagOrItem,variable)
-		    }
-		}
-		if {![info exists _canvases($path,variable)]} {
-		    $path bind BwHelpVariable <Enter> \
-		    	{DynamicHelp::_motion_info %W 1}
-		    $path bind BwHelpVariable <Motion> \
-		    	{DynamicHelp::_motion_info %W 1}
-		    $path bind BwHelpVariable <Leave> \
-		    	{DynamicHelp::_leave_info  %W 1}
-		    bind $path <Destroy> \
-		    	{DynamicHelp::_unset_help  %W 1}
-		    set _canvases($path,variable) 1
-		}
-		$path addtag BwHelpVariable withtag $tagOrItem
-		return 1
-	    }
-
-            menu {
-                set cpath [BWidget::clonename $path]
-                if { [winfo exists $cpath] } {
-                    set path $cpath
-                }
-                set var [lindex $args 0]
-                if { $var != "" } {
-                    set _registered($path) [list $var]
-                    lappend evt BwHelpMenu
-                } else {
-                    if {[info exists _registered($path)]} {
-                        unset _registered($path)
-                    }
-                }
-                bindtags $path $evt
-                return 1
-            }
-
-            menuentry {
-                set cpath [BWidget::clonename $path]
-                if { [winfo exists $cpath] } {
-                    set path $cpath
-                }
-                if { [info exists _registered($path)] } {
-                    if { [set index [lindex $args 0]] != "" } {
-                        set text  [lindex $args 1]
-                        set idx   [lsearch $_registered($path) [list $index *]]
-                        if { $text != "" } {
-                            if { $idx == -1 } {
-                                lappend _registered($path) [list $index $text]
-                            } else {
-                                set _registered($path) [lreplace $_registered($path) $idx $idx [list $index $text]]
-                            }
-                        } else {
-                            set _registered($path) [lreplace $_registered($path) $idx $idx]
-                        }
-                    }
-                    return 1
-                }
-                return 0
-            }
-        }
-        if {[info exists _registered($path,balloon)]} {
-            unset _registered($path,balloon)
-        }
-        if {[info exists _registered($path,variable)]} {
-            unset _registered($path,variable)
-        }
-        if {[info exists _registered($path)]} {
-            unset _registered($path)
-        }
-        bindtags $path $evt
-        return 1
-    } else {
-        if {[info exists _registered($path,balloon)]} {
-            unset _registered($path,balloon)
-        }
-	if {[info exists _registered($path,variable)]} {
-            unset _registered($path,variable)
-        }
-        if {[info exists _registered($path)]} {
-            unset _registered($path)
-        }
+    if { ![winfo exists $path] } {
+        _unset_help $path
         return 0
+    }
+
+    switch $type {
+        balloon {
+            set text [lindex $args 0]
+	    if {$text == ""} {
+		if {[info exists _registered($path,balloon)]} {
+		    unset _registered($path,balloon)
+		}
+		return 0
+	    }
+
+	    _add_balloon $path $text
+        }
+
+        canvasBalloon {
+            set tagOrItem  [lindex $args 0]
+            set text       [lindex $args 1]
+	    if {$text == ""} {
+		if {[info exists _registered($path,$tagOrItem,balloon)]} {
+		    unset _registered($path,$tagOrItem,balloon)
+		}
+		return 0
+	    }
+
+	    _add_canvas_balloon $path $text $tagOrItem
+        }
+
+        variable {
+            set var  [lindex $args 0]
+            set text [lindex $args 1]
+	    if {$text == "" || $var == ""} {
+		if {[info exists _registered($path,variable)]} {
+		    unset _registered($path,variable)
+		}
+		return 0
+	    }
+
+	    _add_variable $path $text $var
+        }
+
+        canvasVariable {
+            set tagOrItem  [lindex $args 0]
+            set var        [lindex $args 1]
+            set text       [lindex $args 2]
+	    if {$text == "" || $var == ""} {
+		if {[info exists _registered($path,$tagOrItem,variable)]} {
+		    unset _registered($path,$tagOrItem,variable)
+		}
+		return 0
+	    }
+
+	    _add_canvas_variable $path $text $var $tagOrItem
+        }
+
+        menu {
+            set var [lindex $args 0]
+	    if {$var == ""} {
+		set cpath [BWidget::clonename $path]
+		if {[winfo exists $cpath]} { set path $cpath }
+		if {[info exists _registered($path)]} {
+		    unset _registered($path)
+		}
+		return 0
+	    }
+
+	    _add_menu $path $var
+        }
+
+        menuentry {
+            set cpath [BWidget::clonename $path]
+            if { [winfo exists $cpath] } { set path $cpath }
+            if {![info exists _registered($path)]} { return 0 }
+
+            set text  [lindex $args 1]
+            set index [lindex $args 0]
+	    if {$text == "" || $index == ""} {
+		set idx [lsearch $_registed($path) [list $index *]]
+		set _registered($path) [lreplace $_registered($path) $idx $idx]
+		return 0
+	    }
+
+	    _add_menuentry $path $text $index
+        }
+
+        default {
+            _unset_help $path
+	    return 0
+        }
+    }
+
+    return 1
+}
+
+
+proc DynamicHelp::add { path args } {
+    variable _registered
+
+    array set data {
+        -type     balloon
+        -text     ""
+        -item     ""
+        -index    -1
+        -command  ""
+        -variable ""
+    }
+    if {[winfo exists $path] && [winfo class $path] == "Menu"} {
+	set data(-type) menu
+    }
+    array set data $args
+
+    set item $path
+
+    switch -- $data(-type) {
+        "balloon" {
+            if {$data(-item) != ""} {
+                _add_canvas_balloon $path $data(-text) $data(-item)
+                set item $path,$data(-item)
+            } else {
+                _add_balloon $path $data(-text)
+            }
+
+	    if {$data(-variable) != ""} {
+		set _registered($item,balloonVar) $data(-variable)
+	    }
+        }
+
+        "variable" {
+            set var $data(-variable)
+            if {$data(-item) != ""} {
+                _add_canvas_variable $path $data(-text) $var $data(-item)
+                set item $path,$data(-item)
+            } else {
+                _add_variable $path $data(-text) $var
+            }
+        }
+
+        "menu" {
+            if {$data(-index) != -1} {
+                set cpath [BWidget::clonename $path]
+                if { [winfo exists $cpath] } { set path $cpath }
+                if {![info exists _registered($path)]} { return 0 }
+                _add_menuentry $path $data(-text) $data(-index)
+                set item $path,$data(-index)
+            } else {
+                _add_menu $path $data(-variable)
+            }
+        }
+
+        default {
+            return 0
+        }
+    }
+
+    if {$data(-command) != ""} {set _registered($item,command) $data(-command)}
+
+    return 1
+}
+
+
+proc DynamicHelp::delete { path } {
+    _unset_help $path
+}
+
+
+proc DynamicHelp::_add_bind_tag { path tag } {
+    set evt [bindtags $path]
+    set idx [lsearch $evt $tag]
+    set evt [lreplace $evt $idx $idx]
+    lappend evt $tag
+    bindtags $path $evt
+}
+
+
+proc DynamicHelp::_add_balloon { path text } {
+    variable _registered
+    set _registered($path,balloon) $text
+    _add_bind_tag $path BwHelpBalloon
+}
+
+
+proc DynamicHelp::_add_canvas_balloon { path text tagOrItem } {
+    variable _canvases
+    variable _registered
+
+    set _registered($path,$tagOrItem,balloon) $text
+
+    if {![info exists _canvases($path,balloon)]} {
+        ## This canvas doesn't have the bindings yet.
+
+        _add_bind_tag $path BwHelpBalloon
+
+        $path bind BwHelpBalloon <Enter> \
+            {DynamicHelp::_motion_balloon enter  %W %X %Y 1}
+        $path bind BwHelpBalloon <Motion> \
+            {DynamicHelp::_motion_balloon motion %W %X %Y 1}
+        $path bind BwHelpBalloon <Leave> \
+            {DynamicHelp::_motion_balloon leave  %W %X %Y 1}
+        $path bind BwHelpBalloon <Button> \
+            {DynamicHelp::_motion_balloon button %W %X %Y 1}
+
+        set _canvases($path,balloon) 1
+    }
+
+    $path addtag BwHelpBalloon withtag $tagOrItem
+}
+
+proc DynamicHelp::_add_variable { path text varName } {
+    variable _registered
+    set _registered($path,variable) [list $varName $text]
+    _add_bind_tag $path BwHelpVariable
+}
+
+
+proc DynamicHelp::_add_canvas_variable { path text varName tagOrItem } {
+    variable _canvases
+    variable _registered
+
+    set _registered($path,$tagOrItem,variable) [list $varName $text]
+
+    if {![info exists _canvases($path,variable)]} {
+        ## This canvas doesn't have the bindings yet.
+
+        _add_bind_tag $path BwHelpVariable
+
+        $path bind BwHelpVariable <Enter> \
+            {DynamicHelp::_motion_info %W 1}
+        $path bind BwHelpVariable <Motion> \
+            {DynamicHelp::_motion_info %W 1}
+        $path bind BwHelpVariable <Leave> \
+            {DynamicHelp::_leave_info  %W 1}
+
+        set _canvases($path,variable) 1
+    }
+
+    $path addtag BwHelpVariable withtag $tagOrItem
+}
+
+
+proc DynamicHelp::_add_menu { path varName } {
+    variable _registered
+
+    set cpath [BWidget::clonename $path]
+    if { [winfo exists $cpath] } { set path $cpath }
+
+    set _registered($path) [list $varName]
+    _add_bind_tag $path BwHelpMenu
+}
+
+
+proc DynamicHelp::_add_menuentry { path text index } {
+    variable _registered
+
+    set idx  [lsearch $_registered($path) [list $index *]]
+    set list [list $index $text]
+    if { $idx == -1 } {
+	lappend _registered($path) $list
+    } else {
+	set _registered($path) \
+	    [lreplace $_registered($path) $idx $idx $list]
     }
 }
 
@@ -318,7 +427,8 @@ proc DynamicHelp::_motion_balloon { type path x y {isCanvasItem 0} } {
         }
         if { $type == "motion" } {
             if { ![winfo exists $_top] } {
-                set _id [after $_delay [list DynamicHelp::_show_help $path $w $x $y]]
+                set cmd [list DynamicHelp::_show_help $path $w $x $y]
+                set _id [after $_delay $cmd]
             }
         } else {
             destroy $_top
@@ -332,17 +442,22 @@ proc DynamicHelp::_motion_balloon { type path x y {isCanvasItem 0} } {
 #  Command DynamicHelp::_motion_info
 # ----------------------------------------------------------------------------
 proc DynamicHelp::_motion_info { path {isCanvasItem 0} } {
+    variable _saved
     variable _registered
     variable _current_variable
-    variable _saved
 
     if {$isCanvasItem} { set path [_get_canvas_path $path variable] }
 
-    if { $_current_variable != $path && [info exists _registered($path,variable)] } {
-        if { ![info exists _saved] } {
-            set _saved [GlobalVar::getvar [lindex $_registered($path,variable) 0]]
+    if { $_current_variable != $path
+        && [info exists _registered($path,variable)] } {
+
+        set varName [lindex $_registered($path,variable) 0]
+        if {![info exists _saved]} { set _saved [GlobalVar::getvar $varName] }
+        set string [lindex $_registered($path,variable) 1]
+        if {[info exists _registered($path,command)]} {
+            set string [eval $_registered($path,command)]
         }
-        GlobalVar::setvar [lindex $_registered($path,variable) 0] [lindex $_registered($path,variable) 1]
+        GlobalVar::setvar $varName $string
         set _current_variable $path
     }
 }
@@ -352,14 +467,15 @@ proc DynamicHelp::_motion_info { path {isCanvasItem 0} } {
 #  Command DynamicHelp::_leave_info
 # ----------------------------------------------------------------------------
 proc DynamicHelp::_leave_info { path {isCanvasItem 0} } {
+    variable _saved
     variable _registered
     variable _current_variable
-    variable _saved
 
     if {$isCanvasItem} { set path [_get_canvas_path $path variable] }
 
     if { [info exists _registered($path,variable)] } {
-        GlobalVar::setvar [lindex $_registered($path,variable) 0] $_saved
+        set varName [lindex $_registered($path,variable) 0]
+        GlobalVar::setvar $varName $_saved
     }
     unset _saved
     set _current_variable ""
@@ -375,13 +491,17 @@ proc DynamicHelp::_menu_info { event path } {
     variable _registered
 
     if { [info exists _registered($path)] } {
-        set index [$path index active]
-        if { [string compare $index "none"] &&
+        set index   [$path index active]
+        set varName [lindex $_registered($path) 0]
+        if { ![string equal $index "none"] &&
              [set idx [lsearch $_registered($path) [list $index *]]] != -1 } {
-            GlobalVar::setvar [lindex $_registered($path) 0] \
-                [lindex [lindex $_registered($path) $idx] 1]
+	    set string [lindex [lindex $_registered($path) $idx] 1]
+	    if {[info exists _registered($path,$index,command)]} {
+		set string [eval $_registered($path,$index,command)]
+	    }
+            GlobalVar::setvar $varName $string
         } else {
-            GlobalVar::setvar [lindex $_registered($path) 0] ""
+            GlobalVar::setvar $varName ""
         }
     }
 }
@@ -400,6 +520,20 @@ proc DynamicHelp::_show_help { path w x y } {
 
     if { [info exists _registered($path,balloon)] } {
         destroy  $_top
+
+        set string $_registered($path,balloon)
+
+	if {[info exists _registered($path,balloonVar)]} {
+	    upvar #0 $_registered($path,balloonVar) var
+	    if {[info exists var]} { set string $var }
+	}
+
+        if {[info exists _registered($path,command)]} {
+            set string [eval $_registered($path,command)]
+        }
+
+	if {$string == ""} { return }
+
         toplevel $_top -relief flat \
             -bg [Widget::getoption $_top -topbackground] \
             -bd [Widget::getoption $_top -borderwidth] \
@@ -409,7 +543,9 @@ proc DynamicHelp::_show_help { path w x y } {
         wm transient $_top
         wm withdraw $_top
 
-        label $_top.label -text $_registered($path,balloon) \
+	catch { wm attributes $_top -topmost 1 }
+
+        label $_top.label -text $string \
             -relief flat -bd 0 -highlightthickness 0 \
 	    -padx       [Widget::getoption $_top -padx] \
 	    -pady       [Widget::getoption $_top -pady] \
@@ -441,17 +577,26 @@ proc DynamicHelp::_show_help { path w x y } {
         wm geometry  $_top "+$x+$y"
         update idletasks
 
-	if {![winfo exists $_top]} {return}
+	if {![winfo exists $_top]} { return }
         wm deiconify $_top
+        raise $_top
     }
 }
 
 # ----------------------------------------------------------------------------
 #  Command DynamicHelp::_unset_help
 # ----------------------------------------------------------------------------
-proc DynamicHelp::_unset_help {path} {
+proc DynamicHelp::_unset_help { path } {
+    variable _canvases
     variable _registered
-    foreach var [array names _registered $path,*] { unset _registered($var) }
+
+    if {[info exists _registered($path)]} { unset _registered($path) }
+    if {[winfo exists $path]} {
+	set cpath [BWidget::clonename $path]
+	if {[info exists _registered($cpath)]} { unset _registered($cpath) }
+    }
+    array unset _canvases   $path,*
+    array unset _registered $path,*
 }
 
 # ----------------------------------------------------------------------------

@@ -18,6 +18,8 @@
 # ----------------------------------------------------------------------------
 
 namespace eval Button {
+    Widget::define Button button DynamicHelp
+
     set remove [list -command -relief -text -textvariable -underline -state]
     if {[info tclversion] > 8.3} {
 	lappend remove -repeatdelay -repeatinterval
@@ -51,10 +53,7 @@ namespace eval Button {
     bind BwButton <ButtonRelease-1> {Button::_release %W}
     bind BwButton <Key-space>       {Button::invoke %W; break}
     bind BwButton <Return>          {Button::invoke %W; break}
-    bind BwButton <Destroy>         {Widget::destroy %W; rename %W {}}
-
-    Widget::redir_create_command ::Button
-    proc use {} {}
+    bind BwButton <Destroy>         {Widget::destroy %W}
 }
 
 
@@ -104,10 +103,7 @@ proc Button::create { path args } {
 
     DynamicHelp::sethelp $path $path 1
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path Button
-
-    return $path
+    return [Widget::create Button $path]
 }
 
 
@@ -186,7 +182,7 @@ proc Button::cget { path option } {
 #  Command Button::invoke
 # ----------------------------------------------------------------------------
 proc Button::invoke { path } {
-    if { [string compare [$path:cmd cget -state] "disabled"] } {
+    if { ![string equal [$path:cmd cget -state] "disabled"] } {
 	$path:cmd configure -state active -relief sunken
 	update idletasks
 	set cmd [Widget::getMegawidgetOption $path -armcommand]
@@ -221,7 +217,7 @@ proc Button::_enter { path } {
     variable _pressed
 
     set _current $path
-    if { [string compare [$path:cmd cget -state] "disabled"] } {
+    if { ![string equal [$path:cmd cget -state] "disabled"] } {
         $path:cmd configure -state active
         if { $_pressed == $path } {
             $path:cmd configure -relief sunken
@@ -240,7 +236,7 @@ proc Button::_leave { path } {
     variable _pressed
 
     set _current ""
-    if { [string compare [$path:cmd cget -state] "disabled"] } {
+    if { ![string equal [$path:cmd cget -state] "disabled"] } {
         $path:cmd configure -state [Widget::cget $path -state]
         set relief [Widget::cget $path -relief]
         if { $_pressed == $path } {
@@ -261,7 +257,7 @@ proc Button::_leave { path } {
 proc Button::_press { path } {
     variable _pressed
 
-    if { [string compare [$path:cmd cget -state] "disabled"] } {
+    if { ![string equal [$path:cmd cget -state] "disabled"] } {
         set _pressed $path
 	$path:cmd configure -relief sunken
 	set cmd [Widget::getMegawidgetOption $path -armcommand]
@@ -289,6 +285,7 @@ proc Button::_release { path } {
     if { $_pressed == $path } {
         set _pressed ""
         set relief [Widget::getMegawidgetOption $path -relief]
+	after cancel "Button::_repeat $path"
         if { [string equal $relief "link"] } {
             set relief raised
         }
@@ -298,7 +295,7 @@ proc Button::_release { path } {
             uplevel \#0 $cmd
         }
         if { $_current == $path &&
-             [string compare [$path:cmd cget -state] "disabled"] && \
+             ![string equal [$path:cmd cget -state] "disabled"] && \
 	     [set cmd [Widget::getMegawidgetOption $path -command]] != "" } {
             uplevel \#0 $cmd
         }
@@ -314,7 +311,7 @@ proc Button::_repeat { path } {
     variable _pressed
 
     if { $_current == $path && $_pressed == $path &&
-         [string compare [$path:cmd cget -state] "disabled"] &&
+         ![string equal [$path:cmd cget -state] "disabled"] &&
          [set cmd [Widget::getMegawidgetOption $path -armcommand]] != "" } {
         uplevel \#0 $cmd
     }

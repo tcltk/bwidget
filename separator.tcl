@@ -9,16 +9,18 @@
 # ------------------------------------------------------------------------------
 
 namespace eval Separator {
+    Widget::define Separator separator
+
     Widget::declare Separator {
         {-background TkResource ""         0 frame}
+        {-cursor     TkResource ""         0 frame}
         {-relief     Enum       groove     0 {ridge groove}}
         {-orient     Enum       horizontal 1 {horizontal vertical}}
         {-bg         Synonym    -background}
     }
-    Widget::addmap Separator "" :cmd {-background {}}
+    Widget::addmap Separator "" :cmd { -background {} -cursor {} }
 
-    Widget::redir_create_command ::Separator
-    proc use {} {}
+    bind Separator <Destroy> [list Widget::destroy %W]
 }
 
 
@@ -37,17 +39,13 @@ proc Separator::create { path args } {
 	$path configure -borderwidth 1 -width 2
     }
 
-    bind $path <Destroy> {Widget::destroy %W; rename %W {}}
     if { [string equal [Widget::cget $path -relief] "groove"] } {
 	$path configure -relief sunken
     } else {
 	$path configure -relief raised
     }
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path Separator
-
-    return $path
+    return [Widget::create Separator $path]
 }
 
 

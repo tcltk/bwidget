@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.12 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: dialog.tcl,v 1.13 2003/10/20 21:23:52 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -22,7 +22,7 @@
 # JDC: added -transient and -place flag
 
 namespace eval Dialog {
-    ButtonBox::use
+    Widget::define Dialog dialog ButtonBox
 
     Widget::bwinclude Dialog ButtonBox .bbox \
         remove     {-orient} \
@@ -47,10 +47,7 @@ namespace eval Dialog {
     Widget::addmap Dialog "" :cmd   {-background {}}
     Widget::addmap Dialog "" .frame {-background {}}
 
-    Widget::redir_create_command ::Dialog
-    proc use {} {}
-
-    bind BwDialog <Destroy> {Dialog::enddialog %W -1; Dialog::_destroy %W}
+    bind BwDialog <Destroy> [list Dialog::_destroy %W]
 
     variable _widget
 }
@@ -120,13 +117,10 @@ proc Dialog::create { path args } {
     set _widget($path,realized) 0
     set _widget($path,nbut)     0
 
-    bind $path <Escape>  [list ButtonBox::invoke $path.bbox [Widget::getoption $path -cancel]]
-    bind $path <Return>  [list ButtonBox::invoke $path.bbox default]
+    bind $path <Escape>  "ButtonBox::invoke $path.bbox [Widget::getoption $path -cancel]"
+    bind $path <Return>  "ButtonBox::invoke $path.bbox default"
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path Dialog
-
-    return $path
+    return [Widget::create Dialog $path]
 }
 
 
@@ -329,6 +323,8 @@ proc Dialog::withdraw { path } {
 proc Dialog::_destroy { path } {
     variable _widget
 
+    Dialog::enddialog $path -1
+
     BWidget::grab  release $path
     BWidget::focus release $path
     if {[info exists _widget($path,result)]} {
@@ -338,5 +334,4 @@ proc Dialog::_destroy { path } {
     unset _widget($path,nbut)
 
     Widget::destroy $path
-    rename $path {}
 }

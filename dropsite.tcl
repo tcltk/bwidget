@@ -1,8 +1,8 @@
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #  dropsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dropsite.tcl,v 1.6 2003/10/17 18:33:06 hobbs Exp $
-# ----------------------------------------------------------------------------
+#  $Id: dropsite.tcl,v 1.7 2003/10/20 21:23:52 damonc Exp $
+# ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DropSite::include
 #     - DropSite::setdrop
@@ -19,6 +19,8 @@
 
 
 namespace eval DropSite {
+    Widget::define DropSite dropsite -classonly
+
     Widget::declare DropSite [list \
 	    [list -dropovercmd String "" 0] \
 	    [list -dropcmd     String "" 0] \
@@ -166,7 +168,7 @@ proc DropSite::register { path args } {
                     if { ![info exists _tabops(ops,$baseop)] } {
                         return -code error "invalid base operation \"$baseop\""
                     }
-                    if { [string compare $subop $baseop] &&
+                    if { ![string equal $subop $baseop] &&
                          [info exists _tabops(ops,$subop)] } {
                         return -code error "sub operation \"$subop\" is a base operation"
                     }
@@ -188,7 +190,7 @@ proc DropSite::register { path args } {
                         }
                         set mask [expr {$mask | $_tabops(mod,$mod)}]
                     }
-                    if { ($mask == 0) != ([string compare $subop "default"] == 0) } {
+                    if { ($mask == 0) != ([string equal $subop "default"]) } {
                         return -code error "sub operation default can only be used with modifier \"none\""
                     }
                     set drop($type,mod,$mask)  $subop
@@ -378,7 +380,7 @@ proc DropSite::_motion { X Y } {
         return
     }
     set path [winfo containing $X $Y]
-    if { [string compare $path $_target] } {
+    if { ![string equal $path $_target] } {
         # path != current target
         if { $_status & 2 } {
             # current target is valid and has recall status

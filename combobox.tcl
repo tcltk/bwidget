@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.26 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: combobox.tcl,v 1.27 2003/10/20 21:23:52 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -20,8 +20,7 @@
 package require Tk 8.3
 
 namespace eval ComboBox {
-    ArrowButton::use
-    Entry::use
+    Widget::define ComboBox combobox ArrowButton Entry ListBox
 
     Widget::tkinclude ComboBox frame :cmd \
 	include {-relief -borderwidth -bd -background} \
@@ -40,6 +39,9 @@ namespace eval ComboBox {
 	{-postcommand  String	  ""   0}
 	{-expand       Enum	  none 0 {none tab}}
 	{-autocomplete Boolean	  0    0}
+        {-bwlistbox    Boolean    0    0}
+        {-listboxwidth Int        0    0}
+        {-hottrack     Boolean    0    0}
     }
 
     Widget::addmap ComboBox ArrowButton .a {
@@ -49,10 +51,13 @@ namespace eval ComboBox {
     Widget::syncoptions ComboBox Entry .e {-text {}}
 
     ::bind BwComboBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
-    ::bind BwComboBox <Destroy> {Widget::destroy %W; rename %W {}}
+    ::bind BwComboBox <Destroy> [list Widget::destroy %W]
 
-    Widget::redir_create_command ::ComboBox
-    proc use {} {}
+    ::bind ListBoxHotTrack <Motion> {
+        %W selection clear 0 end
+        %W activate @%x,%y
+        %W selection set @%x,%y
+    }
 }
 
 
@@ -80,8 +85,8 @@ proc ComboBox::create { path args } {
     set entry [eval [list Entry::create $path.e] $maps(.e) \
 		   [list -relief flat -borderwidth 0 -takefocus 1]]
 
-    ::bind $path.e <FocusOut> [list $path _focus_out]
-    ::bind $path   <<TraverseIn>> [list $path _traverse_in]
+    ::bind $path.e <FocusOut>      [list $path _focus_out]
+    ::bind $path   <<TraverseIn>>  [list $path _traverse_in]
 
     if {[Widget::cget $path -autocomplete]} {
 	::bind $path.e <KeyRelease> [list $path _auto_complete %K]
@@ -136,10 +141,15 @@ proc ComboBox::create { path args } {
 	}
     }
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path ComboBox
+    ## If we have images, we have to use a BWidget ListBox.
+    set bw [Widget::cget $path -bwlistbox]
+    if {[llength [Widget::cget $path -images]]} {
+        Widget::configure $path [list -bwlistbox 1]
+    } else {
+        Widget::configure $path [list -bwlistbox $bw]
+    }
 
-    return $path
+    return [Widget::create ComboBox $path]
 }
 
 
@@ -163,6 +173,28 @@ proc ComboBox::create { path args } {
 proc ComboBox::configure { path args } {
     set res [Widget::configure $path $args]
     set entry $path.e
+
+
+    set list [list -images -values -bwlistbox -hottrack]
+    foreach {ci cv cb ch} [eval Widget::hasChangedX $path $list] { break }
+
+    if { $ci } {
+        set images [Widget::cget $path -images]
+        if {[llength $images]} {
+            Widget::configure $path [list -bwlistbox 1]
+        } else {
+            Widget::configure $path [list -bwlistbox 0]
+        }
+    }
+
+    set bw [Widget::cget $path -bwlistbox]
+
+    ## If the images, bwlistbox, hottrack or values have changed,
+    ## destroy the shell so that it will re-create itself the next
+    ## time around.
+    if { $ci || $cb || $ch || ($bw && $cv) } {
+        destroy $path.shell
+    }
 
     set chgedit [Widget::hasChangedX $path -editable]
     if {$chgedit} {
@@ -266,6 +298,16 @@ proc ComboBox::setvalue { path index } {
 }
 
 
+proc ComboBox::icursor { path idx } {
+    return [$path.e icursor $idx]
+}
+
+
+proc ComboBox::get { path } {
+    return [$path.e get]
+}
+
+
 # ----------------------------------------------------------------------------
 #  Command ComboBox::getvalue
 # ----------------------------------------------------------------------------
@@ -277,6 +319,27 @@ proc ComboBox::getvalue { path } {
 }
 
 
+proc ComboBox::getlistbox { path } {
+    _create_popup $path
+    return $path.shell.listb
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command ComboBox::post
+# ----------------------------------------------------------------------------
+proc ComboBox::post { path } {
+    _mapliste $path
+    return
+}
+
+
+proc ComboBox::unpost { path } {
+    _unmapliste $path
+    return
+}
+
+
 # ----------------------------------------------------------------------------
 #  Command ComboBox::bind
 # ----------------------------------------------------------------------------
@@ -285,13 +348,35 @@ proc ComboBox::bind { path args } {
 }
 
 
+proc ComboBox::insert { path idx args } {
+    upvar #0 [Widget::varForOption $path -values] values
+
+    if {[Widget::cget $path -bwlistbox]} {
+        set l [$path getlistbox]
+        set i [eval $l insert $idx #auto $args]
+        set text [$l itemcget $i -text]
+        if {$idx == "end"} {
+            lappend values $text
+        } else {
+            set values [linsert $values $idx $text]
+        }
+    } else {
+        set values [eval linsert [list $values] $idx $args]
+    }
+}
+
 # ----------------------------------------------------------------------------
 #  Command ComboBox::_create_popup
 # ----------------------------------------------------------------------------
 proc ComboBox::_create_popup { path } {
     set shell $path.shell
-    set lval  [Widget::cget $path -values]
-    set h     [Widget::cget $path -height]
+
+    if {[winfo exists $shell]} { return }
+
+    set lval   [Widget::cget $path -values]
+    set h      [Widget::cget $path -height]
+    set bw     [Widget::cget $path -bwlistbox]
+
     if { $h <= 0 } {
 	set len [llength $lval]
 	if { $len < 3 } {
@@ -302,54 +387,121 @@ proc ComboBox::_create_popup { path } {
 	    set h $len
 	}
     }
+
     if { $::tcl_platform(platform) == "unix" } {
 	set sbwidth 11
     } else {
 	set sbwidth 15
     }
-    if {![winfo exists $path.shell]} {
-	set shell [toplevel $path.shell -relief solid -bd 1]
-	wm overrideredirect $shell 1
-	wm transient $shell [winfo toplevel $path]
-	wm withdraw  $shell
-	catch {wm attributes $shell -topmost 1}
 
-	set sw	   [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
-	set listb  [listbox $shell.listb \
-		-relief flat -borderwidth 0 -highlightthickness 0 \
-		-exportselection false \
-		-font	[Widget::cget $path -font]  \
-		-height $h \
-		-bg [Widget::cget $path -entrybg] \
-		-fg [Widget::cget $path -foreground] \
-		-selectbackground [Widget::cget $path -selectbackground] \
-		-selectforeground [Widget::cget $path -selectforeground] \
-		-listvariable [Widget::varForOption $path -values]]
-	pack $sw -fill both -expand yes
-	$sw setwidget $listb
+    toplevel            $shell -relief solid -bd 1
+    wm withdraw         $shell
+    update idletasks
+    wm overrideredirect $shell 1
+    wm transient        $shell [winfo toplevel $path]
+    wm withdraw         $shell
+    catch { wm attributes $shell -topmost 1 }
 
-	::bind $listb <ButtonRelease-1> [list ComboBox::_select $path @%x,%y]
-	::bind $listb <Return>	"ComboBox::_select [list $path] active; break"
-	::bind $listb <Escape>	"ComboBox::_unmapliste [list $path]; break"
-	# when losing focus to some other app, make sure we drop the listbox
-	::bind $listb <FocusOut> \
-	    "if {\[focus\] == {}} {ComboBox::_unmapliste [list $path] 0};break"
+    set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
+    
+    if {$bw} {
+        set listb  [ListBox $shell.listb \
+                -relief flat -borderwidth 0 -highlightthickness 0 \
+                -selectmode single -selectfill 1 -autofocus 0 -height $h \
+                -font [Widget::cget $path -font]  \
+                -bg [Widget::cget $path -entrybg] \
+                -fg [Widget::cget $path -foreground] \
+                -selectbackground [Widget::cget $path -selectbackground] \
+                -selectforeground [Widget::cget $path -selectforeground]]
 
+        set values [Widget::cget $path -values]
+        set images [Widget::cget $path -images]
+        foreach value $values image $images {
+            $listb insert end #auto -text $value -image $image
+        }
+        ::bind $listb <<ListboxSelect>> \
+		"ComboBox::_select $path \[%W selection get]"
+        if {[Widget::cget $path -hottrack]} {
+            $listb bindText  <Enter> [list $listb selection set]
+            $listb bindImage <Enter> [list $listb selection set]
+        }
     } else {
-	set listb $shell.listb
-	destroy $shell.sw
-	set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
-	$listb configure \
-		-height $h \
-		-font [Widget::cget $path -font] \
-		-bg [Widget::cget $path -entrybg] \
-		-fg [Widget::cget $path -foreground] \
-		-selectbackground [Widget::cget $path -selectbackground] \
-		-selectforeground [Widget::cget $path -selectforeground]
-	pack $sw -fill both -expand yes
-	$sw setwidget $listb
-	raise $listb
+        set listb  [listbox $shell.listb \
+                -relief flat -borderwidth 0 -highlightthickness 0 \
+                -exportselection false \
+                -font	[Widget::cget $path -font]  \
+                -height $h \
+                -bg [Widget::cget $path -entrybg] \
+                -fg [Widget::cget $path -foreground] \
+                -selectbackground [Widget::cget $path -selectbackground] \
+                -selectforeground [Widget::cget $path -selectforeground] \
+                -listvariable [Widget::varForOption $path -values]]
+        ::bind $listb <<ListboxSelect>> \
+		"ComboBox::_select $path \[%W curselection]"
+
+        if {[Widget::cget $path -hottrack]} {
+            bindtags $listb [concat [bindtags $listb] ListBoxHotTrack]
+        }
     }
+    pack $sw -fill both -expand yes
+    $sw setwidget $listb
+
+    ::bind $listb <Return>   [list ComboBox::_select $path]
+    ::bind $listb <Escape>   [list ComboBox::_unmapliste $path]
+    ::bind $listb <FocusOut> [list ComboBox::_focus_out $path]
+}
+
+
+proc ComboBox::_recreate_popup { path } {
+    variable background
+    variable foreground
+
+    set shell $path.shell
+    set lval  [Widget::cget $path -values]
+    set h     [Widget::cget $path -height]
+    set bw    [Widget::cget $path -bwlistbox]
+
+    if { $h <= 0 } {
+	set len [llength $lval]
+	if { $len < 3 } {
+	    set h 3
+	} elseif { $len > 10 } {
+	    set h 10
+	} else {
+	    set h $len
+	}
+    }
+
+    if { $::tcl_platform(platform) == "unix" } {
+	set sbwidth 11
+    } else {
+	set sbwidth 15
+    }
+
+    _create_popup $path
+
+    if {![Widget::cget $path -editable]} {
+        if {[info exists background]} {
+            $path.e configure -bg $background
+            $path.e configure -fg $foreground
+            unset background
+            unset foreground
+        }
+    }
+
+    set listb $shell.listb
+    destroy $shell.sw
+    set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
+    $listb configure \
+            -height $h \
+            -font   [Widget::cget $path -font] \
+            -bg     [Widget::cget $path -entrybg] \
+            -fg     [Widget::cget $path -foreground] \
+            -selectbackground [Widget::cget $path -selectbackground] \
+            -selectforeground [Widget::cget $path -selectforeground]
+    pack $sw -fill both -expand yes
+    $sw setwidget $listb
+    raise $listb
 }
 
 
@@ -373,26 +525,40 @@ proc ComboBox::_mapliste { path } {
     if { ![llength [Widget::getMegawidgetOption $path -values]] } {
         return
     }
-    _create_popup $path
+
+    _recreate_popup $path
 
     ArrowButton::configure $path.a -relief sunken
     update
+
+    set bw [Widget::cget $path -bwlistbox]
 
     $listb selection clear 0 end
     set values [Widget::getMegawidgetOption $path -values]
     set curval [Entry::cget $path.e -text]
     if { [set idx [lsearch -exact $values $curval]] != -1 ||
          [set idx [lsearch -exact $values "$curval*"]] != -1 } {
+        if {$bw} {
+            set idx [$listb items $idx]
+        } else {
+            $listb activate $idx
+        }
         $listb selection set $idx
-        $listb activate $idx
         $listb see $idx
     } else {
-	$listb selection set 0
-        $listb activate 0
-        $listb see 0
+        set idx 0
+        if {$bw} {
+            set idx [$listb items 0]
+        } else {
+            $listb activate $idx
+        }
+	$listb selection set $idx
+        $listb see $idx
     }
 
-    BWidget::place $path.shell [winfo width $path] 0 below $path
+    set width [Widget::cget $path -listboxwidth]
+    if {!$width} { set width [winfo width $path] }
+    BWidget::place $path.shell $width 0 below $path
     wm deiconify $path.shell
     raise $path.shell
     BWidget::focus set $listb
@@ -435,7 +601,6 @@ proc ComboBox::_select { path index } {
     }
     $path.e selection clear
     $path.e selection range 0 end
-    return -code break
 }
 
 
@@ -535,7 +700,6 @@ proc ComboBox::_best_match {l {e {}}} {
 #  Command ComboBox::_traverse_in
 #  Called when widget receives keyboard focus due to keyboard traversal.
 # ----------------------------------------------------------------------------
-# 
 proc ComboBox::_traverse_in { path } {
     if {[$path.e selection present] != 1} {
 	# Autohighlight the selection, but not if one existed
@@ -550,7 +714,7 @@ proc ComboBox::_traverse_in { path } {
 proc ComboBox::_focus_out { path } {
     if {[focus] == ""} {
 	# we lost focus to some other app, make sure we drop the listbox
-	_unmapliste $path 0
+	return [_unmapliste $path 0]
     }
 }
 

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.47 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: tree.tcl,v 1.48 2003/10/20 21:23:53 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -48,6 +48,8 @@
 # ----------------------------------------------------------------------------
 
 namespace eval Tree {
+    Widget::define Tree tree DragSite DropSite DynamicHelp
+
     namespace eval Node {
         Widget::declare Tree::Node {
             {-text       String     ""      0}
@@ -61,6 +63,7 @@ namespace eval Tree {
             {-drawcross  Enum       auto    0 {auto allways never}}
 	    {-padx       Int        -1      0 "%d >= -1"}
 	    {-deltax     Int        -1      0 "%d >= -1"}
+	    {-anchor     String     "w"     0 ""}
         }
     }
 
@@ -97,7 +100,13 @@ namespace eval Tree {
         {-closecmd         String  "" 0}
         {-dropovermode     Flag    "wpn" 0 "wpn"}
         {-bg               Synonym -background}
+
+        {-crossopenimage    String  ""  0}
+        {-crosscloseimage   String  ""  0}
+        {-crossopenbitmap   String  ""  0}
+        {-crossclosebitmap  String  ""  0}
     }
+
     DragSite::include Tree "TREE_NODE" 1
     DropSite::include Tree {
         TREE_NODE {copy {} move {}}
@@ -111,6 +120,11 @@ namespace eval Tree {
 	option add *TreeNode.fill SystemWindowText widgetDefault
     }
 
+    bind Tree <FocusIn>   [list after idle {BWidget::refocus %W %W.c}]
+    bind Tree <Destroy>   [list Tree::_destroy %W]
+    bind Tree <Configure> [list Tree::_update_scrollregion %W]
+
+
     bind TreeSentinalStart <Button-1> {
 	if { $::Tree::sentinal(%W) } {
 	    set ::Tree::sentinal(%W) 0
@@ -123,9 +137,6 @@ namespace eval Tree {
     }
 
     bind TreeFocus <Button-1> [list focus %W]
-
-    Widget::redir_create_command ::Tree
-    proc use {} {}
 
     variable _edit
 }
@@ -141,8 +152,14 @@ proc Tree::create { path args } {
     Widget::init Tree $path $args
     set ::Tree::sentinal($path.c) 0
 
-    Widget::getVariable $path autoIndex
-    set autoIndex 0
+    if {[Widget::cget $path -crossopenbitmap] == ""} {
+        set file [file join $::BWIDGET::LIBRARY images "minus.xbm"]
+        Widget::configure $path [list -crossopenbitmap @$file]
+    }
+    if {[Widget::cget $path -crossclosebitmap] == ""} {
+        set file [file join $::BWIDGET::LIBRARY images "plus.xbm"]
+        Widget::configure $path [list -crossclosebitmap @$file]
+    }
 
     set data(root)         {{}}
     set data(selnodes)     {}
@@ -179,16 +196,13 @@ proc Tree::create { path args } {
     bind $path.c <Control-KeyPress-Right> [list $path.c xview scroll  1 units]
     # ericm@scriptics.com
 
-    bind $path <Configure> [list Tree::_update_scrollregion $path]
-    bind $path <Destroy>   [list Tree::_destroy $path]
-    bind $path <FocusIn>   [list after idle {BWidget::refocus %W %W.c}]
+    BWidget::bindMouseWheel $path.c
 
     DragSite::setdrag $path $path.c Tree::_init_drag_cmd \
 	    [Widget::cget $path -dragendcmd] 1
     DropSite::setdrop $path $path.c Tree::_over_cmd Tree::_drop_cmd 1
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path Tree
+    Widget::create Tree $path
 
     set w [Widget::cget $path -width]
     set h [Widget::cget $path -height]
@@ -197,10 +211,15 @@ proc Tree::create { path args } {
 
     # ericm
     # Bind <Button-1> to select the clicked node -- no reason not to, right?
-    Tree::bindText  $path <Button-1> [list $path selection set]
-    Tree::bindImage $path <Button-1> [list $path selection set]
-    Tree::bindText  $path <Control-Button-1> [list $path selection toggle]
-    Tree::bindImage $path <Control-Button-1> [list $path selection toggle]
+
+    ## Bind button 1 to select the node via the _mouse_select command.
+    ## This command will generate the proper <<TreeSelect>> virtual event
+    ## when necessary.
+    set selectcmd Tree::_mouse_select
+    Tree::bindText  $path <Button-1>         [list $selectcmd $path set]
+    Tree::bindImage $path <Button-1>         [list $selectcmd $path set]
+    Tree::bindText  $path <Control-Button-1> [list $selectcmd $path toggle]
+    Tree::bindImage $path <Control-Button-1> [list $selectcmd $path toggle]
 
 
     # Add sentinal bindings for double-clicking on items, to handle the 
@@ -301,9 +320,9 @@ proc Tree::cget { path option } {
 proc Tree::insert { path index parent node args } {
     variable $path
     upvar 0  $path data
-    Widget::getVariable $path autoIndex
 
-    set node [string map [list #auto [incr autoIndex]] $node]
+    set node [_node_name $path $node]
+    set node [Widget::nextIndex $path $node]
 
     if { [info exists data($node)] } {
         return -code error "node \"$node\" already exists"
@@ -346,6 +365,7 @@ proc Tree::itemconfigure { path node args } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -399,6 +419,7 @@ proc Tree::itemconfigure { path node args } {
 proc Tree::itemcget { path node option } {
     # Instead of upvar'ing $path as data for this test, just directly refer to
     # it, as that is faster.
+    set node [_node_name $path $node]
     if { [string equal $node "root"] || \
 	    ![info exists ::Tree::${path}($node)] } {
         return -code error "node \"$node\" does not exist"
@@ -449,6 +470,7 @@ proc Tree::delete { path args } {
 
     foreach lnodes $args {
 	foreach node $lnodes {
+            set node [_node_name $path $node]
 	    if { ![string equal $node "root"] && [info exists data($node)] } {
 		set parent [lindex $data($node) 0]
 		set idx	   [lsearch -exact $data($parent) $node]
@@ -469,6 +491,7 @@ proc Tree::move { path parent node index } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -509,6 +532,7 @@ proc Tree::reorder { path node neworder } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -533,12 +557,14 @@ proc Tree::selection { path cmd args } {
     switch -- $cmd {
 	toggle {
             foreach node $args {
+                set node [_node_name $path $node]
                 if {![info exists data($node)]} {
 		    return -code error \
 			    "$path selection toggle: Cannot toggle unknown node \"$node\"."
 		}
 	    }
             foreach node $args {
+                set node [_node_name $path $node]
 		if {[$path selection includes $node]} {
 		    $path selection remove $node
 		} else {
@@ -548,6 +574,7 @@ proc Tree::selection { path cmd args } {
 	}
         set {
             foreach node $args {
+                set node [_node_name $path $node]
                 if {![info exists data($node)]} {
 		    return -code error \
 			    "$path selection set: Cannot select unknown node \"$node\"."
@@ -555,6 +582,7 @@ proc Tree::selection { path cmd args } {
 	    }
             set data(selnodes) {}
             foreach node $args {
+                set node [_node_name $path $node]
 		if { [Widget::getoption $path.$node -selectable] } {
 		    if { [lsearch -exact $data(selnodes) $node] == -1 } {
 			lappend data(selnodes) $node
@@ -565,12 +593,14 @@ proc Tree::selection { path cmd args } {
         }
         add {
             foreach node $args {
+                set node [_node_name $path $node]
                 if {![info exists data($node)]} {
 		    return -code error \
 			    "$path selection add: Cannot select unknown node \"$node\"."
 		}
 	    }
             foreach node $args {
+                set node [_node_name $path $node]
 		if { [Widget::getoption $path.$node -selectable] } {
 		    if { [lsearch -exact $data(selnodes) $node] == -1 } {
 			lappend data(selnodes) $node
@@ -597,6 +627,8 @@ proc Tree::selection { path cmd args } {
 
 	    foreach {node1 node2} $args break
 
+            set node1 [_node_name $path $node1]
+            set node2 [_node_name $path $node2]
 	    if {![info exists data($node1)]} {
 		return -code error \
 			"$path selection range: Cannot start range at unknown node \"$node1\"."
@@ -641,6 +673,7 @@ proc Tree::selection { path cmd args } {
 	}
         remove {
             foreach node $args {
+                set node [_node_name $path $node]
                 if { [set idx [lsearch -exact $data(selnodes) $node]] != -1 } {
                     set data(selnodes) [lreplace $data(selnodes) $idx $idx]
                 }
@@ -668,6 +701,7 @@ proc Tree::selection { path cmd args } {
 			"wrong#args: Expected $path selection includes node"
 	    }
 	    set node [lindex $args 0]
+            set node [_node_name $path $node]
             return [expr {[lsearch -exact $data(selnodes) $node] != -1}]
         }
         default {
@@ -676,6 +710,12 @@ proc Tree::selection { path cmd args } {
     }
     _redraw_idle $path 1
 }
+
+
+proc Tree::getcanvas { path } {
+    return $path.c
+}
+
 
 proc Tree::__call_selectcmd { path } {
     variable $path
@@ -697,6 +737,7 @@ proc Tree::exists { path node } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     return [info exists data($node)]
 }
 
@@ -705,6 +746,7 @@ proc Tree::exists { path node } {
 #  Command Tree::visible
 # ----------------------------------------------------------------------------
 proc Tree::visible { path node } {
+    set node [_node_name $path $node]
     set idn [$path.c find withtag n:$node]
     return [llength $idn]
 }
@@ -717,6 +759,7 @@ proc Tree::parent { path node } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -731,6 +774,7 @@ proc Tree::index { path node } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -798,6 +842,7 @@ proc Tree::find {path findInfo {confine ""}} {
 #     Returns the line where is drawn a node.
 # ----------------------------------------------------------------------------
 proc Tree::line {path node} {
+    set node [_node_name $path $node]
     set item [$path.c find withtag n:$node]
     if {[string length $item]} {
         set dy   [Widget::getoption $path -deltay]
@@ -817,6 +862,7 @@ proc Tree::nodes { path node {first ""} {last ""} } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -873,6 +919,7 @@ proc Tree::see { path node } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { [Widget::getoption $path -redraw] && $data(upd,afterid) != "" } {
         after cancel $data(upd,afterid)
         _redraw_tree $path
@@ -892,6 +939,7 @@ proc Tree::opentree { path node {recursive 1} } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
@@ -908,12 +956,22 @@ proc Tree::closetree { path node {recursive 1} } {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { [string equal $node "root"] || ![info exists data($node)] } {
         return -code error "node \"$node\" does not exist"
     }
 
     _recexpand $path $node 0 $recursive [Widget::getoption $path -closecmd]
     _redraw_idle $path 3
+}
+
+
+proc Tree::toggle { path node } {
+    if {[$path itemcget $node -open]} {
+        $path closetree $node 0
+    } else {
+        $path opentree $node 0
+    }
 }
 
 
@@ -925,6 +983,7 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
     variable $path
     upvar 0  $path data
 
+    set node [_node_name $path $node]
     if { [Widget::getoption $path -redraw] && $data(upd,afterid) != "" } {
         after cancel $data(upd,afterid)
         _redraw_tree $path
@@ -1038,26 +1097,6 @@ proc Tree::_update_edit_size { path entry idw wmax args } {
     } else {
         $path.c itemconfigure $idw -width 0
     }
-}
-
-
-# ----------------------------------------------------------------------------
-#  Command Tree::_destroy
-# ----------------------------------------------------------------------------
-proc Tree::_destroy { path } {
-    variable $path
-    upvar 0  $path data
-
-    if { $data(upd,afterid) != "" } {
-        after cancel $data(upd,afterid)
-    }
-    if { $data(dnd,afterid) != "" } {
-        after cancel $data(dnd,afterid)
-    }
-    _subdelete $path [lrange $data(root) 1 end]
-    Widget::destroy $path
-    unset data
-    rename $path {}
 }
 
 
@@ -1205,6 +1244,43 @@ proc Tree::_cross_event { path } {
 }
 
 
+proc Tree::_draw_cross { path node open x y } {
+    set idc [$path.c find withtag c:$node]
+
+    if { $open } {
+        set img [Widget::cget $path -crossopenimage]
+        set bmp [Widget::cget $path -crossopenbitmap]
+    } else {
+        set img [Widget::cget $path -crosscloseimage]
+        set bmp [Widget::cget $path -crossclosebitmap]
+    }
+
+    ## If we already have a cross for this node, we just adjust the image.
+    if {$idc != ""} {
+        if {$img == ""} {
+            $path.c itemconfigure $idc -bitmap $bmp
+        } else {
+            $path.c itemconfigure $idc -image $img
+        }
+        return
+    }
+
+    ## Create a new image for the cross.  If the user has specified an
+    ## image, it overrides a bitmap.
+    if {$img == ""} {
+        $path.c create bitmap $x $y \
+            -bitmap     $bmp \
+            -background [$path.c cget -background] \
+            -foreground [Widget::getoption $path -crossfill] \
+            -tags       [list cross c:$node] -anchor c
+    } else {
+        $path.c create image $x $y \
+            -image      $img \
+            -tags       [list cross c:$node] -anchor c
+    }
+}
+
+
 # ----------------------------------------------------------------------------
 #  Command Tree::_draw_node
 # ----------------------------------------------------------------------------
@@ -1237,23 +1313,16 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
     }
 
     if {![string equal $dc "never"] && ($len || [string equal $dc "allways"])} {
-        if { $exp } {
-            set bmp [file join $::BWIDGET::LIBRARY "images" "minus.xbm"]
-        } else {
-            set bmp [file join $::BWIDGET::LIBRARY "images" "plus.xbm"]
-        }
-        $path.c create bitmap $x0 $y0 \
-            -bitmap     @$bmp \
-            -background [$path.c cget -background] \
-            -foreground [Widget::getoption $path -crossfill] \
-            -tags       [list cross c:$node] -anchor c
+        _draw_cross $path $node $exp $x0 $y0
     }
 
     if { [set win [Widget::getoption $path.$node -window]] != "" } {
-        $path.c create window $x1 $y0 -window $win -anchor w \
+	set a [Widget::cget $path.$node -anchor]
+        $path.c create window $x1 $y0 -window $win -anchor $a \
 		-tags [Tree::_get_node_tags $path $node [list win i:$node]]
     } elseif { [set img [Widget::getoption $path.$node -image]] != "" } {
-        $path.c create image $x1 $y0 -image $img -anchor w \
+	set a [Widget::cget $path.$node -anchor]
+        $path.c create image $x1 $y0 -image $img -anchor $a \
 		-tags   [Tree::_get_node_tags $path $node [list img i:$node]]
     }
     set box [$path.c bbox n:$node i:$node]
@@ -1346,24 +1415,12 @@ proc Tree::_update_nodes { path } {
             set len [expr {[llength $data($node)] > 1}]
             set dc  [Widget::getoption $path.$node -drawcross]
             set exp [Widget::getoption $path.$node -open]
-            set idc [$path.c find withtag c:$node]
 
-            if {![string equal $dc "never"] && ($len || [string equal $dc "allways"])} {
-                if { $exp } {
-                    set bmp [file join $::BWIDGET::LIBRARY "images" "minus.xbm"]
-                } else {
-                    set bmp [file join $::BWIDGET::LIBRARY "images" "plus.xbm"]
-                }
-                if { $idc == "" } {
-                    $path.c create bitmap [expr {$x0-$deltax-5}] $y0 \
-                        -bitmap     @$bmp \
-                        -background [$path.c cget -background] \
-                        -foreground [Widget::getoption $path -crossfill] \
-                        -tags       [list cross c:$node] -anchor c
-                } else {
-                    $path.c itemconfigure $idc -bitmap @$bmp
-                }
+            if {![string equal $dc "never"]
+                && ($len || [string equal $dc "allways"])} {
+                _draw_cross $path $node $exp $x0 $y0
             } else {
+		set idc [$path.c find withtag c:$node]
                 $path.c delete $idc
             }
         }
@@ -2045,6 +2102,7 @@ proc Tree::_get_node_deltax {path node} {
     return $deltax
 }
 
+
 # Tree::_get_node_tags --
 #
 #	Given a node in the tree, return a list of tags to apply to its
@@ -2111,4 +2169,38 @@ proc Tree::_set_help { path node } {
             }
         }
     }
+}
+
+proc Tree::_mouse_select { path cmd args } {
+    eval selection [list $path] [list $cmd] $args
+    switch -- $cmd {
+        "add" - "clear" - "remove" - "set" - "toggle" {
+            event generate $path <<TreeSelect>>
+        }
+    }
+}
+
+
+proc Tree::_node_name { path node } {
+    set map [list & _ | _ ^ _ ! _]
+    return  [string map $map $node]
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command Tree::_destroy
+# ----------------------------------------------------------------------------
+proc Tree::_destroy { path } {
+    variable $path
+    upvar 0  $path data
+
+    if { $data(upd,afterid) != "" } {
+        after cancel $data(upd,afterid)
+    }
+    if { $data(dnd,afterid) != "" } {
+        after cancel $data(dnd,afterid)
+    }
+    _subdelete $path [lrange $data(root) 1 end]
+    Widget::destroy $path
+    unset data
 }

@@ -11,6 +11,8 @@
 # ------------------------------------------------------------------------------
 
 namespace eval TitleFrame {
+    Widget::define TitleFrame titleframe
+
     Widget::declare TitleFrame {
         {-relief      TkResource groove 0 frame}
         {-borderwidth TkResource 2      0 frame}
@@ -28,15 +30,16 @@ namespace eval TitleFrame {
     }
 
     Widget::addmap TitleFrame "" :cmd {-background {}}
-    Widget::addmap TitleFrame "" .l   {-background {} -foreground {} -text {} -font {}}
+    Widget::addmap TitleFrame "" .l   {
+    	-background {} -foreground {} -text {} -font {}
+    }
     Widget::addmap TitleFrame "" .l   {-state {}}
     Widget::addmap TitleFrame "" .p   {-background {}}
-    Widget::addmap TitleFrame "" .b   {-background {} -relief {} -borderwidth {}}
+    Widget::addmap TitleFrame "" .b   {
+    	-background {} -relief {} -borderwidth {}
+    }
     Widget::addmap TitleFrame "" .b.p {-background {}}
     Widget::addmap TitleFrame "" .f   {-background {}}
-
-    Widget::redir_create_command ::TitleFrame
-    proc use {} {}
 }
 
 
@@ -69,9 +72,21 @@ proc TitleFrame::create { path args } {
     }
     set bd [Widget::getoption $path -borderwidth]
     switch [Widget::getoption $path -baseline] {
-        top    { set htop $height; set hbot 1; set y 0 }
-        center { set htop [expr {$height/2}]; set hbot [expr {$height/2+$height%2+1}]; set y 0 }
-        bottom { set htop 1; set hbot $height; set y [expr {$bd+1}] }
+        top    {
+	    set y    0
+	    set htop $height
+	    set hbot 1
+	}
+        center {
+	    set y    0
+	    set htop [expr {$height/2}]
+	    set hbot [expr {$height/2+$height%2+1}]
+	}
+        bottom {
+	    set y    [expr {$bd+1}]
+	    set htop 1
+	    set hbot $height
+	}
     }
     $padtop configure -height $htop
     $padbot configure -height $hbot
@@ -86,12 +101,9 @@ proc TitleFrame::create { path args } {
     place $label -relx $relx -x $x -anchor $anchor -y $y
 
     bind $label <Configure> [list TitleFrame::_place $path]
-    bind $path  <Destroy>   {Widget::destroy %W; rename %W {}}
+    bind $path  <Destroy>   [list Widget::destroy %W]
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path TitleFrame
-
-    return $path
+    return [Widget::create TitleFrame $path]
 }
 
 

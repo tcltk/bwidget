@@ -23,6 +23,7 @@
 # ------------------------------------------------------------------------------
 
 namespace eval ArrowButton {
+    Widget::define ArrowButton arrow DynamicHelp
 
     Widget::tkinclude ArrowButton button .c \
 	    include [list \
@@ -56,10 +57,6 @@ namespace eval ArrowButton {
 	    [list -bg	Synonym	-background] \
 	    ]
     DynamicHelp::include ArrowButton balloon
-
-    Widget::redir_create_command ::ArrowButton
-
-    proc use {} {}
 
     bind BwArrowButtonC <Enter>           {ArrowButton::_enter %W}
     bind BwArrowButtonC <Leave>           {ArrowButton::_leave %W}
@@ -109,10 +106,7 @@ proc ArrowButton::create { path args } {
 
     set ::ArrowButton::_moved($path) 0
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path ArrowButton
-
-    return $path
+    return [Widget::create ArrowButton $path]
 }
 
 
@@ -167,7 +161,7 @@ proc ArrowButton::invoke { path } {
     if { ![string equal [winfo class $path] "ArrowButton"] } {
 	set path [winfo parent $path]
     }
-    if { [string compare [Widget::getoption $path -state] "disabled"] } {
+    if { ![string equal [Widget::getoption $path -state] "disabled"] } {
         set oldstate [Widget::getoption $path -state]
         if { [string equal [Widget::getoption $path -type] "button"] } {
             set oldrelief [Widget::getoption $path -relief]
@@ -437,25 +431,13 @@ proc ArrowButton::_redraw_whole { path width height } {
 
 
 # ------------------------------------------------------------------------------
-#  Command ArrowButton::_destroy
-# ------------------------------------------------------------------------------
-proc ArrowButton::_destroy { path } {
-    variable _moved
-
-    Widget::destroy $path
-    unset _moved($path)
-    rename $path {}
-}
-
-
-# ------------------------------------------------------------------------------
 #  Command ArrowButton::_enter
 # ------------------------------------------------------------------------------
 proc ArrowButton::_enter { path } {
     variable _grab
     set path [winfo parent $path]
     set _grab(current) $path
-    if { [string compare [Widget::getoption $path -state] "disabled"] } {
+    if { ![string equal [Widget::getoption $path -state] "disabled"] } {
         set _grab(oldstate) [Widget::getoption $path -state]
         configure $path -state active
         if { $_grab(pressed) == $path } {
@@ -478,7 +460,7 @@ proc ArrowButton::_leave { path } {
     variable _grab
     set path [winfo parent $path]
     set _grab(current) ""
-    if { [string compare [Widget::getoption $path -state] "disabled"] } {
+    if { ![string equal [Widget::getoption $path -state] "disabled"] } {
         configure $path -state $_grab(oldstate)
         if { $_grab(pressed) == $path } {
             if { [string equal [Widget::getoption $path -type] "button"] } {
@@ -497,7 +479,7 @@ proc ArrowButton::_leave { path } {
 proc ArrowButton::_press { path } {
     variable _grab
     set path [winfo parent $path]
-    if { [string compare [Widget::getoption $path -state] "disabled"] } {
+    if { ![string equal [Widget::getoption $path -state] "disabled"] } {
         set _grab(pressed) $path
             if { [string equal [Widget::getoption $path -type] "button"] } {
             set _grab(oldrelief) [Widget::getoption $path -relief]
@@ -534,7 +516,7 @@ proc ArrowButton::_release { path } {
             uplevel \#0 $cmd
         }
         if { $_grab(current) == $path &&
-             [string compare [Widget::getoption $path -state] "disabled"] &&
+             ![string equal [Widget::getoption $path -state] "disabled"] &&
              [set cmd [Widget::getoption $path -command]] != "" } {
             uplevel \#0 $cmd
         }
@@ -548,7 +530,7 @@ proc ArrowButton::_release { path } {
 proc ArrowButton::_repeat { path } {
     variable _grab
     if { $_grab(current) == $path && $_grab(pressed) == $path &&
-         [string compare [Widget::getoption $path -state] "disabled"] &&
+         ![string equal [Widget::getoption $path -state] "disabled"] &&
          [set cmd [Widget::getoption $path -armcommand]] != "" } {
         uplevel \#0 $cmd
     }
@@ -559,3 +541,12 @@ proc ArrowButton::_repeat { path } {
     }
 }
 
+
+# ------------------------------------------------------------------------------
+#  Command ArrowButton::_destroy
+# ------------------------------------------------------------------------------
+proc ArrowButton::_destroy { path } {
+    variable _moved
+    Widget::destroy $path
+    unset _moved($path)
+}

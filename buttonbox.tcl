@@ -16,11 +16,12 @@
 # ----------------------------------------------------------------------------
 
 namespace eval ButtonBox {
-    Button::use
+    Widget::define ButtonBox buttonbox Button
 
     Widget::declare ButtonBox {
         {-background  TkResource ""         0 frame}
         {-orient      Enum       horizontal 1 {horizontal vertical}}
+        {-state       Enum       "normal"   0 {normal disabled}}
         {-homogeneous Boolean    1          1}
         {-spacing     Int        10         0 "%d >= 0"}
         {-padx        TkResource ""         0 button}
@@ -31,8 +32,7 @@ namespace eval ButtonBox {
 
     Widget::addmap ButtonBox "" :cmd {-background {}}
 
-    Widget::redir_create_command ::ButtonBox
-    proc use {} {}
+    bind ButtonBox <Destroy> [list ButtonBox::_destroy %W]
 }
 
 
@@ -46,20 +46,16 @@ proc ButtonBox::create { path args } {
     upvar 0  $path data
 
     eval [list frame $path] [Widget::subcget $path :cmd] \
-	[list -takefocus 0 -highlightthickness 0]
+	[list -class ButtonBox -takefocus 0 -highlightthickness 0]
     # For 8.4+ we don't want to inherit the padding
     catch {$path configure -padx 0 -pady 0}
 
-    set data(default)  [Widget::getoption $path -default]
-    set data(nbuttons) 0
     set data(max)      0
+    set data(nbuttons) 0
+    set data(buttons)  [list]
+    set data(default)  [Widget::getoption $path -default]
 
-    bind $path <Destroy> [list ButtonBox::_destroy $path]
-
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path ButtonBox
-
-    return $path
+    return [Widget::create ButtonBox $path]
 }
 
 
@@ -88,6 +84,12 @@ proc ButtonBox::configure { path args } {
         }
     }
 
+    if {[Widget::hasChanged $path -state val]} {
+	foreach i $data(buttons) {
+	    $path.b$i configure -state $val
+	}
+    }
+
     return $res
 }
 
@@ -104,11 +106,28 @@ proc ButtonBox::cget { path option } {
 #  Command ButtonBox::add
 # ----------------------------------------------------------------------------
 proc ButtonBox::add { path args } {
+    return [eval insert $path end $args]
+}
+
+
+proc ButtonBox::insert { path idx args } {
     variable $path
     upvar 0  $path data
 
     set but     $path.b$data(nbuttons)
     set spacing [Widget::getoption $path -spacing]
+
+    ## Save the current spacing setting for this button.  Buttons
+    ## appended to the end of the box have their spacing applied
+    ## to their left while all other have their spacing applied
+    ## to their right.
+    if {$idx == "end"} {
+	set data(spacing,$data(nbuttons)) [list left $spacing]
+	lappend data(buttons) $data(nbuttons)
+    } else {
+	set data(spacing,$data(nbuttons)) [list right $spacing]
+        set data(buttons) [linsert $data(buttons) $idx $data(nbuttons)]
+    }
 
     if { $data(nbuttons) == $data(default) } {
         set style active
@@ -127,8 +146,8 @@ proc ButtonBox::add { path args } {
     }
 
     eval [list Button::create $but \
-	      -background [Widget::getoption $path -background]\
-	      -padx       [Widget::getoption $path -padx] \
+        -background [Widget::getoption $path -background]\
+        -padx       [Widget::getoption $path -padx] \
 	      -pady       [Widget::getoption $path -pady]] \
         $args [list -default $style]
 
@@ -142,38 +161,25 @@ proc ButtonBox::add { path args } {
     set data(buttontags,$but) $tags
     # ericm@scriptics.com
 
-    set idx [expr {2*$data(nbuttons)}]
-    if { [string equal [Widget::getoption $path -orient] "horizontal"] } {
-        grid $but -column $idx -row 0 -sticky nsew
-        if { [Widget::getoption $path -homogeneous] } {
-            set req [winfo reqwidth $but]
-            if { $req > $data(max) } {
-                for {set i 0} {$i < $data(nbuttons)} {incr i} {
-                    grid columnconfigure $path [expr {2*$i}] -minsize $req
-                }
-                set data(max) $req
-            }
-            grid columnconfigure $path $idx -minsize $data(max) -weight 1
-        } else {
-            grid columnconfigure $path $idx -weight 0
-        }
-        if { $data(nbuttons) > 0 } {
-            grid columnconfigure $path [expr {$idx-1}] -minsize $spacing
-        }
-    } else {
-        grid $but -column 0 -row $idx -sticky nsew
-        grid rowconfigure $path $idx -weight 0
-        if { $data(nbuttons) > 0 } {
-            grid rowconfigure $path [expr {$idx-1}] -minsize $spacing
-        }
-    }
+    _redraw $path
 
     incr data(nbuttons)
 
     return $but
 }
 
-# ::ButtonBox::setbuttonstate --
+
+proc ButtonBox::delete { path idx } {
+    variable $path
+    upvar 0  $path data
+
+    set i [lindex $data(buttons) $idx]
+    set data(buttons) [lreplace $data(buttons) $idx $idx]
+    destroy $path.b$i
+}
+
+
+# ButtonBox::setbuttonstate --
 #
 #	Set the state of a given button tag.  If this makes any buttons
 #       enable-able (ie, all of their tags are TRUE), enable them.
@@ -186,7 +192,7 @@ proc ButtonBox::add { path args } {
 # Results:
 #	None.
 
-proc ::ButtonBox::setbuttonstate {path tag state} {
+proc ButtonBox::setbuttonstate {path tag state} {
     variable $path
     upvar 0  $path data
     # First see if this is a real tag
@@ -208,7 +214,7 @@ proc ::ButtonBox::setbuttonstate {path tag state} {
     return
 }
 
-# ::ButtonBox::getbuttonstate --
+# ButtonBox::getbuttonstate --
 #
 #	Retrieve the state of a given button tag.
 #
@@ -219,7 +225,7 @@ proc ::ButtonBox::setbuttonstate {path tag state} {
 # Results:
 #	None.
 
-proc ::ButtonBox::getbuttonstate {path tag} {
+proc ButtonBox::getbuttonstate {path tag} {
     variable $path
     upvar 0  $path data
     # First see if this is a real tag
@@ -275,33 +281,33 @@ proc ButtonBox::invoke { path index } {
 #  Command ButtonBox::index
 # ----------------------------------------------------------------------------
 proc ButtonBox::index { path index } {
-    if { [string equal $index "default"] } {
+    variable $path
+    upvar 0  $path data
+
+    set n [expr {$data(nbuttons) - 1}]
+
+    if {[string equal $index "default"]} {
         set res [Widget::getoption $path -default]
     } elseif {$index == "end" || $index == "last"} {
-        variable $path
-        upvar 0  $path data
-
-        set res [expr {$data(nbuttons)-1}]
+	set res $n
+    } elseif {![string is integer $index]} {
+	## It's not an integer.  Search the text of each button
+	## in the box and return the index that matches.
+	foreach i $data(buttons) {
+	    set w $path.b$i
+	    lappend text  [$w cget -text]
+	    lappend names [$w cget -name]
+	}
+	set res [lsearch -exact [concat $names $text] $index]
     } else {
         set res $index
+	if {$index > $n} { set res $n }
     }
     return $res
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command ButtonBox::_destroy
-# ----------------------------------------------------------------------------
-proc ButtonBox::_destroy { path } {
-    variable $path
-    upvar 0  $path data
-
-    Widget::destroy $path
-    unset data
-    rename $path {}
-}
-
-# ::ButtonBox::gettags --
+# ButtonBox::gettags --
 #
 #	Return a list of all the tags on all the buttons in a buttonbox.
 #
@@ -311,7 +317,7 @@ proc ButtonBox::_destroy { path } {
 # Results:
 #	taglist   a list of tags on the buttons in the buttonbox
 
-proc ::ButtonBox::gettags {path} {
+proc ButtonBox::gettags {path} {
     upvar ::ButtonBox::$path data
     set taglist {}
     foreach tag [array names data "tags,*"] {
@@ -320,3 +326,68 @@ proc ::ButtonBox::gettags {path} {
     return $taglist
 }
 
+
+# ----------------------------------------------------------------------------
+#  Command ButtonBox::_redraw
+# ----------------------------------------------------------------------------
+proc ButtonBox::_redraw { path } {
+    variable $path
+    upvar 0  $path data
+    Widget::getVariable $path buttons
+
+    ## We re-grid the buttons from left-to-right.  As we go through
+    ## each button, we check its spacing and which direction the
+    ## spacing applies to.  Once spacing has been applied to an index,
+    ## it is not changed.  This means spacing takes precedence from
+    ## left-to-right.
+
+    set idx  0
+    set idxs [list]
+    foreach i $data(buttons) {
+	set dir     [lindex $data(spacing,$i) 0]
+	set spacing [lindex $data(spacing,$i) 1]
+        set but $path.b$i
+        if {[string equal [Widget::getoption $path -orient] "horizontal"]} {
+            grid $but -column $idx -row 0 -sticky nsew
+            if { [Widget::getoption $path -homogeneous] } {
+                set req [winfo reqwidth $but]
+                if { $req > $data(max) } {
+                    grid columnconfigure $path [expr {2*$i}] -minsize $req
+                    set data(max) $req
+                }
+                grid columnconfigure $path $idx -minsize $data(max) -weight 1
+            } else {
+                grid columnconfigure $path $idx -weight 0
+            }
+
+	    set col [expr {$idx - 1}]
+	    if {[string equal $dir "right"]} { set col [expr {$idx + 1}] }
+	    if {$col > 0 && [lsearch $idxs $col] < 0} {
+		lappend idxs $col
+		grid columnconfigure $path $col -minsize $spacing
+	    }
+        } else {
+            grid $but -column 0 -row $idx -sticky nsew
+            grid rowconfigure $path $idx -weight 0
+
+	    set row [expr {$idx - 1}]
+	    if {[string equal $dir "right"]} { set row [expr {$idx + 1}] }
+	    if {$row > 0 && [lsearch $idxs $row] < 0} {
+		lappend idxs $row
+		grid rowconfigure $path $row -minsize $spacing
+	    }
+        }
+        incr idx 2
+    }
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command ButtonBox::_destroy
+# ----------------------------------------------------------------------------
+proc ButtonBox::_destroy { path } {
+    variable $path
+    upvar 0  $path data
+    Widget::destroy $path
+    unset data
+}

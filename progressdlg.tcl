@@ -7,8 +7,7 @@
 # ----------------------------------------------------------------------------
 
 namespace eval ProgressDlg {
-    Dialog::use
-    ProgressBar::use
+    Widget::define ProgressDlg progressdlg Dialog ProgressBar
 
     Widget::bwinclude ProgressDlg Dialog :cmd \
         remove {
@@ -30,9 +29,6 @@ namespace eval ProgressDlg {
 
     Widget::addmap ProgressDlg :cmd .frame.msg \
         {-width {} -height {} -textvariable {} -font {} -background {}}
-
-    Widget::redir_create_command ::ProgressDlg
-    proc use {} {}
 }
 
 
@@ -42,7 +38,7 @@ namespace eval ProgressDlg {
 proc ProgressDlg::create { path args } {
     array set maps [list ProgressDlg {} :cmd {} .frame.msg {} .frame.pb {}]
     array set maps [Widget::parseArgs ProgressDlg $args]
-
+    
     eval [list Dialog::create] $path $maps(:cmd) \
 	[list -image [Bitmap::get hourglass] \
 	     -modal none -side bottom -anchor c -class ProgressDlg]
@@ -57,7 +53,7 @@ proc ProgressDlg::create { path args } {
 
     eval [list label $frame.msg] $maps(.frame.msg) \
 	-relief flat -borderwidth 0 \
-	-highlightthickness 0 -anchor w -justify left
+	    -highlightthickness 0 -anchor w -justify left
     pack $frame.msg -side top -pady 3m -anchor nw -fill x -expand yes
 
     eval [list ProgressBar::create] $frame.pb $maps(.frame.pb) -width 100
@@ -71,9 +67,7 @@ proc ProgressDlg::create { path args } {
     Dialog::draw $path
     BWidget::grab local $path
 
-    Widget::redir_widget_command $path ProgressDlg
-
-    return $path
+    return [Widget::create ProgressDlg $path 0]
 }
 
 
