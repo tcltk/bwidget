@@ -1,3 +1,7 @@
+2003-06-05  Damon Courtney <damon@unreality.com>
+	* listbox.tcl: Liberal use of list where appropriate to make
+	the code safe for space-containing node names.
+
 2003-05-23  Bob Techentin <techentin@sourceforge.net>
 
 	**** BWIDGET 1.6.0 TAGGED ****
