@@ -1,3 +1,9 @@
+2000-09-17  Eric Melski  <ericm@ajubasolutions.com>
+
+	* widget.tcl (_test_boolean): Altered to return strictly 0 or 1
+	(for false and true, respectively), rather than allowing the
+	string booleans (false, true, off, on, etc).
+
 2000-09-07  Sven Delmas  <sven@scriptics.com>
 
 	* mainframe.tcl: Fixed the typo of Alt (Atl) as reported in bug #

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.15 2000/08/10 22:55:01 ericm Exp $
+#  $Id: widget.tcl,v 1.16 2000/09/17 23:39:11 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1089,7 +1089,13 @@ proc Widget::_test_boolean { option value arg } {
     if { ![string is boolean $value] } {
         return -code error "bad $option value \"$value\": must be boolean"
     }
-    return [expr {$value}]
+
+    # Get the canonical form of the boolean value (1 for true, 0 for false)
+    if {$value} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 
