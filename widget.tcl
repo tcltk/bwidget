@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.26 2003/10/20 21:23:53 damonc Exp $
+#  $Id: widget.tcl,v 1.27 2003/10/28 05:03:17 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -750,6 +750,8 @@ proc Widget::destroy { path } {
 
     ## Unset any variables used in this widget.
     foreach var [info vars ::${class}::$path:*] { unset $var }
+
+    unset _class($path)
 }
 
 
@@ -1523,4 +1525,10 @@ proc Widget::nextIndex { path node } {
     Widget::getVariable $path autoIndex
     if {![info exists autoIndex]} { set autoIndex -1 }
     return [string map [list #auto [incr autoIndex]] $node]
+}
+
+
+proc Widget::exists { path } {
+    variable _class
+    return [info exists _class($path)]
 }

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.27 2003/10/20 21:23:52 damonc Exp $
+#  $Id: combobox.tcl,v 1.28 2003/10/28 05:03:17 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -419,8 +419,8 @@ proc ComboBox::_create_popup { path } {
         foreach value $values image $images {
             $listb insert end #auto -text $value -image $image
         }
-        ::bind $listb <<ListboxSelect>> \
-		"ComboBox::_select $path \[%W selection get]"
+	$listb bindText  <1> "ComboBox::_select $path"
+	$listb bindImage <1> "ComboBox::_select $path"
         if {[Widget::cget $path -hottrack]} {
             $listb bindText  <Enter> [list $listb selection set]
             $listb bindImage <Enter> [list $listb selection set]
@@ -436,8 +436,7 @@ proc ComboBox::_create_popup { path } {
                 -selectbackground [Widget::cget $path -selectbackground] \
                 -selectforeground [Widget::cget $path -selectforeground] \
                 -listvariable [Widget::varForOption $path -values]]
-        ::bind $listb <<ListboxSelect>> \
-		"ComboBox::_select $path \[%W curselection]"
+        ::bind $listb <1>      "ComboBox::_select $path \[%W curselection]"
 
         if {[Widget::cget $path -hottrack]} {
             bindtags $listb [concat [bindtags $listb] ListBoxHotTrack]
@@ -446,7 +445,7 @@ proc ComboBox::_create_popup { path } {
     pack $sw -fill both -expand yes
     $sw setwidget $listb
 
-    ::bind $listb <Return>   [list ComboBox::_select $path]
+    ::bind $listb <Return>   "ComboBox::_select $path \[%W curselection]"
     ::bind $listb <Escape>   [list ComboBox::_unmapliste $path]
     ::bind $listb <FocusOut> [list ComboBox::_focus_out $path]
 }

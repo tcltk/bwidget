@@ -1,3 +1,19 @@
+2003-10-27  Damon Courtney  <damon@unreality.com>
+
+	* combobox.tcl, listbox.tcl: Fixed keyboard navigation in the
+	combobox drop down [Bug 831496].
+
+	* listbox.tcl: Added curselection subcommand to mimic Tk listbox
+	behavior.
+
+	Added keyboard navigation to the listbox.
+
+	* widget.tcl: Added Widget::exists command to return whether a
+	widget is a BWidget (based on whether it exists in the _class array).
+
+	Widget::destroy now properly unsets the widget's variable in
+	the _class array.
+
 2003-10-27  Joe English  <jenglish@users.sourceforge.net>
 	* DragSite.html, DropSite.html: Fix markup errors [Bug #740484]
 
