@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.5 2001/06/11 23:58:40 hobbs Exp $
+#  $Id: passwddlg.tcl,v 1.6 2001/09/06 19:50:41 andreas_kupries Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -22,13 +22,13 @@ namespace eval PasswdDlg {
 	    initialize {-modal local -anchor c}
     
     Widget::bwinclude PasswdDlg LabelEntry .frame.lablog \
-	    remove [list -command -editable -justify -name -show -side	\
+	    remove [list -command -justify -name -show -side	        \
 		-state -takefocus -width -xscrollcommand -padx -pady	\
 		-dragenabled -dragendcmd -dragevent -draginitcmd	\
 		-dragtype -dropenabled -dropcmd -dropovercmd -droptypes	\
 		] \
-	    prefix [list login -helptext -helpvar -label -text 		\
-		-textvariable -underline				\
+	    prefix [list login -editable -helptext -helpvar -label      \
+		-text -textvariable -underline				\
 		] \
 	    initialize [list -relief sunken -borderwidth 2		\
 		-labelanchor w -width 15 -loginlabel "Login"		\
@@ -115,7 +115,14 @@ proc PasswdDlg::create { path args } {
     proc ::$path { cmd args } "return \[eval PasswdDlg::\$cmd $path \$args\]"
 
     pack  $frame.lablog $frame.labpass -fill x -expand 1
-    focus $frame.lablog.e
+
+    # added by bach@mwgdna.com
+    #  give focus to loginlabel unless the state is disabled
+    if {[$lablog cget -editable]} {
+	focus $frame.lablog.e
+    } else {
+	focus $frame.labpass.e
+    }
     set res [Dialog::draw $path]
 
     if { $res == 0 } {
