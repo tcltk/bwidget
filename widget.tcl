@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.27 2003/10/28 05:03:17 damonc Exp $
+#  $Id: widget.tcl,v 1.28 2004/09/14 23:44:30 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1290,7 +1290,7 @@ proc Widget::focusNext { w } {
 	    incr i
 	    if {$i < [llength $children]} {
 		set cur [lindex $children $i]
-		if {[winfo toplevel $cur] == $cur} {
+		if {[string equal [winfo toplevel $cur] $cur]} {
 		    continue
 		} else {
 		    break
@@ -1302,14 +1302,14 @@ proc Widget::focusNext { w } {
 	    # look for its next sibling.
 
 	    set cur $parent
-	    if {[winfo toplevel $cur] == $cur} {
+	    if {[string equal [winfo toplevel $cur] $cur]} {
 		break
 	    }
 	    set parent [winfo parent $parent]
 	    set children [winfo children $parent]
 	    set i [lsearch -exact $children $cur]
 	}
-	if {($cur == $w) || [focusOK $cur]} {
+	if {[string equal $cur $w] || [focusOK $cur]} {
 	    return $cur
 	}
     }
@@ -1318,17 +1318,20 @@ proc Widget::focusNext { w } {
 
 # -----------------------------------------------------------------------------
 #  Command Widget::focusPrev
-#  Same as tk_focusPrev, but call Widget::focusOK
+#  Same as tk_focusPrev, except:
+#	+ Don't traverse from a child to a direct ancestor
+#	+ Call Widget::focusOK instead of tk::focusOK
 # -----------------------------------------------------------------------------
 proc Widget::focusPrev { w } {
     set cur $w
+    set origParent [winfo parent $w]
     while 1 {
 
 	# Collect information about the current window's position
 	# among its siblings.  Also, if the window is a top-level,
 	# then reposition to just after the last child of the window.
-    
-	if {[winfo toplevel $cur] == $cur}  {
+
+	if {[string equal [winfo toplevel $cur] $cur]}  {
 	    set parent $cur
 	    set children [winfo children $cur]
 	    set i [llength $children]
@@ -1346,7 +1349,7 @@ proc Widget::focusPrev { w } {
 	while {$i > 0} {
 	    incr i -1
 	    set cur [lindex $children $i]
-	    if {[winfo toplevel $cur] == $cur} {
+	    if {[string equal [winfo toplevel $cur] $cur]} {
 		continue
 	    }
 	    set parent $cur
@@ -1354,7 +1357,19 @@ proc Widget::focusPrev { w } {
 	    set i [llength $children]
 	}
 	set cur $parent
-	if {($cur == $w) || [focusOK $cur]} {
+	if {[string equal $cur $w]} {
+	    return $cur
+	}
+	# If we are just at the original parent of $w, skip it as a
+	# potential focus accepter.  Extra safety in this is to see if
+	# that parent is also a proc (not a C command), which is what
+	# BWidgets makes for any megawidget.  Could possibly also check
+	# for '[info commands ::${origParent}:cmd] != ""'.  [Bug 765667]
+	if {[string equal $cur $origParent]
+	    && [info procs ::$origParent] != ""} {
+	    continue
+	}
+	if {[focusOK $cur]} {
 	    return $cur
 	}
     }
