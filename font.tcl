@@ -20,45 +20,117 @@ namespace eval SelectFont {
     ScrolledWindow::use
 
     Widget::declare SelectFont {
-        {-title      String     "Font selection" 0}
-        {-parent     String     "" 0}
-        {-background TkResource "" 0 frame}
+        {-title		String		"Font selection" 0}
+        {-parent	String		"" 0}
+        {-background	TkResource	"" 0 frame}
 
-        {-type       Enum       dialog        0 {dialog toolbar}}
-        {-font       TkResource ""            0 label}
-	{-families   String     "all"         1}
-	{-styles     String     "bold italic underline overstrike" 1}
-        {-command    String     ""            0}
-        {-sampletext String     "Sample Text" 0}
-        {-bg         Synonym    -background}
+        {-type		Enum		dialog        0 {dialog toolbar}}
+        {-font		TkResource	""            0 label}
+	{-families	String		"all"         1}
+	{-querysystem	Boolean		1             0}
+	{-styles	String		"bold italic underline overstrike" 1}
+        {-command	String		""            0}
+        {-sampletext	String		"Sample Text" 0}
+        {-bg		Synonym		-background}
     }
 
-    proc ::SelectFont { path args } { return [eval SelectFont::create $path $args] }
+    proc ::SelectFont { path args } { 
+	return [eval SelectFont::create $path $args] 
+    }
     proc use {} {}
 
     variable _families
     variable _styleOff
     array set _styleOff [list bold normal italic roman]
-    variable _sizes    {4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24}
-
+    variable _sizes     {4 5 6 7 8 9 10 11 12 13 14 15 16 \
+	    17 18 19 20 21 22 23 24}
+    
+    # Set up preset lists of fonts, so the user can avoid the painfully slow
+    # loadfont process if desired.
+    if { [string equal $::tcl_platform(platform) "windows"] } {
+	set presetVariable [list	\
+		Arial			\
+		{Arial Narrow}		\
+		{Lucida Sans}		\
+		{MS Sans Serif}		\
+		{MS Serif}		\
+		{Times New Roman}	\
+		]
+	set presetFixed    [list	\
+		6x13			\
+		7x14			\
+		{Courier New}		\
+		FixedSys		\
+		Terminal		\
+		]
+	set presetAll      [list	\
+		6x13			\
+		7x14			\
+		Arial			\
+		{Arial Narrow}		\
+		{Courier New}		\
+		FixedSys		\
+		{Lucida Sans}		\
+		{MS Sans Serif}		\
+		{MS Serif}		\
+		Terminal		\
+		{Times New Roman}	\
+		]
+    } else {
+	set presetVariable [list	\
+		helvetica		\
+		lucida			\
+		lucidabright		\
+		{times new roman}	\
+		]
+	set presetFixed    [list	\
+		courier			\
+		fixed			\
+		{lucida typewriter}	\
+		screen			\
+		serif			\
+		terminal		\
+		]
+	set presetAll      [list	\
+		courier			\
+		fixed			\
+		helvetica		\
+		lucida			\
+		lucidabright		\
+		{lucida typewriter}	\
+		screen			\
+		serif			\
+		terminal		\
+		{times new roman}	\
+		]
+    }
+    array set _families [list \
+	    presetvariable	$presetVariable	\
+	    presetfixed		$presetFixed	\
+	    presetall		$presetAll	\
+	    ]
+		
     variable _widget
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::create { path args } {
     variable _families
     variable _sizes
-#    variable _styles
     variable $path
     upvar 0  $path data
 
-    if { ![info exists _families] } {
+    # Initialize the internal rep of the widget options
+    Widget::init SelectFont "$path#SelectFont" $args
+
+    if { ![info exists _families(all)] && \
+	    [Widget::getoption "$path#SelectFont" -querysystem] } {
         loadfont
     }
-    Widget::init SelectFont "$path#SelectFont" $args
+
     set bg [Widget::getoption "$path#SelectFont" -background]
     set _styles [Widget::getoption "$path#SelectFont" -styles]
     if { [Widget::getoption "$path#SelectFont" -type] == "dialog" } {
@@ -77,8 +149,13 @@ proc SelectFont::create { path args } {
                        -height 5 -width 25 -exportselection false -selectmode browse]
         ScrolledWindow::setwidget $sw $lbf
         LabelFrame::configure $labf1 -focus $lbf
-        eval $lbf insert end \
-		$_families([Widget::getoption "$path#SelectFont" -families])
+	if { [Widget::getoption "$path#SelectFont" -querysystem] } {
+	    set fam [Widget::getoption "$path#SelectFont" -families]
+	} else {
+	    set fam "preset"
+	    append fam [Widget::getoption "$path#SelectFont" -families]
+	}
+        eval $lbf insert end $_families($fam)
         set script "set SelectFont::$path\(family\) \[%W curselection\]; SelectFont::_update $path"
         bind $lbf <ButtonRelease-1> $script
         bind $lbf <space>           $script
@@ -147,7 +224,12 @@ proc SelectFont::create { path args } {
 
         return [_draw $path]
     } else {
-	set fams [Widget::getoption "$path#SelectFont" -families]
+	if { [Widget::getoption "$path#SelectFont" -querysystem] } {
+	    set fams [Widget::getoption "$path#SelectFont" -families]
+	} else {
+	    set fams "preset"
+	    append fams [Widget::getoption "$path#SelectFont" -families]
+	}
         frame $path -relief flat -borderwidth 0 -background $bg
         bind $path <Destroy> "SelectFont::_destroy $path"
         set lbf [ComboBox::create $path.font \
@@ -186,11 +268,10 @@ proc SelectFont::create { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::configure { path args } {
-#    variable _styles
     set _styles [Widget::getoption "$path#SelectFont" -styles]
 
     set res [Widget::configure "$path#SelectFont" $args]
@@ -230,17 +311,17 @@ proc SelectFont::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::cget { path option } {
     return [Widget::cget "$path#SelectFont" $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::loadfont
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::loadfont { } {
     variable _families
 
@@ -268,9 +349,9 @@ proc SelectFont::loadfont { } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::_draw
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::_draw { path } {
     variable $path
     upvar 0  $path data
@@ -297,9 +378,9 @@ proc SelectFont::_draw { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::_destroy
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::_destroy { path } {
     variable $path
     upvar 0  $path data
@@ -310,9 +391,9 @@ proc SelectFont::_destroy { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::_modstyle
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::_modstyle { path style } {
     variable $path
     upvar 0  $path data
@@ -328,9 +409,9 @@ proc SelectFont::_modstyle { path style } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::_update
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::_update { path } {
     variable _families
     variable _sizes
@@ -339,8 +420,13 @@ proc SelectFont::_update { path } {
     upvar 0  $path data
 
     set type [Widget::getoption "$path#SelectFont" -type]
-    set fams [Widget::getoption "$path#SelectFont" -families]
     set _styles [Widget::getoption "$path#SelectFont" -styles]
+    if { [Widget::getoption "$path#SelectFont" -querysystem] } {
+	set fams [Widget::getoption "$path#SelectFont" -families]
+    } else {
+	set fams "preset"
+	append fams [Widget::getoption "$path#SelectFont" -families]
+    }
     if { $type == "dialog" } {
         set curs [$path:cmd cget -cursor]
         $path:cmd configure -cursor watch
@@ -371,23 +457,27 @@ proc SelectFont::_update { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command SelectFont::_getfont
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc SelectFont::_getfont { path } {
     variable _families
-#    variable _styles
     variable _sizes
     variable $path
     upvar 0  $path data
 
     array set font [font actual [Widget::getoption "$path#SelectFont" -font]]
-    set data(bold)       [expr {[string compare $font(-weight) "normal"] != 0}]
-    set data(italic)     [expr {[string compare $font(-slant)  "roman"]  != 0}]
+    set data(bold)    [expr {[string compare $font(-weight) "normal"] != 0}]
+    set data(italic)  [expr {[string compare $font(-slant)  "roman"]  != 0}]
     set data(underline)  $font(-underline)
     set data(overstrike) $font(-overstrike)
     set _styles [Widget::getoption "$path#SelectFont" -styles]
-    set fams [Widget::getoption "$path#SelectFont" -families]
+    if { [Widget::getoption "$path#SelectFont" -querysystem] } {
+	set fams [Widget::getoption "$path#SelectFont" -families]
+    } else {
+	set fams "preset"
+	append fams [Widget::getoption "$path#SelectFont" -families]
+    }
     if { [Widget::getoption "$path#SelectFont" -type] == "dialog" } {
         set idxf [lsearch $_families($fams) $font(-family)]
         set idxs [lsearch $_sizes    $font(-size)]

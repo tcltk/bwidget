@@ -1,3 +1,10 @@
+1999-10-29  Eric Melski  <ericm@scriptics.com>
+
+	* font.tcl: Added one new flag: -querysystem.  This lets the user 
+	control whether the font selector queries the system (via font families)
+	for the list of fonts, or if it uses a preset list of fonts (which is
+	much faster and less likely to crash some systems).
+
 1999-10-25  Eric Melski  <ericm@scriptics.com>
 
 	* font.tcl: Added support for two new flags: -families and -styles; 
