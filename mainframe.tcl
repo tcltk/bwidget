@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.9 2001/09/24 19:18:52 jenglish Exp $
+#  $Id: mainframe.tcl,v 1.10 2001/12/29 01:39:51 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -423,7 +423,7 @@ proc MainFrame::_create_menubar { path descmenu } {
             lappend _widget($path,tags,$tag) $menubar $count
 	    # ericm@scriptics:  Add a tagstate tracker
 	    if { ![info exists _widget($path,tagstate,$tag)] } {
-		set _widget($path,tagstate,$tag) 0
+		set _widget($path,tagstate,$tag) 1
 	    }
         }
 	# ericm@scriptics.com:  Add mapping from menu items to tags
@@ -464,7 +464,7 @@ proc MainFrame::_create_entries { path menu bg entries } {
             lappend _widget($path,tags,$tag) $menu $count
 	    # ericm@scriptics:  Add a tagstate tracker
 	    if { ![info exists _widget($path,tagstate,$tag)] } {
-		set _widget($path,tagstate,$tag) 0
+		set _widget($path,tagstate,$tag) 1
 	    }
         }
 	# ericm@scriptics.com:  Add mapping from menu items to tags
@@ -551,6 +551,10 @@ proc MainFrame::_parse_accelerator { desc } {
     if { [llength $desc] == 1 } {
 	set seq None
 	set key [string tolower [lindex $desc 0]]
+	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
+	if {[regexp {f[1]?[0-9]*} $key]} {
+	    set key [string toupper $key]
+	}
     } elseif { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
         set key [string tolower [lindex $desc 1]]
