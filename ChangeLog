@@ -1,3 +1,18 @@
+2004-09-09  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* panelframe.tcl (new): new PanelFrame widget which creates a
+	* pkgIndex.tcl:         frame with boxed title area that accepts
+	* Makefile.in:          additional widgets.
+	* BWman/contents.html: 
+	* BWman/navtree.html:
+	* BWman/PanelFrame.html (new): 
+
+	* statusbar.tcl: improve init to use bwidget's automated arg
+	passing for subwidgets.  Simplify delete subcommand to call remove.
+
+	* xpm2image.tcl (xpm-to-image): correctly recognize None with
+	-nocase
+
 2004-09-02  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* buttonbox.tcl, combobox.tcl: code safety fixes
