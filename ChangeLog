@@ -1,3 +1,7 @@
+2003-08-06  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* listbox.tcl: Correct Listbox selection drawing [Bug #781652]
+
 2003-07-17  Joe English  <jenglish@users.sourceforge.net>
 	* init.tcl, combobox.tcl:  Fix for [Bug 720032] "BWidget
 	breaks Tk entry behaviour".  Highlight the entry

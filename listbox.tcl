@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.13 2003/07/17 20:00:05 hobbs Exp $
+#  $Id: listbox.tcl,v 1.14 2003/08/06 23:37:19 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -991,9 +991,8 @@ proc ListBox::_redraw_selection { path } {
     foreach item $data(selitems) {
         set bbox [$path.c bbox "n:$item"]
         if { [llength $bbox] } {
-            set id [eval [list $path.c create rectangle] $bbox \
-		    [list -fill $selbg -outline $selbg \
-		    -tags [list [list sel s:$item]]]]
+            set id [$path.c create rectangle $bbox \
+		    -fill $selbg -outline $selbg -tags [list sel s:$item]]
             $path.c itemconfigure "n:$item" -fill $selfg
             $path.c lower $id
         }
