@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: tree.tcl,v 1.2 1999/10/22 00:09:04 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -57,6 +57,7 @@ namespace eval Tree {
             {-fill       TkResource black   0 {listbox -foreground}}
             {-data       String     ""      0}
             {-open       Boolean    0       0}
+	    {-selectable Boolean    1       0}
             {-drawcross  Enum       auto    0 {auto allways never}}
         }
     }
@@ -75,6 +76,7 @@ namespace eval Tree {
         {-background       TkResource "" 0 listbox}
         {-selectbackground TkResource "" 0 listbox}
         {-selectforeground TkResource "" 0 listbox}
+	{-selectcommand    String     "" 0}
         {-width            TkResource "" 0 listbox}
         {-height           TkResource "" 0 listbox}
         {-showlines        Boolean 1  0}
@@ -125,6 +127,13 @@ proc Tree::create { path args } {
                   -xscrollincrement 8]
 
     $path bind cross <ButtonPress-1> {Tree::_cross_event %W}
+
+    # Added by ericm@scriptics.com
+    bind $path <KeyPress-Up>    "Tree::_keynav up %W"
+    bind $path <KeyPress-Down>  "Tree::_keynav down %W"
+    bind $path <KeyPress-space> "Tree::_keynav space %W"
+    # ericm@scriptics.com
+
     bind $path <Configure> "Tree::_update_scrollregion $path"
     bind $path <Destroy>   "Tree::_destroy $path"
 
@@ -133,6 +142,12 @@ proc Tree::create { path args } {
 
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval Tree::\$cmd $path \$args\]"
+
+    # ericm
+    # Bind <Button-1> to select the clicked node -- no reason not to, right?
+    Tree::bindText  $path <Button-1> "$path selection set"
+    Tree::bindImage $path <Button-1> "$path selection set"
+    # ericm
 
     return $path
 }
@@ -414,11 +429,22 @@ proc Tree::selection { path cmd args } {
             set data(selnodes) {}
             foreach node $args {
                 if { [info exists data($node)] } {
-                    if { [lsearch $data(selnodes) $node] == -1 } {
-                        lappend data(selnodes) $node
-                    }
+		    if { [Widget::getoption $path.$node -selectable] } {
+			if { [lsearch $data(selnodes) $node] == -1 } {
+			    lappend data(selnodes) $node
+			}
+		    }
                 }
             }
+
+	    if { ![string equal $data(selnodes) ""] } {
+		set selectcmd [Widget::getoption $path -selectcommand]
+		if { ![string equal $selectcmd ""] } {
+		    lappend selectcmd $path
+		    lappend selectcmd $data(selnodes)
+		    uplevel \#0 $selectcmd
+		}
+	    }
         }
         add {
             foreach node $args {
@@ -1387,3 +1413,114 @@ proc Tree::_scroll { path cmd dir } {
         DropSite::setcursor dot
     }
 }
+
+# Tree::_keynav --
+#
+#	Handle navigational keypresses on the tree.
+#
+# Arguments:
+#	which      one of up, down or space.
+#       win        name of the tree widget
+#
+# Results:
+#	None.
+
+proc Tree::_keynav {which win} {
+    set node     [$win selection get]
+    switch -exact -- $which {
+	"up" {
+	    # If nothing is selected, do nothing??
+	    if { [string equal $node ""] } {
+		return
+	    }
+
+	    # If this node has a previous sibling, go to it
+	    set parent   [$win parent $node]
+	    set siblings [$win nodes $parent]
+	    set index    [lsearch $siblings $node]
+	    set newIndex [expr {$index - 1}]
+	    if { $newIndex >= 0 } {
+		set node [lindex $siblings $newIndex]
+		# If the previous sibling is open and has children, go to its
+		# last child
+		if { [$win itemcget $node -open] } {
+		    if { [llength [$win nodes $node]] } {
+			set node [lindex [$win nodes $node] end]
+		    }
+		}
+		$win selection clear
+		$win selection set $node
+		$win see $node
+		return
+	    }
+
+	    # Otherwise, go to this node's parent, unless that is "root"
+	    if { ![string equal $parent "root"] } {
+		$win selection clear
+		$win selection set $parent
+		$win see $parent
+		return
+	    }
+
+	}
+	"down" {
+	    # If nothing is selected, select the first node
+	    if { [string equal $node ""] } {
+		set node [lindex [$win nodes root] 0]
+		if { ![string equal $node ""] } {
+		    $win selection set $node
+		    $win see $node
+		}
+		return
+	    }
+
+	    set open [$win itemcget $node -open]
+	    # If this node is open, select its first child (if it has any)
+	    # Otherwise, fallthrough to the "closed node" state
+	    if { $open } {
+		set children [$win nodes $node]
+		if { [llength $children] } {
+		    set node [lindex $children 0]
+		    $win selection clear
+		    $win selection set $node
+		    $win see $node
+		    return
+		}
+	    }
+
+	    # If the node is not open, go to its next sibling, if it has one
+	    set parent   [$win parent $node]
+	    set siblings [$win nodes $parent]
+	    set index    [lsearch $siblings $node]
+	    set newIndex [expr {$index + 1 }]
+	    # If the node was the last of the children, go to the next sibling
+	    # of the parent
+	    while { $newIndex >= [llength $siblings] } {
+		set node $parent
+		if { [string equal $node "root"] } {
+		    return
+		}
+		set parent [$win parent $node]
+		set siblings [$win nodes $parent]
+		set index [lsearch $siblings $node]
+		set newIndex [expr {$index + 1}]
+	    }
+
+	    set newNode  [lindex $siblings $newIndex]
+	    $win selection clear
+	    $win selection set $newNode
+	    $win see $newNode
+	}
+	"space" {
+	    if { [string equal $node ""] } {
+		return
+	    }
+	    set open [$win itemcget $node -open]
+	    if { [llength [$win nodes $node]] } {
+		$win itemconfigure $node -open [expr {$open?0:1}]
+	    }
+	}
+    }
+    return
+}
+

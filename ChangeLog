@@ -1,3 +1,18 @@
+1999-10-21  Eric Melski  <ericm@scriptics.com>
+
+	* tree.tcl: Added a -selectable option to tree nodes, which
+	controls whether or not a given node is selectable (duh).  This
+	works with the new -selectcommand option for the tree, and with
+	keyboard traversal (also new).  Now, whenever the tree gets a
+	"selection set", it calls the given -selectcommand with the name
+	of the tree and the list of selected nodes, which makes it easier
+	to just drop in place and use.
+
+1999-10-15  Eric Melski  <ericm@scriptics.com>
+
+	* panedw.tcl: Added a -class PanedWindow option to the main frame 
+	(the megawidget) of the paned window.
+
 1999-10-15  Eric Melski  <ericm@scriptics.com>
 
 	* dialog.tcl: Added an overrideredirect option to Dialog::draw, which
