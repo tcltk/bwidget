@@ -100,7 +100,7 @@ proc ButtonBox::cget { path option } {
 # ------------------------------------------------------------------------------
 #  Command ButtonBox::add
 # ------------------------------------------------------------------------------
-proc ButtonBox::add { path tags args } {
+proc ButtonBox::add { path args } {
     variable $path
     upvar 0  $path data
 
@@ -113,6 +113,14 @@ proc ButtonBox::add { path tags args } {
         set style disabled
     } else {
         set style normal
+    }
+
+    array set flags $args
+    set tags ""
+    if { [info exists flags(-tags)] } {
+	set tags $flags(-tags)
+	unset flags(-tags)
+	set args [array get flags]
     }
 
     eval Button::create $but \
