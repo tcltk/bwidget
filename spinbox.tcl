@@ -45,8 +45,8 @@ namespace eval SpinBox {
 		-repeatinterval {} -repeatdelay {}
     }
 
-    ::bind BwSpinBox <FocusIn> [list after idle {BWidget::refocus %W %W.labf}]
-    ::bind BwSpinBox <Destroy> {SpinBox::_destroy %W}
+    ::bind SpinBox <FocusIn> [list after idle {BWidget::refocus %W %W.labf}]
+    ::bind SpinBox <Destroy> {SpinBox::_destroy %W}
 
     proc ::SpinBox { path args } { return [eval SpinBox::create $path $args] }
     proc use {} {}
@@ -67,7 +67,7 @@ proc SpinBox::create { path args } {
 
     set labf [eval LabelFrame::create $path.labf $maps(.labf) -focus $path.e]
     set entry [eval Entry::create $path.e $maps(.e) -relief flat -bd 0]
-    bindtags $path [list $path BwSpinBox [winfo toplevel $path] all]
+    bindtags $path.e [linsert [bindtags $path.e] 1 SpinBoxEntry]
 
     set farr   [frame $path.farr -relief flat -bd 0 -highlightthickness 0]
     set height [expr {[winfo reqheight $path.e]/2-2}]
