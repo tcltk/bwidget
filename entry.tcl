@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.7 2000/02/29 22:05:22 ericm Exp $
+#  $Id: entry.tcl,v 1.8 2000/02/29 23:04:06 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -160,7 +160,7 @@ proc Entry::configure { path args } {
 	# disable validation, delete the old text, enable, then set the text.
 	set varName [$path:cmd cget -textvariable]
 	if { ![string equal $varName ""] } {
-	    uplevel \#0 set $varName [Widget::cget $path -text]
+	    uplevel \#0 [list set $varName [Widget::cget $path -text]]
 	} else {
 	    set validateState [$path:cmd cget -validate]
 	    $path:cmd configure -validate none
