@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.20 2002/01/23 00:36:53 hobbs Exp $
+#  $Id: widget.tcl,v 1.21 2002/10/14 20:54:52 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1016,39 +1016,43 @@ proc Widget::_get_tkwidget_options { tkwidget } {
     
     set widget ".#BWidget#$tkwidget"
     if { ![winfo exists $widget] || ![info exists _tk_widget($tkwidget)] } {
-        set widget [$tkwidget $widget]
-        set config [$widget configure]
-        foreach optlist $config {
-            set opt [lindex $optlist 0]
-            if { [llength $optlist] == 2 } {
-                set refsyn [lindex $optlist 1]
-                # search for class
-                set idx [lsearch $config [list * $refsyn *]]
-                if { $idx == -1 } {
-                    if { [string index $refsyn 0] == "-" } {
-                        # search for option (tk8.1b1 bug)
-                        set idx [lsearch $config [list $refsyn * *]]
-                    } else {
-                        # last resort
-                        set idx [lsearch $config [list -[string tolower $refsyn] * *]]
-                    }
-                    if { $idx == -1 } {
-                        # fed up with "can't read classopt()"
-                        return -code error "can't find option of synonym $opt"
-                    }
-                }
-                set syn [lindex [lindex $config $idx] 0]
+	set widget [$tkwidget $widget]
+	# JDC: Withdraw toplevels, otherwise visible
+	if {[string equal $tkwidget "toplevel"]} {
+	    wm withdraw $widget
+	}
+	set config [$widget configure]
+	foreach optlist $config {
+	    set opt [lindex $optlist 0]
+	    if { [llength $optlist] == 2 } {
+		set refsyn [lindex $optlist 1]
+		# search for class
+		set idx [lsearch $config [list * $refsyn *]]
+		if { $idx == -1 } {
+		    if { [string index $refsyn 0] == "-" } {
+			# search for option (tk8.1b1 bug)
+			set idx [lsearch $config [list $refsyn * *]]
+		    } else {
+			# last resort
+			set idx [lsearch $config [list -[string tolower $refsyn] * *]]
+		    }
+		    if { $idx == -1 } {
+			# fed up with "can't read classopt()"
+			return -code error "can't find option of synonym $opt"
+		    }
+		}
+		set syn [lindex [lindex $config $idx] 0]
 		# JDC: used 4 (was 3) to get def from optiondb
-                set def [lindex [lindex $config $idx] 4]
-                lappend _tk_widget($tkwidget) [list $opt $syn $def]
-            } else {
+		set def [lindex [lindex $config $idx] 4]
+		lappend _tk_widget($tkwidget) [list $opt $syn $def]
+	    } else {
 		# JDC: used 4 (was 3) to get def from optiondb
-                set def [lindex $optlist 4]
-                lappend _tk_widget($tkwidget) [list $opt $def]
-                set _optiondb($opt)    [lindex $optlist 1]
-                set _optionclass($opt) [lindex $optlist 2]
-            }
-        }
+		set def [lindex $optlist 4]
+		lappend _tk_widget($tkwidget) [list $opt $def]
+		set _optiondb($opt)    [lindex $optlist 1]
+		set _optionclass($opt) [lindex $optlist 2]
+	    }
+	}
     }
     return $_tk_widget($tkwidget)
 }
