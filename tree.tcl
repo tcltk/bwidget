@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.24 2000/03/14 20:20:14 ericm Exp $
+#  $Id: tree.tcl,v 1.24.2.1 2000/03/27 21:51:58 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1733,12 +1733,16 @@ proc Tree::_keynav {which win} {
 		return
 	    } else {
 		set parent [$win parent $node]
-		while { ![$win itemcget $parent -selectable] } {
-		    set parent [$win parent $parent]
-		    if { [string equal $parent "root"] } {
-			set parent $node
-			break
-		    }
+	    if { [string equal $parent "root"] } {
+		    set parent $node
+        } else {
+            while { ![$win itemcget $parent -selectable] } {
+		        set parent [$win parent $parent]
+		        if { [string equal $parent "root"] } {
+			    set parent $node
+			    break
+		        }
+            }
 		}
 		$win selection set $parent
 		_set_current_node $win $parent
