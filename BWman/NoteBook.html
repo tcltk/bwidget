@@ -41,11 +41,15 @@
 <DT><I><A HREF="#wso">WIDGET-SPECIFIC OPTIONS</A></I></DT>
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-arcradius">-arcradius</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-homogeneous">-homogeneous</A></TR>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-homogeneous">-homogeneous</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-side">-side</A></TR>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-tabbevelsize">-tabbevelsize</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TR>
 </TR>
 </TABLE></DD>
@@ -115,6 +119,14 @@ NoteBook widget manage a set of pages and displays one of them.
 </P>
 <BR><HR WIDTH="50%"><BR>
 <B><A NAME="wso">WIDGET-SPECIFIC OPTIONS</A></B><BR>
+<DL><DT><A NAME="-arcradius"><B>-arcradius</B></A></DT>
+<DD>
+
+Specifies the amount of rounding effect at the corners of a tab. This value
+can be adjusted from 0 to 8 pixels with the default being 2 pixels. Usually,
+small values are preferable.
+</DD>
+</DL>
 <DL><DT><A NAME="-height"><B>-height</B></A></DT>
 <DD>
 
@@ -131,13 +143,20 @@ Specifies wether or not the label of the pages must have the same width.
 
 </DD>
 </DL>
-<DL><DT><A NAME="-side"><B>-side (read-only)</B></A></DT>
+<DL><DT><A NAME="-side"><B>-side</B></A></DT>
 <DD>
 
 Specifies the side where to place the label of the pages. Must be one
 of <B>top</B> or <B>bottom</B>.
-Only <B>top</B> is implemented for the moment.
 
+</DD>
+</DL>
+<DL><DT><A NAME="-tabbevelsize"><B>-tabbevelsize</B></A></DT>
+<DD>
+
+Specifies the amount of bevel the tabs should have. This value can be adjusted from
+0 to 8 pixels with the default being 0 pixels. A zero pixel bevel is essentially rectangular
+while non-zero bevel size will look trapezoidal.
 </DD>
 </DL>
 <DL><DT><A NAME="-width"><B>-width</B></A></DT>
