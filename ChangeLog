@@ -1,0 +1,5 @@
+1999-09-16  Eric Melski  <ericm@scriptics.com>
+
+	* notebook.tcl: Added some (non-functional) code for doing
+	tab-notebooks with the tabs on the bottom.
+
