@@ -1,3 +1,11 @@
+2004-04-22  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tree.tcl (edit): correct inversion of verifycmd emptiness test.
+	* listbox.tcl: correct eval/after/lists usage.
+	(_redraw_listbox): call _update_select_fill on redraw, otherwise
+	the insert of items causes wonkiness.
+	(_redraw_items): call update idle after changing cursor.
+
 2004-04-21  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tree.tcl (_draw_subnodes): Adjust the drawing of the line to the
