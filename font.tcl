@@ -126,7 +126,8 @@ proc SelectFont::create { path args } {
     set bg [Widget::getoption "$path#SelectFont" -background]
     set _styles [Widget::getoption "$path#SelectFont" -styles]
     if { [Widget::getoption "$path#SelectFont" -type] == "dialog" } {
-        Dialog::create $path -modal local -default 0 -cancel 1 -background $bg \
+        Dialog::create $path -modal local -anchor e -default 0 -cancel 1 \
+	    -background $bg \
             -title  [Widget::getoption "$path#SelectFont" -title] \
             -parent [Widget::getoption "$path#SelectFont" -parent]
 

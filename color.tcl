@@ -148,9 +148,9 @@ proc SelectColor::dialog {path args} {
     set top   [Dialog::create $path \
                    -title  [Widget::cget $path:SelectColor -title]  \
                    -parent [Widget::cget $path:SelectColor -parent] \
-                   -separator 1 -default 0 -cancel 1]
+                   -separator 1 -default 0 -cancel 1 -anchor e]
     wm resizable $top 0 0
-    set dlgf  [$top getframe]  
+    set dlgf  [$top getframe]
     set fg    [frame $dlgf.fg]
     set desc  [list \
                    base _baseColors "Base colors" \
