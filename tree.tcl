@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.48 2003/10/20 21:23:53 damonc Exp $
+#  $Id: tree.tcl,v 1.49 2004/04/21 22:26:41 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1048,7 +1048,7 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
         set ok 0
         while { !$ok } {
             tkwait variable Tree::_edit(wait)
-            if { !$_edit(wait) || $verifycmd == "" ||
+            if { !$_edit(wait) || [llength $verifycmd] ||
                  [uplevel \#0 $verifycmd [list $_edit(text)]] } {
                 set ok 1
             }
@@ -1075,7 +1075,7 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
 #  Command Tree::xview
 # ----------------------------------------------------------------------------
 proc Tree::xview { path args } {
-    return [eval [list $path.c xview] $args]
+    return [eval [linsert $args 0 $path.c xview]]
 }
 
 
@@ -1083,7 +1083,7 @@ proc Tree::xview { path args } {
 #  Command Tree::yview
 # ----------------------------------------------------------------------------
 proc Tree::yview { path args } {
-    return [eval [list $path.c yview] $args]
+    return [eval [linsert $args 0 $path.c yview]]
 }
 
 
@@ -1141,7 +1141,7 @@ proc Tree::_recexpand { path node expand recursive cmd } {
 
     if { [Widget::getoption $path.$node -open] != $expand } {
         Widget::setoption $path.$node -open $expand
-        if { $cmd != "" } {
+        if {[llength $cmd]} {
             uplevel \#0 $cmd [list $node]
         }
     }
@@ -1232,12 +1232,12 @@ proc Tree::_cross_event { path } {
     set node [Tree::_get_node_name $path current 1]
     if { [Widget::getoption $path.$node -open] } {
         Tree::itemconfigure $path $node -open 0
-        if { [set cmd [Widget::getoption $path -closecmd]] != "" } {
+        if {[llength [set cmd [Widget::getoption $path -closecmd]]]} {
             uplevel \#0 $cmd [list $node]
         }
     } else {
         Tree::itemconfigure $path $node -open 1
-        if { [set cmd [Widget::getoption $path -opencmd]] != "" } {
+        if {[llength [set cmd [Widget::getoption $path -opencmd]]]} {
             uplevel \#0 $cmd [list $node]
         }
     }
@@ -1350,6 +1350,11 @@ proc Tree::_draw_subnodes { path nodes x0 y0 deltax deltay padx showlines } {
         set y1 [_draw_node $path $node $x0 [expr {$y1+$deltay}] $deltax $deltay $padx $showlines]
     }
     if { $showlines && [llength $nodes] } {
+	if {$y0 < 0} {
+	    # Adjust the drawing of the line to the first root node
+	    # to start at the vertical point (not go up).
+	    incr y0 $deltay
+	}
         set id [$path.c create line $x0 $y0 $x0 [expr {$yp+$deltay}] \
                     -fill    [Widget::getoption $path -linesfill]   \
                     -stipple [Widget::getoption $path -linestipple] \
@@ -1526,7 +1531,7 @@ proc Tree::_redraw_idle { path level } {
     upvar 0  $path data
 
     if { [Widget::getoption $path -redraw] && $data(upd,afterid) == "" } {
-        set data(upd,afterid) [after idle Tree::_redraw_tree $path]
+        set data(upd,afterid) [after idle [list Tree::_redraw_tree $path]]
     }
     if { $level > $data(upd,level) } {
         set data(upd,level) $level
@@ -1546,7 +1551,7 @@ proc Tree::_init_drag_cmd { path X Y top } {
          [string equal $item "img"]  ||
          [string equal $item "win"] } {
         set node [Tree::_get_node_name $path current 2]
-        if { [set cmd [Widget::getoption $path -draginitcmd]] != "" } {
+        if {[llength [set cmd [Widget::getoption $path -draginitcmd]]]} {
             return [uplevel \#0 $cmd [list $path $node $top]]
         }
         if { [set type [Widget::getoption $path -dragtype]] == "" } {
@@ -1575,10 +1580,10 @@ proc Tree::_drop_cmd { path source X Y op type dnddata } {
         set data(dnd,afterid) ""
     }
     set data(dnd,scroll) ""
-    if { [llength $data(dnd,node)] } {
-        if { [set cmd [Widget::getoption $path -dropcmd]] != "" } {
-            return [uplevel \#0 $cmd [list $path $source $data(dnd,node) $op $type $dnddata]]
-        }
+    if {[llength $data(dnd,node)]
+	&& [llength [set cmd [Widget::getoption $path -dropcmd]]]} {
+	return [uplevel \#0 $cmd \
+		    [list $path $source $data(dnd,node) $op $type $dnddata]]
     }
     return 0
 }
@@ -1724,7 +1729,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
             }
         }
 
-    if { $vmode && [set cmd [Widget::getoption $path -dropovercmd]] != "" } {
+    if {$vmode && [llength [set cmd [Widget::getoption $path -dropovercmd]]]} {
         # user-defined dropover command
         set res     [uplevel \#0 $cmd [list $path $source $target $op $type $dnddata]]
         set code    [lindex $res 0]
@@ -1823,7 +1828,7 @@ proc Tree::_auto_scroll { path x y } {
 
     set data(dnd,scroll) $scroll
     if { [string length $scroll] && ![string length $data(dnd,afterid)] } {
-        set data(dnd,afterid) [after 200 Tree::_scroll $path $scroll]
+        set data(dnd,afterid) [after 200 [list Tree::_scroll $path $scroll]]
     }
     return $data(dnd,afterid)
 }
@@ -1839,7 +1844,7 @@ proc Tree::_scroll { path cmd dir } {
     if { ($dir == -1 && [lindex [$path.c $cmd] 0] > 0) ||
          ($dir == 1  && [lindex [$path.c $cmd] 1] < 1) } {
         $path.c $cmd scroll $dir units
-        set data(dnd,afterid) [after 100 Tree::_scroll $path $cmd $dir]
+        set data(dnd,afterid) [after 100 [list Tree::_scroll $path $cmd $dir]]
     } else {
         set data(dnd,afterid) ""
         DropSite::setcursor dot
@@ -1936,7 +1941,7 @@ proc Tree::_keynav {which win} {
                 }
             } else {
                 $win itemconfigure $node -open 1
-                if { [set cmd [Widget::getoption $win -opencmd]] != "" } {
+                if {[llength [set cmd [Widget::getoption $win -opencmd]]]} {
                     uplevel \#0 $cmd [list $node]
                 }
                 return
@@ -1951,7 +1956,7 @@ proc Tree::_keynav {which win} {
 	    set open [$win itemcget $node -open]
 	    if { $open } {
 		$win itemconfigure $node -open 0
-                if { [set cmd [Widget::getoption $win -closecmd]] != "" } {
+                if {[llength [set cmd [Widget::getoption $win -closecmd]]]} {
                     uplevel \#0 $cmd [list $node]
                 }
 		return
@@ -1988,13 +1993,13 @@ proc Tree::_keynav {which win} {
 		if {$open} {
 		    # Node was open, is now closed. Call the close-cmd
 
-		    if { [set cmd [Widget::getoption $win -closecmd]] != "" } {
+		    if {[llength [set cmd [Widget::getoption $win -closecmd]]]} {
 			uplevel \#0 $cmd [list $node]
 		    }
 		} else {
 		    # Node was closed, is now open. Call the open-cmd
 
-		    if { [set cmd [Widget::getoption $win -opencmd]] != "" } {
+		    if {[llength [set cmd [Widget::getoption $win -opencmd]]]} {
 			uplevel \#0 $cmd [list $node]
 		    }
                 }
@@ -2021,7 +2026,7 @@ proc Tree::_keynav {which win} {
 proc Tree::_get_current_node {win} {
     if {[info exists selectTree::selectCursor($win)]} {
 	set result $selectTree::selectCursor($win)
-    } elseif {[set selList [$win selection get]] != {}} {
+    } elseif {[llength [set selList [$win selection get]]]} {
 	set result [lindex $selList 0]
     } else {
 	set result ""
@@ -2116,7 +2121,7 @@ proc Tree::_get_node_deltax {path node} {
 # Results:
 #	list		The list of tags to apply to the canvas item
 proc Tree::_get_node_tags {path node {tags ""}} {
-    eval [list lappend list TreeItemSentinal] $tags
+    eval [linsert $tags 0 lappend list TreeItemSentinal]
     if {[Widget::getoption $path.$node -helptext] == ""} { return $list }
 
     switch -- [Widget::getoption $path.$node -helptype] {
@@ -2146,7 +2151,7 @@ proc Tree::_set_help { path node } {
 
     set item $path.$node
     set opts [list -helptype -helptext -helpvar]
-    foreach {cty ctx cv} [eval [list Widget::hasChangedX $item] $opts] break
+    foreach {cty ctx cv} [eval [linsert $opts 0 Widget::hasChangedX $item]] break
     set text [Widget::getoption $item -helptext]
 
     ## If we've never set help for this item before, and text is not blank,
@@ -2172,7 +2177,7 @@ proc Tree::_set_help { path node } {
 }
 
 proc Tree::_mouse_select { path cmd args } {
-    eval selection [list $path] [list $cmd] $args
+    eval [linsert $args 0 selection $path $cmd]
     switch -- $cmd {
         "add" - "clear" - "remove" - "set" - "toggle" {
             event generate $path <<TreeSelect>>

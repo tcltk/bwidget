@@ -1,3 +1,13 @@
+2004-04-21  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tree.tcl (_draw_subnodes): Adjust the drawing of the line to the
+	first root node to start at the vertical point (not go up).
+
+	* entry.tcl, arrow.tcl, combobox.tcl: better space/list handling
+
+	* entry.tcl: make the icursor not appear for non-editable and/or
+	state disabled comboboxes.
+
 2004-03-08  Joe English  <jenglish@users.sourceforge.net>
 
 	* init.tcl: (bugfix) Use <<PrevWindow>> virtual event instead
