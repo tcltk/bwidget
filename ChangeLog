@@ -1,3 +1,9 @@
+2001-09-05  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* arrow.tcl: Changed containing frame to be more invisible
+	  (borderwidth 0). Fixes [458301], by Georgios Petasis
+	  <petasis@users.sourceforge.net>.
+
 2001-08-08  Andreas Kupries <andreas_kupries@users.sourceforge.net>
 
 	* tree.tcl (Tree::_keynav): Added code to call the open and close
