@@ -24,6 +24,7 @@ package ifneeded BWidget 1.7 "\
 {dropsite.tcl source {DropSite::register DropSite::include DropSite::use}}
 {separator.tcl source {Separator Separator::create Separator::use}}
 {spinbox.tcl source {SpinBox SpinBox::create SpinBox::use}}
+{statusbar.tcl source {StatusBar StatusBar::create StatusBar::use}}
 {titleframe.tcl source {TitleFrame TitleFrame::create TitleFrame::use}}
 {mainframe.tcl source {MainFrame MainFrame::create MainFrame::use}}
 {listbox.tcl source {ListBox ListBox::create ListBox::use}}
