@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.16 2003/05/15 00:09:03 hobbs Exp $
+#  $Id: notebook.tcl,v 1.17 2003/07/17 19:59:53 hobbs Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -94,7 +94,9 @@ namespace eval NoteBook {
 
     variable _warrow 12
 
-    proc ::NoteBook { path args } { return [eval NoteBook::create $path $args] }
+    proc ::NoteBook { path args } {
+	return [eval [linsert $args 0 NoteBook::create $path]]
+    }
     proc use {} {}
 }
 
@@ -153,7 +155,7 @@ proc NoteBook::create { path args } {
     bind $path <Destroy>   [list NoteBook::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval NoteBook::\$cmd [list $path] \$args\]"
+    proc ::$path { cmd args } [subst { return \[eval \[linsert \$args 0 NoteBook::\$cmd [list $path]\]\] }]
 
     set bg [Widget::cget $path -background]
     foreach {data(dbg) data(lbg)} [BWidget::get3dcolor $path $bg] {break}
@@ -254,22 +256,23 @@ proc NoteBook::insert { path index page args } {
     variable $path
     upvar 0  $path data
 
-    if { [lsearch $data(pages) $page] != -1 } {
+    if { [lsearch -exact $data(pages) $page] != -1 } {
         return -code error "page \"$page\" already exists"
     }
 
-    Widget::init NoteBook::Page $path.f$page $args
+    set f $path.f$page
+    Widget::init NoteBook::Page $f $args
 
     set data(pages) [linsert $data(pages) $index $page]
     # If the page doesn't exist, create it; if it does reset its bg and ibd
-    if { ![winfo exists $path.f$page] } {
-        frame $path.f$page 						\
+    if { ![winfo exists $f] } {
+        frame $f \
 		-relief flat						\
 		-background	[Widget::cget $path -background]	\
 		-borderwidth	[Widget::cget $path -internalborderwidth]
         set data($page,realized) 0
     } else {
-	$path.f$page configure						\
+	$f configure \
 		-background	[Widget::cget $path -background]	\
 		-borderwidth	[Widget::cget $path -internalborderwidth]
     }
@@ -277,7 +280,7 @@ proc NoteBook::insert { path index page args } {
     _draw_page $path $page 1
     _redraw $path
 
-    return $path.f$page
+    return $f
 }
 
 
@@ -331,8 +334,8 @@ proc NoteBook::itemcget { path page option } {
 # ---------------------------------------------------------------------------
 proc NoteBook::bindtabs { path event script } {
     if { $script != "" } {
-        $path.c bind "page" $event \
-            "$script \[string range \[lindex \[$path.c gettags current\] 1\] 2 end\]"
+	append script " \[string range \[lindex \[[list $path.c] gettags current\] 1\] 2 end\]"
+        $path.c bind "page" $event $script
     } else {
         $path.c bind "page" $event {}
     }
@@ -435,7 +438,7 @@ proc NoteBook::index { path page } {
     variable $path
     upvar 0  $path data
 
-    return [lsearch $data(pages) $page]
+    return [lsearch -exact $data(pages) $page]
 }
 
 
@@ -470,7 +473,7 @@ proc NoteBook::_test_page { path page } {
     variable $path
     upvar 0  $path data
 
-    if { [set pos [lsearch $data(pages) $page]] == -1 } {
+    if { [set pos [lsearch -exact $data(pages) $page]] == -1 } {
         return -code error "page \"$page\" does not exists"
     }
     return $pos
@@ -607,7 +610,7 @@ proc NoteBook::_highlight { type path page } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare [Widget::cget $path.f$page -state] "disabled"] } {
+    if { [string equal [Widget::cget $path.f$page -state] "disabled"] } {
         return
     }
 
@@ -635,37 +638,38 @@ proc NoteBook::_select { path page } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare [Widget::cget $path.f$page -state] "normal"] } {
+    if { [string equal [Widget::cget $path.f$page -state] "normal"] } {
         set oldsel $data(select)
-        if { [string compare $page $oldsel] } {
-            if { ![string equal $oldsel ""] } {
-		set cmd [Widget::cget $path.f$oldsel -leavecmd]
-                if { ![string equal $cmd ""] } {
-		    set code [catch {uplevel \#0 $cmd} res]
-                    if { $code == 1 || $res == 0 } {
-                        return -code $code $res
-                    }
-                }
-                set data(select) ""
-                _draw_page $path $oldsel 0
-            }
-            set data(select) $page
-            if { ![string equal $page ""] } {
-                if { !$data($page,realized) } {
-                    set data($page,realized) 1
-		    set cmd [Widget::cget $path.f$page -createcmd]
-                    if { ![string equal $cmd ""] } {
-                        uplevel \#0 $cmd
-                    }
-                }
-		set cmd [Widget::cget $path.f$page -raisecmd]
-                if { ![string equal $cmd ""] } {
-                    uplevel \#0 $cmd
-                }
-                _draw_page $path $page 0
-            }
-            _draw_area $path
-        }
+        if {[string equal $page $oldsel]} {
+	    return
+	}
+	if { ![string equal $oldsel ""] } {
+	    set cmd [Widget::cget $path.f$oldsel -leavecmd]
+	    if { ![string equal $cmd ""] } {
+		set code [catch {uplevel \#0 $cmd} res]
+		if { $code == 1 || $res == 0 } {
+		    return -code $code $res
+		}
+	    }
+	    set data(select) ""
+	    _draw_page $path $oldsel 0
+	}
+	set data(select) $page
+	if { ![string equal $page ""] } {
+	    if { !$data($page,realized) } {
+		set data($page,realized) 1
+		set cmd [Widget::cget $path.f$page -createcmd]
+		if { ![string equal $cmd ""] } {
+		    uplevel \#0 $cmd
+		}
+	    }
+	    set cmd [Widget::cget $path.f$page -raisecmd]
+	    if { ![string equal $cmd ""] } {
+		uplevel \#0 $cmd
+	    }
+	    _draw_page $path $page 0
+	}
+	_draw_area $path
     }
 }
 
@@ -697,7 +701,7 @@ proc NoteBook::_draw_page { path page create } {
     upvar 0  $path data
 
     # --- calcul des coordonnees et des couleurs de l'onglet ------------------
-    set pos [lsearch $data(pages) $page]
+    set pos [lsearch -exact $data(pages) $page]
     set bg  [_getoption $path $page -background]
 
     # lookup the tab colors
@@ -832,7 +836,7 @@ proc NoteBook::_draw_page { path page create } {
     if { $create } {
 	# Create the tab region
         eval [list $path.c create polygon] [concat $lt $lb] [list \
-		-tag		[list page p:$page $page:poly] \
+		-tags		[list page p:$page $page:poly] \
 		-outline	$bg \
 		-fill		$bg \
 		]
@@ -1002,7 +1006,7 @@ proc NoteBook::_draw_area { path } {
         set xf  $xd
         set lbg $data(dbg)
     } else {
-        set xd [_get_x_page $path [lsearch $data(pages) $data(select)]]
+        set xd [_get_x_page $path [lsearch -exact $data(pages) $data(select)]]
         set xf [expr {$xd + $data($sel,width) + $arcRadius + 1}]
         set lbg $data(lbg)
     }
