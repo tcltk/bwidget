@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.19 2001/12/29 02:06:46 hobbs Exp $
+#  $Id: widget.tcl,v 1.20 2002/01/23 00:36:53 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -38,6 +38,7 @@
 #	String		{nothing}
 #	Flag		{string of valid flag characters}
 #	Synonym		{nothing}
+#	Color		{nothing}
 #
 # Next, each namespace has an array map, which maps class options to their
 # component widget options:
@@ -70,6 +71,7 @@ namespace eval Widget {
         String     Widget::_test_string
         Flag       Widget::_test_flag
         Synonym    Widget::_test_synonym
+        Color      Widget::_test_color
     }
 
     proc use {} {}
@@ -1082,6 +1084,18 @@ proc Widget::_test_bwresource { option value arg } {
 # ----------------------------------------------------------------------------
 proc Widget::_test_synonym { option value arg } {
     return -code error "bad option type Synonym in widget"
+}
+
+# ----------------------------------------------------------------------------
+#  Command Widget::_test_color
+# ----------------------------------------------------------------------------
+proc Widget::_test_color { option value arg } {
+    if {[catch {winfo rgb . $value} color]} {
+        return -code error "bad $option value \"$value\": must be a colorname \
+		or #RRGGBB triplet"
+    }
+
+    return $value
 }
 
 
