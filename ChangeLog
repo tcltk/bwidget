@@ -1,3 +1,8 @@
+2004-09-14  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* notebook.tcl (NoteBook::_draw_page): adjust height for bottom
+	drawn tabs. [Bug 988628]
+
 2004-09-09  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* panelframe.tcl (new): new PanelFrame widget which creates a
