@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.9 2000/02/26 03:51:17 ericm Exp $
+#  $Id: combobox.tcl,v 1.10 2000/02/27 20:22:01 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -98,10 +98,10 @@ proc ComboBox::create { path args } {
 
     if { [Widget::cget $path -editable] } {
         ::bind $entry <ButtonPress-1> "ComboBox::_unmapliste $path"
-        Entry::configure $path.e -state normal
+        Entry::configure $path.e -editable true
     } else {
         ::bind $entry <ButtonPress-1> "ArrowButton::invoke $path.a"
-        Entry::configure $path.e -state disabled
+        Entry::configure $path.e -editable false
     }
 
     ::bind $path  <ButtonPress-1> "ComboBox::_unmapliste $path"
@@ -134,10 +134,10 @@ proc ComboBox::configure { path args } {
     if { [Widget::hasChanged $path -editable ed] } {
         if { $ed } {
             ::bind $path.e <ButtonPress-1> "ComboBox::_unmapliste $path"
-	    Entry::configure $path.e -state normal
+	    Entry::configure $path.e -editable true
 	} else {
 	    ::bind $path.e <ButtonPress-1> "ArrowButton::invoke $path.a"
-	    Entry::configure $path.e -state disabled
+	    Entry::configure $path.e -editable false
         }
     }
 
