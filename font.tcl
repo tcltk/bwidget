@@ -245,7 +245,7 @@ proc SelectFont::create { path args } {
         pack $lbs -side left -anchor w -padx 4
         foreach st $_styles {
             button $path.$st \
-                -highlightthickness 0 -takefocus 0 -padx 0 -pady 0 -bd 2 \
+                -highlightthickness 0 -takefocus 0 -padx 0 -pady 0 \
                 -background $bg \
                 -image  [Bitmap::get $st] \
                 -command [list SelectFont::_modstyle $path $st]

@@ -1,3 +1,10 @@
+2004-05-12  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* font.tcl (SelectFont::create): don't hardcode -bd 2 when
+	creating the style selectbuttons.
+
+	* dynhelp.tcl (_show_help): account for OS X help style
+
 2004-05-04  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* listbox.tcl (_keyboard_navigation): make sure you can see the
