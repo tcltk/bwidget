@@ -1,21 +1,27 @@
-07/09/1999
-BWidget ToolKit 1.2.1
+07/19/2001
+BWidget ToolKit 1.3.1
 Copyright (c) 1998-1999 UNIFIX. 
 
 --------------------------------------------------------------------------
 WHAT IS BWIDGET ?
 
-The BWidget Toolkit is a high-level Widgets Set for Tcl/Tk built using
+The BWidget Toolkit is a high-level Widget Set for Tcl/Tk built using
 native Tcl/Tk 8.x namespaces.
 
-The BWidgets have a professional look&feel as in other well known Toolkits 
-(Tix or Incr Widget) but the concept is radically different because everything is 
-native so no platform compilation, no compiled extension library are needed. 
-The code is 100% Pure Tcl/Tk.
+The BWidgets have a professional look&feel as in other well known
+Toolkits (Tix or Incr Widgets), but the concept is radically different
+because everything is pure Tcl/Tk.  No platform dependencies, and no
+compiling required.  The code is 100% Pure Tcl/Tk.
 
+The BWidget library was originally developed by UNIFIX Online, and
+released under both the GNU Public License and the Tcl license.
+BWidget is now maintained as a community project, hosted by
+Sourceforge.  Scores of fixes and enhancements have been added by
+community developers.  See the ChangeLog file for details.
 
 --------------------------------------------------------------------------
-WIDGET LIST (1.2.1)
+
+WIDGET LIST (1.3.1)
 
 Simple Widgets 
       Label           Extended Label widget
@@ -94,55 +100,44 @@ INSTALLATION AND USE
 
 Distribution contains these directories:
 
-BWidget-1.2   Root directory and BWidget Tcl sources
+BWidget-1.3.1   Root directory and BWidget Tcl sources
    BWman        HTML manual pages
    images       images used by BWidget
    lang         Resources for language customization
    demo         Demo sources
+   tests        BWidgets test suite         
 
 
 --------------------------------------------------------------------------
+
 DOCUMENTATION
 
-HTML manual pages are available in the BWman subdirectory.
-Points to index.html for frame version with tree navigation,
-or to contents.html for no frame version.
-
-Look at http://www.unifix-online.com/BWidget for last revision
-of manual pages.
+HTML manual pages are available in the BWman subdirectory.  Point to
+index.html for frame version with tree navigation, or to contents.html
+for no frame version.
 
 
 --------------------------------------------------------------------------
+
 LICENSE
 
-BWidget ToolKit 1.2.1
+BWidget ToolKit 1.3.1
 Copyright (c) 1998-1999 UNIFIX. 
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Library General Public
-License as published by the Free Software Foundation; either
-version 2 of the License, or (at your option) any later version.
+The BWidget toolkit was originally released under the GNU Public
+License (GPL), and then under the Lesser GPL (LGPL), and finally under
+the Tcl license, which is similar to the BSD license.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Library General Public License for more details.
-
-You should have received a copy of the GNU Library General Public
-License along with this library; if not, write to the
-Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-Boston, MA  02111-1307, USA.
-
-
-License is also in LICENSE.txt. You can find LGPL.txt too.
+See the file LICENSE.txt for details.
 
 --------------------------------------------------------------------------
+
 CONTACTS
 
-Mail         mailto:bwidget@unifix-online.com
-Home page    http://www.unifix-online.com/BWidget/
+The BWidget toolkit is maintained on Sourceforge, at
+http://www.sourceforge.net/projects/tcllib/
 
-Bug Report and FAQ : See Home Page
+
 
 
 
