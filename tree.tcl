@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.23 2000/03/14 01:23:04 ericm Exp $
+#  $Id: tree.tcl,v 1.24 2000/03/14 20:20:14 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -327,10 +327,10 @@ proc Tree::itemconfigure { path node args } {
 #  Command Tree::itemcget
 # ------------------------------------------------------------------------------
 proc Tree::itemcget { path node option } {
-    variable $path
-    upvar 0  $path data
-
-    if { ![string compare $node "root"] || ![info exists data($node)] } {
+    # Instead of upvar'ing $path as data for this test, just directly refer to
+    # it, as that is faster.
+    if { ![string compare $node "root"] || \
+	    ![info exists ::Tree::${path}($node)] } {
         return -code error "node \"$node\" does not exist"
     }
 

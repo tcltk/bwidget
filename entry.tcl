@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.12 2000/03/14 01:23:03 ericm Exp $
+#  $Id: entry.tcl,v 1.13 2000/03/14 20:20:14 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -124,15 +124,14 @@ proc Entry::configure { path args } {
     set Widget::Entry::${path}:opt(-text) [$path:cmd get]
 
     set res [Widget::configure $path $args]
-    set chstate    [Widget::hasChangedX $path -state]
-    set cheditable [Widget::hasChangedX $path -editable]
-    set chfg       [Widget::hasChangedX $path -foreground]
-    set chdfg      [Widget::hasChangedX $path -disabledforeground]
 
-    set state [Widget::cget $path -state]
+    # Extract the modified bits that we are interested in.
+    foreach {chstate cheditable chfg chdfg chtext} [Widget::hasChangedX $path \
+	    -state -editable -foreground -disabledforeground -text] break
 
     if { $chstate || $cheditable } {
-	set editable [Widget::cget $path -editable]
+	set state [Widget::getMegawidgetOption $path -state]
+	set editable [Widget::getMegawidgetOption $path -editable]
         set btags [bindtags $path]
         if { $editable && ![string compare $state "normal"] } {
             set idx [lsearch $btags BwDisabledEntry]
@@ -153,6 +152,7 @@ proc Entry::configure { path args } {
     }
 
     if { $chstate || $chfg || $chdfg } {
+	set state [Widget::getMegawidgetOption $path -state]
         if { ![string compare $state "disabled"] } {
 	    set dfg [Widget::cget $path -disabledforeground]
             $path:cmd configure -fg $dfg
@@ -170,20 +170,21 @@ proc Entry::configure { path args } {
         }
     }
 
-    if { [Widget::hasChangedX $path -text] } {
+    if { $chtext } {
 	# Oh my lordee-ba-goordee
 	# Do some magic to prevent multiple validation command firings.
 	# If there is a textvariable, set that to the right value; if not,
 	# disable validation, delete the old text, enable, then set the text.
 	set varName [$path:cmd cget -textvariable]
 	if { ![string equal $varName ""] } {
-	    uplevel \#0 [list set $varName [Widget::cget $path -text]]
+	    uplevel \#0 [list set $varName \
+		    [Widget::getMegawidgetOption $path -text]]
 	} else {
 	    set validateState [$path:cmd cget -validate]
 	    $path:cmd configure -validate none
 	    $path:cmd delete 0 end
 	    $path:cmd configure -validate $validateState
-	    $path:cmd insert 0 [Widget::cget $path -text]
+	    $path:cmd insert 0 [Widget::getMegawidgetOption $path -text]
 	}
     }
 

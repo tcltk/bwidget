@@ -1,3 +1,30 @@
+2000-03-14  Eric Melski  <ericm@scriptics.com>
+
+	* button.tcl: (configure) replaced several hasChanged calls with
+	one hasChangedX call.
+
+	* dynhelp.tcl: (sethelp) replaced several hasChanged calls with
+	one hasChangedX call.
+
+	* entry.tcl: Replaced stack of hasChanged calls with one
+	hasChangedX (in configure); replaced a couple cget's with
+	getMegawidgetOption's.
+
+	* spinbox.tcl: Updated _test_options to use setMegawidgetOption,
+	and to only do that if it has to, instead of always doing it.
+
+	* tree.tcl: Worked on itemcget; instead of upvar'ing the
+	one-time-use variable, just refer to it directly.
+
+	* widget.tcl: One problem with [set
+	${class}::${path}:opt($option)] -- if path contains "foo(foo)",
+	the command will choke.  Removed that particular
+	micro-optimization.  Added setMegawidgetOption to compliment
+	getMegawidgetOption; extended hasChangedX to accept multiple
+	options to check.  This allows us to compress stacks of hasChanged
+	calls into a single call (so there's a single function call, and a
+	single upvar...).
+
 2000-03-13  Eric Melski  <ericm@scriptics.com>
 
 	* combobox.tcl: Tweaked bg/background options so that button

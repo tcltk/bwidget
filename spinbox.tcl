@@ -6,7 +6,7 @@
 # Copyright (c) 2000 by Scriptics Corporation.
 # All rights reserved.
 # 
-# RCS: @(#) $Id: spinbox.tcl,v 1.8 2000/03/13 18:21:48 ericm Exp $
+# RCS: @(#) $Id: spinbox.tcl,v 1.9 2000/03/14 20:20:14 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - SpinBox::create
@@ -312,26 +312,31 @@ proc SpinBox::_modify_value { path direction reason } {
 #  Command SpinBox::_test_options
 # -----------------------------------------------------------------------------
 proc SpinBox::_test_options { path } {
-    variable _widget
-
     set values [Widget::getMegawidgetOption $path -values]
     if { [llength $values] } {
-        set _widget($path,curval) [lindex $values 0]
+        set ::SpinBox::_widget($path,curval) [lindex $values 0]
     } else {
 	foreach {vmin vmax incr} [Widget::getMegawidgetOption $path -range] {
 	    break
 	}
+	set update 0
         if { [catch {expr {int($vmin)}}] } {
             set vmin 0
+	    set update 1
         }
         if { [catch {expr {$vmax<$vmin}} res] || $res } {
             set vmax $vmin
+	    set update 1
         }
         if { [catch {expr {$incr<0}} res] || $res } {
             set incr 1
+	    set update 1
         }
-        Widget::configure $path [list -range [list $vmin $vmax $incr]]
-        set _widget($path,curval) $vmin
+	# Only do the set back (which is expensive) if we changed a value
+	if { $update } {
+	    Widget::setMegawidgetOption $path -range [list $vmin $vmax $incr]
+	}
+        set ::SpinBox::_widget($path,curval) $vmin
     }
 }
 

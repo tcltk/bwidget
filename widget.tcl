@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.12 2000/03/14 03:25:07 ericm Exp $
+#  $Id: widget.tcl,v 1.13 2000/03/14 20:20:14 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -700,40 +700,23 @@ proc Widget::cget { path option } {
     }
 
     set class $::Widget::_class($path)
-    upvar 0 ${class}::opt  classopt
-    upvar 0 ${class}::map classmap
-
-    if { ![info exists classopt($option)] } {
+    if { ![info exists ${class}::opt($option)] } {
         return -code error "unknown option \"$option\""
     }
 
-    set optdesc $classopt($option)
+    set optdesc [set ${class}::opt($option)]
     set type    [lindex $optdesc 0]
     if { ![string compare $type "Synonym"] } {
         set option [lindex $optdesc 1]
     }
 
-    if { [info exists classmap($option)] } {
-	foreach {subpath subclass realopt} $classmap($option) {break}
+    if { [info exists ${class}::map($option)] } {
+	foreach {subpath subclass realopt} [set ${class}::map($option)] {break}
 	set path "[_get_window $class $path]$subpath"
 	return [$path cget $realopt]
     }
     upvar 0 ${class}::$path:opt pathopt
-    return $pathopt($option)
-
-    upvar 0 ${class}::sync classync
-    if { [info exists classync($option)] } {
-        set window [_get_window $class $path]
-        foreach {subpath subclass realopt} $classync($option) {
-            if { [string length $subclass] } {
-                set pathopt($option) [${subclass}::cget $window$subpath $realopt]
-            } else {
-                set pathopt($option) [$window$subpath cget $realopt]
-            }
-        }
-    }
-
-    return $pathopt($option)
+    set pathopt($option)
 }
 
 
@@ -771,14 +754,18 @@ proc Widget::hasChanged { path option pvalue } {
     return $result
 }
 
-proc Widget::hasChangedX { path option } {
+proc Widget::hasChangedX { path option args } {
     set class $::Widget::_class($path)
     upvar 0 ${class}::$path:mod pathmod
 
     set result  $pathmod($option)
     set pathmod($option) 0
+    foreach option $args {
+	lappend result $pathmod($option)
+	set pathmod($option) 0
+    }
 
-    return $result
+    set result
 }
 
 
@@ -822,7 +809,28 @@ proc Widget::getoption { path option } {
 
 proc Widget::getMegawidgetOption {path option} {
     set class $::Widget::_class($path)
-    set ${class}::$path:opt($option)
+    upvar 0 ${class}::${path}:opt pathopt
+    set pathopt($option)
+}
+
+# Widget::setMegawidgetOption --
+#
+#	Bypass the superfluous checks in cget and just directly poke at the
+#	widget's data space.  This is much more fragile than configure, so it 
+#	should only be used with great care, in places where speed is critical.
+#
+# Arguments:
+#	path	widget to lookup options for.
+#	option	option to retrieve.
+#	value	option value.
+#
+# Results:
+#	value	option value.
+
+proc Widget::setMegawidgetOption {path option value} {
+    set class $::Widget::_class($path)
+    upvar 0 ${class}::${path}:opt pathopt
+    set pathopt($option) $value
 }
 
 # ------------------------------------------------------------------------------

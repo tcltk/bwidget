@@ -118,10 +118,12 @@ proc Button::configure { path args } {
     }
     set res [Widget::configure $path $args]
 
-    set rc [Widget::hasChanged $path -relief relief]
-    set sc [Widget::hasChanged $path -state  state]
-
-    if { $rc || $sc } {
+    # Extract all the modified bits we're interested in
+    foreach {cr cs cv cn ct cu} [Widget::hasChangedX $path \
+	    -relief -state -textvariable -name -text -underline] break
+    if { $cr || $cs } {
+	set relief [Widget::cget $path -relief]
+	set state  [Widget::cget $path -state]
         if { ![string compare $relief "link"] } {
             if { ![string compare $state "active"] } {
                 set relief "raised"
@@ -132,14 +134,12 @@ proc Button::configure { path args } {
         $path:cmd configure -relief $relief -state $state
     }
 
-    set cv [Widget::hasChanged $path -textvariable var]
-    set cn [Widget::hasChanged $path -name name]
-    set ct [Widget::hasChanged $path -text text]
-    set cu [Widget::hasChanged $path -underline under]
-
     if { $cv || $cn || $ct || $cu } {
+	set var		[Widget::cget $path -textvariable]
+	set text	[Widget::cget $path -text]
+	set under	[Widget::cget $path -underline]
         if {  ![string length $var] } {
-            set desc [BWidget::getname $name]
+            set desc [BWidget::getname [Widget::cget $path -name]]
             if { [llength $desc] } {
                 set text  [lindex $desc 0]
                 set under [lindex $desc 1]
@@ -158,7 +158,7 @@ proc Button::configure { path args } {
     }
     DynamicHelp::sethelp $path $path
 
-    return $res
+    set res
 }
 
 

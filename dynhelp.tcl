@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.3 2000/03/10 16:58:13 ericm Exp $
+#  $Id: dynhelp.tcl,v 1.4 2000/03/14 20:20:14 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -91,9 +91,8 @@ proc DynamicHelp::include { class type } {
 #  Command DynamicHelp::sethelp
 # ------------------------------------------------------------------------------
 proc DynamicHelp::sethelp { path subpath {force 0}} {
-    set ctype [Widget::hasChangedX $path -helptype]
-    set ctext [Widget::hasChangedX $path -helptext]
-    set cvar  [Widget::hasChangedX $path -helpvar]
+    foreach {ctype ctext cvar} [Widget::hasChangedX $path \
+	    -helptype -helptext -helpvar] break
     if { $force || $ctype || $ctext || $cvar } {
 	set htype [Widget::cget $path -helptype]
         switch $htype {
