@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.45 2003/05/02 01:07:01 hobbs Exp $
+#  $Id: tree.tcl,v 1.46 2003/05/15 00:09:16 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -379,7 +379,7 @@ proc Tree::itemconfigure { path node args } {
 	}
 
 	if { $data(upd,level) < 3 && $flag } {
-            if { [set idx [lsearch $data(upd,nodes) $node]] == -1 } {
+            if { [set idx [lsearch -exact $data(upd,nodes) $node]] == -1 } {
                 lappend data(upd,nodes) $node $flag
             } else {
                 incr idx
@@ -451,7 +451,7 @@ proc Tree::delete { path args } {
 	foreach node $lnodes {
 	    if { ![string equal $node "root"] && [info exists data($node)] } {
 		set parent [lindex $data($node) 0]
-		set idx	   [lsearch $data($parent) $node]
+		set idx	   [lsearch -exact $data($parent) $node]
 		set data($parent) [lreplace $data($parent) $idx $idx]
 		_subdelete $path [list $node]
 	    }
@@ -484,7 +484,7 @@ proc Tree::move { path parent node index } {
     }
 
     set oldp        [lindex $data($node) 0]
-    set idx         [lsearch $data($oldp) $node]
+    set idx         [lsearch -exact $data($oldp) $node]
     set data($oldp) [lreplace $data($oldp) $idx $idx]
     set data($node) [concat [list $parent] [lrange $data($node) 1 end]]
     if { [string equal $index "end"] } {
@@ -556,7 +556,7 @@ proc Tree::selection { path cmd args } {
             set data(selnodes) {}
             foreach node $args {
 		if { [Widget::getoption $path.$node -selectable] } {
-		    if { [lsearch $data(selnodes) $node] == -1 } {
+		    if { [lsearch -exact $data(selnodes) $node] == -1 } {
 			lappend data(selnodes) $node
 		    }
 		}
@@ -572,7 +572,7 @@ proc Tree::selection { path cmd args } {
 	    }
             foreach node $args {
 		if { [Widget::getoption $path.$node -selectable] } {
-		    if { [lsearch $data(selnodes) $node] == -1 } {
+		    if { [lsearch -exact $data(selnodes) $node] == -1 } {
 			lappend data(selnodes) $node
 		    }
 		}
@@ -641,7 +641,7 @@ proc Tree::selection { path cmd args } {
 	}
         remove {
             foreach node $args {
-                if { [set idx [lsearch $data(selnodes) $node]] != -1 } {
+                if { [set idx [lsearch -exact $data(selnodes) $node]] != -1 } {
                     set data(selnodes) [lreplace $data(selnodes) $idx $idx]
                 }
             }
@@ -668,7 +668,7 @@ proc Tree::selection { path cmd args } {
 			"wrong#args: Expected $path selection includes node"
 	    }
 	    set node [lindex $args 0]
-            return [expr {[lsearch $data(selnodes) $node] != -1}]
+            return [expr {[lsearch -exact $data(selnodes) $node] != -1}]
         }
         default {
             return
@@ -735,7 +735,7 @@ proc Tree::index { path node } {
         return -code error "node \"$node\" does not exist"
     }
     set parent [lindex $data($node) 0]
-    return [expr {[lsearch $data($parent) $node] - 1}]
+    return [expr {[lsearch -exact $data($parent) $node] - 1}]
 }
 
 
@@ -1131,7 +1131,7 @@ proc Tree::_subdelete { path lnodes } {
                 lappend lsubnodes $subnode
             }
             unset data($node)
-	    set idx [lsearch $sel $node]
+	    set idx [lsearch -exact $sel $node]
 	    if { $idx >= 0 } {
 		set sel [lreplace $sel $idx $idx]
 	    }
@@ -1637,7 +1637,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
                             # $node is not open and doesn't have subnodes
                             # drop position is after $node in children of parent of $node
                             set parent [lindex $data($node) 0]
-                            set index  [lsearch $data($parent) $node]
+                            set index  [lsearch -exact $data($parent) $node]
                             set xli    [expr {$xi - $deltax - 5}]
                         }
                         set yl $ys
@@ -1645,7 +1645,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
                         # position is before $node
                         # drop position is before $node in children of parent of $node
                         set parent [lindex $data($node) 0]
-                        set index  [expr {[lsearch $data($parent) $node] - 1}]
+                        set index  [expr {[lsearch -exact $data($parent) $node] - 1}]
                         set xli    [expr {$xi - $deltax - 5}]
                         set yl     $yi
                     }
@@ -1832,7 +1832,7 @@ proc Tree::_keynav {which win} {
 	    if { [string equal $node ""] } {
 		return
 	    }
-	    set index [lsearch $nodes $node]
+	    set index [lsearch -exact $nodes $node]
 	    incr index -1
 	    if { $index >= 0 } {
 		$win selection set [lindex $nodes $index]
@@ -1850,7 +1850,7 @@ proc Tree::_keynav {which win} {
 		return
 	    }
 
-	    set index [lsearch $nodes $node]
+	    set index [lsearch -exact $nodes $node]
 	    incr index
 	    if { $index < [llength $nodes] } {
 		$win selection set [lindex $nodes $index]
@@ -1868,7 +1868,7 @@ proc Tree::_keynav {which win} {
 	    set open [$win itemcget $node -open]
             if { $open } {
                 if { [llength [$win nodes $node]] } {
-		    set index [lsearch $nodes $node]
+		    set index [lsearch -exact $nodes $node]
 		    incr index
 		    if { $index < [llength $nodes] } {
 			$win selection set [lindex $nodes $index]
