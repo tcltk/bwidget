@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.29 2003/11/06 05:49:44 damonc Exp $
+#  $Id: combobox.tcl,v 1.30 2004/04/21 22:26:28 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -176,7 +176,7 @@ proc ComboBox::configure { path args } {
 
 
     set list [list -images -values -bwlistbox -hottrack]
-    foreach {ci cv cb ch} [eval Widget::hasChangedX $path $list] { break }
+    foreach {ci cv cb ch} [eval [linsert $list 0 Widget::hasChangedX $path]] { break }
 
     if { $ci } {
         set images [Widget::cget $path -images]
@@ -518,7 +518,7 @@ proc ComboBox::_mapliste { path } {
     if { [Widget::cget $path -state] == "disabled" } {
         return
     }
-    if { [set cmd [Widget::getMegawidgetOption $path -postcommand]] != "" } {
+    if {[llength [set cmd [Widget::getMegawidgetOption $path -postcommand]]]} {
         uplevel \#0 $cmd
     }
     if { ![llength [Widget::getMegawidgetOption $path -values]] } {
@@ -593,7 +593,7 @@ proc ComboBox::_select { path index } {
     if { $index != -1 } {
         if { [setvalue $path @$index] } {
 	    set cmd [Widget::getMegawidgetOption $path -modifycmd]
-            if { $cmd != "" } {
+            if {[llength $cmd]} {
                 uplevel \#0 $cmd
             }
         }
@@ -607,10 +607,9 @@ proc ComboBox::_select { path index } {
 #  Command ComboBox::_modify_value
 # ----------------------------------------------------------------------------
 proc ComboBox::_modify_value { path direction } {
-    if { [setvalue $path $direction] } {
-        if { [set cmd [Widget::getMegawidgetOption $path -modifycmd]] != "" } {
-            uplevel \#0 $cmd
-        }
+    if {[setvalue $path $direction]
+        && [llength [set cmd [Widget::getMegawidgetOption $path -modifycmd]]]} {
+	uplevel \#0 $cmd
     }
 }
 
