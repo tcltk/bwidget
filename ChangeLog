@@ -1,3 +1,8 @@
+2004-10-09  Rolf Ade  <pointsman@users.sourceforge.net>
+
+        * mainframe.tcl: (MainFrame::_parse_accelerator) made
+          accelerator Ctrl-f in -menu definitions work. [Bug 1043107] 
+
 2004-09-24  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* color.tcl: use toplevel instead of menu for dropdown color menu
