@@ -1,3 +1,33 @@
+2002-10-14  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* pkgIndex.tcl:
+	* configure.in: bump version to 1.5
+
+	* button.tcl: remove -repeatdelay and -repeatinterval for 8.4 to
+	allow Button to override them. [Bug #620103]
+
+	* combobox.tcl: make -entrybg also control the listbox background.
+	[Bug #519189] (chevreux)
+
+	* tree.tcl (_see): change to always show left edge of requested
+	item. [Patch #556077] (english)
+
+	* dynhelp.tcl: allow variable and balloon help simultaneously.
+	[Patch #567982] (decoster)
+
+	* BWman/LabelFrame.html:
+	* labelframe.tcl: allow -bitmap -image and -textvariable options
+	of the BWLabel component of a LabelFrame. [Patch #620753] (decoster)
+
+	* widget.tcl (_get_tkwidget_options): withdraw toplevel if it is
+	the TkResource base widget. [Patch #620754] (decoster)
+
+	* tree.tcl (delete): correct tree deletion with selected nodes.
+	[Patch #621331] (decoster)
+
+	* progressbar.tcl (_modify): use updated idletasks instead of
+	update. [Patch #622927] (decoster)
+
 2002-09-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* Makefile.in: better DESTDIR/libdir support (steffen)
