@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: widget.tcl,v 1.2 2000/02/19 02:12:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -95,6 +95,7 @@ proc Widget::tkinclude { class tkwidget subpath args } {
     namespace eval $class {}
     upvar 0 ${class}::opt classopt
     upvar 0 ${class}::map classmap
+    upvar 0 ${class}::map$subpath submap
 
     # create resources informations from tk widget resources
     foreach optdesc [_get_tkwidget_options $tkwidget] {
@@ -130,7 +131,10 @@ proc Widget::tkinclude { class tkwidget subpath args } {
                     set ro 0
                 }
                 set classopt($option) [list TkResource $value $ro [list $tkwidget $realopt]]
+		# Store the forward and backward mappings for this
+		# option <-> realoption pair
                 lappend classmap($option) $subpath "" $realopt
+		set submap($realopt) $option
             }
         }
     }
@@ -185,6 +189,7 @@ proc Widget::bwinclude { class subclass subpath args } {
     namespace eval $class {}
     upvar 0 ${class}::opt classopt
     upvar 0 ${class}::map classmap
+    upvar 0 ${class}::map$subpath submap
     upvar 0 ${subclass}::opt subclassopt
 
     # create resources informations from BWidget resources
@@ -220,7 +225,10 @@ proc Widget::bwinclude { class subclass subpath args } {
                     set ro [lindex $optdesc 2]
                 }
                 set classopt($option) [list $type $value $ro [lindex $optdesc 3]]
+		# Store the forward and backward mappings for this
+		# option <-> realoption pair
                 lappend classmap($option) $subpath $subclass $realopt
+		set submap($realopt) $option
             }
         }
     }
@@ -314,12 +322,16 @@ proc Widget::declare { class optlist } {
 # ------------------------------------------------------------------------------
 proc Widget::addmap { class subclass subpath options } {
     upvar 0 ${class}::map classmap
+    upvar 0 ${class}::map$subpath submap
 
     foreach {option realopt} $options {
         if { ![string length $realopt] } {
             set realopt $option
         }
+	# Store the forward and backward mappings for this
+	# option <-> realoption pair
         lappend classmap($option) $subpath $subclass $realopt
+	set submap($realopt) $option
     }
 }
 
@@ -343,18 +355,18 @@ proc Widget::syncoptions { class subclass subpath options } {
 #  Command Widget::init
 # ------------------------------------------------------------------------------
 proc Widget::init { class path options } {
-    variable _class
-    variable _optiontype
-
     upvar 0 ${class}::opt classopt
-    upvar 0 ${class}::map classmap
     upvar 0 ${class}::$path:opt  pathopt
     upvar 0 ${class}::$path:mod  pathmod
 
-    catch {unset pathopt}
-    catch {unset pathmod}
+    if { [info exists pathopt] } {
+	unset pathopt
+    }
+    if { [info exists pathmod] } {
+	unset pathmod
+    }
     set fpath ".#BWidgetClass#$class"
-    regsub -all "::" $class "" rdbclass
+    set rdbclass [string map [list :: ""] $class]
     if { ![winfo exists $fpath] } {
         frame $fpath -class $rdbclass
     }
@@ -380,7 +392,7 @@ proc Widget::init { class path options } {
         set pathmod($option) 0
     }
 
-    set _class($path) $class
+    set Widget::_class($path) $class
     foreach {option value} $options {
         if { ![info exists classopt($option)] } {
             unset pathopt
@@ -394,7 +406,7 @@ proc Widget::init { class path options } {
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
         }
-        set pathopt($option) [$_optiontype($type) $option $value [lindex $optdesc 3]]
+        set pathopt($option) [$Widget::_optiontype($type) $option $value [lindex $optdesc 3]]
     }
 }
 
@@ -510,19 +522,13 @@ proc Widget::cget { path option } {
 #  Command Widget::subcget
 # ------------------------------------------------------------------------------
 proc Widget::subcget { path subwidget } {
-    variable _class
-
-    set class $_class($path)
-    upvar 0 ${class}::map classmap
+    set class $::Widget::_class($path)
     upvar 0 ${class}::$path:opt pathopt
+    upvar 0 ${class}::map$subwidget submap
 
     set result {}
-    foreach {option map} [array get classmap] {
-        foreach {subpath subclass realopt} $map {
-            if { ![string compare $subpath $subwidget] } {
-                lappend result $realopt $pathopt($option)
-            }
-        }
+    foreach realopt [array names submap] {
+	lappend result $realopt $pathopt($submap($realopt))
     }
     return $result
 }
@@ -564,9 +570,7 @@ proc Widget::setoption { path option value } {
 #  Command Widget::getoption
 # ------------------------------------------------------------------------------
 proc Widget::getoption { path option } {
-    variable _class
-
-    set class $_class($path)
+    set class $::Widget::_class($path)
     upvar 0 ${class}::$path:opt pathopt
 
     return $pathopt($option)
@@ -727,8 +731,9 @@ proc Widget::_get_tkwidget_options { tkwidget } {
 #  Command Widget::_test_tkresource
 # ------------------------------------------------------------------------------
 proc Widget::_test_tkresource { option value arg } {
-    set tkwidget [lindex $arg 0]
-    set realopt  [lindex $arg 1]
+#    set tkwidget [lindex $arg 0]
+#    set realopt  [lindex $arg 1]
+    foreach {tkwidget realopt} $arg break
     set path     ".#BWidget#$tkwidget"
     set old      [$path cget $realopt]
     $path configure $realopt $value
@@ -759,7 +764,7 @@ proc Widget::_test_synonym { option value arg } {
 #  Command Widget::_test_string
 # ------------------------------------------------------------------------------
 proc Widget::_test_string { option value arg } {
-    return $value
+    set value
 }
 
 

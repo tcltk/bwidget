@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dragsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dragsite.tcl,v 1.2 1999/11/12 04:12:11 sven Exp $
+#  $Id: dragsite.tcl,v 1.3 2000/02/19 02:12:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DragSite::include
@@ -14,11 +14,11 @@
 # ------------------------------------------------------------------------------
 
 namespace eval DragSite {
-    Widget::declare DragSite {
-        {-dragevent     Enum   1  0 {1 2 3}}
-        {-draginitcmd   String "" 0}
-        {-dragendcmd    String "" 0}
-    }
+    Widget::declare DragSite [list \
+	    [list	-dragevent	Enum	1	0	[list 1 2 3]] \
+	    [list	-draginitcmd	String	""	0] \
+	    [list	-dragendcmd	String	""	0] \
+	    ]
 
     variable _topw ".drag"
     variable _tabops
@@ -41,14 +41,13 @@ namespace eval DragSite {
 #  Command DragSite::include
 # ------------------------------------------------------------------------------
 proc DragSite::include { class type event } {
-    set dragoptions {
-        {-dragenabled Boolean 0  0}
-        {-draginitcmd String  "" 0}
-        {-dragendcmd  String  "" 0}
-    }
-    lappend dragoptions \
-        [list -dragtype  String $type  0] \
-        [list -dragevent Enum   $event 0 {1 2 3}]
+    set dragoptions [list \
+	    [list	-dragenabled	Boolean	0	0] \
+	    [list	-draginitcmd	String	""	0] \
+	    [list	-dragendcmd	String	""	0] \
+	    [list	-dragtype	String	$type	0] \
+	    [list	-dragevent	Enum	$event	0	[list 1 2 3]] \
+	    ]
     Widget::declare $class $dragoptions
 }
 

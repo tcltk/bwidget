@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.2 2000/02/08 17:48:17 kuchler Exp $
+#  $Id: entry.tcl,v 1.3 2000/02/19 02:12:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -18,26 +18,27 @@
 
 namespace eval Entry {
     Widget::tkinclude Entry entry :cmd \
-        remove {-state -cursor -foreground -textvariable}
+	    remove [list -state -cursor -foreground -textvariable]
 
-    Widget::declare Entry {
-        {-foreground         TkResource ""     0 entry}
-        {-disabledforeground TkResource ""     0 button}
-        {-state              Enum       normal 0 {normal disabled}}
-        {-text               String     "" 0}
-        {-textvariable       String     "" 0}
-        {-editable           Boolean    1  0}
-        {-command            String     "" 0}
-        {-invalidcommand     String     "" 0 entry}
-        {-validate           Enum     none 0 {none focus focusin focusout key all}}
-        {-validatecommand    String     "" 0 entry}
-        {-relief             TkResource "" 0 entry}
-        {-borderwidth        TkResource "" 0 entry}
-        {-fg                 Synonym -foreground}
-        {-bd                 Synonym -borderwidth}
-        {-invcmd             Synonym -invalidcommand}
-        {-vcmd               Synonym -validatecommand}
-    }
+    Widget::declare Entry [list \
+	    [list -foreground		TkResource	""	0 entry] \
+	    [list -disabledforeground	TkResource	""	0 button] \
+	    [list -state	Enum	normal	0 [list normal disabled]] \
+	    [list -text			String	""	0] \
+	    [list -textvariable		String	""	0] \
+	    [list -editable		Boolean	1	0] \
+	    [list -command		String	""	0] \
+	    [list -invalidcommand	String	""	0 entry] \
+	    [list -validate	Enum	none	0	\
+		[list none focus focusin focusout key all]] \
+	    [list -validatecommand	String	""	0 entry] \
+	    [list -relief		TkResource	""	0 entry] \
+	    [list -borderwidth		TkResource	""	0 entry] \
+	    [list -fg		Synonym		-foreground] \
+	    [list -bd		Synonym		-borderwidth] \
+	    [list -invcmd	Synonym		-invalidcommand] \
+	    [list -vcmd		Synonym		-validatecommand] \
+	    ]
 
     DynamicHelp::include Entry balloon
     DragSite::include    Entry "" 3

@@ -1,3 +1,24 @@
+2000-02-18  Eric Melski  <ericm@scriptics.com>
+
+	* images/target.xbm: Placeholder for actual icon.
+
+	* color.tcl: Change env(BWIDGET_LIBRARY) to ::BWIDGET::LIBRARY;
+	changed proc "dialogue" to "dialog"
+
+	* pkgIndex.tcl: Updated function spec for color.tcl.
+
+	* widget.tcl: Various minor speed tweaks; added a reverse mapping
+	from component widget options -> mega-widget options so that
+	subcget can be faster.
+
+	* entry.tcl: 
+	* dropsite.tcl: 
+	* dragsite.tcl: 
+	* arrow.tcl: Tcl list'd the specs for Widget::declare calls.
+
+	* combobox.tcl: Removed extraneous ListBox::use call.
+	
+
 2000-02-17  Eric Melski  <ericm@scriptics.com>
 
 	* notebook.tcl: Added an extra check to move the leftmost tab a

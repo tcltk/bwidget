@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dropsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dropsite.tcl,v 1.2 1999/11/05 03:38:54 ericm Exp $
+#  $Id: dropsite.tcl,v 1.3 2000/02/19 02:12:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DropSite::include
@@ -19,13 +19,13 @@
 
 
 namespace eval DropSite {
-    Widget::declare DropSite {
-        {-dropovercmd String "" 0}
-        {-dropcmd     String "" 0}
-        {-droptypes   String "" 0}
-    }
+    Widget::declare DropSite [list \
+	    [list -dropovercmd String "" 0] \
+	    [list -dropcmd     String "" 0] \
+	    [list -droptypes   String "" 0] \
+	    ]
 
-    proc use { } {}
+    proc use {} {}
 
     variable _top  ".drag"
     variable _opw  ".drag.\#op"
@@ -97,12 +97,12 @@ namespace eval DropSite {
 #  Command DropSite::include
 # ------------------------------------------------------------------------------
 proc DropSite::include { class types } {
-    set dropoptions {
-        {-dropenabled Boolean 0  0}
-        {-dropovercmd String  "" 0}
-        {-dropcmd     String  "" 0}
-    }
-    lappend dropoptions [list -droptypes String $types 0]
+    set dropoptions [list \
+	    [list	-dropenabled	Boolean	0	0] \
+	    [list	-dropovercmd	String	""	0] \
+	    [list	-dropcmd	String	""	0] \
+	    [list	-droptypes	String	$types	0] \
+	    ]
     Widget::declare $class $dropoptions
 }
 

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.5 2000/02/11 22:54:26 ericm Exp $
+#  $Id: combobox.tcl,v 1.6 2000/02/19 02:12:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -20,7 +20,6 @@ namespace eval ComboBox {
     ArrowButton::use
     Entry::use
     LabelFrame::use
-    ListBox::use
 
     Widget::bwinclude ComboBox LabelFrame .labf \
         rename     {-text -label} \
