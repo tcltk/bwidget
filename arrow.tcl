@@ -57,7 +57,7 @@ namespace eval ArrowButton {
 	    ]
     DynamicHelp::include ArrowButton balloon
 
-    proc ::ArrowButton { path args } { return [eval ArrowButton::create $path $args] }
+    Widget::redir_create_command ::ArrowButton
 
     proc use {} {}
 
@@ -110,7 +110,7 @@ proc ArrowButton::create { path args } {
     set ::ArrowButton::_moved($path) 0
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval ArrowButton::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path ArrowButton
 
     return $path
 }
@@ -169,7 +169,7 @@ proc ArrowButton::invoke { path } {
     }
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         set oldstate [Widget::getoption $path -state]
-        if { ![string compare [Widget::getoption $path -type] "button"] } {
+        if { [string equal [Widget::getoption $path -type] "button"] } {
             set oldrelief [Widget::getoption $path -relief]
             configure $path -state active -relief sunken
         } else {
@@ -181,7 +181,7 @@ proc ArrowButton::invoke { path } {
             uplevel \#0 $cmd
         }
 	after 10
-        if { ![string compare [Widget::getoption $path -type] "button"] } {
+        if { [string equal [Widget::getoption $path -type] "button"] } {
             configure $path -state $oldstate -relief $oldrelief
         } else {
             configure $path -state $oldstate -arrowrelief $oldrelief
@@ -207,7 +207,7 @@ proc ArrowButton::_redraw { path width height } {
     set dir   [Widget::getoption $path -dir]
     set bd    [expr {[$path.c cget -borderwidth] + [$path.c cget -highlightthickness] + 1}]
     set clean [Widget::getoption $path -clean]
-    if { ![string compare $type "arrow"] } {
+    if { [string equal $type "arrow"] } {
         if { [set id [$path.c find withtag rect]] == "" } {
             $path.c create rectangle $bd $bd [expr {$width-$bd-1}] [expr {$height-$bd-1}] -tags rect
         } else {
@@ -228,8 +228,8 @@ proc ArrowButton::_redraw { path width height } {
 
     if { $clean > 0 } {
         # arrange for base to be odd
-        if { ![string compare $dir "top"] ||
-             ![string compare $dir "bottom"] } {
+        if { [string equal $dir "top"] ||
+             [string equal $dir "bottom"] } {
             if { !($w % 2) } {
                 incr w -1
             }
@@ -271,7 +271,7 @@ proc ArrowButton::_redraw { path width height } {
             } else {
                 $path.c coords $id $x0 $y1 $x1 $y1 $xd $y0
             }
-            if { ![string compare $type "arrow"] } {
+            if { [string equal $type "arrow"] } {
                 if { [set id [$path.c find withtag bot]] == "" } {
                     $path.c create line $x0 $y1 $x1 $y1 $xd $y0 -tags bot
                 } else {
@@ -296,7 +296,7 @@ proc ArrowButton::_redraw { path width height } {
             } else {
                 $path.c coords $id $x1 $y0 $x0 $y0 $xd $y1
             }
-            if { ![string compare $type "arrow"] } {
+            if { [string equal $type "arrow"] } {
                 if { [set id [$path.c find withtag top]] == "" } {
                     $path.c create line $x1 $y0 $x0 $y0 $xd $y1 -tags top
                 } else {
@@ -321,7 +321,7 @@ proc ArrowButton::_redraw { path width height } {
             } else {
                 $path.c coords $id $x1 $y0 $x1 $y1 $x0 $yd
             }
-            if { ![string compare $type "arrow"] } {
+            if { [string equal $type "arrow"] } {
                 if { [set id [$path.c find withtag bot]] == "" } {
                     $path.c create line $x1 $y0 $x1 $y1 $x0 $yd -tags bot
                 } else {
@@ -346,7 +346,7 @@ proc ArrowButton::_redraw { path width height } {
             } else {
                 $path.c coords $id $x0 $y1 $x0 $y0 $x1 $yd
             }
-            if { ![string compare $type "arrow"] } {
+            if { [string equal $type "arrow"] } {
                 if { [set id [$path.c find withtag top]] == "" } {
                     $path.c create line $x0 $y1 $x0 $y0 $x1 $yd -tags top
                 } else {
@@ -373,7 +373,7 @@ proc ArrowButton::_redraw { path width height } {
 # ------------------------------------------------------------------------------
 proc ArrowButton::_redraw_state { path } {
     set state [Widget::getoption $path -state]
-    if { ![string compare [Widget::getoption $path -type] "button"] } {
+    if { [string equal [Widget::getoption $path -type] "button"] } {
         switch $state {
             normal   {set bg -background;       set fg -foreground}
             active   {set bg -activebackground; set fg -activeforeground}
@@ -402,8 +402,8 @@ proc ArrowButton::_redraw_state { path } {
 proc ArrowButton::_redraw_relief { path } {
     variable _moved
 
-    if { ![string compare [Widget::getoption $path -type] "button"] } {
-        if { ![string compare [Widget::getoption $path -relief] "sunken"] } {
+    if { [string equal [Widget::getoption $path -type] "button"] } {
+        if { [string equal [Widget::getoption $path -relief] "sunken"] } {
             if { !$_moved($path) } {
                 $path.c move poly 1 1
                 set _moved($path) 1
@@ -459,7 +459,7 @@ proc ArrowButton::_enter { path } {
         set _grab(oldstate) [Widget::getoption $path -state]
         configure $path -state active
         if { $_grab(pressed) == $path } {
-            if { ![string compare [Widget::getoption $path -type] "button"] } {
+            if { [string equal [Widget::getoption $path -type] "button"] } {
                 set _grab(oldrelief) [Widget::getoption $path -relief]
                 configure $path -relief sunken
             } else {
@@ -481,7 +481,7 @@ proc ArrowButton::_leave { path } {
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         configure $path -state $_grab(oldstate)
         if { $_grab(pressed) == $path } {
-            if { ![string compare [Widget::getoption $path -type] "button"] } {
+            if { [string equal [Widget::getoption $path -type] "button"] } {
                 configure $path -relief $_grab(oldrelief)
             } else {
                 configure $path -arrowrelief $_grab(oldrelief)
@@ -499,7 +499,7 @@ proc ArrowButton::_press { path } {
     set path [winfo parent $path]
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         set _grab(pressed) $path
-            if { ![string compare [Widget::getoption $path -type] "button"] } {
+            if { [string equal [Widget::getoption $path -type] "button"] } {
             set _grab(oldrelief) [Widget::getoption $path -relief]
             configure $path -relief sunken
         } else {
@@ -525,7 +525,7 @@ proc ArrowButton::_release { path } {
     set path [winfo parent $path]
     if { $_grab(pressed) == $path } {
         set _grab(pressed) ""
-            if { ![string compare [Widget::getoption $path -type] "button"] } {
+            if { [string equal [Widget::getoption $path -type] "button"] } {
             configure $path -relief $_grab(oldrelief)
         } else {
             configure $path -arrowrelief $_grab(oldrelief)

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  scrollview.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollview.tcl,v 1.4 2000/06/15 00:45:16 kuchler Exp $
+#  $Id: scrollview.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -45,10 +45,7 @@ namespace eval ScrollView {
     bind BwScrollView <Configure>     {ScrollView::_resize %W}
     bind BwScrollView <Destroy>       {ScrollView::_destroy %W}
 
-    proc ::ScrollView {path args} {
-        return [eval ScrollView::create $path $args]
-    }
-
+    Widget::redir_create_command ::ScrollView
     proc use {} {}
 
     variable _widget
@@ -62,7 +59,8 @@ proc ScrollView::create { path args } {
     variable _widget
 
     Widget::init ScrollView $path $args
-    eval canvas $path [Widget::subcget $path :canvas] -highlightthickness 0
+    eval [list canvas $path] [Widget::subcget $path :canvas] \
+	-highlightthickness 0
     rename $path ::$path:canvas
 
     set w                     [Widget::cget $path -window]
@@ -74,8 +72,8 @@ proc ScrollView::create { path args } {
         set _widget($path,oldxscroll) [$w cget -xscrollcommand]
         set _widget($path,oldyscroll) [$w cget -yscrollcommand]
         $w configure \
-            -xscrollcommand "ScrollView::_set_hscroll $path" \
-            -yscrollcommand "ScrollView::_set_vscroll $path"
+            -xscrollcommand [list ScrollView::_set_hscroll $path] \
+            -yscrollcommand [list ScrollView::_set_vscroll $path]
     }
     $path:canvas create rectangle -2 -2 -2 -2 \
         -fill    [Widget::cget $path -fill]       \
@@ -84,7 +82,7 @@ proc ScrollView::create { path args } {
 
     bindtags $path [list $path BwScrollView [winfo toplevel $path] all]
 
-    proc ::$path { cmd args } "return \[eval ScrollView::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path ScrollView
 
     return $path
 }
@@ -109,8 +107,8 @@ proc ScrollView::configure { path args } {
             set _widget($path,oldxscroll) [$w cget -xscrollcommand]
             set _widget($path,oldyscroll) [$w cget -yscrollcommand]
             $w configure \
-                -xscrollcommand "ScrollView::_set_hscroll $path" \
-                -yscrollcommand "ScrollView::_set_vscroll $path"
+                -xscrollcommand [list ScrollView::_set_hscroll $path] \
+                -yscrollcommand [list ScrollView::_set_vscroll $path]
         } else {
             $path:canvas coords view -2 -2 -2 -2
             set _widget($path,oldxscroll) {}
@@ -232,7 +230,7 @@ proc ScrollView::_set_view { path cmd x y } {
 
     set w [Widget::getoption $path -window]
     if {[winfo exists $w]} {
-        if {![string compare $cmd "set"]} {
+        if {[string equal $cmd "set"]} {
             set c  [$path:canvas coords view]
             set x0 [lindex $c 0]
             set y0 [lindex $c 1]
@@ -251,7 +249,7 @@ proc ScrollView::_set_view { path cmd x y } {
                 set vh [expr {double($x0-$_widget($path,bd))/$_widget($path,width)}]
                 set vv [expr {double($y0-$_widget($path,bd))/$_widget($path,height)}]
             }
-        } elseif {![string compare $cmd "motion"]} {
+        } elseif {[string equal $cmd "motion"]} {
             set vh [expr {double($x-$_widget($path,dx)-$_widget($path,bd))/$_widget($path,width)}]
             set vv [expr {double($y-$_widget($path,dy)-$_widget($path,bd))/$_widget($path,height)}]
         }

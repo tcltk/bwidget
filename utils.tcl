@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.8 2003/04/15 01:21:20 hobbs Exp $
+#  $Id: utils.tcl,v 1.9 2003/10/17 18:33:06 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -57,7 +57,7 @@ proc GlobalVar::getvar { varName } {
 #  Command GlobalVar::tracevar
 # ----------------------------------------------------------------------------
 proc GlobalVar::tracevar { cmd varName args } {
-    return [uplevel \#0 trace $cmd [list $varName] $args]
+    return [uplevel \#0 [list trace $cmd $varName] $args]
 }
 
 

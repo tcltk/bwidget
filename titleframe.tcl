@@ -35,7 +35,7 @@ namespace eval TitleFrame {
     Widget::addmap TitleFrame "" .b.p {-background {}}
     Widget::addmap TitleFrame "" .f   {-background {}}
 
-    proc ::TitleFrame { path args } { return [eval TitleFrame::create $path $args] }
+    Widget::redir_create_command ::TitleFrame
     proc use {} {}
 }
 
@@ -46,19 +46,19 @@ namespace eval TitleFrame {
 proc TitleFrame::create { path args } {
     Widget::init TitleFrame $path $args
 
-    set frame  [eval frame $path [Widget::subcget $path :cmd] \
+    set frame  [eval [list frame $path] [Widget::subcget $path :cmd] \
 	    -class TitleFrame -relief flat -bd 0 -highlightthickness 0]
 
-    set padtop [eval frame $path.p [Widget::subcget $path :cmd] \
+    set padtop [eval [list frame $path.p] [Widget::subcget $path :cmd] \
 	    -relief flat -borderwidth 0]
-    set border [eval frame $path.b [Widget::subcget $path .b] -highlightthickness 0]
-    set label  [eval label $path.l [Widget::subcget $path .l] \
+    set border [eval [list frame $path.b] [Widget::subcget $path .b] -highlightthickness 0]
+    set label  [eval [list label $path.l] [Widget::subcget $path .l] \
                     -highlightthickness 0 \
                     -relief flat \
                     -bd     0 -padx 2 -pady 0]
-    set padbot [eval frame $border.p [Widget::subcget $path .p] \
+    set padbot [eval [list frame $border.p] [Widget::subcget $path .p] \
 	    -relief flat -bd 0 -highlightthickness 0]
-    set frame  [eval frame $path.f [Widget::subcget $path .f] \
+    set frame  [eval [list frame $path.f] [Widget::subcget $path .f] \
 	    -relief flat -bd 0 -highlightthickness 0]
     set height [winfo reqheight $label]
 
@@ -85,12 +85,12 @@ proc TitleFrame::create { path args } {
 
     place $label -relx $relx -x $x -anchor $anchor -y $y
 
-    bind $label <Configure> "TitleFrame::_place $path"
+    bind $label <Configure> [list TitleFrame::_place $path]
     bind $path  <Destroy>   {Widget::destroy %W; rename %W {}}
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval TitleFrame::\$cmd $path \$args\]"
-    
+    Widget::redir_widget_command $path TitleFrame
+
     return $path
 }
 

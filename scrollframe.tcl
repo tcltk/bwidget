@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.4 2003/02/25 09:47:50 hobbs Exp $
+#  $Id: scrollframe.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -42,7 +42,7 @@ namespace eval ScrollableFrame {
     bind BwScrollableFrame <Configure> {ScrollableFrame::_resize %W}
     bind BwScrollableFrame <Destroy>   {Widget::destroy %W; rename %W {}}
 
-    proc ::ScrollableFrame { path args } { return [eval ScrollableFrame::create $path $args] }
+    Widget::redir_create_command ::ScrollableFrame
     proc use {} {}
 }
 
@@ -53,10 +53,10 @@ namespace eval ScrollableFrame {
 proc ScrollableFrame::create { path args } {
     Widget::init ScrollableFrame $path $args
 
-    set canvas [eval canvas $path [Widget::subcget $path :cmd] \
+    set canvas [eval [list canvas $path] [Widget::subcget $path :cmd] \
                     -highlightthickness 0 -borderwidth 0 -relief flat]
 
-    set frame  [eval frame $path.frame [Widget::subcget $path .frame] \
+    set frame  [eval [list frame $path.frame] [Widget::subcget $path .frame] \
                     -highlightthickness 0 -borderwidth 0 -relief flat]
 
     $canvas create window 0 0 -anchor nw -window $frame -tags win \
@@ -68,8 +68,7 @@ proc ScrollableFrame::create { path args } {
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } \
-	    "return \[eval ScrollableFrame::\$cmd [list $path] \$args\]"
+    Widget::redir_widget_command $path ScrollableFrame
 
     return $canvas
 }

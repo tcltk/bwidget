@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  pagesmgr.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: pagesmgr.tcl,v 1.4 2001/10/14 19:32:58 hobbs Exp $
+#  $Id: pagesmgr.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - PagesManager::create
@@ -31,7 +31,7 @@ namespace eval PagesManager {
 
     Widget::addmap PagesManager "" :cmd {-width {} -height {}}
 
-    proc ::PagesManager { path args } { return [eval PagesManager::create $path $args] }
+    Widget::redir_create_command ::PagesManager
     proc use {} {}
 }
 
@@ -54,11 +54,11 @@ proc PagesManager::create { path args } {
     eval canvas $path -relief flat -bd 0 -highlightthickness 0 \
 	    [Widget::subcget $path :cmd]
 
-    bind $path <Configure> "PagesManager::_realize $path"
-    bind $path <Destroy>   "PagesManager::_destroy $path"
+    bind $path <Configure> [list PagesManager::_realize $path]
+    bind $path <Destroy>   [list PagesManager::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval PagesManager::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path PagesManager
 
     return $path
 }
@@ -295,5 +295,5 @@ proc PagesManager::_realize { path } {
 
     set data(realized) 1
     _draw_area $path
-    bind $path <Configure> "PagesManager::_draw_area $path"
+    bind $path <Configure> [list PagesManager::_draw_area $path]
 }

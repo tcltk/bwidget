@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.16 2001/06/11 23:58:40 hobbs Exp $
+#  $Id: entry.tcl,v 1.17 2003/10/17 18:33:06 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -78,7 +78,7 @@ namespace eval Entry {
     bind BwEntry <Destroy> {Entry::_destroy %W}
     bind BwDisabledEntry <Destroy> {Entry::_destroy %W}
 
-    interp alias {} ::Entry {} ::Entry::create
+    Widget::redir_create_command ::Entry
     proc use {} {}
 }
 
@@ -94,12 +94,12 @@ proc Entry::create { path args } {
     array set maps [Widget::parseArgs Entry $args]
 
     set data(afterid) ""
-    eval entry $path $maps(:cmd)
+    eval [list entry $path] $maps(:cmd)
     Widget::initFromODB Entry $path $maps(Entry)
     set state    [Widget::getMegawidgetOption $path -state]
     set editable [Widget::getMegawidgetOption $path -editable]
     set text     [Widget::getMegawidgetOption $path -text]
-    if { $editable && ![string compare $state "normal"] } {
+    if { $editable && [string equal $state "normal"] } {
         bindtags $path [list $path BwEntry [winfo toplevel $path] all]
         $path configure -takefocus 1
     } else {
@@ -109,13 +109,13 @@ proc Entry::create { path args } {
     if { $editable == 0 } {
         $path configure -cursor left_ptr
     }
-    if { ![string compare $state "disabled"] } {
+    if { [string equal $state "disabled"] } {
         $path configure -foreground \
 		[Widget::getMegawidgetOption $path -disabledforeground]
     } else {
 	$path configure -foreground \
 		[Widget::getMegawidgetOption $path -foreground]
-	bindtags $path [linsert [bindtags $path] 2 BwEditableEntry] 
+	bindtags $path [linsert [bindtags $path] 2 BwEditableEntry]
     }
     if { [string length $text] } {
 	set varName [$path cget -textvariable]
@@ -128,14 +128,15 @@ proc Entry::create { path args } {
 	    $path configure -validate $validateState
 	    $path insert 0 [Widget::getMegawidgetOption $path -text]
 	}
-    }	
+    }
 
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd 1
     DropSite::setdrop $path $path Entry::_over_cmd Entry::_drop_cmd 1
     DynamicHelp::sethelp $path $path 1
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[Entry::_path_command $path \$cmd \$args\]"
+    proc ::$path {cmd args} \
+	"return \[Entry::_path_command [list $path] \$cmd \$args\]"
 
     return $path
 }
@@ -159,7 +160,7 @@ proc Entry::configure { path args } {
 	set state [Widget::getMegawidgetOption $path -state]
 	set editable [Widget::getMegawidgetOption $path -editable]
         set btags [bindtags $path]
-        if { $editable && ![string compare $state "normal"] } {
+        if { $editable && [string equal $state "normal"] } {
             set idx [lsearch $btags BwDisabledEntry]
             if { $idx != -1 } {
                 bindtags $path [lreplace $btags $idx $idx BwEntry]
@@ -171,7 +172,7 @@ proc Entry::configure { path args } {
                 bindtags $path [lreplace $btags $idx $idx BwDisabledEntry]
             }
             $path:cmd configure -takefocus 0
-            if { ![string compare [focus] $path] } {
+            if { [string equal [focus] $path] } {
                 focus .
             }
         }
@@ -179,7 +180,7 @@ proc Entry::configure { path args } {
 
     if { $chstate || $chfg || $chdfg } {
 	set state [Widget::getMegawidgetOption $path -state]
-        if { ![string compare $state "disabled"] } {
+        if { [string equal $state "disabled"] } {
 	    set dfg [Widget::cget $path -disabledforeground]
             $path:cmd configure -fg $dfg
         } else {
@@ -188,7 +189,7 @@ proc Entry::configure { path args } {
         }
     }
     if { $chstate } {
-	if { ![string compare $state "disabled"] } {
+	if { [string equal $state "disabled"] } {
 	    set idx [lsearch -exact [bindtags $path] BwEditableEntry]
 	    if { $idx != -1 } {
 		bindtags $path [lreplace [bindtags $path] $idx $idx]
@@ -258,10 +259,10 @@ proc Entry::invoke { path } {
 #  Command Entry::_path_command
 # ------------------------------------------------------------------------------
 proc Entry::_path_command { path cmd larg } {
-    if { ![string compare $cmd "configure"] || ![string compare $cmd "cget"] } {
-        return [eval Entry::$cmd $path $larg]
+    if {[string equal $cmd "configure"] || [string equal $cmd "cget"]} {
+        return [eval [list Entry::$cmd $path] $larg]
     } else {
-        return [eval $path:cmd $cmd $larg]
+        return [eval [list $path:cmd $cmd] $larg]
     }
 }
 
@@ -380,7 +381,7 @@ proc Entry::_over_cmd { path source event X Y op type dnddata } {
     upvar 0  $path data
 
     set x [expr {$X-[winfo rootx $path]}]
-    if { ![string compare $event "leave"] } {
+    if { [string equal $event "leave"] } {
         if { [string length $data(afterid)] } {
             after cancel $data(afterid)
             set data(afterid) ""
@@ -396,13 +397,13 @@ proc Entry::_over_cmd { path source event X Y op type dnddata } {
         return $res
     }
 
-    if { ![string compare $type "COLOR"]   ||
-         ![string compare $type "FGCOLOR"] ||
-         ![string compare $type "BGCOLOR"] } {
+    if { [string equal $type "COLOR"]   ||
+         [string equal $type "FGCOLOR"] ||
+         [string equal $type "BGCOLOR"] } {
         DropSite::setcursor based_arrow_down
         return 1
     }
-    if { [Widget::getoption $path -editable] && ![string compare [Widget::getoption $path -state] "normal"] } {
+    if { [Widget::getoption $path -editable] && [string equal [Widget::getoption $path -state] "normal"] } {
         if { [string compare $event "leave"] } {
             $path:cmd selection clear
             $path:cmd icursor @$x

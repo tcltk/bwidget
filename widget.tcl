@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.24 2003/05/18 17:26:52 jenglish Exp $
+#  $Id: widget.tcl,v 1.25 2003/10/17 18:33:06 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1355,5 +1355,44 @@ proc Widget::getVariable { path varName {newVarName ""} } {
     variable _class
     set class $_class($path)
     if {![string length $newVarName]} { set newVarName $varName }
-    uplevel 1 "upvar #0 ${class}::$path:$varName $newVarName"
+    uplevel 1 [list upvar \#0 ${class}::$path:$varName $newVarName]
+}
+
+# Widget::redir_create_command --
+#
+#   Create the redirecting command for widget instantiation procs
+#
+# Arguments:
+#   args	comments
+# Results:
+#   Returns ...
+#
+proc Widget::redir_create_command {cmd {recmd {}}} {
+    if {$recmd eq ""} { set recmd ${cmd}::create }
+    if 0 {
+	proc $cmd {path args} \
+	    "return \[eval \[list [list $recmd] \$path\] \$args\]"
+    } else {
+	interp alias {} $cmd {} $recmd
+    }
+}
+
+# Widget::redir_widget_command --
+#
+#   Create the redirecting command for widget instance procs
+#   Widget namespaces cannot contain spaces.
+#
+# Arguments:
+#   args	comments
+# Results:
+#   Returns ...
+#
+proc Widget::redir_widget_command {path ns} {
+    if 0 {
+	proc ::$path {cmd args} \
+	    "return \[eval \[list ${ns}::\$cmd [list $path]\] \$args\]"
+    } else {
+	proc ::$path {cmd args} \
+	    [subst {return \[eval \[linsert \$args 0 ${ns}::\$cmd [list $path]\]\]}]
+    }
 }

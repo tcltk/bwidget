@@ -1,12 +1,12 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  bitmap.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: bitmap.tcl,v 1.2 1999/11/05 03:38:54 ericm Exp $
-# ------------------------------------------------------------------------------
+#  $Id: bitmap.tcl,v 1.3 2003/10/17 18:33:06 hobbs Exp $
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Bitmap::get
 #     - Bitmap::_init
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 namespace eval Bitmap {
     variable path
     variable _bmp
@@ -21,9 +21,9 @@ namespace eval Bitmap {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Bitmap::get
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Bitmap::get { name } {
     variable path
     variable _bmp
@@ -33,7 +33,7 @@ proc Bitmap::get { name } {
         return $_bmp($name)
     }
 
-    # --- Nom de fichier avec extension ------------------------------------------------------
+    # --- Nom de fichier avec extension ---------------------------------
     set ext [file extension $name]
     if { $ext != "" } {
         if { ![info exists _bmp($ext)] } {
@@ -41,7 +41,7 @@ proc Bitmap::get { name } {
         }
 
         if { [file exists $name] } {
-            if {![string compare $ext ".xpm"]} {
+            if {[string equal $ext ".xpm"]} {
                 set _bmp($name) [xpm-to-image $name]
                 return $_bmp($name)
             }
@@ -54,7 +54,7 @@ proc Bitmap::get { name } {
     foreach dir $path {
         foreach {type ext} $_types {
             if { [file exists [file join $dir $name$ext]] } {
-                if {![string compare $ext ".xpm"]} {
+                if {[string equal $ext ".xpm"]} {
                     set _bmp($name) [xpm-to-image [file join $dir $name$ext]]
                     return $_bmp($name)
                 } else {
@@ -70,9 +70,9 @@ proc Bitmap::get { name } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Bitmap::_init
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Bitmap::_init { } {
     global   env
     variable path

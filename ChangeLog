@@ -1,3 +1,15 @@
+2003-10-17  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* arrow.tcl, bitmap.tcl, button.tcl, buttonbox.tcl, color.tcl,
+	* combobox.tcl, dialog.tcl, dragsite.tcl, dropsite.tcl, entry.tcl
+	* font.tcl, label.tcl, labelentry.tcl, labelframe.tcl, listbox.tcl
+	* mainframe.tcl, messagedlg.tcl, notebook.tcl, pagesmgr.tcl
+	* panedw.tcl, passwddlg.tcl, progressbar.tcl, progressdlg.tcl
+	* scrollframe.tcl, scrollview.tcl, scrollw.tcl, separator.tcl
+	* spinbox.tcl, titleframe.tcl, tree.tcl, utils.tcl, widget.tcl
+	* xpm2image.tcl: major revamp to reduce incorrect use of eval and
+	other list-safetiness evils.  Also change !strcomp to streq.
+
 2003-08-06  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* listbox.tcl: Correct Listbox selection drawing [Bug #781652]

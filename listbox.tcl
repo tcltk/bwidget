@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.14 2003/08/06 23:37:19 hobbs Exp $
+#  $Id: listbox.tcl,v 1.15 2003/10/17 18:33:06 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -97,9 +97,7 @@ namespace eval ListBox {
 
     Widget::addmap ListBox "" .c {-deltay -yscrollincrement}
 
-    proc ::ListBox { path args } {
-	return [eval [linsert $args 0 ListBox::create $path]]
-    }
+    Widget::redir_create_command ::ListBox
     proc use {} {}
 
     variable _edit
@@ -143,15 +141,15 @@ proc ListBox::create { path args } {
 	    [list -xscrollincrement 8]
     pack $path.c -expand yes -fill both
 
-    bind $path <Configure> "ListBox::_resize  $path"
-    bind $path <Destroy>   "ListBox::_destroy $path"
+    bind $path <Configure> [list ListBox::_resize  $path]
+    bind $path <Destroy>   [list ListBox::_destroy $path]
 
     DragSite::setdrag $path $path.c ListBox::_init_drag_cmd \
 	    [Widget::cget $path -dragendcmd] 1
     DropSite::setdrop $path $path.c ListBox::_over_cmd ListBox::_drop_cmd 1
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } [subst { return \[eval \[linsert \$args 0 ListBox::\$cmd [list $path]\]\] }]
+    Widget::redir_widget_command $path ListBox
 
     set w [Widget::cget $path -width]
     set h [Widget::cget $path -height]
@@ -715,7 +713,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
         pack $ent -ipadx 8 -anchor w
 
         set idw [$path.c create window $x $y -window $frame -anchor w]
-        trace variable ListBox::_edit(text) w "ListBox::_update_edit_size $path $ent $idw $wmax"
+        trace variable ListBox::_edit(text) w [list ListBox::_update_edit_size $path $ent $idw $wmax]
         tkwait visibility $ent
         grab  $frame
         BWidget::focus set $ent
@@ -731,7 +729,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
         bind $ent <Escape> {set ListBox::_edit(wait) 0}
         bind $ent <Return> {set ListBox::_edit(wait) 1}
 	if { $clickres == 0 || $clickres == 1 } {
-	    bind $frame <Button>  "set ListBox::_edit(wait) $clickres"
+	    bind $frame <Button>  [list set ListBox::_edit(wait) $clickres]
 	}
 
         set ok 0
@@ -742,7 +740,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
                 set ok 1
             }
         }
-        trace vdelete ListBox::_edit(text) w "ListBox::_update_edit_size $path $ent $idw $wmax"
+        trace vdelete ListBox::_edit(text) w [list ListBox::_update_edit_size $path $ent $idw $wmax]
         grab release $frame
         BWidget::focus release $ent
         destroy $frame

@@ -40,7 +40,7 @@ namespace eval PanedWindow {
 
     variable _panedw
 
-    proc ::PanedWindow { path args } { return [eval PanedWindow::create $path $args] }
+    Widget::redir_create_command ::PanedWindow
     proc use {} {}
 }
 
@@ -63,8 +63,7 @@ proc PanedWindow::create { path args } {
     bind $path <Destroy>   [list PanedWindow::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval PanedWindow::\$cmd\
-	    [list $path] \$args\]"
+    Widget::redir_widget_command $path PanedWindow
 
     return $path
 }
@@ -173,7 +172,7 @@ proc PanedWindow::add { path args } {
             grid rowconfigure $path [expr {2*$num-1}] -weight 0
         }
         bind $activator <ButtonPress-1> \
-		"PanedWindow::_beg_move_sash $path $num %X %Y"
+	    [list PanedWindow::_beg_move_sash $path $num %X %Y]
     } else {
         if { [string equal $side "top"] || \
 		[string equal $side "bottom"] } {
@@ -257,8 +256,8 @@ proc PanedWindow::_beg_move_sash { path num x y } {
 
         update idletasks
         grab set $top
-        bind $top <ButtonRelease-1> "PanedWindow::_end_move_sash $path $top $num $xmin $xmax %X rootx width"
-        bind $top <Motion>          "PanedWindow::_move_sash $top $xmin $xmax %X +%%d+$yr"
+        bind $top <ButtonRelease-1> [list PanedWindow::_end_move_sash $path $top $num $xmin $xmax %X rootx width]
+        bind $top <Motion>          [list PanedWindow::_move_sash $top $xmin $xmax %X +%%d+$yr]
         _move_sash $top $xmin $xmax $x "+%d+$yr"
     } else {
         $top configure -cursor sb_v_double_arrow
@@ -372,9 +371,9 @@ proc PanedWindow::_apply_weights { path } {
     set wsash [expr {[Widget::getoption $path -width] + 2*[Widget::getoption $path -pad]}]
     set rs [winfo $size $path]
     set s [expr {$rs - ($_panedw($path,nbpanes) - 1) * $wsash}]
-    
+
     set tw 0.0
-    foreach w $_panedw($path,weights) { 
+    foreach w $_panedw($path,weights) {
 	set tw [expr {$tw + $w}]
     }
 
@@ -382,6 +381,6 @@ proc PanedWindow::_apply_weights { path } {
 	set rw [lindex $_panedw($path,weights) $i]
 	set ps [expr {int($rw / $tw * $s)}]
 	$path.f$i configure -$size $ps
-    }    
+    }
     return
 }

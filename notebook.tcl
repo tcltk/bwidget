@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.17 2003/07/17 19:59:53 hobbs Exp $
+#  $Id: notebook.tcl,v 1.18 2003/10/17 18:33:06 hobbs Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -94,9 +94,7 @@ namespace eval NoteBook {
 
     variable _warrow 12
 
-    proc ::NoteBook { path args } {
-	return [eval [linsert $args 0 NoteBook::create $path]]
-    }
+    Widget::redir_create_command ::NoteBook
     proc use {} {}
 }
 
@@ -155,7 +153,7 @@ proc NoteBook::create { path args } {
     bind $path <Destroy>   [list NoteBook::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } [subst { return \[eval \[linsert \$args 0 NoteBook::\$cmd [list $path]\]\] }]
+    Widget::redir_widget_command $path NoteBook
 
     set bg [Widget::cget $path -background]
     foreach {data(dbg) data(lbg)} [BWidget::get3dcolor $path $bg] {break}
@@ -1086,5 +1084,5 @@ proc NoteBook::_realize { path } {
     # Sven
     NoteBook::_redraw $path
     # Sven
-    bind $path <Configure> "NoteBook::_resize $path"
+    bind $path <Configure> [list NoteBook::_resize $path]
 }

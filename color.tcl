@@ -7,9 +7,7 @@ namespace eval SelectColor {
 	{-placement String     "center"         1}
     }
 
-    proc ::SelectColor { path args } { 
-	return [eval SelectColor::create $path $args] 
-    }
+    Widget::redir_create_command ::SelectColor
 
     variable _baseColors {
         \#0000ff \#00ff00 \#00ffff \#ff0000 \#ff00ff \#ffff00
@@ -22,7 +20,7 @@ namespace eval SelectColor {
         \#ffffff \#ffffff \#ffffff \#ffffff \#ffffff
     }
 
-    if {![string compare $::tcl_platform(platform) "unix"]} {
+    if {[string equal $::tcl_platform(platform) "unix"]} {
         set useTkDialogue 0
     } else {
         set useTkDialogue 1
@@ -42,7 +40,7 @@ proc SelectColor::create { path args } {
 
     switch -- [Widget::cget $path -type] {
 	"dialog" {
-	    return [eval SelectColor::dialog $path $args]
+	    return [eval [list SelectColor::dialog $path] $args]
 	}
 
 	"popup" {
@@ -61,7 +59,7 @@ proc SelectColor::create { path args } {
 	    if {[string length $parent]} {
 		if {[llength $placement] == 1} { lappend placement $parent }
 	    }
-	    return [eval SelectColor::menu $path [list $placement] $args]
+	    return [eval [list SelectColor::menu $path $placement] $args]
 	}
     }
 }
@@ -91,7 +89,7 @@ proc SelectColor::menu {path placement args} {
                    -highlightcolor white \
                    -relief solid -borderwidth 1 \
                    -width 16 -height 16 -background $color]
-        bind $f <ButtonPress-1> "set SelectColor::_selection $count"
+        bind $f <ButtonPress-1> [list set SelectColor::_selection $count]
         bind $f <Enter>         {focus %W}
         grid $f -column $col -row $row -padx 1 -pady 1
         bindtags $f $f
@@ -113,7 +111,7 @@ proc SelectColor::menu {path placement args} {
 
     bind $frame <ButtonPress-1> {set SelectColor::_selection -1}
     bind $frame <FocusOut>      {set SelectColor::_selection -2}
-    eval BWidget::place $top 0 0 $placement
+    eval [list BWidget::place $top 0 0] $placement
 
     wm deiconify $top
     raise $top
@@ -131,7 +129,7 @@ proc SelectColor::menu {path placement args} {
     update
     Widget::destroy $top
     if {$_selection == $count} {
-        return [eval dialog $path $args]
+        return [eval [list dialog $path] $args]
     } else {
         return [lindex $colors $_selection]
     }
@@ -178,13 +176,13 @@ proc SelectColor::dialog {path args} {
             pack $fcolor -in $fround
             grid $fround -in $subf -row $lin -column $col -padx 1 -pady 1
 
-            bind $fround <ButtonPress-1> "SelectColor::_select_rgb $count"
-            bind $fcolor <ButtonPress-1> "SelectColor::_select_rgb $count"
+            bind $fround <ButtonPress-1> [list SelectColor::_select_rgb $count]
+            bind $fcolor <ButtonPress-1> [list SelectColor::_select_rgb $count]
 
 	    bind $fround <Double-1> \
-	    	"SelectColor::_select_rgb $count; $top invoke 0"
+	    	"SelectColor::_select_rgb [list $count]; [list $top] invoke 0"
 	    bind $fcolor <Double-1> \
-	    	"SelectColor::_select_rgb $count; $top invoke 0"
+	    	"SelectColor::_select_rgb [list $count]; [list $top] invoke 0"
 
             incr count
             if {[incr col] == 6} {
@@ -220,20 +218,20 @@ proc SelectColor::dialog {path args} {
 
     pack $fg $fd -side left -anchor n -fill y
 
-    bind $c1 <ButtonPress-1> "SelectColor::_select_hue_sat %x %y"
-    bind $c1 <B1-Motion>     "SelectColor::_select_hue_sat %x %y"
+    bind $c1 <ButtonPress-1> [list SelectColor::_select_hue_sat %x %y]
+    bind $c1 <B1-Motion>     [list SelectColor::_select_hue_sat %x %y]
 
-    bind $c2 <ButtonPress-1> "SelectColor::_select_value %x %y"
-    bind $c2 <B1-Motion>     "SelectColor::_select_value %x %y"
+    bind $c2 <ButtonPress-1> [list SelectColor::_select_value %x %y]
+    bind $c2 <B1-Motion>     [list SelectColor::_select_value %x %y]
 
     if {![info exists _image] || [catch {image type $_image}]} {
         set _image [image create photo -width 200 -height 200]
         for {set x 0} {$x < 200} {incr x 4} {
             for {set y 0} {$y < 200} {incr y 4} {
                 $_image put \
-			[eval format "\#%04x%04x%04x" \
-			[hsvToRgb [expr {$x/196.0}] [expr {(196-$y)/196.0}] 0.85]] \
-			-to $x $y [expr {$x+4}] [expr {$y+4}]
+		    [eval [list format "\#%04x%04x%04x"] \
+			 [hsvToRgb [expr {$x/196.0}] [expr {(196-$y)/196.0}] 0.85]] \
+		    -to $x $y [expr {$x+4}] [expr {$y+4}]
             }
         }
     }
@@ -288,7 +286,7 @@ proc SelectColor::_select_rgb {count} {
     set bg   [$frame.color$count cget -background]
     set user [expr {$_selection-[llength $_baseColors]}]
     if {$user >= 0 &&
-        ![string compare \
+        [string equal \
               [winfo rgb $frame.color$_selection $bg] \
               [winfo rgb $frame.color$_selection white]]} {
         set bg [$frame.color cget -bg]
@@ -338,7 +336,7 @@ proc SelectColor::_select_hue_sat {x y} {
     set _hsv [lreplace $_hsv 0 1 $hue $sat]
     $_widget(chs) coords target [expr {$x-9}] [expr {$y-9}]
     _draw_values $hue $sat
-    _set_rgb [eval format "\#%04x%04x%04x" [eval hsvToRgb $_hsv]]
+    _set_rgb [eval [list format "\#%04x%04x%04x"] [eval [list hsvToRgb] $_hsv]]
 }
 
 
@@ -364,7 +362,7 @@ proc SelectColor::_select_value {x y} {
     }
     $_widget(cv) coords target 0 [expr {$y-5}] 10 $y 0 [expr {$y+5}]
     set _hsv [lreplace $_hsv 2 2 [expr {(200-$y)/200.0}]]
-    _set_rgb [eval format "\#%04x%04x%04x" [eval hsvToRgb $_hsv]]
+    _set_rgb [eval [list format "\#%04x%04x%04x"] [eval [list hsvToRgb] $_hsv]]
 }
 
 
@@ -373,7 +371,7 @@ proc SelectColor::_draw_values {hue sat} {
 
     for {set val 0} {$val < 40} {incr val} {
         set l   [hsvToRgb $hue $sat [expr {$val/39.0}]]
-        set col [eval format "\#%04x%04x%04x" $l]
+        set col [eval [list format "\#%04x%04x%04x"] $l]
         $_widget(cv) itemconfigure val$val -fill $col -outline $col
     }
 }

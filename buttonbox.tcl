@@ -31,7 +31,7 @@ namespace eval ButtonBox {
 
     Widget::addmap ButtonBox "" :cmd {-background {}}
 
-    proc ::ButtonBox { path args } { return [eval ButtonBox::create $path $args] }
+    Widget::redir_create_command ::ButtonBox
     proc use {} {}
 }
 
@@ -45,8 +45,8 @@ proc ButtonBox::create { path args } {
     variable $path
     upvar 0  $path data
 
-    eval frame $path [Widget::subcget $path :cmd] -takefocus 0 \
-	    -highlightthickness 0
+    eval [list frame $path] [Widget::subcget $path :cmd] \
+	[list -takefocus 0 -highlightthickness 0]
     # For 8.4+ we don't want to inherit the padding
     catch {$path configure -padx 0 -pady 0}
 
@@ -57,8 +57,7 @@ proc ButtonBox::create { path args } {
     bind $path <Destroy> [list ButtonBox::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } \
-	    "return \[eval ButtonBox::\$cmd [list $path] \$args\]"
+    Widget::redir_widget_command $path ButtonBox
 
     return $path
 }
@@ -127,12 +126,11 @@ proc ButtonBox::add { path args } {
 	set args [array get flags]
     }
 
-    eval Button::create $but \
-        -background [Widget::getoption $path -background]\
-        -padx       [Widget::getoption $path -padx] \
-        -pady       [Widget::getoption $path -pady] \
-        $args \
-        -default $style
+    eval [list Button::create $but \
+	      -background [Widget::getoption $path -background]\
+	      -padx       [Widget::getoption $path -padx] \
+	      -pady       [Widget::getoption $path -pady]] \
+        $args [list -default $style]
 
     # ericm@scriptics.com:  set up tags, just like the menu items
     foreach tag $tags {
@@ -145,7 +143,7 @@ proc ButtonBox::add { path args } {
     # ericm@scriptics.com
 
     set idx [expr {2*$data(nbuttons)}]
-    if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
+    if { [string equal [Widget::getoption $path -orient] "horizontal"] } {
         grid $but -column $idx -row 0 -sticky nsew
         if { [Widget::getoption $path -homogeneous] } {
             set req [winfo reqwidth $but]
@@ -239,7 +237,7 @@ proc ButtonBox::itemconfigure { path index args } {
     if { [set idx [lsearch $args -default]] != -1 } {
         set args [lreplace $args $idx [expr {$idx+1}]]
     }
-    return [eval Button::configure $path.b[index $path $index] $args]
+    return [eval [list Button::configure $path.b[index $path $index]] $args]
 }
 
 
@@ -277,7 +275,7 @@ proc ButtonBox::invoke { path index } {
 #  Command ButtonBox::index
 # ----------------------------------------------------------------------------
 proc ButtonBox::index { path index } {
-    if { ![string compare $index "default"] } {
+    if { [string equal $index "default"] } {
         set res [Widget::getoption $path -default]
     } elseif {$index == "end" || $index == "last"} {
         variable $path

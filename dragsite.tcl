@@ -1,8 +1,8 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  dragsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dragsite.tcl,v 1.6 2001/06/11 23:58:40 hobbs Exp $
-# ------------------------------------------------------------------------------
+#  $Id: dragsite.tcl,v 1.7 2003/10/17 18:33:06 hobbs Exp $
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DragSite::include
 #     - DragSite::setdrag
@@ -11,7 +11,7 @@
 #     - DragSite::_init_drag
 #     - DragSite::_end_drag
 #     - DragSite::_update_operation
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval DragSite {
     Widget::declare DragSite [list \
@@ -37,9 +37,9 @@ namespace eval DragSite {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command DragSite::include
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc DragSite::include { class type event } {
     set dragoptions [list \
 	    [list	-dragenabled	Boolean	0	0] \
@@ -52,10 +52,10 @@ proc DragSite::include { class type event } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command DragSite::setdrag
 #  Widget interface to register
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc DragSite::setdrag { path subpath initcmd endcmd {force 0}} {
     set cen       [Widget::hasChanged $path -dragenabled en]
     set cdragevt  [Widget::hasChanged $path -dragevent   dragevt]
@@ -72,9 +72,9 @@ proc DragSite::setdrag { path subpath initcmd endcmd {force 0}} {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command DragSite::register
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc DragSite::register { path args } {
     upvar \#0 DragSite::$path drag
 
@@ -104,9 +104,9 @@ proc DragSite::register { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command DragSite::_begin_drag
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc DragSite::_begin_drag { event source state X Y } {
     variable _x0
     variable _y0
@@ -124,7 +124,7 @@ proc DragSite::_begin_drag { event source state X Y } {
                 # rare cases where the motion comes before the press.
                 return
             }
-            if { ![string compare $_state "press"] } {
+            if { [string equal $_state "press"] } {
                 if { abs($_x0-$X) > 3 || abs($_y0-$Y) > 3 } {
                     set _state "done"
                     _init_drag $source $state $X $Y
@@ -135,9 +135,9 @@ proc DragSite::_begin_drag { event source state X Y } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command DragSite::_init_drag
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc DragSite::_init_drag { source state X Y } {
     variable _topw
     upvar \#0 DragSite::$source drag
@@ -154,7 +154,7 @@ proc DragSite::_init_drag { source state X Y } {
         set data [lindex $info 2]
 
         if { [winfo children $_topw] == "" } {
-            if { ![string compare $type "BITMAP"] || ![string compare $type "IMAGE"] } {
+            if { [string equal $type "BITMAP"] || [string equal $type "IMAGE"] } {
                 label $_topw.l -image [Bitmap::get dragicon] -relief flat -bd 0
             } else {
                 label $_topw.l -image [Bitmap::get dragfile] -relief flat -bd 0
@@ -177,9 +177,9 @@ proc DragSite::_init_drag { source state X Y } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command DragSite::_end_drag
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc DragSite::_end_drag { source target op type data result } {
     variable _topw
     upvar \#0 DragSite::$source drag
