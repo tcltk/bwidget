@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: combobox.tcl,v 1.2 1999/10/21 17:41:37 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -57,6 +57,8 @@ namespace eval ComboBox {
 #  Command ComboBox::create
 # ------------------------------------------------------------------------------
 proc ComboBox::create { path args } {
+    global tcl_platform
+    
     Widget::init ComboBox $path $args
 
     frame $path -background [Widget::getoption $path -background] \
@@ -67,35 +69,49 @@ proc ComboBox::create { path args } {
     set labf  [eval LabelFrame::create $path.labf [Widget::subcget $path .labf] \
                    -focus $path.e]
     set entry [eval Entry::create $path.e [Widget::subcget $path .e] \
-                   -relief flat -borderwidth 0]
-
-    set width  11
+                   -relief flat -borderwidth 0 -takefocus 1]
+    ::bind $path.e <FocusIn> "$path _focus_in"
+    ::bind $path.e <FocusOut> "$path _focus_out"
+    
+    if {![string compare $tcl_platform(platform) "unix"]} {
+        set ipadx 0
+        set width  11
+    } else {
+        set ipadx 2
+        set width  15
+    }
     set height [winfo reqheight $entry]
     set arrow [eval ArrowButton::create $path.a [Widget::subcget $path .a] \
                    -width $width -height $height \
                    -highlightthickness 0 -borderwidth 1 -takefocus 0 \
                    -dir   bottom \
                    -type  button \
+                   -ipadx $ipadx \
                    -command [list "ComboBox::_mapliste $path"]]
-
+    
+    
     set frame [LabelFrame::getframe $labf]
 
     pack $arrow -in $frame -side right -fill y
     pack $entry -in $frame -side left  -fill both -expand yes
     pack $labf  -fill x -expand yes
 
-    if { [Widget::getoption $path -editable] == 0 } {
-        ::bind $entry <ButtonPress-1> "ArrowButton::invoke $path.a"
-    } else {
+    if { [Widget::getoption $path -editable] != 0 } {
         ::bind $entry <ButtonPress-1> "ComboBox::_unmapliste $path"
+        $path.e config -state normal
+    } else {
+        ::bind $entry <ButtonPress-1> "ArrowButton::invoke $path.a"
+        $path.e config -state disabled
     }
 
     ::bind $path  <ButtonPress-1> "ComboBox::_unmapliste $path"
-    ::bind $entry <Key-Up>        "ComboBox::_modify_value $path previous"
-    ::bind $entry <Key-Down>      "ComboBox::_modify_value $path next"
-    ::bind $entry <Key-Prior>     "ComboBox::_modify_value $path first"
-    ::bind $entry <Key-Next>      "ComboBox::_modify_value $path last"
-
+    ::bind $entry <Key-Up>        "ComboBox::_unmapliste $path"
+    ::bind $entry <Key-Down>      "ComboBox::_mapliste $path"
+    ::bind $entry <Control-Up>    "ComboBox::_modify_value $path previous"
+    ::bind $entry <Control-Down>  "ComboBox::_modify_value $path next"
+    ::bind $entry <Control-Prior> "ComboBox::_modify_value $path first"
+    ::bind $entry <Control-Next>  "ComboBox::_modify_value $path last"
+    
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval ComboBox::\$cmd $path \$args\]"
 
@@ -118,8 +134,10 @@ proc ComboBox::configure { path args } {
     if { [Widget::hasChanged $path -editable ed] } {
         if { $ed } {
             ::bind $path.e <ButtonPress-1> "ComboBox::_unmapliste $path"
+            $path.e config -state normal
         } else {
             ::bind $path.e <ButtonPress-1> "ArrowButton::invoke $path.a"
+            $path.e config -state disabled
         }
     }
 
@@ -279,7 +297,9 @@ proc ComboBox::_mapliste { path } {
     }
     _create_popup $path
 
-    ArrowButton::configure $path.a -dir top
+    ArrowButton::configure $path.a -relief sunken
+    update
+    
     $listb selection clear 0 end
     set values [$listb get 0 end]
     set curval [Entry::cget $path.e -text]
@@ -289,15 +309,20 @@ proc ComboBox::_mapliste { path } {
         $listb activate $idx
         $listb see $idx
     } else {
+        $listb selection set 0
         $listb activate 0
         $listb see 0
     }
 
+    ::bind $listb <Escape> "ComboBox::_unmapliste $path; break"
+    
     set frame [LabelFrame::getframe $path.labf]
     BWidget::place $path.shell [winfo width $frame] 0 below $frame
+    focus -force $listb
     wm deiconify $path.shell
     raise $path.shell
     BWidget::grab global $path
+    ArrowButton::configure $path.a -relief raised
 }
 
 
@@ -306,8 +331,8 @@ proc ComboBox::_mapliste { path } {
 # ------------------------------------------------------------------------------
 proc ComboBox::_unmapliste { path } {
     BWidget::grab release $path
+    focus -force $path.e
     destroy $path.shell
-    ArrowButton::configure $path.a -dir bottom
 }
 
 
@@ -337,4 +362,51 @@ proc ComboBox::_modify_value { path direction } {
             uplevel \#0 $cmd
         }
     }
+}
+
+
+# ------------------------------------------------------------------------------
+#  Command ComboBox::_focus_in
+# ------------------------------------------------------------------------------
+proc ComboBox::_focus_in { path } {
+    variable background
+    variable foreground
+
+    if { [Widget::getoption $path -editable] == 0 } {
+        set value  [Entry::cget $path.e -text]
+        if {[string equal $value ""]} {
+            # If the entry is empty, we need to do some magic to
+            # make it "selected"
+            if {[$path.e cget -bg] != [$path.e cget -selectbackground]} {
+                # Copy only if we know that this is not the selection
+                # background color (by accident... focus out without
+                # focus in etc.
+                set background [$path.e cget -bg]
+                set foreground [$path.e cget -fg]
+            }
+            $path.e configure -bg [$path.e cget -selectbackground]
+            $path.e configure -fg [$path.e cget -selectforeground]
+        }
+    }
+    $path.e selection clear
+    $path.e selection range 0 end
+}
+
+
+# ------------------------------------------------------------------------------
+#  Command ComboBox::_focus_out
+# ------------------------------------------------------------------------------
+proc ComboBox::_focus_out { path } {
+    variable background
+    variable foreground
+
+    if { [Widget::getoption $path -editable] == 0 } {
+        if {[info exists background]} {
+            $path.e configure -bg $background
+            $path.e configure -fg $foreground
+            unset background
+            unset foreground
+        }
+    }
+    $path.e selection clear
 }
