@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.43 2003/04/24 00:53:21 hobbs Exp $
+#  $Id: tree.tcl,v 1.44 2003/04/24 01:03:21 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1422,6 +1422,8 @@ proc Tree::_redraw_selection { path } {
         set bbox [$path.c bbox "n:$node"]
         if { [llength $bbox] } {
             if {$fill} {
+		# get the image to (if any), as it may have different height
+		set bbox [$path.c bbox "n:$node" "i:$node"]
                 set bbox [list 0 [lindex $bbox 1] $xmax [lindex $bbox 3]]
             }
             set id [eval [list $path.c create rectangle] $bbox \
