@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.36 2002/08/23 20:12:48 andreas_kupries Exp $
+#  $Id: tree.tcl,v 1.37 2002/10/14 20:54:12 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -404,20 +404,25 @@ proc Tree::delete { path args } {
     variable $path
     upvar 0  $path data
 
+    set sel $data(selnodes)
+
     foreach lnodes $args {
-        foreach node $lnodes {
-            if { [string compare $node "root"] && [info exists data($node)] } {
-                set parent [lindex $data($node) 0]
-                set idx    [lsearch $data($parent) $node]
-                set data($parent) [lreplace $data($parent) $idx $idx]
-                _subdelete $path [list $node]
-            }
-        }
+	foreach node $lnodes {
+	    if { [string compare $node "root"] && [info exists data($node)] } {
+		set parent [lindex $data($node) 0]
+		set idx	   [lsearch $data($parent) $node]
+		set data($parent) [lreplace $data($parent) $idx $idx]
+		set idx	   [lsearch $sel $node]
+		if { $idx >= 0 } {
+		    set sel [lreplace $sel $idx $idx]
+		}
+		_subdelete $path [list $node]
+	    }
+	}
     }
 
-    set sel $data(selnodes)
     set data(selnodes) {}
-    eval selection $path set $sel
+    eval [list selection $path set] $sel
     _redraw_idle $path 3
 }
 
@@ -838,8 +843,7 @@ proc Tree::see { path node } {
     }
     set idn [$path.c find withtag n:$node]
     if { $idn != "" } {
-        Tree::_see $path $idn right
-        Tree::_see $path $idn left
+        Tree::_see $path $idn
     }
 }
 
@@ -891,8 +895,7 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
     }
     set idn [$path.c find withtag n:$node]
     if { $idn != "" } {
-        Tree::_see $path $idn right
-        Tree::_see $path $idn left
+        Tree::_see $path $idn
 
         set oldfg  [$path.c itemcget $idn -fill]
         set sbg    [Widget::getoption $path -selectbackground]
@@ -1023,7 +1026,7 @@ proc Tree::_destroy { path } {
 # ----------------------------------------------------------------------------
 #  Command Tree::_see
 # ----------------------------------------------------------------------------
-proc Tree::_see { path idn side } {
+proc Tree::_see { path idn } {
     set bbox [$path.c bbox $idn]
     set scrl [$path.c cget -scrollregion]
 
@@ -1042,18 +1045,11 @@ proc Tree::_see { path idn side } {
     set xmax [lindex $scrl 2]
     set dx   [$path.c cget -xscrollincrement]
     set xv   [$path xview]
-    if { ![string compare $side "right"] } {
-        set xv1 [expr {round([lindex $xv 1]*$xmax/$dx)}]
-        set x1  [expr {int([lindex $bbox 2]/$dx)}]
-        if { $x1 >= $xv1 } {
-            $path.c xview scroll [expr {$x1-$xv1+1}] units
-        }
-    } else {
-        set xv0 [expr {round([lindex $xv 0]*$xmax/$dx)}]
-        set x0  [expr {int([lindex $bbox 0]/$dx)}]
-        if { $x0 < $xv0 } {
-            $path.c xview scroll [expr {$x0-$xv0}] units
-        }
+    set x0   [expr {int([lindex $bbox 0]/$dx)}]
+    set xv0  [expr {round([lindex $xv 0]*$xmax/$dx)}]
+    set xv1  [expr {round([lindex $xv 1]*$xmax/$dx)}]
+    if { $x0 >= $xv1 || $x0 < $xv0 } {
+	$path.c xview scroll [expr {$x0-$xv0}] units
     }
 }
 
