@@ -86,7 +86,8 @@ proc ProgressBar::configure { path args } {
 
     set res [Widget::configure $path $args]
 
-    if { [Widget::hasChanged $path -variable newv] } {
+    if { [Widget::hasChangedX $path -variable] } {
+	set newv [Widget::cget $path -variable]
         if { $_widget($path,var) != "" } {
             GlobalVar::tracevar vdelete $_widget($path,var) w "ProgressBar::_modify $path"
         }
@@ -99,11 +100,14 @@ proc ProgressBar::configure { path args } {
         }
     }
 
-    if { [Widget::hasChanged $path -borderwidth v] ||
-         [Widget::hasChanged $path -orient v] } {
+    foreach {cbd cor cma} [Widget::hasChangedX $path -borderwidth \
+	    -orient -maximum] break
+
+    if { $cbd || $cor || $cma } {
         after idle ProgressBar::_modify $path
     }
-    if { [Widget::hasChanged $path -foreground fg] } {
+    if { [Widget::hasChangedX $path -foreground] } {
+	set fg [Widget::cget $path -foreground]
         $path.bar itemconfigure rect -fill $fg -outline $fg
     }
     return $res

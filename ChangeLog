@@ -1,3 +1,13 @@
+2000-03-20  Eric Melski  <ericm@scriptics.com>
+
+	* progressbar.tcl: (configure) Added test for change to -maximum
+	value, so that bar is redrawn if maximum changes. [Bug: 4399].
+
+	* BWman/SpinBox.html: Removed references to -label* options.
+
+	* demo/select.tcl: Removed use of -label* options on ComboBox and
+	SpinBox. [Bug: 4394].
+
 2000-03-14  Eric Melski  <ericm@scriptics.com>
 
 	* button.tcl: (configure) replaced several hasChanged calls with
