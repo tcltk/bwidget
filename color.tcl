@@ -5,6 +5,10 @@ namespace eval SelectColor {
         {-color    TkResource "" 0 {label -background}}
     }
 
+    proc ::SelectColor { path args } { 
+	return [eval SelectColor::dialog $path $args] 
+    }
+
     variable _baseColors {
         \#0000ff \#00ff00 \#00ffff \#ff0000 \#ff00ff \#ffff00
         \#000099 \#009900 \#009999 \#990000 \#990099 \#999900
