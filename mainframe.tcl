@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.4 2000/01/24 16:35:38 sven Exp $
+#  $Id: mainframe.tcl,v 1.5 2000/02/11 22:54:27 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -118,7 +118,7 @@ proc MainFrame::create { path args } {
                       -takefocus 0 -highlightthickness 0 -background $bg]
 
     place $label    -anchor w -x 0 -rely 0.5
-    place $indframe -anchor e -relx 1 -rely 0.5
+    place $indframe -anchor ne -relx 1 -y 0 -relheight 1
     pack  $prgframe -in $indframe -side left -padx 2
     $status configure -height [winfo reqheight $label]
 
@@ -248,7 +248,7 @@ proc MainFrame::addindicator { path args } {
     eval label $indic $args -relief sunken -borderwidth 1 \
         -takefocus 0 -highlightthickness 0
 
-    pack $indic -side left -anchor w -padx 2
+    pack $indic -side left -anchor w -padx 2 -fill y -expand 1
 
     incr _widget($path,nindic)
 
@@ -376,17 +376,10 @@ proc MainFrame::_destroy { path } {
     catch {destroy [$_widget($path,top) cget -menu]}
     $_widget($path,top) configure -menu {}
 
-    # ericm@scriptics.com
-    # We really want to unset ALL of the state vars, not just some of them
-    # Otherwise, if we ever create a MainFrame with the same pathname, it has
-    # some residual (incorrect) state.
-    foreach var [array names _widget $path*] {
-	unset _widget($var)
+    # Unset all of the state vars associated with this main frame.
+    foreach index [array names _widget $path,*] {
+	unset _widget($index)
     }
-#    unset _widget($path,top)
-#    unset _widget($path,ntoolbar)
-#    unset _widget($path,nindic)
-    # ericm@scriptics.com
     rename $path {}
 }
 
@@ -533,36 +526,57 @@ proc MainFrame::_parse_name { menuname } {
 }
 
 
-# ------------------------------------------------------------------------------
-#  Command MainFrame::_parse_accelerator
-# ------------------------------------------------------------------------------
+# MainFrame::_parse_accelerator --
+#
+#	Given a key combo description, construct an appropriate human readable
+#	string (for display on as a menu accelerator) and the corresponding
+#	bind event.
+#
+# Arguments:
+#	desc	a list with the following format:
+#			?sequence? key
+#		sequence may be None, Ctrl, Alt, or CtrlAlt
+#		key may be any key
+#
+# Results:
+#	{accel event}	a list containing the accelerator string and the event
+
 proc MainFrame::_parse_accelerator { desc } {
-    if { [llength $desc] == 2 } {
+    if { [llength $desc] == 1 } {
+	set seq None
+	set key [string tolower [lindex $desc 0]]
+    } elseif { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
-        set key [lindex $desc 1]
-        if {![regexp {F[1]?[0-9]*} $key]} {
-            set key [string tolower $key]
-        }
-        switch -- $seq {
-            Ctrl {
-                set accel "Ctrl+[string toupper $key]"
-                set event "<Control-Key-$key>"
-            }
-            Alt {
-                set accel "Atl+[string toupper $key]"
-                set event "<Alt-Key-$key>"
-            }
-            CtrlAlt {
-                set accel "Ctrl+Alt+[string toupper $key]"
-                set event "<Control-Alt-Key-$key>"
-            }
-            default {
-                return -code error "invalid accelerator code $seq"
-            }
-        }
-        return [list $accel $event]
+        set key [string tolower [lindex $desc 1]]
+	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
+	if {[regexp {f[1]?[0-9]*} $key]} {
+	    set key [string toupper $key]
+	}
+    } else {
+	return {}
     }
-    return {}
+    switch -- $seq {
+	None {
+	    set accel "[string toupper $key]"
+	    set event "<Key-$key>"
+	}
+	Ctrl {
+	    set accel "Ctrl+[string toupper $key]"
+	    set event "<Control-Key-$key>"
+	}
+	Alt {
+	    set accel "Atl+[string toupper $key]"
+	    set event "<Alt-Key-$key>"
+	}
+	CtrlAlt {
+	    set accel "Ctrl+Alt+[string toupper $key]"
+	    set event "<Control-Alt-Key-$key>"
+	}
+	default {
+	    return -code error "invalid accelerator code $seq"
+	}
+    }
+    return [list $accel $event]
 }
 
 

@@ -1,24 +1,30 @@
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.2 1999/12/23 19:30:59 sven Exp $
-# ------------------------------------------------------------------------------
+#  $Id: scrollw.tcl,v 1.3 2000/02/11 22:54:28 ericm Exp $
+# -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
 #     - ScrolledWindow::getframe
 #     - ScrolledWindow::setwidget
 #     - ScrolledWindow::configure
 #     - ScrolledWindow::cget
-#     - ScrolledWindow::_set_hscroll
+#     - ScrolledWindow::_set_hframe
 #     - ScrolledWindow::_set_vscroll
+#     - ScrolledWindow::_setData
+#     - ScrolledWindow::_setSBSize
 #     - ScrolledWindow::_realize
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 namespace eval ScrolledWindow {
     Widget::declare ScrolledWindow {
         {-background  TkResource ""   0 button}
-        {-scrollbar   Enum       both 1 {none both vertical horizontal}}
+        {-scrollbar   Enum       both 0 {none both vertical horizontal}}
         {-auto        Enum       both 0 {none both vertical horizontal}}
+        {-sides       Enum       se   0 {ne en nw wn se es sw ws}}
+        {-size        Int        0    1 {=0}}
+        {-ipad        Int        1    1 {=0}}
+        {-managed     Boolean    1    1}
         {-relief      TkResource flat 0 frame}
         {-borderwidth TkResource 0    0 frame}
         {-bg          Synonym    -background}
@@ -27,67 +33,111 @@ namespace eval ScrolledWindow {
 
     Widget::addmap ScrolledWindow "" ._grid.f {-relief {} -borderwidth {}}
 
-    proc ::ScrolledWindow { path args } { return [eval ScrolledWindow::create $path $args] }
+    proc ::ScrolledWindow {path args} {
+        return [eval ScrolledWindow::create $path $args]
+    }
     proc use {} {}
-
-    variable _widget
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::create
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::create { path args } {
-    variable _widget
+    upvar \#0 ScrolledWindow::$path data
 
     Widget::init ScrolledWindow $path $args
 
     set bg     [Widget::cget $path -background]
-    set sw     [frame $path -relief flat -bd 0 -bg $bg -highlightthickness 0 -takefocus 0]
-    set grid   [frame $path._grid -relief flat -bd 0 -bg $bg -highlightthickness 0 -takefocus 0]
+    set sbsize [Widget::cget $path -size]
+    set ipad   [Widget::cget $path -ipad]
+    set sw     [frame $path \
+                    -relief flat -borderwidth 0 -background $bg \
+                    -highlightthickness 0 -takefocus 0]
+    set grid   [frame $path._grid \
+                    -relief flat -borderwidth 0 -background $bg \
+                    -highlightthickness 0 -takefocus 0]
+    set fv     [frame $grid.vframe \
+                    -relief flat -borderwidth 0 -background $bg \
+                    -highlightthickness 0 -takefocus 0]
+    set fh     [frame $grid.hframe \
+                    -relief flat -borderwidth 0 -background $bg \
+                    -highlightthickness 0 -takefocus 0]
+    eval frame $grid.f -background $bg -highlightthickness 0 \
+        [Widget::subcget $path ._grid.f]
 
-    set sb    [lsearch {none horizontal vertical both} [Widget::cget $path -scrollbar]]
-    set auto  [lsearch {none horizontal vertical both} [Widget::cget $path -auto]]
-    set rspan [expr {1 + !($sb & 1)}]
-    set cspan [expr {1 + !($sb & 2)}]
+    scrollbar $grid.hscroll \
+        -highlightthickness 0 -takefocus 0 \
+        -orient  horiz	\
+        -relief  sunken	\
+        -bg      $bg
+    scrollbar $grid.vscroll \
+        -highlightthickness 0 -takefocus 0 \
+        -orient  vert  	\
+        -relief  sunken	\
+        -bg      $bg
 
-    set _widget($path,realized) 0
-    set _widget($path,sb)       $sb
-    set _widget($path,auto)     $auto
-    set _widget($path,hpack)    [expr {$rspan == 1}]
-    set _widget($path,vpack)    [expr {$cspan == 1}]
+    set data(realized) 0
 
-    # scrollbar horizontale ou les deux
-    if { $sb & 1 } {
-        scrollbar $grid.hscroll \
-            -highlightthickness 0 -takefocus 0 \
-            -orient  horiz	\
-            -relief  sunken	\
-            -bg      $bg
-        $grid.hscroll set 0 1
-        grid $grid.hscroll -column 0 -row 1 -sticky we -columnspan $cspan -pady 1
+    _setData $path \
+        [Widget::cget $path -scrollbar] \
+        [Widget::cget $path -auto] \
+        [Widget::cget $path -sides]
+
+    if {[Widget::cget $path -managed]} {
+        set data(hsb,packed) $data(hsb,present)
+        set data(vsb,packed) $data(vsb,present)
+    } else {
+        set data(hsb,packed) 0
+        set data(vsb,packed) 0
     }
-
-    # scrollbar verticale ou les deux
-    if { $sb & 2 } {
-        scrollbar $grid.vscroll \
-            -highlightthickness 0 -takefocus 0 \
-            -orient  vert  	\
-            -relief  sunken 	\
-            -bg      $bg
-        $grid.vscroll set 0 1
-        grid $grid.vscroll -column 1 -row 0 -sticky ns -rowspan $rspan -padx 1
+    if {$sbsize} {
+        $grid.vscroll configure -width $sbsize
+        $grid.hscroll configure -width $sbsize
+    } else {
+        set sbsize [$grid.vscroll cget -width]
     }
+    set size [expr {$sbsize+$ipad}]
 
-    eval frame $grid.f -bg $bg -highlightthickness 0 [Widget::subcget $path ._grid.f]
-    grid $grid.f -column 0 -row 0 -sticky nwse -columnspan $cspan -rowspan $rspan
-    grid columnconfigure $grid 0 -weight 1
-    grid rowconfigure    $grid 0 -weight 1
+    $grid.vframe configure -width  $size
+    $grid.hframe configure -height $size
+    set vplaceopt [list -in $grid.vframe -x [expr {(1-$data(vsb,west))*$ipad}] -y 0 -width [expr {-$ipad}]]
+    set hplaceopt [list -in $grid.hframe -x 0 -y [expr {(1-$data(hsb,north))*$ipad}] -height [expr {-$ipad}]]
+    pack propagate $grid.vframe 0
+    pack propagate $grid.hframe 0
+    pack $grid.vscroll -in $grid.vframe
+    pack $grid.hscroll -in $grid.hframe
+
+    bind $grid.hscroll <Configure> \
+        "ScrolledWindow::_setSBSize $grid.hscroll $size -relwidth 1.0 -relheight 1.0 $hplaceopt"
+    bind $grid.vscroll <Configure> \
+        "ScrolledWindow::_setSBSize $grid.vscroll $size -relwidth 1.0 -relheight 1.0 $vplaceopt"
+
+    grid $grid.hframe \
+        -column     [expr {$data(vsb,west)*$data(vsb,packed)}] \
+        -row        [expr {1-$data(hsb,north)}]  \
+        -columnspan [expr {2-$data(vsb,packed)}] \
+        -sticky we
+    grid $grid.vframe \
+        -column  [expr {1-$data(vsb,west)}] \
+        -row     [expr {$data(hsb,north)*$data(hsb,packed)}] \
+        -rowspan [expr {2-$data(hsb,packed)}] \
+        -sticky ns
+
+    grid $grid.f \
+        -column     [expr {$data(vsb,west)*$data(vsb,packed)}]  \
+        -row        [expr {$data(hsb,north)*$data(hsb,packed)}] \
+        -columnspan [expr {2-$data(vsb,packed)}] \
+        -rowspan    [expr {2-$data(hsb,packed)}] \
+        -sticky     nwse
+
+    grid columnconfigure $grid $data(vsb,west)  -weight 1
+    grid rowconfigure    $grid $data(hsb,north) -weight 1
     pack $grid -fill both -expand yes
 
     bind $grid <Configure> "ScrolledWindow::_realize $path"
     bind $grid <Destroy>   "ScrolledWindow::_destroy $path"
-
+    raise $grid.f
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval ScrolledWindow::\$cmd $path \$args\]"
 
@@ -95,48 +145,37 @@ proc ScrolledWindow::create { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::getframe
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::getframe { path } {
     return $path
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::setwidget
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::setwidget { path widget } {
-    variable _widget
+    upvar \#0 ScrolledWindow::$path data
 
     set grid   $path._grid
-    set sb     $_widget($path,sb)
-    set option {}
 
     pack $widget -in $grid.f -fill both -expand yes
 
-    # scrollbar horizontale ou les deux
-    if { $sb & 1 } {
-        $grid.hscroll configure -command "$widget xview"
-        lappend option  "-xscrollcommand" "ScrolledWindow::_set_hscroll $path"
-    }
-
-    # scrollbar verticale ou les deux
-    if { $sb & 2 } {
-        $grid.vscroll configure -command "$widget yview"
-        lappend option  "-yscrollcommand" "ScrolledWindow::_set_vscroll $path"
-    }
-    if { [llength $option] } {
-        eval $widget configure $option
-    }
+    $grid.hscroll configure -command "$widget xview"
+    $grid.vscroll configure -command "$widget yview"
+    $widget configure \
+        -xscrollcommand "ScrolledWindow::_set_hscroll $path" \
+        -yscrollcommand "ScrolledWindow::_set_vscroll $path"
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::configure
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::configure { path args } {
-    variable _widget
+    upvar \#0 ScrolledWindow::$path data
 
     set grid $path._grid
     set res [Widget::configure $path $args]
@@ -147,110 +186,148 @@ proc ScrolledWindow::configure { path args } {
         catch {$grid.hscroll configure -background $bg}
         catch {$grid.vscroll configure -background $bg}
     }
-    if { [Widget::hasChanged $path -auto auto] } {
-        set _widget($path,auto) [lsearch {none horizontal vertical both} $auto]
-        if { $_widget($path,sb) & 1 } {
-            eval _set_hscroll $path [$grid.hscroll get]
-        }
-        if { $_widget($path,sb) & 2 } {
-            eval _set_vscroll $path [$grid.vscroll get]
-        }
+
+    if {[Widget::hasChanged $path -scrollbar scrollbar] |
+        [Widget::hasChanged $path -auto      auto]     |
+        [Widget::hasChanged $path -sides     sides]} {
+        _setData $path $scrollbar $auto $sides
+        set hscroll [$grid.hscroll get]
+        set vmin    [lindex $hscroll 0]
+        set vmax    [lindex $hscroll 1]
+        set data(hsb,packed) [expr {$data(hsb,present) &&
+                                    (!$data(hsb,auto) || ($vmin != 0 || $vmax != 1))}]
+        set vscroll [$grid.vscroll get]
+        set vmin    [lindex $vscroll 0]
+        set vmax    [lindex $vscroll 1]
+        set data(vsb,packed) [expr {$data(vsb,present) &&
+                                    (!$data(vsb,auto) || ($vmin != 0 || $vmax != 1))}]
+
+        set ipad [Widget::cget $path -ipad]
+        place configure $grid.vscroll \
+            -x [expr {(1-$data(vsb,west))*$ipad}]
+        place configure $grid.hscroll \
+            -y [expr {(1-$data(hsb,north))*$ipad}]
+
+        grid configure $grid.hframe \
+            -column     [expr {$data(vsb,west)*$data(vsb,packed)}] \
+            -row        [expr {1-$data(hsb,north)}]  \
+            -columnspan [expr {2-$data(vsb,packed)}]
+        grid configure $grid.vframe \
+            -column  [expr {1-$data(vsb,west)}] \
+            -row     [expr {$data(hsb,north)*$data(hsb,packed)}] \
+            -rowspan [expr {2-$data(hsb,packed)}]
+        grid configure $grid.f \
+            -column     [expr {$data(vsb,west)*$data(vsb,packed)}] \
+            -row        [expr {$data(hsb,north)*$data(hsb,packed)}] \
+            -columnspan [expr {2-$data(vsb,packed)}] \
+            -rowspan    [expr {2-$data(hsb,packed)}]
+        grid columnconfigure $grid $data(vsb,west)             -weight 1
+        grid columnconfigure $grid [expr {1-$data(vsb,west)}]  -weight 0
+        grid rowconfigure    $grid $data(hsb,north)            -weight 1
+        grid rowconfigure    $grid [expr {1-$data(hsb,north)}] -weight 0
     }
     return $res
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::cget
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::_destroy
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::_destroy { path } {
-    variable _widget
+    upvar \#0 ScrolledWindow::$path data
 
-    unset _widget($path,sb)
-    unset _widget($path,auto)
-    unset _widget($path,hpack)
-    unset _widget($path,vpack)
+    unset data
     Widget::destroy $path
     rename $path {}
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::_set_hscroll
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::_set_hscroll { path vmin vmax } {
-    variable _widget
+    upvar \#0 ScrolledWindow::$path data
 
-    if { $_widget($path,realized) } {
+    if {$data(realized) && $data(hsb,present)} {
         set grid $path._grid
-        if { $_widget($path,auto) & 1 } {
-            if { $_widget($path,hpack) && $vmin == 0 && $vmax == 1 } {
-                grid configure $grid.f -rowspan 2
-                if { $_widget($path,sb) & 2 } {
-                    grid configure $grid.vscroll -rowspan 2
-                }
-                set _widget($path,hpack) 0
-            } elseif { !$_widget($path,hpack) && ($vmin != 0 || $vmax != 1) } {
-                grid configure $grid.f -rowspan 1
-                if { $_widget($path,sb) & 2 } {
-                    grid configure $grid.vscroll -rowspan 1
-                }
-                set _widget($path,hpack) 1
+        if {$data(hsb,auto)} {
+            if {$data(hsb,packed) && $vmin == 0 && $vmax == 1} {
+                set data(hsb,packed) 0
+                grid configure $grid.f $grid.vframe -row 0 -rowspan 2
+            } elseif {!$data(hsb,packed) && ($vmin != 0 || $vmax != 1)} {
+                set data(hsb,packed) 1
+                grid configure $grid.f $grid.vframe -row $data(hsb,north) -rowspan 1
             }
         }
-        update idletask
+	update idletask
         $grid.hscroll set $vmin $vmax
     }
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::_set_vscroll
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc ScrolledWindow::_set_vscroll { path vmin vmax } {
-    variable _widget
+    upvar \#0 ScrolledWindow::$path data
 
-    if { $_widget($path,realized) } {
+    if {$data(realized) && $data(vsb,present)} {
         set grid $path._grid
-        if { $_widget($path,auto) & 2 } {
-            if { $_widget($path,vpack) && $vmin == 0 && $vmax == 1 } {
-                grid configure $grid.f -columnspan 2
-                if { $_widget($path,sb) & 1 } {
-                    grid configure $grid.hscroll -columnspan 2
-                }
-                set _widget($path,vpack) 0
-            } elseif { !$_widget($path,vpack) && ($vmin != 0 || $vmax != 1) } {
-                grid configure $grid.f -columnspan 1
-                if { $_widget($path,sb) & 1 } {
-                    grid configure $grid.hscroll -columnspan 1
-                }
-                set _widget($path,vpack) 1
+        if {$data(vsb,auto)} {
+            if {$data(vsb,packed) && $vmin == 0 && $vmax == 1} {
+                set data(vsb,packed) 0
+                grid configure $grid.f $grid.hframe -column 0 -columnspan 2
+            } elseif {!$data(vsb,packed) && ($vmin != 0 || $vmax != 1) } {
+                set data(vsb,packed) 1
+                grid configure $grid.f $grid.hframe -column $data(vsb,west) -columnspan 1
             }
         }
-        update idletask
+	update idletask
         $grid.vscroll set $vmin $vmax
     }
 }
 
 
-# ------------------------------------------------------------------------------
-#  Command ScrolledWindow::_realize
-# ------------------------------------------------------------------------------
-proc ScrolledWindow::_realize { path } {
-    variable _widget
+proc ScrolledWindow::_setData {path scrollbar auto sides} {
+    upvar \#0 ScrolledWindow::$path data
 
-    set grid $path._grid
-    bind  $grid <Configure> {}
-    set _widget($path,realized) 1
-    place $grid -anchor nw -x 0 -y 0 -relwidth 1.0 -relheight 1.0
+    set sb    [lsearch {none horizontal vertical both} $scrollbar]
+    set auto  [lsearch {none horizontal vertical both} $auto]
+    set north [string match *n* $sides]
+    set west  [string match *w* $sides]
+
+    set data(hsb,present)  [expr {($sb & 1) != 0}]
+    set data(hsb,auto)     [expr {($auto & 1) != 0}]
+    set data(hsb,north)    $north
+
+    set data(vsb,present)  [expr {($sb & 2) != 0}]
+    set data(vsb,auto)     [expr {($auto & 2) != 0}]
+    set data(vsb,west)     $west
 }
 
 
+proc ScrolledWindow::_setSBSize {sb size args} {
+    $sb configure -width $size
+    eval place $sb $args
+}
+
+
+# -----------------------------------------------------------------------------
+#  Command ScrolledWindow::_realize
+# -----------------------------------------------------------------------------
+proc ScrolledWindow::_realize { path } {
+    upvar \#0 ScrolledWindow::$path data
+
+    set grid $path._grid
+    bind $grid <Configure> {}
+    set data(realized) 1
+    place $grid -anchor nw -x 0 -y 0 -relwidth 1.0 -relheight 1.0
+}

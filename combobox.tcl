@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.4 1999/12/14 20:12:09 sven Exp $
+#  $Id: combobox.tcl,v 1.5 2000/02/11 22:54:26 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -20,6 +20,7 @@ namespace eval ComboBox {
     ArrowButton::use
     Entry::use
     LabelFrame::use
+    ListBox::use
 
     Widget::bwinclude ComboBox LabelFrame .labf \
         rename     {-text -label} \
@@ -34,13 +35,16 @@ namespace eval ComboBox {
     Widget::declare ComboBox {
         {-height      TkResource 0  0 listbox}
         {-values      String     "" 0}
+        {-images      String     "" 0}
+        {-indents     String     "" 0}
         {-modifycmd   String     "" 0}
         {-postcommand String     "" 0}
     }
 
     Widget::addmap ComboBox "" :cmd {-background {}}
-    Widget::addmap ComboBox ArrowButton .a \
-        {-foreground {} -background {} -disabledforeground {} -state {}}
+    Widget::addmap ComboBox ArrowButton .a {
+        -foreground {} -background {} -disabledforeground {} -state {}
+    }
 
     Widget::syncoptions ComboBox Entry .e {-text {}}
     Widget::syncoptions ComboBox LabelFrame .labf {-label -text -underline {}}
@@ -57,8 +61,6 @@ namespace eval ComboBox {
 #  Command ComboBox::create
 # ------------------------------------------------------------------------------
 proc ComboBox::create { path args } {
-    global tcl_platform
-    
     Widget::init ComboBox $path $args
 
     frame $path -background [Widget::getoption $path -background] \
@@ -72,13 +74,13 @@ proc ComboBox::create { path args } {
                    -relief flat -borderwidth 0 -takefocus 1]
     ::bind $path.e <FocusIn> "$path _focus_in"
     ::bind $path.e <FocusOut> "$path _focus_out"
-    
-    if {![string compare $tcl_platform(platform) "unix"]} {
+
+    if {[string equal $::tcl_platform(platform) "unix"]} {
         set ipadx 0
-        set width  11
+        set width 11
     } else {
         set ipadx 2
-        set width  15
+        set width 15
     }
     set height [winfo reqheight $entry]
     set arrow [eval ArrowButton::create $path.a [Widget::subcget $path .a] \
@@ -86,10 +88,9 @@ proc ComboBox::create { path args } {
                    -highlightthickness 0 -borderwidth 1 -takefocus 0 \
                    -dir   bottom \
                    -type  button \
-                   -ipadx $ipadx \
+		   -ipadx $ipadx \
                    -command [list "ComboBox::_mapliste $path"]]
-    
-    
+
     set frame [LabelFrame::getframe $labf]
 
     pack $arrow -in $frame -side right -fill y
@@ -107,11 +108,11 @@ proc ComboBox::create { path args } {
     ::bind $path  <ButtonPress-1> "ComboBox::_unmapliste $path"
     ::bind $entry <Key-Up>        "ComboBox::_unmapliste $path"
     ::bind $entry <Key-Down>      "ComboBox::_mapliste $path"
-    ::bind $entry <Control-Up>    "ComboBox::_modify_value $path previous"
-    ::bind $entry <Control-Down>  "ComboBox::_modify_value $path next"
-    ::bind $entry <Control-Prior> "ComboBox::_modify_value $path first"
-    ::bind $entry <Control-Next>  "ComboBox::_modify_value $path last"
-    
+    ::bind $entry <Control-Up>        "ComboBox::_modify_value $path previous"
+    ::bind $entry <Control-Down>      "ComboBox::_modify_value $path next"
+    ::bind $entry <Control-Prior>     "ComboBox::_modify_value $path first"
+    ::bind $entry <Control-Next>      "ComboBox::_modify_value $path last"
+
     rename $path ::$path:cmd
     proc ::$path { cmd args } "return \[eval ComboBox::\$cmd $path \$args\]"
 
@@ -125,17 +126,17 @@ proc ComboBox::create { path args } {
 proc ComboBox::configure { path args } {
     set res [Widget::configure $path $args]
 
-    if { [Widget::hasChanged $path -values values] |
-         [Widget::hasChanged $path -height h] |
-         [Widget::hasChanged $path -font f] } {
-        destroy $path.shell.listb
-    }
+#     if { [Widget::hasChanged $path -values values] |
+#          [Widget::hasChanged $path -height h] |
+#          [Widget::hasChanged $path -font f] } {
+#         destroy $path.shell.listb
+#     }
 
     if { [Widget::hasChanged $path -editable ed] } {
         if { $ed } {
             ::bind $path.e <ButtonPress-1> "ComboBox::_unmapliste $path"
-            $path.e config -state normal
-        } else {
+             $path.e config -state normal
+       } else {
             ::bind $path.e <ButtonPress-1> "ArrowButton::invoke $path.a"
             $path.e config -state disabled
         }
@@ -149,7 +150,7 @@ proc ComboBox::configure { path args } {
 #  Command ComboBox::cget
 # ------------------------------------------------------------------------------
 proc ComboBox::cget { path option } {
-    Widget::setoption $path -text [Entry::cget $path.e -text]
+#    Widget::setoption $path -text [Entry::cget $path.e -text]
     return [Widget::cget $path $option]
 }
 
@@ -229,50 +230,60 @@ proc ComboBox::bind { path args } {
 #  Command ComboBox::_create_popup
 # ------------------------------------------------------------------------------
 proc ComboBox::_create_popup { path } {
-    set shell [menu $path.shell -tearoff 0 -relief flat -bd 0]
-    wm overrideredirect $shell 1
-    wm withdraw $shell
-    wm transient $shell [winfo toplevel $path]
-    wm group $shell [winfo toplevel $path]
-    set lval [Widget::getoption $path -values]
-    set h    [Widget::getoption $path -height] 
-    set sb   0
+    set shell $path.shell
+    set lval  [Widget::getoption $path -values]
+    set h     [Widget::getoption $path -height] 
     if { $h <= 0 } {
         set len [llength $lval]
         if { $len < 3 } {
             set h 3
         } elseif { $len > 10 } {
-            set h  10
-	    set sb 1
+            set h 10
+        } else {
+            set h $len
         }
     }
-    set frame  [frame $shell.frame -relief sunken -bd 2]
-    set listb  [listbox $shell.listb -relief flat -bd 0 -highlightthickness 0 \
-                    -exportselection false \
-                    -font   [Widget::getoption $path -font]  \
-                    -height $h]
+    if {![winfo exists $path.shell]} {
+        set shell [toplevel $path.shell -relief sunken -bd 2]
+        wm overrideredirect $shell 1
+        wm transient $shell [winfo toplevel $path]
+        wm withdraw  $shell
 
-    if { $sb } {
-	set scroll [scrollbar $shell.scroll \
-		-orient vertical \
-		-command "$shell.listb yview" \
-		-highlightthickness 0 -takefocus 0 -width 9]
-	$listb configure -yscrollcommand "$scroll set"
-    }
-    $listb delete 0 end
-    foreach val $lval {
-        $listb insert end $val
-    }
+        set sw     [ScrolledWindow $shell.sw -managed 0 -size 11 -ipad 0]
+        set listb  [listbox $shell.listb \
+                        -relief flat -borderwidth 0 -highlightthickness 0 \
+                        -exportselection false \
+                        -font   [Widget::getoption $path -font]  \
+                        -height $h]
+        pack $sw -fill both -expand yes
+        $sw setwidget $listb
+        _update_listbox $path 1
 
-    if { $sb } {
-	pack $scroll -in $frame -side right -fill y
+        ::bind $listb <ButtonRelease-1> "ComboBox::_select $path @%x,%y"
+        ::bind $listb <Return>          "ComboBox::_select $path active; break"
+        ::bind $listb <Escape>          "ComboBox::_unmapliste $path; break"
+    } else {
+        set listb $shell.listb
+        destroy $shell.sw
+        set sw [ScrolledWindow $shell.sw -managed 0 -size 11 -ipad 0]
+        $listb configure -height $h -font [Widget::getoption $path -font]
+        pack $sw -fill both -expand yes
+        $sw setwidget $listb
+        raise $listb
+        _update_listbox $path 0
     }
-    pack $listb  -in $frame -side left  -fill both -expand yes
-    pack $frame  -fill both -expand yes -padx 1 -padx 1
+}
 
-    ::bind $listb <ButtonRelease-1> "ComboBox::_select $path @%x,%y"
-    ::bind $listb <Return>          "ComboBox::_select $path active"
-    ::bind $listb <Escape>          "ComboBox::_unmapliste $path"
+
+# ------------------------------------------------------------------------------
+#  Command ComboBox::_update_listbox
+# ------------------------------------------------------------------------------
+proc ComboBox::_update_listbox {path force} {
+    if {[Widget::hasChanged $path -values values] || $force} {
+        set listb $path.shell.listb
+        $listb delete 0 end
+        eval $listb insert end $values
+    }
 }
 
 
@@ -281,7 +292,8 @@ proc ComboBox::_create_popup { path } {
 # ------------------------------------------------------------------------------
 proc ComboBox::_mapliste { path } {
     set listb $path.shell.listb
-    if { [winfo exists $path.shell] } {
+    if {[winfo exists $path.shell] &&
+        ![string compare [wm state $path.shell] "normal"]} {
 	_unmapliste $path
         return
     }
@@ -299,9 +311,9 @@ proc ComboBox::_mapliste { path } {
 
     ArrowButton::configure $path.a -relief sunken
     update
-    
+
     $listb selection clear 0 end
-    set values [$listb get 0 end]
+    set values [Widget::getoption $path -values]
     set curval [Entry::cget $path.e -text]
     if { [set idx [lsearch $values $curval]] != -1 ||
          [set idx [lsearch $values "$curval*"]] != -1 } {
@@ -309,20 +321,17 @@ proc ComboBox::_mapliste { path } {
         $listb activate $idx
         $listb see $idx
     } else {
-        $listb selection set 0
+	$listb selection set 0
         $listb activate 0
         $listb see 0
     }
 
-    ::bind $listb <Escape> "ComboBox::_unmapliste $path; break"
-    
     set frame [LabelFrame::getframe $path.labf]
     BWidget::place $path.shell [winfo width $frame] 0 below $frame
-    focus -force $listb
     wm deiconify $path.shell
     raise $path.shell
+    BWidget::focus set $listb
     BWidget::grab global $path
-    ArrowButton::configure $path.a -relief raised
 }
 
 
@@ -330,9 +339,16 @@ proc ComboBox::_mapliste { path } {
 #  Command ComboBox::_unmapliste
 # ------------------------------------------------------------------------------
 proc ComboBox::_unmapliste { path } {
-    BWidget::grab release $path
-    focus -force $path.e
-    destroy $path.shell
+    if {[winfo exists $path.shell] && \
+	    ![string compare [wm state $path.shell] "normal"]} {
+        BWidget::grab release $path
+        BWidget::focus release $path.shell.listb
+	# Update now because otherwise [focus -force...] makes the app hang!
+	update
+	focus -force $path.e
+        wm withdraw $path.shell
+        ArrowButton::configure $path.a -relief raised
+    }
 }
 
 
@@ -366,10 +382,9 @@ proc ComboBox::_modify_value { path direction } {
     }
 }
 
-
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_focus_in
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::_focus_in { path } {
     variable background
     variable foreground
@@ -395,9 +410,9 @@ proc ComboBox::_focus_in { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_focus_out
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::_focus_out { path } {
     variable background
     variable foreground
@@ -410,11 +425,4 @@ proc ComboBox::_focus_out { path } {
             unset foreground
         }
     }
-    # ericm@scriptics.com. It's not clear why you would want to clear selection
-    # on a focus out event.  That basically disables -exportselection, which
-    # seems like something users might want to do.  This feels like an 
-    # application specific, rather than a widget general, behaviour.  Thus, I
-    # am removing this behaviour:
-    # $path.e selection clear
-    # ericm@scriptics.com
 }

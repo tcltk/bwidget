@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: listbox.tcl,v 1.2 2000/02/11 22:54:26 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -45,35 +45,46 @@
 namespace eval ListBox {
     namespace eval Item {
         Widget::declare ListBox::Item {
-            {-indent     Int        0       0 {=0}}
-            {-text       String     ""      0}
-            {-font       TkResource ""      0 listbox}
-            {-image      TkResource ""      0 label}
-            {-window     String     ""      0}
-            {-fill       TkResource black   0 {listbox -foreground}}
-            {-data       String     ""      0}
+            {-indent     Int        0   0 {=0}}
+            {-text       String     ""  0}
+            {-font       String     ""  0}
+            {-foreground String     ""  0}
+            {-image      TkResource ""  0 label}
+            {-window     String     ""  0}
+            {-data       String     ""  0}
+
+            {-fill       Synonym    -foreground}
+            {-fg         Synonym    -foreground}
         }
     }
 
     Widget::tkinclude ListBox canvas :cmd \
-        remove     {-insertwidth -insertbackground -insertborderwidth -insertofftime \
-                        -insertontime -selectborderwidth -closeenough -confine -scrollregion \
-                        -xscrollincrement -yscrollincrement -width -height} \
-        initialize {-relief sunken -borderwidth 2 -takefocus 1 \
-                        -highlightthickness 1 -width 200}
+        remove {
+            -insertwidth -insertbackground -insertborderwidth -insertofftime
+            -insertontime -selectborderwidth -closeenough -confine -scrollregion
+            -xscrollincrement -yscrollincrement -width -height
+        } \
+        initialize {
+            -relief sunken -borderwidth 2 -takefocus 1
+            -highlightthickness 1 -width 200
+        }
 
     Widget::declare ListBox {
         {-deltax           Int 10 0 {=0 ""}}
         {-deltay           Int 15 0 {=0 ""}}
         {-padx             Int 20 0 {=0 ""}}
+        {-foreground       TkResource "" 0 listbox}
         {-background       TkResource "" 0 listbox}
         {-selectbackground TkResource "" 0 listbox}
         {-selectforeground TkResource "" 0 listbox}
+        {-font             TkResource "" 0 listbox}
         {-width            TkResource "" 0 listbox}
         {-height           TkResource "" 0 listbox}
         {-redraw           Boolean 1  0}
         {-multicolumn      Boolean 0  0}
         {-dropovermode     Flag    "wpi" 0 "wpi"}
+
+        {-fg               Synonym -foreground}
         {-bg               Synonym -background}
     }
     DragSite::include ListBox "LISTBOX_ITEM" 1
@@ -233,7 +244,7 @@ proc ListBox::itemconfigure { path item args } {
     set chi   [Widget::hasChanged $path.$item -image  img]
     set cht   [Widget::hasChanged $path.$item -text txt]
     set chf   [Widget::hasChanged $path.$item -font fnt]
-    set chfg  [Widget::hasChanged $path.$item -fill fg]
+    set chfg  [Widget::hasChanged $path.$item -foreground fg]
     set idn   [$path:cmd find withtag n:$item]
 
     if { $idn == "" } {
@@ -271,7 +282,9 @@ proc ListBox::itemconfigure { path item args } {
     }
 
     if { $cht || $chf || $chfg } {
-        # -text or -font modified, or -fill modified
+        # -text or -font modified, or -foreground modified
+        set fnt [_getoption $path $item -font]
+        set fg  [_getoption $path $item -foreground]
         $path:cmd itemconfigure $idn -text $txt -font $fnt -fill $fg
         _redraw_idle $path 1
     }
@@ -431,6 +444,9 @@ proc ListBox::selection { path cmd args } {
         get {
             return $data(selitems)
         }
+        includes {
+            return [expr {[lsearch $data(selitems) $args] != -1}]
+        }
         default {
             return
         }
@@ -458,6 +474,64 @@ proc ListBox::index { path item } {
     upvar 0  $path data
 
     return [lsearch $data(items) $item]
+}
+
+
+# ------------------------------------------------------------------------------
+#  ListBox::find
+#     Returns the item given a position.
+#  findInfo     @x,y ?confine?
+#               lineNumber
+# ------------------------------------------------------------------------------
+proc ListBox::find {path findInfo {confine ""}} {
+    variable $path
+    upvar 0  $path widgetData
+
+    if {[regexp -- {^@([0-9]+),([0-9]+)$} $findInfo match x y]} {
+        set x [$path:cmd canvasx $x]
+        set y [$path:cmd canvasy $y]
+    } elseif {[regexp -- {^[0-9]+$} $findInfo lineNumber]} {
+        set dy [Widget::getoption $path -deltay]
+        set y  [expr {$dy*($lineNumber+0.5)}]
+        set confine ""
+    } else {
+        return -code error "invalid find spec \"$findInfo\""
+    }
+
+    set found 0
+    set xi    0
+    foreach xs $widgetData(xlist) {
+        if {$x <= $xs} {
+            foreach id [$path:cmd find overlapping $xi $y $xs $y] {
+                set ltags [$path:cmd gettags $id]
+                set item  [lindex $ltags 0]
+                if { ![string compare $item "item"] ||
+                     ![string compare $item "img"]  ||
+                     ![string compare $item "win"] } {
+                    # item is the label or image/window of the node
+                    set item [string range [lindex $ltags 1] 2 end]
+                    set found 1
+                    break
+                }
+            }
+            break
+        }
+        set  xi  $xs
+    }
+
+    if {$found} {
+        if {[string compare $confine "confine" 0] == 0} {
+            # test if x stand inside node bbox
+            set xi [expr {[lindex [$path:cmd coords n:$item] 0]-[Widget::getoption $path -padx]}]
+            set xs [lindex [$path:cmd bbox n:$item] 2]
+            if {$x >= $xi && $x <= $xs} {
+                return $item
+            }
+        } else {
+            return $item
+        }
+    }
+    return ""
 }
 
 
@@ -554,11 +628,11 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
                         -relief             solid \
                         -borderwidth        1     \
                         -highlightthickness 0     \
-                        -foreground         [Widget::getoption $path.$item -fill] \
+                        -foreground         [_getoption $path $item -foreground] \
                         -background         [Widget::getoption $path -background] \
                         -selectforeground   [Widget::getoption $path -selectforeground] \
                         -selectbackground   $sbg  \
-                        -font               [Widget::getoption $path.$item -font] \
+                        -font               [_getoption $path $item -font] \
                         -textvariable       ListBox::_edit(text)]
         pack $ent -ipadx 8 -anchor w
 
@@ -575,6 +649,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
             $ent xview end
         }
 
+        bindtags $ent [list $ent Entry]
         bind $ent <Escape> {set ListBox::_edit(wait) 0}
         bind $ent <Return> {set ListBox::_edit(wait) 1}
 	if { $clickres == 0 || $clickres == 1 } {
@@ -631,6 +706,20 @@ proc ListBox::_update_edit_size { path entry idw wmax args } {
     } else {
         $path:cmd itemconfigure $idw -width 0
     }
+}
+
+
+# ------------------------------------------------------------------------------
+#  Command ListBox::_getoption
+#     Returns the value of option for node. If empty, returned value is those
+#  of the ListBox.
+# ------------------------------------------------------------------------------
+proc ListBox::_getoption { path item option } {
+    set value [Widget::getoption $path.$item $option]
+    if {![string length $value]} {
+        set value [Widget::getoption $path $option]
+    }
+    return $value
 }
 
 
@@ -734,8 +823,8 @@ proc ListBox::_draw_item { path item x0 x1 y } {
     set indent [Widget::getoption $path.$item -indent]
     $path:cmd create text [expr {$x1+$indent}] $y \
         -text   [Widget::getoption $path.$item -text] \
-        -fill   [Widget::getoption $path.$item -fill] \
-        -font   [Widget::getoption $path.$item -font] \
+        -fill   [_getoption        $path $item -foreground] \
+        -font   [_getoption        $path $item -font] \
         -anchor w \
         -tags   "item n:$item"
     if { [set win [Widget::getoption $path.$item -window]] != "" } {
@@ -815,13 +904,14 @@ proc ListBox::_redraw_selection { path } {
     set selfg [Widget::getoption $path -selectforeground]
     foreach id [$path:cmd find withtag sel] {
         set item [string range [lindex [$path:cmd gettags $id] 1] 2 end]
-        $path:cmd itemconfigure "n:$item" -fill [Widget::getoption $path.$item -fill]
+        $path:cmd itemconfigure "n:$item" -fill [_getoption $path $item -foreground]
     }
     $path:cmd delete sel
     foreach item $data(selitems) {
         set bbox [$path:cmd bbox "n:$item"]
         if { [llength $bbox] } {
-            set id [eval $path:cmd create rectangle $bbox -fill $selbg -outline $selbg -tags [list "sel s:$item"]]
+            set id [eval $path:cmd create rectangle $bbox \
+                        -fill $selbg -outline $selbg -tags [list "sel s:$item"]]
             $path:cmd itemconfigure "n:$item" -fill $selfg
             $path:cmd lower $id
         }
@@ -990,8 +1080,13 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
         set target [list ""]
         set vmode  0
     }
+    if { ($data(dnd,mode) & 2) && ![llength $data(items)] } {
+        # dropovermode includes position and listbox is empty
+        lappend target "" 0
+        set vmode [expr {$vmode | 2}]
+    }
 
-    if { $data(dnd,mode) & 3 } {
+    if { ($data(dnd,mode) & 3) && [llength $data(items)]} {
         # dropovermode includes item or position
         # we extract the box (xi,yi,xs,ys) where we can find item around x,y
         set len  [llength $data(items)]
@@ -1018,6 +1113,7 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
             }
             if { $pos < $len } {
                 set item [lindex $data(items) $pos]
+                set xi   [expr {[lindex [$path:cmd coords n:$item] 0]-[Widget::getoption $path -padx]-1}]
                 if { $data(dnd,mode) & 1 } {
                     # dropovermode includes item
                     lappend target $item
@@ -1064,15 +1160,12 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
         set res   [uplevel \#0 $cmd [list $source $target $op $type $dnddata]]
         set code  [lindex $res 0]
         set vmode 0
-        if { $code & 1 } {
+        if {$code & 1} {
             # update vmode
-            set mode [lindex $res 1]
-            if { ![string compare $mode "item"] } {
-                set vmode 1
-            } elseif { ![string compare $mode "position"] } {
-                set vmode 2
-            } elseif { ![string compare $mode "widget"] } {
-                set vmode 4
+            switch -exact -- [lindex $res 1] {
+                item     {set vmode 1}
+                position {set vmode 2}
+                widget   {set vmode 4}
             }
         }
     } else {
@@ -1095,16 +1188,18 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
     }
 
     # draw dnd visual following vmode
-    if { $vmode & 1 } {
-        set data(dnd,item) [list "item" [lindex $target 1]]
-        $path:cmd create rectangle $xi $yi $xs $ys -tags drop
-    } elseif { $vmode & 2 } {
-        set data(dnd,item) [concat "position" [lindex $target 2]]
-        $path:cmd create line $xi $yl $xs $yl -tags drop
-    } elseif { $vmode & 4 } {
-        set data(dnd,item) [list "widget"]
-    } else {
-        set code [expr {$code & 2}]
+    if {[llength $data(items)]} {
+        if { $vmode & 1 } {
+            set data(dnd,item) [list "item" [lindex $target 1]]
+            $path:cmd create rectangle $xi $yi $xs $ys -tags drop
+        } elseif { $vmode & 2 } {
+            set data(dnd,item) [concat "position" [lindex $target 2]]
+            $path:cmd create line $xi $yl $xs $yl -tags drop
+        } elseif { $vmode & 4 } {
+            set data(dnd,item) [list "widget"]
+        } else {
+            set code [expr {$code & 2}]
+        }
     }
 
     if { $code & 1 } {

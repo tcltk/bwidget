@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.3 1999/09/21 01:50:17 sven Exp $
+#  $Id: notebook.tcl,v 1.4 2000/02/11 22:54:27 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -45,21 +45,27 @@ namespace eval NoteBook {
             {-leavecmd   String     ""     0}
             {-image      TkResource ""     0 label}
             {-text       String     ""     0}
+            {-foreground         String     ""     0}
+            {-background         String     ""     0}
+            {-activeforeground   String     ""     0}
+            {-activebackground   String     ""     0}
+            {-disabledforeground String     ""     0}
         }
     }
 
     Widget::declare NoteBook {
-        {-foreground         TkResource "" 0 button}
-        {-background         TkResource "" 0 button}
-        {-activebackground   TkResource "" 0 button}
-        {-activeforeground   TkResource "" 0 button}
-        {-disabledforeground TkResource "" 0 button}
-        {-font               TkResource "" 0 button}
-        {-side               Enum       top 1 {top bottom}}
-        {-homogeneous        Boolean 0   0}
-        {-borderwidth        Int 1   0 {=1 =2}}
-        {-width              Int 0   0 {=0 ""}}
-        {-height             Int 0   0 {=0 ""}}
+	{-foreground		TkResource "" 0 button}
+        {-background		TkResource "" 0 button}
+        {-activebackground	TkResource "" 0 button}
+        {-activeforeground	TkResource "" 0 button}
+        {-disabledforeground	TkResource "" 0 button}
+        {-font			TkResource "" 0 button}
+        {-side			Enum       top 1 {top bottom}}
+        {-homogeneous		Boolean 0   0}
+        {-borderwidth		Int 1   0 {=1 =2}}
+ 	{-internalborderwidth	Int 10  0 {=0 ""}}
+        {-width			Int 0   0 {=0 ""}}
+        {-height		Int 0   0 {=0 ""}}
 
         {-repeatdelay        BwResource ""  0 ArrowButton}
         {-repeatinterval     BwResource ""  0 ArrowButton}
@@ -67,15 +73,20 @@ namespace eval NoteBook {
         {-fg                 Synonym -foreground}
         {-bg                 Synonym -background}
         {-bd                 Synonym -borderwidth}
+        {-ibd                Synonym -internalborderwidth}
     }
 
     Widget::addmap NoteBook "" :cmd {-background {}}
-    Widget::addmap NoteBook ArrowButton .fg \
-        {-foreground {} -background {} -activeforeground {} -activebackground {} \
-             -borderwidth {} -repeatinterval {} -repeatdelay {} -disabledforeground {}}
-    Widget::addmap NoteBook ArrowButton .fd \
-        {-foreground {} -background {} -activeforeground {} -activebackground {} \
-             -borderwidth {} -repeatinterval {} -repeatdelay {} -disabledforeground {}}
+    Widget::addmap NoteBook ArrowButton .fg {
+        -foreground {} -background {} 
+	-activeforeground {} -activebackground {} -disabledforeground {}
+	-borderwidth {} -repeatinterval {} -repeatdelay {}
+    }
+    Widget::addmap NoteBook ArrowButton .fd {
+        -foreground {} -background {}
+        -activeforeground {} -activebackground {} -disabledforeground {}
+        -borderwidth {} -repeatinterval {} -repeatdelay {}
+    }
 
     variable _warrow 12
 
@@ -103,12 +114,18 @@ proc NoteBook::create { path args } {
     set data(hpage)    [expr {[font metrics [Widget::getoption $path -font] -linespace] + 6}]
     set bg             [Widget::getoption $path -background]
 
-    # --- creation du canvas -----------------------------------------------------------------
+    # Create the canvas
     set w [expr {[Widget::getoption $path -width]+4}]
     set h [expr {[Widget::getoption $path -height]+$data(hpage)+4}]
-    canvas $path -relief flat -bd 0 -highlightthickness 0 -bg $bg -width $w -height $h
+    canvas $path			\
+	    -relief flat		\
+	    -borderwidth 0		\
+	    -highlightthickness 0	\
+	    -background $bg		\
+	    -width $w			\
+	    -height $h
 
-    # --- creation des arrow -----------------------------------------------------------------
+    # Create the arrow button
     eval ArrowButton::create $path.fg [Widget::subcget $path .fg] \
         -highlightthickness 0 \
         -type button  -dir left \
@@ -150,7 +167,16 @@ proc NoteBook::configure { path args } {
         _compute_width $path
         set redraw 1
     }
-    if { [Widget::hasChanged $path -background bg] } {
+    set chibd [Widget::hasChanged $path -internalborderwidth ibd]
+    set chbg  [Widget::hasChanged $path -background bg]
+    if {$chibd || $chbg} {
+        foreach page $data(pages) {
+            $path.f$page configure \
+                -borderwidth $ibd -background $bg
+        }
+    }
+
+    if {$chbg} {
         set col [BWidget::get3dcolor $path $bg]
         set data(dbg)  [lindex $col 0]
         set data(lbg)  [lindex $col 1]
@@ -163,8 +189,11 @@ proc NoteBook::configure { path args } {
     set wc [Widget::hasChanged $path -width  w]
     set hc [Widget::hasChanged $path -height h]
     if { $wc || $hc } {
-        $path:cmd configure -width [expr {$w+4}] -height [expr {$h + $data(hpage)+4}]
-    } elseif { $redraw } {
+        $path:cmd configure \
+		-width [expr {$w+4}] \
+		-height [expr {$h + $data(hpage)+4}]
+    }
+    if { $redraw } {
         _redraw $path
     }
 
@@ -217,10 +246,17 @@ proc NoteBook::insert { path index page args } {
     Widget::init NoteBook::Page $path.f$page $args
 
     set data(pages) [linsert $data(pages) $index $page]
+    # If the page doesn't exist, create it; if it does reset its bg and ibd
     if { ![winfo exists $path.f$page] } {
-        frame $path.f$page \
-            -relief flat -background [Widget::getoption $path -background] -borderwidth 10
+        frame $path.f$page 						\
+		-relief flat						\
+		-background	[Widget::getoption $path -background]	\
+		-borderwidth	[Widget::getoption $path -internalborderwidth]
         set data($page,realized) 0
+    } else {
+	$path.f$page configure						\
+		-background	[Widget::getoption $path -background]	\
+		-borderwidth	[Widget::getoption $path -internalborderwidth]
     }
     _compute_width $path
     _draw_page $path $page 1
@@ -425,6 +461,13 @@ proc NoteBook::_test_page { path page } {
     return $pos
 }
 
+proc NoteBook::_getoption { path page option } {
+    set value [Widget::cget $path.f$page $option]
+    if {![string length $value]} {
+        set value [Widget::cget $path $option]
+    }
+    return $value
+}
 
 # ------------------------------------------------------------------------------
 #  Command NoteBook::_itemconfigure
@@ -549,12 +592,16 @@ proc NoteBook::_highlight { type path page } {
 
     switch -- $type {
         on {
-            $path:cmd itemconfigure "$page:poly" -fill [Widget::getoption $path -activebackground]
-            $path:cmd itemconfigure "$page:text" -fill [Widget::getoption $path -activeforeground]
+            $path:cmd itemconfigure "$page:poly" \
+		    -fill [_getoption $path $page -activebackground]
+            $path:cmd itemconfigure "$page:text" \
+		    -fill [_getoption $path $page -activeforeground]
         }
         off {
-            $path:cmd itemconfigure "$page:poly" -fill [Widget::getoption $path -background]
-            $path:cmd itemconfigure "$page:text" -fill [Widget::getoption $path -foreground]
+            $path:cmd itemconfigure "$page:poly" \
+		    -fill [_getoption $path $page -background]
+            $path:cmd itemconfigure "$page:text" \
+		    -fill [_getoption $path $page -foreground]
         }
     }
 }
@@ -570,9 +617,11 @@ proc NoteBook::_select { path page } {
     if { ![string compare [Widget::getoption $path.f$page -state] "normal"] } {
         set oldsel $data(select)
         if { [string compare $page $oldsel] } {
-            if { $oldsel != "" } {
-                if { [set cmd [Widget::getoption $path.f$oldsel -leavecmd]] != "" } {
-                    if { [set code [catch {uplevel \#0 $cmd} res]] == 1 || $res == 0 } {
+            if { ![string equal $oldsel ""] } {
+		set cmd [Widget::getoption $path.f$oldsel -leavecmd]
+                if { ![string equal $cmd ""] } {
+		    set code [catch {uplevel \#0 $cmd} res]
+                    if { $code == 1 || $res == 0 } {
                         return -code $code $res
                     }
                 }
@@ -580,14 +629,16 @@ proc NoteBook::_select { path page } {
                 _draw_page $path $oldsel 0
             }
             set data(select) $page
-            if { $page != "" } {
+            if { ![string equal $page ""] } {
                 if { !$data($page,realized) } {
                     set data($page,realized) 1
-                    if { [set cmd [Widget::getoption $path.f$page -createcmd]] != "" } {
+		    set cmd [Widget::getoption $path.f$page -createcmd]
+                    if { ![string equal $cmd ""] } {
                         uplevel \#0 $cmd
                     }
                 }
-                if { [set cmd [Widget::getoption $path.f$page -raisecmd]] != "" } {
+		set cmd [Widget::getoption $path.f$page -raisecmd]
+                if { ![string equal $cmd ""] } {
                     uplevel \#0 $cmd
                 }
                 _draw_page $path $page 0
@@ -598,9 +649,9 @@ proc NoteBook::_select { path page } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command NoteBook::_redraw
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc NoteBook::_redraw { path } {
     variable $path
     upvar 0  $path data
@@ -617,16 +668,16 @@ proc NoteBook::_redraw { path } {
 }
 
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command NoteBook::_draw_page
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc NoteBook::_draw_page { path page create } {
     variable $path
     upvar 0  $path data
 
-    # --- calcul des coordonnees et des couleurs de l'onglet ---------------------------------
+    # --- calcul des coordonnees et des couleurs de l'onglet ------------------
     set pos [lsearch $data(pages) $page]
-    set bg  [Widget::getoption $path -background]
+    set bg  [_getoption $path $page -background]
     set h   $data(hpage)
     set xd  [_get_x_page $path $pos]
     set xf  [expr {$xd + $data($page,width)}]
@@ -664,7 +715,7 @@ proc NoteBook::_draw_page { path page create } {
             set xtext [expr {$ximg+[image width $img]+4}]
         }
         set bd    [Widget::getoption $path -borderwidth]
-        set fg    [Widget::getoption $path -foreground]
+        set fg    [_getoption $path $page -foreground]
     } else {
         set fgt   $data(dbg)
         set fgb   $fgt
@@ -683,21 +734,23 @@ proc NoteBook::_draw_page { path page create } {
         }
         set bd    1
         if { [Widget::getoption $path.f$page -state] == "normal" } {
-            set fg [Widget::getoption $path -foreground]
+            set fg [_getoption $path $page -foreground]
         } else {
-            set fg [Widget::getoption $path -disabledforeground]
+            set fg [_getoption $path $page -disabledforeground]
         }
     }
 
-    # --- creation ou modification de l'onglet -----------------------------------------------
+    # --- creation ou modification de l'onglet --------------------------------
     # Sven
     if { $create } {
-        eval $path:cmd create polygon [concat $lt $lb] \
-            -tag     {"page p:$page $page:poly"}
+        eval $path:cmd create polygon [concat $lt $lb]		\
+		-tag		{"page p:$page $page:poly"}	\
+		-outline	$bg				\
+		-fill		$bg
         eval $path:cmd create line $lt \
-            -tags {"page p:$page $page:top top"}
+            -tags {"page p:$page $page:top top"} -fill $fgt -width $bd
         eval $path:cmd create line $lb \
-            -tags {"page p:$page $page:bot bot"}
+            -tags {"page p:$page $page:bot bot"} -fill $fgb -width $bd
         $path:cmd create text $xtext $ytext           \
             -text   [Widget::getoption $path.f$page -text] \
             -font   [Widget::getoption $path -font]        \
@@ -716,20 +769,21 @@ proc NoteBook::_draw_page { path page create } {
             -font [Widget::getoption $path -font]    \
             -fill $fg
     }
-    $path:cmd itemconfigure "$page:poly" -fill $bg  -outline $bg
-    $path:cmd itemconfigure "$page:top"  -fill $fgt -width $bd
-    $path:cmd itemconfigure "$page:bot"  -fill $fgb -width $bd
     eval $path:cmd coords "$page:poly" [concat $lt $lb]
     eval $path:cmd coords "$page:top"  $lt
     eval $path:cmd coords "$page:bot"  $lb
+    $path:cmd itemconfigure "$page:poly" -fill $bg  -outline $bg
+    $path:cmd itemconfigure "$page:top"  -fill $fgt -width $bd
+    $path:cmd itemconfigure "$page:bot"  -fill $fgb -width $bd
     # Sven end
         
     if { $img != "" } {
         # Sven
-        if { [set id [$path:cmd find withtag $page:img]] == "" } {
-            set id [$path:cmd create image $ximg $ytext \
-                -anchor w    \
-                -tags   "page p:$page $page:img"]
+	set id [$path:cmd find withtag $page:img]
+	if { [string equal $id ""] } {
+	    set id [$path:cmd create image $ximg $ytext \
+		    -anchor w    \
+		    -tags   "page p:$page $page:img"]
         }
         $path:cmd coords $id $ximg $ytext
         $path:cmd itemconfigure $id -image $img
@@ -757,9 +811,9 @@ proc NoteBook::_draw_page { path page create } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command NoteBook::_draw_arrows
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc NoteBook::_draw_arrows { path } {
     variable _warrow
     variable $path
@@ -772,7 +826,7 @@ proc NoteBook::_draw_arrows { path } {
     set xr      [expr {$w-$_warrow+1}]
     # Sven
     set side [Widget::getoption $path -side]
-    if {"$side" == "bottom"} {
+    if { [string equal $side "bottom"] } {
         set h1 [expr {[winfo height $path]-1}]
         set bd [Widget::getoption $path -borderwidth]
         set y0 [expr {$h1 - $data(hpage) + $bd}]
@@ -820,9 +874,9 @@ proc NoteBook::_draw_arrows { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command NoteBook::_draw_area
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc NoteBook::_draw_area { path } {
     variable $path
     upvar 0  $path data
@@ -904,9 +958,9 @@ proc NoteBook::_draw_area { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command NoteBook::_resize
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc NoteBook::_resize { path } {
     # Sven
     NoteBook::_redraw $path
@@ -914,9 +968,9 @@ proc NoteBook::_resize { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command NoteBook::_realize
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc NoteBook::_realize { path } {
     variable $path
     upvar 0  $path data

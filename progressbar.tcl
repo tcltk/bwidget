@@ -21,6 +21,7 @@ namespace eval ProgressBar {
         {-relief      TkResource sunken     0 label}
         {-orient      Enum       horizontal 1 {horizontal vertical}}
         {-variable    String     ""         0}
+        {-idle        Boolean    0          0}
         {-width       TkResource 100        0 frame}
         {-height      TkResource 4m         0 frame}
         {-bg          Synonym    -background}
@@ -182,5 +183,7 @@ proc ProgressBar::_modify { path args } {
             }
         }
     }
-    update
+    if {![Widget::cget $path -idle]} {
+        update
+    }
 }

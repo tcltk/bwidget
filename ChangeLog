@@ -1,7 +1,87 @@
-1998-12-13  Eric Melski  <ericm@scriptics.com>
+2000-02-11  Eric Melski  <ericm@scriptics.com>
 
-	* buttonbox.tcl: Added a getbuttonstate function, which retrieves the value
-	of a tag used on a button in the buttonbox.
+	* tree.tcl: Integrated changes from Eric Boudaillier:
+	[itemconfigure -open ...]
+	    optimized to only call redraw_idle 3 if node has subnodes.
+	_cross_event:
+	    itemconfigure -open called before -opencmd/closecmd; no more
+	    call to _redraw_idle (handled by other procedures)
+	_over_cmd:
+	    allow position {root 0} when tree is empty
+	new [find] command:  
+	    [find @x,y ?confine?]
+	    	    if confine is "confine" returns the node at window
+		    coordinate x,y (x,y must be inside the bbox of the
+		    node) else returns the node found on the line (in
+		    pixel) pixel y
+	    [find line]
+	            returns the node on the line $line (in -deltay coords)
+	new [line] command:
+	    [line node]
+	            returns the line where node is drawn
+	-selectfill option added:
+	    if true, selection is draw on full width of tree (instead of
+	    just highlighting the bbox of the selected nodes)
+	
+	* combobox.tcl: Integrated changes from Eric Boudaillier:
+	internal widget restructuring.
+
+	* tree.tcl: Added "range" subcommand to selection.  Given two
+	nodes, node1 and node2, it will set the selection to the visible
+	nodes between (and including) node1 and node2.  If node1 or node2
+	is not visible, it will find the first visible ancestor of the
+	node and use that as the start/end point instead.
+
+	* listbox.tcl: Integrated changes from Eric Boudaillier:
+	_over_cmd: allow position 0 when listbox is empty
+	find command, similar to tree find command.
+	
+	* spinbox.tcl: Integrated changes from Eric Boudaillier:
+	cosmetic changes.
+	
+	* color.tcl: Integrated changes from Eric Boudaillier:
+	split widget into two commands: SelectColor::menu and
+	SelectColor::dialog.
+
+	* progressbar.tcl: Integrated changes from Eric Boudaillier:
+	added -idle option to prevent call to update in case where task is
+	done in idle (ie, fileevents)
+
+	* scrollview.tcl: Integrated changes from Eric Boudaillier:
+	bindings changed.
+
+	* scrollw.tcl: Integrated changes from Eric Boudaillier:
+	-managed option: if true, scrollbar are managed during creation,
+	so their size are included in the requested size of the
+	ScrolledWindow.  If false, they are not.
+	-sides option: specifies the side of the scrollbar.
+	-size option: specifies size of scrollbar.
+	-ipad option: specifies pad between scrollbar and scrolled widget.
+
+	* mainframe.tcl: Integrated changes from Eric Boudaillier: support
+	for function keys in accelerators, support for no modifier in
+	accelerators.
+
+	* notebook.tcl: Integrated changes from Eric Boudaillier:
+	-internalborderwidth (-ibd) option specifies pad around pages;
+	-foreground, -background, -activeforeground, -activebackground,
+	-disabledforeground options for each tab.
+	Code cleanup.
+
+1999-12-23  Sven Delmas  <sven@scriptics.com>
+
+	* scrollw.tcl: Added "update idletask" to scrollbar update to
+	prevent loss of update events.
+
+1999-12-14  Sven Delmas  <sven@scriptics.com>
+
+	* combobox.tcl: When the selected item is changed, the selection
+	is now set to the entire string.
+
+1999-12-13  Eric Melski  <ericm@scriptics.com>
+
+	* buttonbox.tcl: Added a getbuttonstate function, which retrieves 
+	the value of a tag used on a button in the buttonbox.
 
 1999-12-08  Eric Melski  <ericm@scriptics.com>
 
@@ -10,28 +90,42 @@
 
 1999-10-29  Eric Melski  <ericm@scriptics.com>
 
-	* buttonbox.tcl: Added a gettags function, which allows the user to query
-	the tags that are used on buttons in the buttonbox.
+	* buttonbox.tcl: Added a gettags function, which allows the user
+	to query the tags that are used on buttons in the buttonbox.
 
 1999-10-29  Eric Melski  <ericm@scriptics.com>
 
 	* font.tcl: Added one new flag: -querysystem.  This lets the user 
-	control whether the font selector queries the system (via font families)
-	for the list of fonts, or if it uses a preset list of fonts (which is
-	much faster and less likely to crash some systems).
+	control whether the font selector queries the system 
+	(via font families) for the list of fonts, or if it uses a preset 
+	list of fonts (which is much faster and less likely to crash some 
+	systems).
 
 1999-10-25  Eric Melski  <ericm@scriptics.com>
 
 	* font.tcl: Added support for two new flags: -families and -styles; 
-	-families allows you to specify one of all, fixed, or variable, to limit 
-	the choice of fonts to those fonts; -styles allows you to specify a list
-	of styles that can be set with the widget (ie, bold, italic, etc).
+	-families allows you to specify one of all, fixed, or variable, to
+	limit the choice of fonts to those fonts; -styles allows you to
+	specify a list of styles that can be set with the widget (ie,
+	bold, italic, etc).
 
 1999-10-22  Eric Melski  <ericm@scriptics.com>
 
 	* tree.tcl: Fixed some problems with keyboard traversal.  Added
 	support for left/right arrows a la MS Explorer.
 	Added support for keyboard-based scrolling.
+	
+1999-10-21  Sven Delmas  <sven@scriptics.com>
+
+	* combobox.tcl: Added support for keyboard traversal.  The widget
+	will now tab in even when it is not editable.  Also the entry
+	widget content will be selected when the user tabs in. The key
+	bindings now allow a traversal of the list (<Down> brings up the
+	list). The arrow button no longer switches to an up button, but
+	instead changes relief. The button is now more Windows NT like
+	(for Windows NT).  Changed keyboard bindings:  down/up now
+	display/hide the listbox; control-{up|down|prev|next} move through
+	the options without displaying the listbox.
 	
 1999-10-21  Eric Melski  <ericm@scriptics.com>
 
