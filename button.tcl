@@ -66,7 +66,7 @@ proc Button::create { path args } {
         set relief "flat"
     }
 
-    set var [Widget::getoption $path -textvariable]
+    set var [Widget::cget $path -textvariable]
     if {  ![string length $var] } {
         set desc [BWidget::getname [Widget::getoption $path -name]]
         if { [llength $desc] } {
@@ -84,8 +84,10 @@ proc Button::create { path args } {
         Widget::setoption $path -underline $under
     }
 
+    set st [Widget::cget $path -state]
     eval button $path [Widget::subcget $path :cmd] \
-        [list -relief $relief -text $text -underline $under -textvariable $var]
+        [list -relief $relief -text $text -underline $under \
+	    -textvariable $var -state $st]
     bindtags $path [list $path BwButton [winfo toplevel $path] all]
 
     set accel [string tolower [string index $text $under]]

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  labelentry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelentry.tcl,v 1.2 2000/03/01 02:12:39 ericm Exp $
+#  $Id: labelentry.tcl,v 1.3 2000/03/08 03:26:19 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelEntry::create
@@ -40,15 +40,17 @@ namespace eval LabelEntry {
 #  Command LabelEntry::create
 # ------------------------------------------------------------------------------
 proc LabelEntry::create { path args } {
-    Widget::init LabelEntry $path $args
+    array set maps [list LabelEntry {} :cmd {} .labf {} .e {}]
+    array set maps [Widget::parseArgs LabelEntry $args]
 
-    eval frame $path [Widget::subcget $path :cmd] -class LabelEntry \
+    eval frame $path $maps(:cmd) -class LabelEntry \
 	    -relief flat -bd 0 -highlightthickness 0 -takefocus 0
+    Widget::initFromODB LabelEntry $path $maps(LabelEntry)
 	
-    set labf  [eval LabelFrame::create $path.labf [Widget::subcget $path .labf] \
+    set labf  [eval LabelFrame::create $path.labf $maps(.labf) \
                    -relief flat -borderwidth 0 -focus $path.e]
     set subf  [LabelFrame::getframe $labf]
-    set entry [eval Entry::create $path.e [Widget::subcget $path .e]]
+    set entry [eval Entry::create $path.e $maps(.e)]
 
     pack $entry -in $subf -fill both -expand yes
     pack $labf  -fill both -expand yes

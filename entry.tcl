@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.8 2000/02/29 23:04:06 ericm Exp $
+#  $Id: entry.tcl,v 1.9 2000/03/08 03:26:19 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -64,14 +64,16 @@ namespace eval Entry {
 proc Entry::create { path args } {
     variable $path
     upvar 0  $path data
-
-    Widget::init Entry $path $args
+    
+    array set maps [list Entry {} :cmd {}]
+    array set maps [Widget::parseArgs Entry $args]
 
     set data(afterid) ""
-    eval entry $path [Widget::subcget $path :cmd]
-
+    eval entry $path $maps(:cmd)
+    Widget::initFromODB Entry $path $maps(Entry)
     set state    [Widget::cget $path -state]
     set editable [Widget::cget $path -editable]
+    set text     [Widget::cget $path -text]
     if { $editable && ![string compare $state "normal"] } {
         bindtags $path [list $path BwEntry [winfo toplevel $path] all]
         $path configure -takefocus 1
@@ -87,6 +89,18 @@ proc Entry::create { path args } {
     } else {
 	$path configure -foreground [Widget::cget $path -foreground]
     }
+    if { [string length $text] } {
+	set varName [$path cget -textvariable]
+	if { ![string equal $varName ""] } {
+	    uplevel \#0 [list set $varName [Widget::cget $path -text]]
+	} else {
+	    set validateState [$path cget -validate]
+	    $path configure -validate none
+	    $path delete 0 end
+	    $path configure -validate $validateState
+	    $path insert 0 [Widget::cget $path -text]
+	}
+    }	
 
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd 1
     DropSite::setdrop $path $path Entry::_over_cmd Entry::_drop_cmd 1
