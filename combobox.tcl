@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.2 1999/10/21 17:41:37 sven Exp $
+#  $Id: combobox.tcl,v 1.3 1999/12/08 15:51:07 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -408,5 +408,11 @@ proc ComboBox::_focus_out { path } {
             unset foreground
         }
     }
-    $path.e selection clear
+    # ericm@scriptics.com. It's not clear why you would want to clear selection
+    # on a focus out event.  That basically disables -exportselection, which
+    # seems like something users might want to do.  This feels like an 
+    # application specific, rather than a widget general, behaviour.  Thus, I
+    # am removing this behaviour:
+    # $path.e selection clear
+    # ericm@scriptics.com
 }

@@ -1,3 +1,8 @@
+1999-12-08  Eric Melski  <ericm@scriptics.com>
+
+	* combobox.tcl: Removed code that cleared entry selection on focus out 
+	events, as this crippled exportselection.
+
 1999-10-29  Eric Melski  <ericm@scriptics.com>
 
 	* buttonbox.tcl: Added a gettags function, which allows the user to query
