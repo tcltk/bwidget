@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.7 2003/02/25 07:43:42 hobbs Exp $
+#  $Id: utils.tcl,v 1.8 2003/04/15 01:21:20 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -122,7 +122,7 @@ proc BWidget::clonename { menu } {
         } else {
             append menupath "#" $widget
             append path "." $widget
-        }    
+        }
     }
     return $path
 }
@@ -279,7 +279,7 @@ proc BWidget::place { path w h args } {
                 }
                 if {[string index [lindex $args 2] 0] != "-"} {
                     set y "+$y"
-                }                    
+                }
             } else {
                 if { $x >= 0 } {
                     set x "+$x"
@@ -422,15 +422,15 @@ proc BWidget::grab { option path } {
 # ----------------------------------------------------------------------------
 #  Command BWidget::focus
 # ----------------------------------------------------------------------------
-proc BWidget::focus { option path } {
+proc BWidget::focus { option path {refocus 1} } {
     variable _fstack
 
     if { $option == "release" } {
         while { [llength $_fstack] } {
             set oldf [lindex $_fstack end]
             set _fstack [lreplace $_fstack end end]
-            if { [string compare $oldf $path] && [winfo exists $oldf] } {
-                catch {::focus -force $oldf}
+            if { ![string equal $oldf $path] && [winfo exists $oldf] } {
+                if {$refocus} {catch {::focus -force $oldf}}
                 return
             }
         }

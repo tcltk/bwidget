@@ -1,3 +1,11 @@
+2003-04-14  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* utils.tcl (BWidget::focus): add optional refocus arg
+	* combobox.tcl: make droplist use solid 1-pixel relief more in
+	accordance with Windows style.  Set topmost attribute on droplist.
+	Add bindings that unmap the droplist if we lose focus to another
+	application (where [focus] == ""), without refocusing to the entry.
+
 2003-04-11  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* combobox.tcl (ComboBox::_expand): add tab expansion behavior
