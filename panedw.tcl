@@ -25,10 +25,11 @@ namespace eval PanedWindow {
 
     Widget::declare PanedWindow {
         {-side       Enum       top 1 {top left bottom right}}
-        {-width      Int        10  1 "%d >=6"}
+        {-width      Int        10  1 "%d >=3"}
         {-pad        Int        4   1 "%d >= 0"}
         {-background TkResource ""  0 frame}
         {-bg         Synonym    -background}
+        {-activator  Enum       ""  1 {line button}}
     }
 
     variable _panedw
@@ -115,7 +116,16 @@ proc PanedWindow::add { path args } {
 		-highlightthickness 0 -bg $bg -width $wbut -height $wbut]
 	set placeButton 1
 	set sepsize     2
-	if { $::tcl_platform(platform) != "windows" } {
+
+	set activator [Widget::getoption $path -activator]
+	if {$activator == ""} {
+	    if { $::tcl_platform(platform) != "windows" } {
+		set activator button
+	    } else {
+		set activator line
+	    }
+	}
+	if {$activator == "button"} {
 	    set activator $but
 	} else {
 	    set activator $sep
