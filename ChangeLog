@@ -1,3 +1,8 @@
+2002-01-15  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* mainframe.tcl: correct unprotected eval calls.  [Patch #501210]
+	(chevreux)
+
 2001-12-28  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* BWman/Dialog.html:
