@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.15 2000/03/14 01:45:25 ericm Exp $
+#  $Id: combobox.tcl,v 1.16 2000/04/27 15:39:31 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -97,11 +97,14 @@ proc ComboBox::create { path args } {
     pack $entry -side left  -fill both -expand yes
 
     if { [Widget::cget $path -editable] } {
-        ::bind $entry <ButtonPress-1> "ComboBox::_unmapliste $path"
-        Entry::configure $path.e -editable true
+	::bind $entry <ButtonPress-1> "ComboBox::_unmapliste $path"
+	Entry::configure $path.e -editable true
     } else {
-        ::bind $entry <ButtonPress-1> "ArrowButton::invoke $path.a"
-        Entry::configure $path.e -editable false
+	::bind $entry <ButtonPress-1> "ArrowButton::invoke $path.a"
+	Entry::configure $path.e -editable false
+	if { ![string equal [Widget::cget $path -state] "disabled"] } {
+	    Entry::configure $path.e -takefocus 1
+	}
     }
 
     ::bind $path  <ButtonPress-1> "ComboBox::_unmapliste $path"
@@ -119,9 +122,23 @@ proc ComboBox::create { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
-#  Command ComboBox::configure
-# ------------------------------------------------------------------------------
+# ComboBox::configure --
+#
+#	Configure subcommand for ComboBox widgets.  Works like regular
+#	widget configure command.
+#
+# Arguments:
+#	path	Name of the ComboBox widget.
+#	args	Additional optional arguments:
+#			?-option?
+#			?-option value ...?
+#
+# Results:
+#	Depends on arguments.  If no arguments are given, returns a complete
+#	list of configuration information.  If one argument is given, returns
+#	the configuration information for that option.  If more than one
+#	argument is given, returns nothing.
+
 proc ComboBox::configure { path args } {
     set res [Widget::configure $path $args]
 
@@ -132,6 +149,12 @@ proc ComboBox::configure { path args } {
 	} else {
 	    ::bind $path.e <ButtonPress-1> "ArrowButton::invoke $path.a"
 	    Entry::configure $path.e -editable false
+
+	    # Make sure that non-editable comboboxes can still be tabbed to.
+
+	    if { ![string equal [Widget::cget $path -state] "disabled"] } {
+		Entry::configure $path.e -takefocus 1
+	    }
         }
     }
 

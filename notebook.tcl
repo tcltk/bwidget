@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.9 2000/03/14 01:23:03 ericm Exp $
+#  $Id: notebook.tcl,v 1.10 2000/04/27 15:39:32 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -797,7 +797,7 @@ proc NoteBook::_draw_page { path page create } {
     if { $img != "" } {
 	# if there's an image, put it on the left and move the text right
 	set ximg $xtext
-	incr ximg [expr {[image width $img] + 4}]
+	incr ximg [expr {[image width $img] + 2}]
     }
 	
     if { $data(select) == $page } {
@@ -856,7 +856,7 @@ proc NoteBook::_draw_page { path page create } {
 	set id [$path.c find withtag $page:img]
 	if { [string equal $id ""] } {
 	    set id [$path.c create image $ximg $ytext \
-		    -anchor w    \
+		    -anchor nw    \
 		    -tags   "page p:$page $page:img"]
         }
         $path.c coords $id $ximg $ytext

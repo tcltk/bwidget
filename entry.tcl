@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.13 2000/03/14 20:20:14 ericm Exp $
+#  $Id: entry.tcl,v 1.14 2000/04/27 15:39:31 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -49,11 +49,19 @@ namespace eval Entry {
     foreach event [bind Entry] {
         bind BwEntry $event [bind Entry $event]
     }
+
+    # Copy is kind of a special event.  It should be enabled when the
+    # widget is editable but not disabled, and not when the widget is disabled.
+    # To make this a bit easier to manage, we will handle it separately.
+
+    bind BwEntry <<Copy>> {}
+    bind BwEditableEntry <<Copy>> [bind Entry <<Copy>>]
+
     bind BwEntry <Return>  {Entry::invoke %W}
     bind BwEntry <Destroy> {Entry::_destroy %W}
     bind BwDisabledEntry <Destroy> {Entry::_destroy %W}
 
-    proc ::Entry { path args } { return [eval Entry::create $path $args] }
+    interp alias {} ::Entry {} ::Entry::create
     proc use {} {}
 }
 
@@ -90,6 +98,7 @@ proc Entry::create { path args } {
     } else {
 	$path configure -foreground \
 		[Widget::getMegawidgetOption $path -foreground]
+	bindtags $path [linsert [bindtags $path] 2 BwEditableEntry] 
     }
     if { [string length $text] } {
 	set varName [$path cget -textvariable]
@@ -160,6 +169,17 @@ proc Entry::configure { path args } {
 	    set fg [Widget::cget $path -foreground]
             $path:cmd configure -fg $fg
         }
+    }
+    if { $chstate } {
+	if { ![string compare $state "disabled"] } {
+	    set idx [lsearch -exact [bindtags $path] BwEditableEntry]
+	    if { $idx != -1 } {
+		bindtags $path [lreplace [bindtags $path] $idx $idx]
+	    }
+	} else {
+	    set idx [expr {[lsearch [bindtags $path] Bw*Entry] + 1}]
+	    bindtags $path [linsert [bindtags $path] $idx BwEditableEntry]
+	}
     }
 
     if { $cheditable } {
