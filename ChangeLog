@@ -1,5 +1,9 @@
 2001-09-05  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
+	* panedw.tcl: Added option -activator to allow user to choose sash
+	  activator. Reduced minimum allowed sash width. [442474]. Request
+	  made by Bastien Chevreux <bach@users.sourceforge.net>.
+
 	* label.tcl: Corrected typo in BWlabel::configure [454505], report
 	  and fix by Bastien Chevreux <bach@users.sourceforge.net>.
 
