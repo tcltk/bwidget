@@ -1,3 +1,8 @@
+2000-10-01  Eric Melski  <ericm@ajubasolutions.com>
+
+	* notebook.tcl: Fixed typo in _draw_page that incorrectly placed
+	images on tabs.
+
 2000-09-17  Eric Melski  <ericm@ajubasolutions.com>
 
 	* widget.tcl (_test_boolean): Altered to return strictly 0 or 1
