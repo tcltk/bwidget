@@ -1,3 +1,9 @@
+2003-05-23  Bob Techentin <techentin@sourceforge.net>
+
+	**** BWIDGET 1.6.0 TAGGED ****
+
+	* README.txt: 
+
 2003-05-18  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* progressbar.tcl: correctly handle progressbar being quickly
