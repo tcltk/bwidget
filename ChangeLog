@@ -1,5 +1,11 @@
 2001-08-08  Andreas Kupries <andreas_kupries@users.sourceforge.net>
 
+	* tree.tcl (Tree::_keynav): Added code to call the open and close
+	  commands when the open-status of a node is toggled with the
+	  space bar. Bug [449284].
+
+2001-08-08  Andreas Kupries <andreas_kupries@users.sourceforge.net>
+
 	* color.tcl: Added the missing definition of the main
 	  'SelectColor' procedure. This prevented users from creating
 	  these widgets in the documented way. Bug [449276].
