@@ -86,7 +86,7 @@ proc ArrowButton::create { path args } {
     array set submaps [Widget::parseArgs ArrowButton $args]
 
     # Create the class frame (so we can do the option db queries)
-    frame $path -class ArrowButton
+    frame $path -class ArrowButton -borderwidth 0 -highlightthickness 0 
     Widget::initFromODB ArrowButton $path $submaps(ArrowButton)
 
     # Create the canvas with the initial options
