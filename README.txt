@@ -1,6 +1,6 @@
-BWidget ToolKit 1.4.0				Dec 2001
+BWidget ToolKit 1.4.0				January 2002
 Copyright (c) 1998-1999 UNIFIX.
-Copyright (c) 2001 ActiveState Corp. 
+Copyright (c) 2001-2002 ActiveState Corp. 
 
 See the file LICENSE.txt for license info (uses Tcl's BSD-style license).
 
