@@ -1,3 +1,9 @@
+2000-03-29  Sven Delmas  <sven@scriptics.com>
+
+	* tree.tcl:  Added protection for the left arrow key click in case
+        we are already at the root node. This used to throw a Tcl error
+        (fixes bug # 4619).
+
 2000-03-20  Eric Melski  <ericm@scriptics.com>
 
 	* progressbar.tcl: (configure) Added test for change to -maximum
