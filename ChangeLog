@@ -1,3 +1,11 @@
+2003-05-01  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tree.tcl (Tree::configure, Tree::_draw_node): add a full-width
+	box underneath the text and image/window that will react to the
+	node binding if -selectfill is true.  It is an empty box that is
+	overly wide, but it could be improved to resize on Configure to
+	just the window width and replace the sel box.
+
 2003-04-23  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tree.tcl: liberal use of list where appropriate to make the code

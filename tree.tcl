@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.44 2003/04/24 01:03:21 hobbs Exp $
+#  $Id: tree.tcl,v 1.45 2003/05/02 01:07:01 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -246,6 +246,20 @@ proc Tree::configure { path args } {
         $path.c itemconfigure cross -foreground $fill
     }
 
+    if {[Widget::hasChanged $path -selectfill fill]} {
+	# Make sure that the full-width boxes have either all or none
+	# of the standard node bindings
+	if {$fill} {
+	    foreach event [$path.c bind "node"] {
+		$path.c bind "box" $event [$path.c bind "node" $event]
+	    }
+	} else {
+	    foreach event [$path.c bind "node"] {
+		$path.c bind "box" $event {}
+	    }
+	}
+    }
+
     if { $ch1 } {
         _redraw_idle $path 3
     } elseif { $ch2 } {
@@ -398,11 +412,14 @@ proc Tree::itemcget { path node option } {
 #  Command Tree::bindText
 # ----------------------------------------------------------------------------
 proc Tree::bindText { path event script } {
-    if { $script != "" } {
-        $path.c bind "node" $event \
-            "$script \[Tree::_get_node_name [list $path] current 2\]"
+    if {[string length $script]} {
+	append script " \[Tree::_get_node_name [list $path] current 2\]"
+    }
+    $path.c bind "node" $event $script
+    if {[Widget::getoption $path -selectfill]} {
+	$path.c bind "box" $event $script
     } else {
-        $path.c bind "node" $event {}
+	$path.c bind "box" $event {}
     }
 }
 
@@ -411,11 +428,14 @@ proc Tree::bindText { path event script } {
 #  Command Tree::bindImage
 # ----------------------------------------------------------------------------
 proc Tree::bindImage { path event script } {
-    if { $script != "" } {
-        $path.c bind "img" $event \
-	    "$script \[Tree::_get_node_name [list $path] current 2\]"
+    if {[string length $script]} {
+	append script " \[Tree::_get_node_name [list $path] current 2\]"
+    }
+    $path.c bind "img" $event $script
+    if {[Widget::getoption $path -selectfill]} {
+	$path.c bind "box" $event $script
     } else {
-        $path.c bind "img" $event {}
+	$path.c bind "box" $event {}
     }
 }
 
@@ -662,7 +682,7 @@ proc Tree::__call_selectcmd { path } {
     upvar 0  $path data
 
     set selectcmd [Widget::getoption $path -selectcommand]
-    if { ![string equal $selectcmd ""] } {
+    if {[llength $selectcmd]} {
 	lappend selectcmd $path
 	lappend selectcmd $data(selnodes)
 	uplevel \#0 $selectcmd
@@ -1236,6 +1256,12 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
         $path.c create image $x1 $y0 -image $img -anchor w \
 		-tags   [Tree::_get_node_tags $path $node [list img i:$node]]
     }
+    set box [$path.c bbox n:$node i:$node]
+    set id [$path.c create rect 0 [lindex $box 1] \
+		[winfo screenwidth $path] [lindex $box 3] \
+		-tags [Tree::_get_node_tags $path $node [list box b:$node]] \
+		-fill {} -outline {}]
+    $path.c lower $id
 
     _set_help $path $node
 
@@ -1426,9 +1452,8 @@ proc Tree::_redraw_selection { path } {
 		set bbox [$path.c bbox "n:$node" "i:$node"]
                 set bbox [list 0 [lindex $bbox 1] $xmax [lindex $bbox 3]]
             }
-            set id [eval [list $path.c create rectangle] $bbox \
-			[list -fill $selbg -outline $selbg \
-			     -tags [list sel s:$node]]]
+            set id [$path.c create rectangle $bbox -tags [list sel s:$node] \
+			-fill $selbg -outline $selbg]
             $path.c itemconfigure "n:$node" -fill $selfg
             $path.c lower $id
         }
@@ -2076,11 +2101,13 @@ proc Tree::_set_help { path node } {
             balloon {
 		DynamicHelp::register $path.c balloon n:$node $text
 		DynamicHelp::register $path.c balloon i:$node $text
+		DynamicHelp::register $path.c balloon b:$node $text
             }
             variable {
 		set var [Widget::getoption $item -helpvar]
 		DynamicHelp::register $path.c variable n:$node $var $text
 		DynamicHelp::register $path.c variable i:$node $var $text
+		DynamicHelp::register $path.c variable b:$node $var $text
             }
         }
     }
