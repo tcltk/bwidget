@@ -22,4 +22,4 @@ bind Entry   <<TraverseIn>> { %W selection range 0 end; %W icursor end }
 bind Spinbox <<TraverseIn>> { %W selection range 0 end; %W icursor end }
 
 bind all <Key-Tab>       { Widget::traverseTo [Widget::focusNext %W] }
-bind all <Shift-Key-Tab> { Widget::traverseTo [Widget::focusPrev %W] }
+bind all <<PrevWindow>>  { Widget::traverseTo [Widget::focusPrev %W] }
