@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.17 2003/10/28 05:03:17 damonc Exp $
+#  $Id: listbox.tcl,v 1.18 2004/04/22 21:29:26 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -416,10 +416,9 @@ proc ListBox::bindText { path event script } {
     if { $script != "" } {
         set map [list %W $path]
         set script [string map $map $script]
-        $path.c bind "click" $event "$script \[ListBox::_get_current $path]"
-    } else {
-        $path.c bind "click" $event {}
+	append script " \[ListBox::_get_current [list $path]\]"
     }
+    $path.c bind "click" $event $script
 }
 
 
@@ -430,10 +429,9 @@ proc ListBox::bindImage { path event script } {
     if { $script != "" } {
         set map [list %W $path]
         set script [string map $map $script]
-        $path.c bind "img" $event "$script \[ListBox::_get_current $path]"
-    } else {
-        $path.c bind "img" $event {}
+	append script " \[ListBox::_get_current [list $path]\]"
     }
+    $path.c bind "img" $event $script
 }
 
 
@@ -751,7 +749,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
         set ok 0
         while { !$ok } {
             tkwait variable ListBox::_edit(wait)
-            if { !$_edit(wait) || $verifycmd == "" ||
+            if { !$_edit(wait) || [llength $verifycmd]==0 ||
                  [uplevel \#0 $verifycmd [list $_edit(text)]] } {
                 set ok 1
             }
@@ -776,7 +774,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
 #  Command ListBox::xview
 # ----------------------------------------------------------------------------
 proc ListBox::xview { path args } {
-    return [eval [list $path.c xview] $args]
+    return [eval [linsert $args 0 $path.c xview]]
 }
 
 
@@ -784,7 +782,7 @@ proc ListBox::xview { path args } {
 #  Command ListBox::yview
 # ----------------------------------------------------------------------------
 proc ListBox::yview { path args } {
-    return [eval [list $path.c yview] $args]
+    return [eval [linsert $args 0 $path.c yview]]
 }
 
 
@@ -980,6 +978,7 @@ proc ListBox::_redraw_items { path } {
 
     set cursor [$path.c cget -cursor]
     $path.c configure -cursor watch
+    update idletasks ; # make sure watch cursor is reflected
     set dx   [Widget::getoption $path -deltax]
     set dy   [Widget::getoption $path -deltay]
     set padx [Widget::getoption $path -padx]
@@ -1011,7 +1010,7 @@ proc ListBox::_redraw_items { path } {
         lappend drawn n:$item
         if { $nitem == $nrows } {
             set y0    [expr {$dy/2}]
-            set bbox  [eval [list $path.c bbox] $drawn]
+            set bbox  [eval [linsert $drawn 0 $path.c bbox]]
             set drawn {}
             set x0    [expr {[lindex $bbox 2]+$dx}]
             set x1    [expr {$x0+$padx}]
@@ -1020,7 +1019,7 @@ proc ListBox::_redraw_items { path } {
         }
     }
     if { $nitem && $nitem < $nrows } {
-        set bbox  [eval [list $path.c bbox] $drawn]
+        set bbox  [eval [linsert $drawn 0 $path.c bbox]]
         lappend data(xlist) [lindex $bbox 2]
     }
     set data(upd,delete) {}
@@ -1078,6 +1077,9 @@ proc ListBox::_redraw_listbox { path } {
         }
         _redraw_selection $path
         _update_scrollregion $path
+        if {[Widget::cget $path -selectfill]} {
+            _update_select_fill $path
+        }
         set data(upd,level)   0
         set data(upd,afterid) ""
     }
@@ -1094,7 +1096,8 @@ proc ListBox::_redraw_idle { path level } {
     if { $data(nrows) != -1 } {
         # widget is realized
         if { [Widget::getoption $path -redraw] && $data(upd,afterid) == "" } {
-            set data(upd,afterid) [after idle ListBox::_redraw_listbox $path]
+            set data(upd,afterid) \
+		[after idle [list ListBox::_redraw_listbox $path]]
         }
     }
     if { $level > $data(upd,level) } {
@@ -1152,7 +1155,7 @@ proc ListBox::_init_drag_cmd { path X Y top } {
          [string equal $item "img"]  ||
          [string equal $item "win"] } {
         set item [string range [lindex $ltags 1] 2 end]
-        if { [set cmd [Widget::getoption $path -draginitcmd]] != "" } {
+        if {[llength [set cmd [Widget::getoption $path -draginitcmd]]]} {
             return [uplevel \#0 $cmd [list $path $item $top]]
         }
         if { [set type [Widget::getoption $path -dragtype]] == "" } {
@@ -1182,7 +1185,7 @@ proc ListBox::_drop_cmd { path source X Y op type dnddata } {
     $path.c delete drop
     set data(dnd,scroll) ""
     if { [llength $data(dnd,item)] || ![llength $data(items)] } {
-        if { [set cmd [Widget::getoption $path -dropcmd]] != "" } {
+        if {[llength [set cmd [Widget::getoption $path -dropcmd]]]} {
             return [uplevel \#0 $cmd [list $path $source $data(dnd,item) $op $type $dnddata]]
         }
     }
@@ -1311,7 +1314,7 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
         }
     }
 
-    if { $vmode && [set cmd [Widget::getoption $path -dropovercmd]] != "" } {
+    if {$vmode && [llength [set cmd [Widget::getoption $path -dropovercmd]]]} {
         # user-defined dropover command
         set res   [uplevel \#0 $cmd [list $source $target $op $type $dnddata]]
         set code  [lindex $res 0]
@@ -1406,7 +1409,7 @@ proc ListBox::_auto_scroll { path x y } {
 
     set data(dnd,scroll) $scroll
     if { [llength $scroll] && ![string length $data(dnd,afterid)] } {
-        set data(dnd,afterid) [after 200 ListBox::_scroll $path $scroll]
+        set data(dnd,afterid) [after 200 [list ListBox::_scroll $path $scroll]]
     }
     return $data(dnd,afterid)
 
@@ -1479,7 +1482,8 @@ proc ListBox::_scroll { path cmd dir } {
     if { ($dir == -1 && [lindex [$path.c $cmd] 0] > 0) ||
          ($dir == 1  && [lindex [$path.c $cmd] 1] < 1) } {
         $path $cmd scroll $dir units
-        set data(dnd,afterid) [after 100 ListBox::_scroll $path $cmd $dir]
+        set data(dnd,afterid) \
+	    [after 100 [list ListBox::_scroll $path $cmd $dir]]
     } else {
         set data(dnd,afterid) ""
         DropSite::setcursor dot
@@ -1502,7 +1506,7 @@ proc ListBox::_set_help { path node } {
 
     set item $path.$node
     set opts [list -helptype -helptext -helpvar]
-    foreach {cty ctx cv} [eval [list Widget::hasChangedX $item] $opts] break
+    foreach {cty ctx cv} [eval [linsert $opts 0 Widget::hasChangedX $item]] break
     set text [Widget::getoption $item -helptext]
 
     ## If we've never set help for this item before, and text is not blank,
@@ -1539,7 +1543,7 @@ proc ListBox::_set_help { path node } {
 # Results:
 #	none
 proc ListBox::_mouse_select { path cmd args } {
-    eval selection [list $path] [list $cmd] $args
+    eval [linsert $args 0 selection $path $cmd]
     switch -- $cmd {
         "add" - "clear" - "remove" - "set" {
             event generate $path <<ListboxSelect>>
@@ -1591,7 +1595,7 @@ proc ListBox::_drag_and_drop { path from endItem operation type startItem } {
 
     if {[string equal $operation "copy"]} {
         set options [Widget::options $path.$startItem]
-        eval $path insert $idx [list $startItem#auto] $options
+        eval [linsert $options 0 $path insert $idx $startItem\#auto]
     } else {
         $path move $startItem $idx
     }
