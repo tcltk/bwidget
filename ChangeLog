@@ -1,3 +1,6 @@
+2003-10-27  Joe English  <jenglish@users.sourceforge.net>
+	* DragSite.html, DropSite.html: Fix markup errors [Bug #740484]
+
 2003-10-20  Damon Courtney  <damon@unreality.com>
 	* arrow.tcl, bitmap.tcl, button.tcl, buttonbox.tcl, color.tcl,
 	* combobox.tcl, dialog.tcl, dragsite.tcl, dropsite.tcl, entry.tcl
