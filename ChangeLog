@@ -1,3 +1,7 @@
+2003-06-23  Damon Courtney <damon@unreality.com>
+	* combobox.tcl: Added a little better handling of keys in the
+	auto-complete.
+
 2003-06-06  Damon Courtney <damon@unreality.com>
 	* combobox.tcl: Added a rudimentary auto-complete function
 	with option (-autocomplete) that is turned off by default.
