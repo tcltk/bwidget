@@ -1,25 +1,32 @@
+2000-08-10  Eric Melski  <ericm@ajubasolutions.com>
+
+	* widget.tcl: Corrected a problem caused by the destruction of the
+	special .#BWidget* widgets, which are used by BWidgets for some
+	option value validations; formerly, if these were destroyed, it
+	could confuse the BWidgets system's internal state, and creating
+	BWidgets after destroying these helper widgets would throw an error.
 
 2000-06-14  Dan Kuchler  <kuchler@scriptics.com>
 
-        * dialog.tcl
-        * dropsite.tcl
-        * dynhelp.tcl
-        * scrollview.tcl: Replaced several catch {unset varname} calls with
-        if {[info exists varname]} {unset varname}.  This avoids using the
-        catch, and also prevents the ::errorInfo corruption that was happening
-        in BWidgets.
+	* dialog.tcl
+	* dropsite.tcl
+	* dynhelp.tcl
+	* scrollview.tcl: Replaced several catch {unset varname} calls with
+	if {[info exists varname]} {unset varname}.  This avoids using the
+	catch, and also prevents the ::errorInfo corruption that was happening
+	in BWidgets.
 
 2000-05-14  Dan Kuchler  <kuchler@scriptics.com>
 
-        * tree.tcl: Fixed a typing error in the Tree::find procedure.
-        The procedure wouldn't work because there was a 'llengh' where there
-        should have been a 'llength'.
+	* tree.tcl: Fixed a typing error in the Tree::find procedure.
+	The procedure wouldn't work because there was a 'llengh' where there
+	should have been a 'llength'.
 
 2000-05-08  Dan Kuchler  <kuchler@scriptics.com>
 
-        * titleframe.tcl: Added a '-state' flag that is associated to the
-        state of the label.  Now that labels can be disabled (in 8.3 and
-        beyond) this allows for the titleframe to have a disabled appearence.
+	* titleframe.tcl: Added a '-state' flag that is associated to the
+	state of the label.  Now that labels can be disabled (in 8.3 and
+	beyond) this allows for the titleframe to have a disabled appearence.
 
 2000-05-02  Eric Melski  <ericm@scriptics.com>
 
@@ -56,8 +63,8 @@
 2000-03-29  Sven Delmas  <sven@scriptics.com>
 
 	* tree.tcl:  Added protection for the left arrow key click in case
-        we are already at the root node. This used to throw a Tcl error
-        (fixes bug # 4619).
+	we are already at the root node. This used to throw a Tcl error
+	(fixes bug # 4619).
 
 2000-03-20  Eric Melski  <ericm@scriptics.com>
 

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.14 2000/06/15 00:45:16 kuchler Exp $
+#  $Id: widget.tcl,v 1.15 2000/08/10 22:55:01 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -168,7 +168,6 @@ proc Widget::tkinclude { class tkwidget subpath args } {
 		    set optionDbName "$subpath$optionDbName"
 		}
 		option add *${class}$optionDbName $value widgetDefault
-#		puts "TK: ${class}$optionDbName $value"
 		lappend exports($option) "$optionDbName"
 
 		# Store the forward and backward mappings for this
@@ -281,7 +280,6 @@ proc Widget::bwinclude { class subclass subpath args } {
 		    if { [info exists initialize($option)] } {
 			option add *${class}$optionDbName $value \
 				widgetDefault
-#			puts "BW: ${class}$optionDbName $value"
 		    }
 		    lappend exports($option) "$optionDbName"
 		}
@@ -381,14 +379,12 @@ proc Widget::declare { class optlist } {
             set classopt($option) [list TkResource $value $ro \
 		    [list $tkwidget $realopt]]
 	    set optionClass($option) [lindex [$foo configure $realopt] 1]
-#	    puts "DE: ${class}${optionDbName} $value"
 	    ::destroy $foo
             continue
         }
 
 	set optionDbName ".[lindex [_configure_option $option ""] 0]"
 	option add *${class}${optionDbName} $value widgetDefault
-#	puts "DE: ${class}${optionDbName} $value"
 	set exports($option) $optionDbName
         # for any other resource type, we keep original optdesc
         set classopt($option) [list $type $value $ro $arg]
@@ -540,6 +536,10 @@ proc Widget::parseArgs {class options} {
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
         }
+	if { ![string compare $type "TkResource"] } {
+	    # Make sure that the widget used for this TkResource exists
+	    Widget::_get_tkwidget_options [lindex [lindex $optdesc 3] 0]
+	}
 	set val [$Widget::_optiontype($type) $option $val [lindex $optdesc 3]]
 		
 	if { [info exists classmap($option)] } {
@@ -951,9 +951,10 @@ proc Widget::_get_tkwidget_options { tkwidget } {
     variable _tk_widget
     variable _optiondb
     variable _optionclass
-
-    if { ![info exists _tk_widget($tkwidget)] } {
-        set widget [$tkwidget ".#BWidget#$tkwidget"]
+    
+    set widget ".#BWidget#$tkwidget"
+    if { ![winfo exists $widget] || ![info exists _tk_widget($tkwidget)] } {
+        set widget [$tkwidget $widget]
         set config [$widget configure]
         foreach optlist $config {
             set opt [lindex $optlist 0]
