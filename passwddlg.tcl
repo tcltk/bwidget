@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.3 2000/03/01 02:12:40 ericm Exp $
+#  $Id: passwddlg.tcl,v 1.4 2000/03/08 00:17:56 sven Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -92,7 +92,7 @@ proc PasswdDlg::create { path args } {
     }
 
     set frame [Dialog::getframe $path]
-    bind $path  <Return>  ""
+#    bind $path  <Return>  ""
     bind $frame <Destroy> "Widget::destroy $path#PasswdDlg"
 
     set lablog [eval LabelEntry::create $frame.lablog $maps(.frame.lablog) \
