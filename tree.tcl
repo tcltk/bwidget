@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.25 2000/03/29 20:57:01 sven Exp $
+#  $Id: tree.tcl,v 1.26 2000/04/25 23:37:31 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1783,7 +1783,7 @@ proc Tree::_get_current_node {win} {
     } elseif {[set selList [$win selection get]] != {}} {
 	set result [lindex $selList 0]
     } else {
-	set result root
+	set result ""
     }
     return $result
 }
