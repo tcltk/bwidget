@@ -1,3 +1,8 @@
+2003-11-10  Damon Courtney  <damon@unreality.com>
+
+	* entry.tcl: Use a button widget for -disabled options if
+	we're using 8.3 [Bug 839469]
+
 2003-11-05  Damon Courtney  <damon@unreality.com>
 
 	* combobox.tcl: Fixed dropdown listbox selection for
