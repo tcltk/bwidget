@@ -22,13 +22,10 @@ if {0} {
     pack $sbar -side bottom -fill x
     set f [$sbar getframe]
 
-    # An entry widget that doesn't accept focus but shows info in black
-    # makes the best status display because you don't have to worry
-    # about truncating the display
-    set bg [$sbar cget -bg]
-    set w [entry $f.e -bd 1 -state disabled -textvariable ::STATUS \
-	       -takefocus 0 -cursor "" -highlightthickness 0 \
-	       -disabledbackground $bg -disabledforeground black]
+    # Specify -width 1 for the label widget so it truncates nicely
+    # instead of requesting large sizes for long messages
+    set w [label $f.status -bd 1 -relief sunken -width 1 -anchor w \
+	       -textvariable ::STATUS]
     set ::STATUS "This is a status message"
     # give the entry weight, as we want it to be the one that expands
     $sbar add $w -weight 1
@@ -88,9 +85,9 @@ namespace eval StatusBar {
 	bIQAgNEQCAIA0hAyE0AEIGgjSEDBQAOw==
     }
     if {[package provide img::png] != ""} {
-	image create photo ::StatusBar::resizer -format GIF -data $gifdata
-    } else {
 	image create photo ::StatusBar::resizer -format PNG -data $pngdata
+    } else {
+	image create photo ::StatusBar::resizer -format GIF -data $gifdata
     }
 }
 
@@ -108,12 +105,6 @@ proc StatusBar::create { path args } {
     array set maps [list StatusBar {} :cmd {} .resize {}]
     array set maps [Widget::parseArgs StatusBar $args]
     eval [list frame $path -class StatusBar] $maps(:cmd)
-
-    if {[llength [wm grid [winfo toplevel $path]]]} {
-	_destroy $path
-	return -code error \
-	    "Cannot add resize control to gridded toplevel"
-    }
 
     Widget::initFromODB StatusBar $path $maps(StatusBar)
 
@@ -375,7 +366,6 @@ proc StatusBar::begin_resize {w rootx rooty} {
     set resize($w,winc) 1
     set resize($w,hinc) 1
     set resize($w,grid) [wm grid $t]
-    #wm grid $t {} {} {} {}
 }
 
 # The following proc handles mouse motion on the resize control by asking the
@@ -383,6 +373,10 @@ proc StatusBar::begin_resize {w rootx rooty} {
 
 proc StatusBar::continue_resize {w rootx rooty} {
     variable resize
+    if {[llength $resize($w,grid)]} {
+	# at this time, we don't know how to handle gridded resizing
+	return
+    }
     set t      [winfo toplevel $w]
     set relx   [expr {$rootx - [winfo rootx $t]}]
     set rely   [expr {$rooty - [winfo rooty $t]}]
