@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.16 2003/10/20 21:23:52 damonc Exp $
+#  $Id: listbox.tcl,v 1.17 2003/10/28 05:03:17 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -104,6 +104,8 @@ namespace eval ListBox {
     bind ListBox <Destroy>   [list ListBox::_destroy %W]
     bind ListBox <Configure> [list ListBox::_resize  %W]
     bind ListBoxFocus <1>    [list focus %W]
+    bind ListBox <Key-Up>    [list ListBox::_keyboard_navigation %W -1]
+    bind ListBox <Key-Down>  [list ListBox::_keyboard_navigation %W  1]
 
     variable _edit
 }
@@ -562,11 +564,7 @@ proc ListBox::exists { path item } {
 proc ListBox::index { path item } {
     variable $path
     upvar 0  $path data
-
-    if {[string equal $item "active"]} {
-	return [$path selection get]
-    }
-
+    if {[string equal $item "active"]} { return [$path selection get] }
     return [lsearch -exact $data(items) $item]
 }
 
@@ -792,6 +790,11 @@ proc ListBox::yview { path args } {
 
 proc ListBox::getcanvas { path } {
     return $path.c
+}
+
+
+proc ListBox::curselection { path } {
+    return [$path selection get]
 }
 
 
@@ -1592,4 +1595,20 @@ proc ListBox::_drag_and_drop { path from endItem operation type startItem } {
     } else {
         $path move $startItem $idx
     }
+}
+
+
+proc ListBox::_keyboard_navigation { path dir } {
+    variable $path
+    upvar 0  $path data
+
+    set sel [$path index [lindex [$path selection get] end]]
+    if {$dir > 0} {
+	incr sel
+	if {$sel >= [llength $data(items)]} { return }
+    } else {
+	incr sel -1
+	if {$sel < 0} { return }
+    }
+    _mouse_select $path set [lindex $data(items) $sel]
 }
