@@ -1,3 +1,11 @@
+2003-06-06  Damon Courtney <damon@unreality.com>
+	* combobox.tcl: Added a rudimentary auto-complete function
+	with option (-autocomplete) that is turned off by default.
+	Over time, I'm sure this function can be improved, but I
+	think it works pretty well for now.
+
+	* BWman/ComboBox.tcl: Added documentation for -autocomplete.
+
 2003-06-05  Damon Courtney <damon@unreality.com>
 	* listbox.tcl: Liberal use of list where appropriate to make
 	the code safe for space-containing node names.
