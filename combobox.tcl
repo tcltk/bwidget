@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.3 1999/12/08 15:51:07 ericm Exp $
+#  $Id: combobox.tcl,v 1.4 1999/12/14 20:12:09 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -349,6 +349,8 @@ proc ComboBox::_select { path index } {
             }
         }
     }
+    $path.e selection clear
+    $path.e selection range 0 end
     return -code break
 }
 
