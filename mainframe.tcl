@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.7 2000/09/07 16:20:42 sven Exp $
+#  $Id: mainframe.tcl,v 1.8 2001/06/11 23:57:50 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -279,9 +279,9 @@ proc MainFrame::getmenu { path menuid } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command MainFrame::setmenustate
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc MainFrame::setmenustate { path tag state } {
     variable _widget
 
@@ -290,7 +290,7 @@ proc MainFrame::setmenustate { path tag state } {
     #            $menu entryconfigure $entry -state $state
     #        }
     #    }
-	    
+
     # We need a more sophisticated state system.
     # The original model was this:  each menu item has a list of tags;
     # whenever any one of those tags changed state, the menu item did too.
@@ -300,7 +300,11 @@ proc MainFrame::setmenustate { path tag state } {
 
     # First see if this is a real tag
     if { [info exists _widget($path,tagstate,$tag)] } {
-	set _widget($path,tagstate,$tag) $state
+	if { [string compare $state "disabled"] } {
+	    set _widget($path,tagstate,$tag) 1
+	} else {
+	    set _widget($path,tagstate,$tag) 0
+	}
 	foreach {menu entry} $_widget($path,tags,$tag) {
 	    set expression "1"
 	    foreach menutag $_widget($path,menutags,[list $menu $entry]) {
@@ -318,9 +322,9 @@ proc MainFrame::setmenustate { path tag state } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command MainFrame::menuonly
-# ------------------------------------------------------------------------------
+# ----------------------d------------------------------------------------------
 proc MainFrame::menuonly { path } {
     variable _widget
 
@@ -520,8 +524,8 @@ proc MainFrame::_parse_name { menuname } {
     if { $idx == -1 } {
         return [list -label $menuname]
     } else {
-        set beg [string range $menuname 0 [expr $idx-1]]
-        set end [string range $menuname [expr $idx+1] end]
+        set beg [string range $menuname 0 [expr {$idx-1}]]
+        set end [string range $menuname [expr {$idx+1}] end]
         append beg $end
         return [list -label $beg -underline $idx]
     }
