@@ -1,3 +1,8 @@
+2003-11-05  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* scrollview.tcl (ScrollView::_set_view): correct :canvas to
+	renamed :cmd.
+
 2003-10-30  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* scrollw.tcl (ScrolledWindow::setwidget): check that the old
