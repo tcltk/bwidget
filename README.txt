@@ -1,4 +1,4 @@
-BWidget ToolKit 1.7.0				May 2003
+BWidget ToolKit 1.7.0				December 2003
 Copyright (c) 1998-1999 UNIFIX.
 Copyright (c) 2001-2002 ActiveState Corp. 
 
