@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.6 2000/09/06 21:35:30 ericm Exp $
+#  $Id: label.tcl,v 1.7 2000/09/06 21:47:42 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - BWLabel::create
@@ -58,7 +58,7 @@ proc BWLabel::create { path args } {
     frame $path -class BWLabel -borderwidth 0 -highlightthickness 0 -relief flat
     Widget::initFromODB BWLabel $path $maps(BWLabel)
 
-    bind ${path}real <Destroy> {Widget::destroy %W; rename %W {}}
+    bind real${path} <Destroy> {Widget::destroy %W; rename %W {}}
     eval label $path.l $maps(.l)
 
     if { [Widget::cget $path -state] == "normal" } {
@@ -93,7 +93,7 @@ proc BWLabel::create { path args } {
     }
 
     bindtags $path.l [list $path.l $path Label [winfo toplevel $path] all]
-    bindtags $path [list ${path}real BwLabel [winfo toplevel $path] all]
+    bindtags $path [list real${path} BwLabel [winfo toplevel $path] all]
     pack $path.l -expand yes -fill both
 
     DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd [Widget::cget $path -dragendcmd] 1
