@@ -100,7 +100,7 @@ proc ButtonBox::cget { path option } {
 # ------------------------------------------------------------------------------
 #  Command ButtonBox::add
 # ------------------------------------------------------------------------------
-proc ButtonBox::add { path args } {
+proc ButtonBox::add { path tags args } {
     variable $path
     upvar 0  $path data
 
@@ -121,6 +121,16 @@ proc ButtonBox::add { path args } {
         -pady       [Widget::getoption $path -pady] \
         $args \
         -default $style
+
+    # ericm@scriptics.com:  set up tags, just like the menu items
+    foreach tag $tags {
+	lappend data(tags,$tag) $but
+	if { ![info exists data(tagstate,$tag)] } {
+	    set data(tagstate,$tag) 0
+	}
+    }
+    set data(buttontags,$but) $tags
+    # ericm@scriptics.com
 
     set idx [expr {2*$data(nbuttons)}]
     if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
@@ -151,6 +161,41 @@ proc ButtonBox::add { path args } {
     incr data(nbuttons)
 
     return $but
+}
+
+# ::ButtonBox::setbuttonstate --
+#
+#	Set the state of a given button tag.  If this makes any buttons
+#       enable-able (ie, all of their tags are TRUE), enable them.
+#
+# Arguments:
+#	path        the button box widget name
+#       tag         the tag to modify
+#       state       the new state of $tag (0 or 1)
+#
+# Results:
+#	None.
+
+proc ::ButtonBox::setbuttonstate {path tag state} {
+    variable $path
+    upvar 0  $path data
+    # First see if this is a real tag
+    if { [info exists data(tagstate,$tag)] } {
+	set data(tagstate,$tag) $state
+	foreach but $data(tags,$tag) {
+	    set expression "1"
+	    foreach buttontag $data(buttontags,$but) {
+		append expression " && $data(tagstate,$buttontag)"
+	    }
+	    if { [expr $expression] } {
+		set state normal
+	    } else {
+		set state disabled
+	    }
+	    $but configure -state $state
+	}
+    }
+    return
 }
 
 
