@@ -1,3 +1,10 @@
+2004-01-28  Reinhard Max  <max@suse.de>
+
+	* configure.in: bumped to v1.7.
+	This should have happened before releasing 1.7.0.
+
+	* Makefile.in: fixed support for DESTDIR.
+
 2004-01-05  Damon Courtney  <damon@unreality.com>
 
         * init.tcl: Added a binding to the Tk spinbox to handle
