@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.10 2001/12/29 01:39:51 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.11 2001/12/29 02:06:36 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -26,25 +26,29 @@ namespace eval MainFrame {
     ProgressBar::use
 
     Widget::bwinclude MainFrame ProgressBar .status.prg \
-        remove {
-            -fg -bg -bd -troughcolor -background -borderwidth
-            -relief -orient -width -height
-        } \
-        rename {
-            -maximum    -progressmax
-            -variable   -progressvar
-            -type       -progresstype
-            -foreground -progressfg
-        }
+	    remove {
+	-fg -bg -bd -troughcolor -background -borderwidth
+	-relief -orient -width -height
+    } \
+	    rename {
+	-maximum    -progressmax
+	-variable   -progressvar
+	-type       -progresstype
+	-foreground -progressfg
+    }
 
     Widget::declare MainFrame {
-        {-width        TkResource 0      0 frame}
-        {-height       TkResource 0      0 frame}
-        {-background   TkResource ""     0 frame}
-        {-textvariable String     ""     0}
-        {-menu         String     {}     1}
-        {-separator    Enum       both   1 {none top bottom both}}
-        {-bg           Synonym    -background}
+	{-width        TkResource 0      0 frame}
+	{-height       TkResource 0      0 frame}
+	{-background   TkResource ""     0 frame}
+	{-textvariable String     ""     0}
+	{-menu         String     {}     1}
+	{-separator    Enum       both   1 {none top bottom both}}
+	{-bg           Synonym    -background}
+
+	{-menubarfont   String     ""  0}
+	{-menuentryfont String     ""  0}
+	{-statusbarfont String     ""  0}
     }
 
     Widget::addmap MainFrame "" .frame  {-width {} -height {} -background {}}
@@ -110,10 +114,17 @@ proc MainFrame::create { path args } {
     }
 
     # --- status bar -------------------------------------------------------------------------
+    if {[string length [Widget::getoption $path -statusbarfont]] >0 } {
+	set sbfnt "-font \"[Widget::getoption $path -statusbarfont]\""
+    } else {
+	set sbfnt ""
+    }
+
     set status   [frame $path.status -relief flat -borderwidth 0 \
                       -takefocus 0 -highlightthickness 0 -background $bg]
-    set label    [label $status.label -textvariable [Widget::getoption $path -textvariable] \
-                      -takefocus 0 -highlightthickness 0 -background $bg]
+    set label    [eval label $status.label \
+	    -textvariable [Widget::getoption $path -textvariable] \
+	    -takefocus 0 -highlightthickness 0 -background $bg $sbfnt]
     set indframe [frame $status.indf -relief flat -borderwidth 0 \
                       -takefocus 0 -highlightthickness 0 -background $bg]
     set prgframe [frame $status.prgf -relief flat -borderwidth 0 \
@@ -182,6 +193,60 @@ proc MainFrame::configure { path args } {
             $w configure -background $bg
         }
     }
+
+    if { [Widget::hasChanged $path -menubarfont newmbfnt] } {
+	if {[string length $newmbfnt] >0 } {
+	    set mbfnt "-font \"$newmbfnt\""
+	} else {
+	    set mbfnt ""
+	}
+	set top     $_widget($path,top)
+	if {[string compare $top .] == 0} {
+	    eval .menubar configure $mbfnt
+	} else {
+	    eval $top.menubar configure $mbfnt
+	}
+    }
+    if { [Widget::hasChanged $path -menuentryfont newmefnt] } {
+	if {[string length $newmefnt] >0 } {
+	    set mefnt "-font \"$newmefnt\""
+	} else {
+	    set mefnt ""
+	}
+	set top     $_widget($path,top)
+	if {[string compare $top .] == 0} {
+	    set mb .menubar
+	} else {
+	    set mb $top.menubar
+	}
+	set l [winfo children $mb]
+	while {[llength $l]} {
+	    set e [lindex $l 0]
+	    set l [lrange $l 1 end]
+	    if {[string length $e] == 0} {continue}
+	    lappend l [winfo children $e]
+	    eval $e configure $mefnt
+	}
+    }
+
+
+    if { [Widget::hasChanged $path -statusbarfont newsbfnt] } {
+	if {[string length $newsbfnt] >0 } {
+	    set sbfnt "-font \"$newsbfnt\""
+	} else {
+	    set sbfnt ""
+	}
+	for {set index 0} {$index<$_widget($path,nindic)} {incr index} {
+	    set indic $path.status.indf.f$index
+	    eval $indic configure $sbfnt
+	}
+	eval $path.status.label configure $sbfnt
+	$path.status configure -height [winfo reqheight $path.status.label]
+
+	$path.status.prg configure \
+		-height [expr {[winfo reqheight $path.status.label]-2}]
+    }
+
     return $res
 }
 
@@ -245,10 +310,16 @@ proc MainFrame::gettoolbar { path index } {
 proc MainFrame::addindicator { path args } {
     variable _widget
 
+    if {[string length [Widget::getoption $path -statusbarfont]]} {
+	set sbfnt "-font \"[Widget::getoption $path -statusbarfont]\""
+    } else {
+	set sbfnt ""
+    }
+
     set index $_widget($path,nindic)
     set indic $path.status.indf.f$index
     eval label $indic $args -relief sunken -borderwidth 1 \
-        -takefocus 0 -highlightthickness 0
+        -takefocus 0 -highlightthickness 0 $sbfnt
 
     pack $indic -side left -anchor w -padx 2 -fill y -expand 1
 
@@ -399,10 +470,21 @@ proc MainFrame::_create_menubar { path descmenu } {
 
     set bg      [Widget::getoption $path -background]
     set top     $_widget($path,top)
+
+    foreach {v x} {mbfnt -menubarfont mefnt -menuentryfont} {
+	if {[string length [Widget::getoption $path $x]]} {
+	    set $v "-font \"[Widget::getoption $path $x]\""
+	} else {
+	    set $v ""
+	}
+    }
+
     if { $tcl_platform(platform) == "unix" } {
-        set menubar [menu $top.menubar -tearoff 0 -background $bg -borderwidth 1]
+	set menubar [eval menu $top.menubar -tearoff 0 \
+		-background $bg -borderwidth 1 $mbfnt]
     } else {
-        set menubar [menu $top.menubar -tearoff 0 -background $bg]
+	set menubar [eval menu $top.menubar -tearoff 0 \
+		-background $bg $mbfnt]
     }
     $top configure -menu $menubar
 
@@ -417,8 +499,8 @@ proc MainFrame::_create_menubar { path descmenu } {
         } else {
 	    set menu $menubar.menu$count
 	}
-        eval $menubar add cascad $opt -menu $menu
-        menu $menu -tearoff $tearoff -background $bg
+        eval $menubar add cascade $opt -menu $menu
+        eval [list menu $menu -tearoff $tearoff -background $bg] $mefnt
         foreach tag $tags {
             lappend _widget($path,tags,$tag) $menubar $count
 	    # ericm@scriptics:  Add a tagstate tracker
