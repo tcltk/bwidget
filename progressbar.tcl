@@ -36,9 +36,7 @@ namespace eval ProgressBar {
 
     variable _widget
 
-    proc ::ProgressBar { path args } {
-	return [eval ProgressBar::create $path $args]
-    }
+    Widget::redir_create_command ::ProgressBar
     proc use {} {}
 }
 
@@ -55,9 +53,9 @@ proc ProgressBar::create { path args } {
 	    -highlightthickness 0 -relief flat
     Widget::initFromODB ProgressBar $path $maps(ProgressBar)
 
-    set c  [eval canvas $path.bar $maps(.bar) -highlightthickness 0]
+    set c  [eval [list canvas $path.bar] $maps(.bar) -highlightthickness 0]
     set fg [Widget::cget $path -foreground]
-    if { ![string compare [Widget::cget $path -orient] "horizontal"] } {
+    if { [string equal [Widget::cget $path -orient] "horizontal"] } {
         $path.bar create rectangle -1 0 0 0 -fill $fg -outline $fg -tags rect
     } else {
         $path.bar create rectangle 0 1 0 0 -fill $fg -outline $fg -tags rect
@@ -77,8 +75,7 @@ proc ProgressBar::create { path args } {
     bind $path.bar <Configure> [list ProgressBar::_modify $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } \
-	    "return \[eval ProgressBar::\$cmd [list $path] \$args\]"
+    Widget::redir_widget_command $path ProgressBar
 
     return $path
 }

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.46 2003/05/15 00:09:16 hobbs Exp $
+#  $Id: tree.tcl,v 1.47 2003/10/17 18:33:06 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -124,7 +124,7 @@ namespace eval Tree {
 
     bind TreeFocus <Button-1> [list focus %W]
 
-    proc ::Tree { path args } { return [eval [list Tree::create $path] $args] }
+    Widget::redir_create_command ::Tree
     proc use {} {}
 
     variable _edit
@@ -188,7 +188,7 @@ proc Tree::create { path args } {
     DropSite::setdrop $path $path.c Tree::_over_cmd Tree::_drop_cmd 1
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval Tree::\$cmd [list $path] \$args\]"
+    Widget::redir_widget_command $path Tree
 
     set w [Widget::cget $path -width]
     set h [Widget::cget $path -height]

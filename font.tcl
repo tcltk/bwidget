@@ -34,9 +34,7 @@ namespace eval SelectFont {
         {-bg		Synonym		-background}
     }
 
-    proc ::SelectFont { path args } { 
-	return [eval SelectFont::create $path $args] 
-    }
+    Widget::redir_create_command ::SelectFont
     proc use {} {}
 
     variable _families
@@ -44,7 +42,7 @@ namespace eval SelectFont {
     array set _styleOff [list bold normal italic roman]
     variable _sizes     {4 5 6 7 8 9 10 11 12 13 14 15 16 \
 	    17 18 19 20 21 22 23 24}
-    
+
     # Set up preset lists of fonts, so the user can avoid the painfully slow
     # loadfont process if desired.
     if { [string equal $::tcl_platform(platform) "windows"] } {
@@ -109,7 +107,7 @@ namespace eval SelectFont {
 	    presetfixed		$presetFixed	\
 	    presetall		$presetAll	\
 	    ]
-		
+
     variable _widget
 }
 
@@ -155,7 +153,8 @@ proc SelectFont::create { path args } {
 	    append fam [Widget::getoption "$path#SelectFont" -families]
 	}
         eval [list $lbf insert end] $_families($fam)
-        set script "set SelectFont::$path\(family\) \[%W curselection\]; SelectFont::_update $path"
+        set script "set [list SelectFont::${path}(family)] \[%W curselection\];\
+		        SelectFont::_update [list $path]"
         bind $lbf <ButtonRelease-1> $script
         bind $lbf <space>           $script
         pack $sw -fill both -expand yes
@@ -169,7 +168,8 @@ proc SelectFont::create { path args } {
         ScrolledWindow::setwidget $sw $lbs
         LabelFrame::configure $labf2 -focus $lbs
         eval [list $lbs insert end] $_sizes
-        set script "set SelectFont::$path\(size\) \[%W curselection\]; SelectFont::_update $path"
+        set script "set [list SelectFont::${path}(size)] \[%W curselection\];\
+			SelectFont::_update [list $path]"
         bind $lbs <ButtonRelease-1> $script
         bind $lbs <space>           $script
         pack $sw -fill both -expand yes
@@ -180,12 +180,12 @@ proc SelectFont::create { path args } {
         foreach st $_styles {
             set name [lindex [BWidget::getname $st] 0]
             if { $name == "" } {
-                set name "[string toupper [string index $name 0]][string range $name 1 end]"
+                set name [string toupper $name 0]
             }
             checkbutton $subf.$st -text $name \
                 -variable   SelectFont::$path\($st\) \
                 -background $bg \
-                -command    "SelectFont::_update $path"
+                -command    [list SelectFont::_update $path]
             bind $subf.$st <Return> break
             pack $subf.$st -anchor w
         }
@@ -219,9 +219,7 @@ proc SelectFont::create { path args } {
 
         _getfont $path
 
-        proc ::$path { cmd args } "return \[eval SelectFont::\$cmd $path \$args\]"
-
-        return [_draw $path]
+	set res [_draw $path]
     } else {
 	if { [Widget::getoption "$path#SelectFont" -querysystem] } {
 	    set fams [Widget::getoption "$path#SelectFont" -families]
@@ -230,20 +228,20 @@ proc SelectFont::create { path args } {
 	    append fams [Widget::getoption "$path#SelectFont" -families]
 	}
         frame $path -relief flat -borderwidth 0 -background $bg
-        bind $path <Destroy> "SelectFont::_destroy $path"
+        bind $path <Destroy> [list SelectFont::_destroy $path]
         set lbf [ComboBox::create $path.font \
                      -highlightthickness 0 -takefocus 0 -background $bg \
                      -values   $_families($fams) \
                      -textvariable SelectFont::$path\(family\) \
                      -editable 0 \
-                     -modifycmd "SelectFont::_update $path"]
+                     -modifycmd [list SelectFont::_update $path]]
         set lbs [ComboBox::create $path.size \
                      -highlightthickness 0 -takefocus 0 -background $bg \
                      -width    4 \
                      -values   $_sizes \
                      -textvariable SelectFont::$path\(size\) \
                      -editable 0 \
-                     -modifycmd "SelectFont::_update $path"]
+                     -modifycmd [list SelectFont::_update $path]]
         pack $lbf -side left -anchor w
         pack $lbs -side left -anchor w -padx 4
         foreach st $_styles {
@@ -251,7 +249,7 @@ proc SelectFont::create { path args } {
                 -highlightthickness 0 -takefocus 0 -padx 0 -pady 0 -bd 2 \
                 -background $bg \
                 -image  [Bitmap::get $st] \
-                -command "SelectFont::_modstyle $path $st"
+                -command [list SelectFont::_modstyle $path $st]
             pack $path.$st -side left -anchor w
         }
         set data(label) ""
@@ -260,10 +258,11 @@ proc SelectFont::create { path args } {
         _getfont $path
 
         rename $path ::$path:cmd
-        proc ::$path { cmd args } "return \[eval SelectFont::\$cmd $path \$args\]"
+	set res $path
     }
 
-    return $path
+    Widget::redir_widget_command $path SelectFont
+    return $res
 }
 
 

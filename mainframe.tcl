@@ -1,8 +1,8 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.13 2002/05/29 22:02:49 andreas_kupries Exp $
-# ------------------------------------------------------------------------------
+#  $Id: mainframe.tcl,v 1.14 2003/10/17 18:33:06 hobbs Exp $
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
 #     - MainFrame::configure
@@ -20,7 +20,7 @@
 #     - MainFrame::_create_entries
 #     - MainFrame::_parse_name
 #     - MainFrame::_parse_accelerator
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval MainFrame {
     ProgressBar::use
@@ -60,16 +60,16 @@ namespace eval MainFrame {
     Widget::addmap MainFrame "" .status.prgf  {-background {}}
     Widget::addmap MainFrame ProgressBar .status.prg {-background {} -background -troughcolor}
 
-    proc ::MainFrame { path args } { return [eval MainFrame::create $path $args] }
+    Widget::redir_create_command ::MainFrame
     proc use {} {}
 
     variable _widget
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::create { path args } {
     global   tcl_platform
     variable _widget
@@ -156,15 +156,15 @@ proc MainFrame::create { path args } {
     bind $path <Destroy> {MainFrame::_destroy %W}
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval MainFrame::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path MainFrame
 
     return $path
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::configure { path args } {
     variable _widget
 
@@ -201,10 +201,10 @@ proc MainFrame::configure { path args } {
 	    set mbfnt ""
 	}
 	set top     $_widget($path,top)
-	if {[string compare $top .] == 0} {
-	    eval .menubar configure $mbfnt
+	if {[string equal $top .]} {
+	    eval [list .menubar configure] $mbfnt
 	} else {
-	    eval $top.menubar configure $mbfnt
+	    eval [list $top.menubar configure] $mbfnt
 	}
     }
     if { [Widget::hasChanged $path -menuentryfont newmefnt] } {
@@ -225,7 +225,7 @@ proc MainFrame::configure { path args } {
 	    set l [lrange $l 1 end]
 	    if {[string length $e] == 0} {continue}
 	    lappend l [winfo children $e]
-	    eval $e configure $mefnt
+	    eval [list $e configure] $mefnt
 	}
     }
 
@@ -238,9 +238,9 @@ proc MainFrame::configure { path args } {
 	}
 	for {set index 0} {$index<$_widget($path,nindic)} {incr index} {
 	    set indic $path.status.indf.f$index
-	    eval $indic configure $sbfnt
+	    eval [list $indic configure] $sbfnt
 	}
-	eval $path.status.label configure $sbfnt
+	eval [list $path.status.label configure] $sbfnt
 	$path.status configure -height [winfo reqheight $path.status.label]
 
 	$path.status.prg configure \
@@ -251,25 +251,25 @@ proc MainFrame::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::getframe
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::getframe { path } {
     return $path.frame
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::addtoolbar
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::addtoolbar { path } {
     global   tcl_platform
     variable _widget
@@ -296,17 +296,17 @@ proc MainFrame::addtoolbar { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::gettoolbar
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::gettoolbar { path index } {
     return $path.topf.tb$index
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::addindicator
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::addindicator { path args } {
     variable _widget
 
@@ -318,7 +318,7 @@ proc MainFrame::addindicator { path args } {
 
     set index $_widget($path,nindic)
     set indic $path.status.indf.f$index
-    eval label $indic $args -relief sunken -borderwidth 1 \
+    eval [list label $indic] $args -relief sunken -borderwidth 1 \
         -takefocus 0 -highlightthickness 0 $sbfnt
 
     pack $indic -side left -anchor w -padx 2 -fill y -expand 1
@@ -329,17 +329,17 @@ proc MainFrame::addindicator { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::getindicator
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::getindicator { path index } {
     return $path.status.indf.f$index
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::getmenu
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::getmenu { path menuid } {
     variable _widget
 
@@ -404,9 +404,9 @@ proc MainFrame::menuonly { path } {
     catch {pack forget $path.frame}
 }
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::showtoolbar
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::showtoolbar { path index bool } {
     variable _widget
 
@@ -422,12 +422,12 @@ proc MainFrame::showtoolbar { path index bool } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::showstatusbar
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::showstatusbar { path name } {
     set status $path.status
-    if { ![string compare $name "none"] } {
+    if { [string equal $name "none"] } {
         pack forget $status
     } else {
         pack $status -fill x
@@ -443,9 +443,9 @@ proc MainFrame::showstatusbar { path name } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::_destroy
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::_destroy { path } {
     variable _widget
 
@@ -461,9 +461,9 @@ proc MainFrame::_destroy { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::_create_menubar
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::_create_menubar { path descmenu } {
     variable _widget
     global    tcl_platform
@@ -497,7 +497,7 @@ proc MainFrame::_create_menubar { path descmenu } {
         } else {
 	    set menu $menubar.menu$count
 	}
-        eval $menubar add cascade $opt -menu $menu
+        eval [list $menubar add cascade] $opt [list -menu $menu]
         eval [list menu $menu -tearoff $tearoff -background $bg] $mefnt
         foreach tag $tags {
             lappend _widget($path,tags,$tag) $menubar $count
@@ -519,9 +519,9 @@ proc MainFrame::_create_menubar { path descmenu } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::_create_entries
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::_create_entries { path menu bg entries } {
     variable _widget
 
@@ -531,7 +531,7 @@ proc MainFrame::_create_entries { path menu bg entries } {
         set len  [llength $entry]
         set type [lindex $entry 0]
 
-        if { ![string compare $type "separator"] } {
+        if { [string equal $type "separator"] } {
             $menu add separator
             incr count
             continue
@@ -550,11 +550,11 @@ proc MainFrame::_create_entries { path menu bg entries } {
 	# ericm@scriptics.com:  Add mapping from menu items to tags
 	set _widget($path,menutags,[list $menu $count]) $tags
 
-        if { ![string compare $type "cascad"] } {
+        if { [string equal $type "cascad"] } {
             set menuid  [lindex $entry 3]
             set tearoff [lindex $entry 4]
             set submenu $menu.menu$count
-            eval $menu add cascad $opt -menu $submenu
+            eval [list $menu add cascade] $opt [list -menu $submenu]
             menu $submenu -tearoff $tearoff -background $bg
             if { [string length $menuid] } {
                 # menu has identifier
@@ -579,15 +579,15 @@ proc MainFrame::_create_entries { path menu bg entries } {
         set accel [_parse_accelerator [lindex $entry 4]]
         if { [llength $accel] } {
             lappend opt -accelerator [lindex $accel 0]
-            bind $_widget($path,top) [lindex $accel 1] "$menu invoke $count"
+            bind $_widget($path,top) [lindex $accel 1] [list $menu invoke $count]
         }
 
         # user options
         set useropt [lrange $entry 5 end]
-        if { ![string compare $type "command"] || 
-             ![string compare $type "radiobutton"] ||
-             ![string compare $type "checkbutton"] } {
-            eval $menu add $type $opt $useropt
+        if { [string equal $type "command"] || 
+             [string equal $type "radiobutton"] ||
+             [string equal $type "checkbutton"] } {
+            eval [list $menu add $type] $opt $useropt
         } else {
             return -code error "invalid menu type \"$type\""
         }
@@ -596,9 +596,9 @@ proc MainFrame::_create_entries { path menu bg entries } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command MainFrame::_parse_name
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc MainFrame::_parse_name { menuname } {
     set idx [string first "&" $menuname]
     if { $idx == -1 } {

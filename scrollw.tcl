@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.7 2003/05/07 06:26:59 hobbs Exp $
+#  $Id: scrollw.tcl,v 1.8 2003/10/17 18:33:06 hobbs Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -33,9 +33,7 @@ namespace eval ScrolledWindow {
 
     Widget::addmap ScrolledWindow "" :cmd {-relief {} -borderwidth {}}
 
-    proc ::ScrolledWindow {path args} {
-	return [eval [list ScrolledWindow::create $path] $args]
-    }
+    Widget::redir_create_command ::ScrolledWindow
     proc use {} {}
 }
 
@@ -102,7 +100,7 @@ proc ScrolledWindow::create { path args } {
     bind $path <Configure> [list ScrolledWindow::_realize $path]
     bind $path <Destroy>   [list ScrolledWindow::_destroy $path]
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval ScrolledWindow::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path ScrolledWindow
 
     return $path
 }

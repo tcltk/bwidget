@@ -31,7 +31,7 @@ namespace eval ProgressDlg {
     Widget::addmap ProgressDlg :cmd .frame.msg \
         {-width {} -height {} -textvariable {} -font {} -background {}}
 
-    proc ::ProgressDlg { path args } { return [eval ProgressDlg::create $path $args] }
+    Widget::redir_create_command ::ProgressDlg
     proc use {} {}
 }
 
@@ -42,23 +42,25 @@ namespace eval ProgressDlg {
 proc ProgressDlg::create { path args } {
     array set maps [list ProgressDlg {} :cmd {} .frame.msg {} .frame.pb {}]
     array set maps [Widget::parseArgs ProgressDlg $args]
-    
-    eval Dialog::create $path $maps(:cmd) -image [Bitmap::get hourglass] \
-	    -modal none -side bottom -anchor c -class ProgressDlg
+
+    eval [list Dialog::create] $path $maps(:cmd) \
+	[list -image [Bitmap::get hourglass] \
+	     -modal none -side bottom -anchor c -class ProgressDlg]
 
     Widget::initFromODB ProgressDlg "$path#ProgressDlg" $maps(ProgressDlg)
 
     wm protocol $path WM_DELETE_WINDOW {;}
 
     set frame [Dialog::getframe $path]
-    bind $frame <Destroy> "Widget::destroy $path#ProgressDlg"
+    bind $frame <Destroy> [list Widget::destroy $path\#ProgressDlg]
     $frame configure -cursor watch
 
-    eval label $frame.msg $maps(.frame.msg) -relief flat -borderwidth 0 \
-	    -highlightthickness 0 -anchor w -justify left
+    eval [list label $frame.msg] $maps(.frame.msg) \
+	-relief flat -borderwidth 0 \
+	-highlightthickness 0 -anchor w -justify left
     pack $frame.msg -side top -pady 3m -anchor nw -fill x -expand yes
 
-    eval ProgressBar::create $frame.pb $maps(.frame.pb) -width 100
+    eval [list ProgressBar::create] $frame.pb $maps(.frame.pb) -width 100
     pack $frame.pb -side bottom -anchor w -fill x -expand yes
 
     set stop [Widget::cget "$path#ProgressDlg" -stop]
@@ -69,7 +71,7 @@ proc ProgressDlg::create { path args } {
     Dialog::draw $path
     BWidget::grab local $path
 
-    proc ::$path { cmd args } "return \[eval ProgressDlg::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path ProgressDlg
 
     return $path
 }

@@ -1,15 +1,15 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  labelframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelframe.tcl,v 1.4 2002/10/14 20:54:41 hobbs Exp $
-# ------------------------------------------------------------------------------
+#  $Id: labelframe.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelFrame::create
 #     - LabelFrame::getframe
 #     - LabelFrame::configure
 #     - LabelFrame::cget
 #     - LabelFrame::align
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval LabelFrame {
     BWLabel::use
@@ -38,25 +38,25 @@ namespace eval LabelFrame {
     bind BwLabelFrame <FocusIn> {BWLabel::setfocus %W.l}
     bind BwLabelFrame <Destroy> {Widget::destroy %W; rename %W {}}
 
-    proc ::LabelFrame { path args } { return [eval LabelFrame::create $path $args] }
+    Widget::redir_create_command ::LabelFrame
     proc use {} {}
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command LabelFrame::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc LabelFrame::create { path args } {
     Widget::init LabelFrame $path $args
 
-    set path  [eval frame $path [Widget::subcget $path :cmd] \
+    set path  [eval [list frame $path] [Widget::subcget $path :cmd] \
 	    -relief flat -bd 0 -takefocus 0 -highlightthickness 0 \
 	    -class LabelFrame]
 
-    set label [eval BWLabel::create $path.l [Widget::subcget $path .l] \
-                   -takefocus 0 -highlightthickness 0 -relief flat -borderwidth 0 \
-                   -dropenabled 0 -dragenabled 0]
-    set frame [eval frame $path.f [Widget::subcget $path .f] \
+    set label [eval [list BWLabel::create $path.l] [Widget::subcget $path .l] \
+                   -takefocus 0 -highlightthickness 0 -relief flat \
+		   -borderwidth 0 -dropenabled 0 -dragenabled 0]
+    set frame [eval [list frame $path.f] [Widget::subcget $path .f] \
                    -highlightthickness 0 -takefocus 0]
 
     switch  [Widget::getoption $path -side] {
@@ -66,47 +66,47 @@ proc LabelFrame::create { path args } {
         bottom {set packopt "-side bottom -fill x"}
     }
 
-    eval pack $label $packopt
+    eval [list pack $label] $packopt
     pack $frame -fill both -expand yes
 
     bindtags $path [list $path BwLabelFrame [winfo toplevel $path] all]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval LabelFrame::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path LabelFrame
 
     return $path
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command LabelFrame::getframe
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc LabelFrame::getframe { path } {
     return $path.f
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command LabelFrame::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc LabelFrame::configure { path args } {
     return [Widget::configure $path $args]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command LabelFrame::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc LabelFrame::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command LabelFrame::align
 #  This command align label of all widget given by args of class LabelFrame
 #  (or "derived") by setting their width to the max one +1
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc LabelFrame::align { args } {
     set maxlen 0
     set wlist  {}
@@ -116,7 +116,7 @@ proc LabelFrame::align { args } {
                 continue
             }
             set class $Widget::_class($w)
-            if { ![string compare $class "LabelFrame"] } {
+            if { [string equal $class "LabelFrame"] } {
                 set textopt  -text
                 set widthopt -width
             } else {
@@ -126,13 +126,13 @@ proc LabelFrame::align { args } {
                 set notdone  2
                 foreach {option lmap} [array get classmap] {
                     foreach {subpath subclass realopt} $lmap {
-                        if { ![string compare $subclass "LabelFrame"] } {
-                            if { ![string compare $realopt "-text"] } {
+                        if { [string equal $subclass "LabelFrame"] } {
+                            if { [string equal $realopt "-text"] } {
                                 set textopt $option
                                 incr notdone -1
                                 break
                             }
-                            if { ![string compare $realopt "-width"] } {
+                            if { [string equal $realopt "-width"] } {
                                 set widthopt $option
                                 incr notdone -1
                                 break

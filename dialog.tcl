@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.11 2002/06/04 22:27:44 hobbs Exp $
+#  $Id: dialog.tcl,v 1.12 2003/10/17 18:33:06 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -47,7 +47,7 @@ namespace eval Dialog {
     Widget::addmap Dialog "" :cmd   {-background {}}
     Widget::addmap Dialog "" .frame {-background {}}
 
-    proc ::Dialog { path args } { return [eval Dialog::create $path $args] }
+    Widget::redir_create_command ::Dialog
     proc use {} {}
 
     bind BwDialog <Destroy> {Dialog::enddialog %W -1; Dialog::_destroy %W}
@@ -98,13 +98,13 @@ proc Dialog::create { path args } {
     wm withdraw $path
 
     set side [Widget::cget $path -side]
-    if { ![string compare $side "left"] || ![string compare $side "right"] } {
+    if { [string equal $side "left"] || [string equal $side "right"] } {
         set orient vertical
     } else {
         set orient horizontal
     }
 
-    set bbox  [eval ButtonBox::create $path.bbox $maps(.bbox) -orient $orient]
+    set bbox  [eval [list ButtonBox::create $path.bbox] $maps(.bbox) -orient $orient]
     set frame [frame $path.frame -relief flat -borderwidth 0]
     set bg [Widget::cget $path -background]
     $path configure -background $bg
@@ -120,11 +120,11 @@ proc Dialog::create { path args } {
     set _widget($path,realized) 0
     set _widget($path,nbut)     0
 
-    bind $path <Escape>  "ButtonBox::invoke $path.bbox [Widget::getoption $path -cancel]"
-    bind $path <Return>  "ButtonBox::invoke $path.bbox default"
+    bind $path <Escape>  [list ButtonBox::invoke $path.bbox [Widget::getoption $path -cancel]]
+    bind $path <Return>  [list ButtonBox::invoke $path.bbox default]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval Dialog::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path Dialog
 
     return $path
 }
@@ -173,8 +173,9 @@ proc Dialog::getframe { path } {
 proc Dialog::add { path args } {
     variable _widget
 
-    set res [eval ButtonBox::add $path.bbox \
-                 -command [list "Dialog::enddialog $path $_widget($path,nbut)"] $args]
+    set cmd [list ButtonBox::add $path.bbox \
+		 -command [list Dialog::enddialog $path $_widget($path,nbut)]]
+    set res [eval $cmd $args]
     incr _widget($path,nbut)
     return $res
 }
@@ -184,7 +185,7 @@ proc Dialog::add { path args } {
 #  Command Dialog::itemconfigure
 # ----------------------------------------------------------------------------
 proc Dialog::itemconfigure { path index args } {
-    return [eval ButtonBox::itemconfigure $path.bbox $index $args]
+    return [eval [list ButtonBox::itemconfigure $path.bbox $index] $args]
 }
 
 
@@ -233,7 +234,7 @@ proc Dialog::draw { path {focus ""} {overrideredirect 0} {geometry ""}} {
         set _widget($path,realized) 1
         if { [llength [winfo children $path.bbox]] } {
             set side [Widget::getoption $path -side]
-            if { ![string compare $side "left"] || ![string compare $side "right"] } {
+            if {[string equal $side "left"] || [string equal $side "right"]} {
                 set pad  -padx
                 set fill y
             } else {

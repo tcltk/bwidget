@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.25 2003/07/17 23:45:14 jenglish Exp $
+#  $Id: combobox.tcl,v 1.26 2003/10/17 18:33:06 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -51,7 +51,7 @@ namespace eval ComboBox {
     ::bind BwComboBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
     ::bind BwComboBox <Destroy> {Widget::destroy %W; rename %W {}}
 
-    proc ::ComboBox {path args} { return [eval ComboBox::create $path $args] }
+    Widget::redir_create_command ::ComboBox
     proc use {} {}
 }
 
@@ -71,14 +71,14 @@ proc ComboBox::create { path args } {
     array set maps [list ComboBox {} :cmd {} .e {} .a {}]
     array set maps [Widget::parseArgs ComboBox $args]
 
-    eval frame $path $maps(:cmd) -highlightthickness 0 \
-	-takefocus 0 -class ComboBox
+    eval [list frame $path] $maps(:cmd) \
+	[list -highlightthickness 0 -takefocus 0 -class ComboBox]
     Widget::initFromODB ComboBox $path $maps(ComboBox)
 
     bindtags $path [list $path BwComboBox [winfo toplevel $path] all]
 
-    set entry [eval Entry::create $path.e $maps(.e) \
-		   -relief flat -borderwidth 0 -takefocus 1]
+    set entry [eval [list Entry::create $path.e] $maps(.e) \
+		   [list -relief flat -borderwidth 0 -takefocus 1]]
 
     ::bind $path.e <FocusOut> [list $path _focus_out]
     ::bind $path   <<TraverseIn>> [list $path _traverse_in]
@@ -95,7 +95,7 @@ proc ComboBox::create { path args } {
 	set width 15
     }
     set height [winfo reqheight $entry]
-    set arrow [eval ArrowButton::create $path.a $maps(.a) \
+    set arrow [eval [list ArrowButton::create $path.a] $maps(.a) \
 		   -width $width -height $height \
 		   -highlightthickness 0 -borderwidth 1 -takefocus 0 \
 		   -dir	  bottom \
@@ -137,7 +137,7 @@ proc ComboBox::create { path args } {
     }
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval ComboBox::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path ComboBox
 
     return $path
 }
@@ -281,7 +281,7 @@ proc ComboBox::getvalue { path } {
 #  Command ComboBox::bind
 # ----------------------------------------------------------------------------
 proc ComboBox::bind { path args } {
-    return [eval ::bind $path.e $args]
+    return [eval [list ::bind $path.e] $args]
 }
 
 
@@ -328,9 +328,9 @@ proc ComboBox::_create_popup { path } {
 	pack $sw -fill both -expand yes
 	$sw setwidget $listb
 
-	::bind $listb <ButtonRelease-1> "ComboBox::_select $path @%x,%y"
-	::bind $listb <Return>		"ComboBox::_select $path active; break"
-	::bind $listb <Escape>		"ComboBox::_unmapliste $path; break"
+	::bind $listb <ButtonRelease-1> [list ComboBox::_select $path @%x,%y]
+	::bind $listb <Return>	"ComboBox::_select [list $path] active; break"
+	::bind $listb <Escape>	"ComboBox::_unmapliste [list $path]; break"
 	# when losing focus to some other app, make sure we drop the listbox
 	::bind $listb <FocusOut> \
 	    "if {\[focus\] == {}} {ComboBox::_unmapliste [list $path] 0};break"

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  labelentry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelentry.tcl,v 1.4 2003/01/17 22:06:17 patthoyts Exp $
+#  $Id: labelentry.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelEntry::create
@@ -31,7 +31,7 @@ namespace eval LabelEntry {
     ::bind BwLabelEntry <FocusIn> {focus %W.labf}
     ::bind BwLabelEntry <Destroy> {Widget::destroy %W; rename %W {}}
 
-    proc ::LabelEntry { path args } { return [eval LabelEntry::create $path $args] }
+    Widget::redir_create_command ::LabelEntry
     proc use { } {}
 }
 
@@ -43,14 +43,14 @@ proc LabelEntry::create { path args } {
     array set maps [list LabelEntry {} :cmd {} .labf {} .e {}]
     array set maps [Widget::parseArgs LabelEntry $args]
 
-    eval frame $path $maps(:cmd) -class LabelEntry \
+    eval [list frame $path] $maps(:cmd) -class LabelEntry \
 	    -relief flat -bd 0 -highlightthickness 0 -takefocus 0
     Widget::initFromODB LabelEntry $path $maps(LabelEntry)
-	
-    set labf  [eval LabelFrame::create $path.labf $maps(.labf) \
-                   -relief flat -borderwidth 0 -focus $path.e]
+
+    set labf  [eval [list LabelFrame::create $path.labf] $maps(.labf) \
+                   [list -relief flat -borderwidth 0 -focus $path.e]]
     set subf  [LabelFrame::getframe $labf]
-    set entry [eval Entry::create $path.e $maps(.e)]
+    set entry [eval [list Entry::create $path.e] $maps(.e)]
 
     pack $entry -in $subf -fill both -expand yes
     pack $labf  -fill both -expand yes
@@ -58,7 +58,8 @@ proc LabelEntry::create { path args } {
     bindtags $path [list $path BwLabelEntry [winfo toplevel $path] all]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[LabelEntry::_path_command $path \$cmd \$args\]"
+    proc ::$path {cmd args} \
+	"return \[LabelEntry::_path_command [list $path] \$cmd \$args\]"
 
     return $path
 }
@@ -84,7 +85,7 @@ proc LabelEntry::cget { path option } {
 #  Command LabelEntry::bind
 # ------------------------------------------------------------------------------
 proc LabelEntry::bind { path args } {
-    return [eval ::bind $path.e $args]
+    return [eval [list ::bind $path.e] $args]
 }
 
 
@@ -92,11 +93,11 @@ proc LabelEntry::bind { path args } {
 #  Command LabelEntry::_path_command
 #------------------------------------------------------------------------------
 proc LabelEntry::_path_command { path cmd larg } {
-    if { ![string compare $cmd "configure"] ||
-         ![string compare $cmd "cget"] ||
-         ![string compare $cmd "bind"] } {
-        return [eval LabelEntry::$cmd $path $larg]
+    if { [string equal $cmd "configure"] ||
+         [string equal $cmd "cget"] ||
+         [string equal $cmd "bind"] } {
+        return [eval [list LabelEntry::$cmd $path] $larg]
     } else {
-        return [eval $path.e:cmd $cmd $larg]
+        return [eval [list $path.e:cmd $cmd] $larg]
     }
 }

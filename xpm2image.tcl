@@ -1,14 +1,14 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  xpm2image.tcl
 #  Slightly modified xpm-to-image command
-#  $Id: xpm2image.tcl,v 1.2 2001/06/11 23:58:40 hobbs Exp $
-# ------------------------------------------------------------------------------
+#  $Id: xpm2image.tcl,v 1.3 2003/10/17 18:33:06 hobbs Exp $
+# ----------------------------------------------------------------------------
 #
 #  Copyright 1996 by Roger E. Critchlow Jr., San Francisco, California
 #  All rights reserved, fair use permitted, caveat emptor.
 #  rec@elf.org
-# 
-# ------------------------------------------------------------------------------
+#
+# ----------------------------------------------------------------------------
 
 proc xpm-to-image { file } {
     set f [open $file]
@@ -44,7 +44,7 @@ proc xpm-to-image { file } {
             set data(y_hotspot) [lindex $sizes 5]
         }
     } else {
-	    error "size line {$sizes} in $file did not compute"
+	error "size line {$sizes} in $file did not compute"
     }
 
     #
@@ -61,7 +61,7 @@ proc xpm-to-image { file } {
             set key [lindex $record 0]
             set color [string tolower [join [lrange $record 1 end] { }]]
             set data(color-$key-$cname) $color
-            if { ![string compare $color "none"] } {
+            if { [string equal $color "none"] } {
                 set data(transparent) $cname
             }
         }
@@ -90,7 +90,7 @@ proc xpm-to-image { file } {
         while { [string length $line] > 0 } {
             set pixel [string range $line 0 [expr {$data(chars_per_pixel)-1}]]
             set c $data(color-$pixel)
-            if { ![string compare $c none] } {
+            if { [string equal $c none] } {
                 if { [string length $pixels] } {
                     $image put [list $pixels] -to [expr {$x-[llength $pixels]}] $y
                     set pixels {}

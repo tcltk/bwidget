@@ -17,7 +17,7 @@ namespace eval Separator {
     }
     Widget::addmap Separator "" :cmd {-background {}}
 
-    proc ::Separator { path args } { return [eval Separator::create $path $args] }
+    Widget::redir_create_command ::Separator
     proc use {} {}
 }
 
@@ -28,7 +28,7 @@ namespace eval Separator {
 proc Separator::create { path args } {
     array set maps [list Separator {} :cmd {}]
     array set maps [Widget::parseArgs Separator $args]
-    eval frame $path $maps(:cmd) -class Separator
+    eval [list frame $path] $maps(:cmd) -class Separator
     Widget::initFromODB Separator $path $maps(Separator)
 
     if { [Widget::cget $path -orient] == "horizontal" } {
@@ -45,7 +45,7 @@ proc Separator::create { path args } {
     }
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval Separator::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path Separator
 
     return $path
 }

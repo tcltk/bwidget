@@ -1,7 +1,7 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  button.tcl
 #  This file is part of Unifix BWidget Toolkit
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #   Public commands
 #     - Button::create
@@ -15,7 +15,7 @@
 #     - Button::_press
 #     - Button::_release
 #     - Button::_repeat
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval Button {
     set remove [list -command -relief -text -textvariable -underline -state]
@@ -53,14 +53,14 @@ namespace eval Button {
     bind BwButton <Return>          {Button::invoke %W; break}
     bind BwButton <Destroy>         {Widget::destroy %W; rename %W {}}
 
-    proc ::Button { path args } { return [eval Button::create $path $args] }
+    Widget::redir_create_command ::Button
     proc use {} {}
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::create { path args } {
     array set maps [list Button {} :cmd {}]
     array set maps [Widget::parseArgs Button $args]
@@ -69,7 +69,7 @@ proc Button::create { path args } {
 
     # Do some extra configuration on the button
     set relief [Widget::getMegawidgetOption $path -relief]
-    if { ![string compare $relief "link"] } {
+    if { [string equal $relief "link"] } {
         set relief "flat"
     }
     set var [Widget::getMegawidgetOption $path -textvariable]
@@ -98,22 +98,22 @@ proc Button::create { path args } {
     set accel1 [string tolower [string index $text $under]]
     set accel2 [string toupper $accel1]
     if { $accel1 != "" } {
-        bind [winfo toplevel $path] <Alt-$accel1> "Button::invoke $path"
-        bind [winfo toplevel $path] <Alt-$accel2> "Button::invoke $path"    
+        bind [winfo toplevel $path] <Alt-$accel1> [list Button::invoke $path]
+        bind [winfo toplevel $path] <Alt-$accel2> [list Button::invoke $path]
     }
 
     DynamicHelp::sethelp $path $path 1
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval Button::\$cmd $path \$args\]"
+    Widget::redir_widget_command $path Button
 
     return $path
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::configure { path args } {
     set oldunder [$path:cmd cget -underline]
     if { $oldunder != -1 } {
@@ -131,8 +131,8 @@ proc Button::configure { path args } {
     if { $cr || $cs } {
 	set relief [Widget::cget $path -relief]
 	set state  [Widget::cget $path -state]
-        if { ![string compare $relief "link"] } {
-            if { ![string compare $state "active"] } {
+        if { [string equal $relief "link"] } {
+            if { [string equal $state "active"] } {
                 set relief "raised"
             } else {
                 set relief "flat"
@@ -163,8 +163,8 @@ proc Button::configure { path args } {
         set accel1 [string tolower [string index $text $under]]
         set accel2 [string toupper $accel1]
         if { $accel1 != "" } {
-            bind $top <Alt-$accel1> "Button::invoke $path"
-            bind $top <Alt-$accel2> "Button::invoke $path"
+            bind $top <Alt-$accel1> [list Button::invoke $path]
+            bind $top <Alt-$accel2> [list Button::invoke $path]
         }
         $path:cmd configure -text $text -underline $under -textvariable $var
     }
@@ -174,17 +174,17 @@ proc Button::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::cget { path option } {
     Widget::cget $path $option
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::invoke
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::invoke { path } {
     if { [string compare [$path:cmd cget -state] "disabled"] } {
 	$path:cmd configure -state active -relief sunken
@@ -195,7 +195,7 @@ proc Button::invoke { path } {
         }
 	after 100
         set relief [Widget::getMegawidgetOption $path -relief]
-        if { ![string compare $relief "link"] } {
+        if { [string equal $relief "link"] } {
             set relief flat
         }
 	$path:cmd configure \
@@ -213,9 +213,9 @@ proc Button::invoke { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::_enter
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::_enter { path } {
     variable _current
     variable _pressed
@@ -225,16 +225,16 @@ proc Button::_enter { path } {
         $path:cmd configure -state active
         if { $_pressed == $path } {
             $path:cmd configure -relief sunken
-        } elseif { ![string compare [Widget::cget $path -relief] "link"] } {
+        } elseif { [string equal [Widget::cget $path -relief] "link"] } {
             $path:cmd configure -relief raised
         }
     }
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::_leave
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::_leave { path } {
     variable _current
     variable _pressed
@@ -244,20 +244,20 @@ proc Button::_leave { path } {
         $path:cmd configure -state [Widget::cget $path -state]
         set relief [Widget::cget $path -relief]
         if { $_pressed == $path } {
-            if { ![string compare $relief "link"] } {
+            if { [string equal $relief "link"] } {
                 set relief raised
             }
             $path:cmd configure -relief $relief
-        } elseif { ![string compare $relief "link"] } {
+        } elseif { [string equal $relief "link"] } {
             $path:cmd configure -relief flat
         }
     }
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::_press
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::_press { path } {
     variable _pressed
 
@@ -279,9 +279,9 @@ proc Button::_press { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::_release
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::_release { path } {
     variable _current
     variable _pressed
@@ -289,7 +289,7 @@ proc Button::_release { path } {
     if { $_pressed == $path } {
         set _pressed ""
         set relief [Widget::getMegawidgetOption $path -relief]
-        if { ![string compare $relief "link"] } {
+        if { [string equal $relief "link"] } {
             set relief raised
         }
         $path:cmd configure -relief $relief
@@ -306,9 +306,9 @@ proc Button::_release { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Button::_repeat
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Button::_repeat { path } {
     variable _current
     variable _pressed

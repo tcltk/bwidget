@@ -32,7 +32,7 @@ namespace eval MessageDlg {
 	-parent {} -message {} -default {} -title {}
     }
 
-    proc ::MessageDlg { path args } { return [eval MessageDlg::create $path $args] }
+    Widget::redir_create_command ::MessageDlg
     proc use { } {}
 }
 
@@ -94,16 +94,16 @@ proc MessageDlg::create { path args } {
         } else {
             set image ""
         }
-        eval Dialog::create $path $maps(:cmd) -image $image -modal local \
-		-side bottom -anchor c
+        eval [list Dialog::create $path] $maps(:cmd) \
+	    [list -image $image -modal local -side bottom -anchor c]
         foreach but $lbut {
             Dialog::add $path -text $but -name $but
         }
         set frame [Dialog::getframe $path]
 
-        eval message $frame.msg $maps(.frame.msg) \
-		-relief flat -borderwidth 0 -highlightthickness 0 \
-		-textvariable {{}}
+        eval [list message $frame.msg] $maps(.frame.msg) \
+	    [list -relief flat -borderwidth 0 -highlightthickness 0 \
+		 -textvariable ""]
         pack  $frame.msg -side left -padx 3m -pady 1m -fill x -expand yes
 
         set res [Dialog::draw $path]
@@ -122,7 +122,7 @@ proc MessageDlg::create { path args } {
 	    }
 	}
 	set tkMBoxArgs(-type) $type
-	set res [eval tk_messageBox [array get tkMBoxArgs]]
+	set res [eval [list tk_messageBox] [array get tkMBoxArgs]]
 	set res [lsearch $lbut $res]
     }
     Widget::destroy "$path#Message"
