@@ -391,7 +391,7 @@ AC_DEFUN(SC_ENABLE_THREADS, [
 	AC_DEFINE(_REENTRANT)
 
 	case "`uname -s`" in
-	    *win32* | *WIN32* | *CYGWIN_NT*)
+	    *win32* | *WIN32* | *CYGWIN_NT* | *CYGWIN_98* | *CYGWIN_95*)
 		    AC_MSG_RESULT(yes)
 		;;
 	    *)
@@ -444,7 +444,7 @@ AC_DEFUN(SC_ENABLE_THREADS, [
 
 AC_DEFUN(SC_ENABLE_SYMBOLS, [
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT* | *CYGWIN_98* | *CYGWIN_95*)
 	    tcl_dbgx=d
 	;;
 	*)
@@ -662,7 +662,7 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    LDFLAGS="-export-dynamic"
 	    LD_SEARCH_FLAGS=""
 	    ;;
-	*win32*|*WIN32*|CYGWIN_NT*|cygwin_nt*)
+	*win32*|*WIN32*|CYGWIN_NT*|cygwin_nt*|*CYGWIN_98*|*CYGWIN_95*)
 	    CFLAGS_DEBUG="-nologo -Z7 -Od -WX ${runtime}d"
 	    CFLAGS_OPTIMIZE="-nologo -Oti -Gs -GD ${runtime}"
 	    LDFLAGS_CONSOLE="-subsystem:console"
@@ -1792,7 +1792,7 @@ AC_DEFUN(SC_TCL_LINK_LIBS, [
 
 AC_DEFUN(SC_MAKE_LIB, [
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT* |*CYGWIN_98*|*CYGWIN_95*)
 	    if test "${CC-cc}" = "cl"; then
 		MAKE_STATIC_LIB="\${STLIB_LD} -out:\[$]@ \$(\[$]@_OBJECTS) "
 		MAKE_SHARED_LIB="\${SHLIB_LD} \${SHLIB_LDFLAGS} \${SHLIB_LD_LIBS} \$(LDFLAGS) -out:\[$]@ \$(\[$]@_OBJECTS) "
@@ -1879,7 +1879,7 @@ AC_DEFUN(SC_LIB_SPEC, [
     done
 
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT* |*CYGWIN_98*|*CYGWIN_95*)
 	    $1_LIB_SPEC=\"`${CYGPATH} ${$1_LIB_PATH_NAME}`\"
 	    ;;
 	*)
@@ -1925,7 +1925,7 @@ AC_DEFUN(SC_PRIVATE_TCL_HEADERS, [
     AC_MSG_CHECKING(for Tcl private include files)
 
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT* |*CYGWIN_98*|*CYGWIN_95*)
 	    TCL_TOP_DIR_NATIVE=\"`${CYGPATH} ${TCL_SRC_DIR}/..`\"
 	    TCL_GENERIC_DIR_NATIVE=\"`${CYGPATH} ${TCL_SRC_DIR}/../generic`\"
 	    TCL_UNIX_DIR_NATIVE=\"`${CYGPATH} ${TCL_SRC_DIR}/../unix`\"
@@ -2051,7 +2051,7 @@ AC_DEFUN(SC_PRIVATE_TK_HEADERS, [
     AC_MSG_CHECKING(for Tk private include files)
 
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT* |*CYGWIN_98*|*CYGWIN_95*)
 	    TK_UNIX_DIR_NATIVE=\"`${CYGPATH} ${TK_SRC_DIR}/../unix`\"
 	    TK_WIN_DIR_NATIVE=\"`${CYGPATH} ${TK_SRC_DIR}/../win`\"
 	    TK_GENERIC_DIR_NATIVE=\"`${CYGPATH} ${TK_SRC_DIR}/../generic`\"
@@ -2168,7 +2168,7 @@ AC_DEFUN(SC_SIMPLE_EXEEXT, [
     AC_MSG_CHECKING(executable extension based on host type)
 
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT* |*CYGWIN_98*|*CYGWIN_95*)
 	    EXEEXT=".exe"
 	;;
 	*)
