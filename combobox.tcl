@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.16 2000/04/27 15:39:31 ericm Exp $
+#  $Id: combobox.tcl,v 1.17 2000/10/31 15:48:51 kuchler Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -178,17 +178,17 @@ proc ComboBox::setvalue { path index } {
     set value  [Entry::cget $path.e -text]
     switch -- $index {
         next {
-            if { [set idx [lsearch $values $value]] != -1 } {
+            if { [set idx [lsearch -exact $values $value]] != -1 } {
                 incr idx
             } else {
-                set idx [lsearch $values "$value*"]
+                set idx [lsearch -exact $values "$value*"]
             }
         }
         previous {
-            if { [set idx [lsearch $values $value]] != -1 } {
+            if { [set idx [lsearch -exact $values $value]] != -1 } {
                 incr idx -1
             } else {
-                set idx [lsearch $values "$value*"]
+                set idx [lsearch -exact $values "$value*"]
             }
         }
         first {
@@ -224,7 +224,7 @@ proc ComboBox::getvalue { path } {
     set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
 
-    return [lsearch $values $value]
+    return [lsearch -exact $values $value]
 }
 
 
@@ -317,8 +317,8 @@ proc ComboBox::_mapliste { path } {
     $listb selection clear 0 end
     set values [Widget::getMegawidgetOption $path -values]
     set curval [Entry::cget $path.e -text]
-    if { [set idx [lsearch $values $curval]] != -1 ||
-         [set idx [lsearch $values "$curval*"]] != -1 } {
+    if { [set idx [lsearch -exact $values $curval]] != -1 ||
+         [set idx [lsearch -exact $values "$curval*"]] != -1 } {
         $listb selection set $idx
         $listb activate $idx
         $listb see $idx

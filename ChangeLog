@@ -1,4 +1,11 @@
 
+2000-10-31  Dan Kuchler  <kuchler@ajubasolutions.com>
+
+        * combobox.tcl: Added the '-exact' option to the 'lsearch'
+        commands in the combobox code so that the correct index
+        of items will be returned even when there are glob/regexp
+        characters.
+
 2000-10-10  Dan Kuchler  <kuchler@ajubasolutions.com>
 
         * dynhelp.tcl: Added the '-screen' option to the toplevel that
