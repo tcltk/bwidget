@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.1 1999/09/14 01:23:30 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.2 1999/09/14 03:32:07 wart Exp $
 
 
 BWIDGET_SOURCES = \
@@ -122,13 +122,22 @@ install-libraries: installdirs
 	@for i in $(srcdir)/lang/*.rc ; do \
 	    $(INSTALL_SCRIPT) $$i $(pkglibdir)/lang ; \
 	done;
+	@echo "Installing image files in $(pkglibdir)/images"
+	@for i in $(srcdir)/lang/*.rc ; do \
+	    $(INSTALL_SCRIPT) $$i $(pkglibdir)/images ; \
+	done;
 	$(INSTALL_SCRIPT) $(PKGINDEX_TCL) $(pkglibdir)
 
 install-doc:
+	@echo "Installing html documentation in $(prefix)/doc/$(PACKAGE)$(VERSION)"
+	@for i in $(srcdir)/BWman/*.html ; do \
+	    $(INSTALL_SCRIPT) $$i $(prefix)/doc/$(PACKAGE)$(VERSION) ; \
+	done;
 
 installdirs:
 	$(mkinstalldirs) $(pkglibdir)
 	$(mkinstalldirs) $(pkglibdir)/lang
+	$(mkinstalldirs) $(prefix)/doc/$(PACKAGE)$(VERSION)
 
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
