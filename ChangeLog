@@ -1,3 +1,9 @@
+2004-02-07  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* progressbar.tcl (ProgressBar::_modify): convert rect coords to
+	ints to prevent left-over lines that are likely due to a bug in
+	core Tk related to fractional coord refresh.
+
 2004-02-03  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* scrollw.tcl (ScrolledWindow::create): correctly set -relief and
