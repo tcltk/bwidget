@@ -1,4 +1,10 @@
+2003-05-18  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* progressbar.tcl: correctly handle progressbar being quickly
+	created and deleted by deleting afters and checking var existence.
+
 2003-05-18  Joe English  <jenglish@users.sourceforge.net>
+
 	* widget.tcl (Widget::focusOK): Don't assume that '-editable' 
 	option is always 1 or 0 for all widgets. [Bug 710658]
 
