@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.28 2000/05/05 21:15:27 ericm Exp $
+#  $Id: tree.tcl,v 1.29 2000/05/09 00:01:21 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -106,6 +106,17 @@ namespace eval Tree {
 	option add *TreeNode.fill SystemWindowText widgetDefault
     }
 
+    bind TreeSentinalStart <Button-1> {
+	if { $::Tree::sentinal(%W) } {
+	    set ::Tree::sentinal(%W) 0
+	    break
+	}
+    }
+    
+    bind TreeSentinalEnd <Button-1> {
+	set ::Tree::sentinal(%W) 0
+    }
+    
     proc ::Tree { path args } { return [eval Tree::create $path $args] }
     proc use {} {}
 
@@ -121,7 +132,8 @@ proc Tree::create { path args } {
     upvar 0  $path data
 
     Widget::init Tree $path $args
-
+    set ::Tree::sentinal($path.c) 0
+    
     set data(root)         {{}}
     set data(selnodes)     {}
     set data(upd,level)    0
@@ -135,6 +147,8 @@ proc Tree::create { path args } {
     frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat \
 	    -takefocus 0
     eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
+    bindtags $path.c [list TreeSentinalStart $path.c Canvas \
+	    [winfo toplevel $path] all TreeSentinalEnd]
     pack $path.c -expand yes -fill both
     $path.c bind cross <ButtonPress-1> [list Tree::_cross_event $path]
 
@@ -173,6 +187,22 @@ proc Tree::create { path args } {
     # Bind <Button-1> to select the clicked node -- no reason not to, right?
     Tree::bindText  $path <Button-1> "$path selection set"
     Tree::bindImage $path <Button-1> "$path selection set"
+
+
+    # Add sentinal bindings for double-clicking on items, to handle the 
+    # gnarly Tk bug wherein:
+    # ButtonClick
+    # ButtonClick
+    # On a canvas item translates into button click on the item, button click
+    # on the canvas, double-button on the item, single button click on the
+    # canvas (which can happen if the double-button on the item causes some
+    # other event to be handled in between when the button clicks are examined
+    # for the canvas)
+    $path.c bind TreeItemSentinal <Double-Button-1> \
+	    "set ::Tree::sentinal($path.c) 1"
+    
+    bind $path.c <Button-1> "focus %W"
+
     # ericm
 
     return $path
@@ -344,7 +374,7 @@ proc Tree::itemcget { path node option } {
 proc Tree::bindText { path event script } {
     if { $script != "" } {
         $path.c bind "node" $event \
-            "$script \[string range \[lindex \[$path.c gettags current\] 1\] 2 end\]"
+            "$script \[Tree::_get_node_name $path current 2\]"
     } else {
         $path.c bind "node" $event {}
     }
@@ -357,7 +387,7 @@ proc Tree::bindText { path event script } {
 proc Tree::bindImage { path event script } {
     if { $script != "" } {
         $path.c bind "img" $event \
-            "$script \[string range \[lindex \[$path.c gettags current\] 1\] 2 end\]"
+		"$script \[Tree::_get_node_name $path current 2\]"
     } else {
         $path.c bind "img" $event {}
     }
@@ -502,8 +532,7 @@ proc Tree::selection { path cmd args } {
 	    if { [info exists data($node1)] && [info exists data($node2)] } {
 		set nodes {}
 		foreach nodeItem [$path.c find withtag node] {
-		    set node [string range \
-			    [lindex [$path.c gettags $nodeItem] 1] 2 end]
+		    set node [Tree::_get_node_name $path $nodeItem 2]
 		    if { [Widget::getoption $path.$node -selectable] } {
 			lappend nodes $node
 		    }
@@ -637,7 +666,7 @@ proc Tree::find {path findInfo {confine ""}} {
                  ![string compare $item "img"]  ||
                  ![string compare $item "win"] } {
                 # item is the label or image/window of the node
-                set node  [string range [lindex $ltags 1] 2 end]
+                set node  [Tree::_get_node_name $path $id 2]
                 set found 1
                 break
             }
@@ -1052,7 +1081,7 @@ proc Tree::_cross_event { path } {
     variable $path
     upvar 0  $path data
 
-    set node [string range [lindex [$path.c gettags current] 1] 2 end]
+    set node [Tree::_get_node_name $path current 1]
     if { [Widget::getoption $path.$node -open] } {
         Tree::itemconfigure $path $node -open 0
         if { [set cmd [Widget::getoption $path -closecmd]] != "" } {
@@ -1088,7 +1117,7 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
         -fill   [Widget::getoption $path.$node -fill] \
         -font   [Widget::getoption $path.$node -font] \
         -anchor w \
-        -tags   "node n:$node"
+        -tags   "TreeItemSentinal node n:$node"
     set len [expr {[llength $data($node)] > 1}]
     set dc  [Widget::getoption $path.$node -drawcross]
     set exp [Widget::getoption $path.$node -open]
@@ -1112,9 +1141,11 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
     }
 
     if { [set win [Widget::getoption $path.$node -window]] != "" } {
-        $path.c create window $x1 $y0 -window $win -anchor w -tags "win i:$node"
+        $path.c create window $x1 $y0 -window $win -anchor w \
+		-tags "TreeItemSentinal win i:$node"
     } elseif { [set img [Widget::getoption $path.$node -image]] != "" } {
-        $path.c create image $x1 $y0 -image $img -anchor w -tags "img i:$node"
+        $path.c create image $x1 $y0 -image $img -anchor w \
+		-tags "TreeItemSentinal img i:$node"
     }
     return $y1
 }
@@ -1170,14 +1201,16 @@ proc Tree::_update_nodes { path } {
                     $path.c itemconfigure $idi -window $win
                 } else {
                     $path.c delete $idi
-                    $path.c create window $x0 $y0 -window $win -anchor w -tags "win i:$node"
+                    $path.c create window $x0 $y0 -window $win -anchor w \
+			    -tags "TreeItemSentinal win i:$node"
                 }
             } elseif { [string length $img] } {
                 if { ![string compare $type "img"] } {
                     $path.c itemconfigure $idi -image $img
                 } else {
                     $path.c delete $idi
-                    $path.c create image $x0 $y0 -image $img -anchor w -tags "img i:$node"
+                    $path.c create image $x0 $y0 -image $img -anchor w \
+			    -tags "TreeItemSentinal img i:$node"
                 }
             } else {
                 $path.c delete $idi
@@ -1283,7 +1316,7 @@ proc Tree::_redraw_selection { path } {
         }
     }
     foreach id [$path.c find withtag sel] {
-        set node [string range [lindex [$path.c gettags $id] 1] 2 end]
+        set node [Tree::_get_node_name $path $id 1]
         $path.c itemconfigure "n:$node" -fill [Widget::getoption $path.$node -fill]
     }
     $path.c delete sel
@@ -1329,7 +1362,7 @@ proc Tree::_init_drag_cmd { path X Y top } {
     if { ![string compare $item "node"] ||
          ![string compare $item "img"]  ||
          ![string compare $item "win"] } {
-        set node [string range [lindex $ltags 1] 2 end]
+        set node [Tree::_get_node_name $path current 2]
         if { [set cmd [Widget::getoption $path -draginitcmd]] != "" } {
             return [uplevel \#0 $cmd [list $path $node $top]]
         }
@@ -1446,7 +1479,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
                  ![string compare $item "img"]  ||
                  ![string compare $item "win"] } {
                 # item is the label or image/window of the node
-                set node [string range [lindex $ltags 1] 2 end]
+                set node [Tree::_get_node_name $path $id 2]
 		set found 1
 		break
 	    }
@@ -1654,7 +1687,7 @@ proc Tree::_keynav {which win} {
     # completely redrawn, this list will be in vertical order.
     set nodes {}
     foreach nodeItem [$win.c find withtag node] {
-	set node [string range [lindex [$win.c gettags $nodeItem] 1] 2 end]
+	set node [Tree::_get_node_name $win $nodeItem 2]
 	if { [Widget::cget $win.$node -selectable] } {
 	    lappend nodes $node
 	}
@@ -1806,3 +1839,24 @@ proc Tree::_set_current_node {win node} {
     }
     return
 }
+
+# Tree::_get_node_name --
+#
+#	Given a canvas item, get the name of the tree node represented by that
+#	item.
+#
+# Arguments:
+#	path		tree to query
+#	item		Optional canvas item to examine; if omitted, 
+#			defaults to "current"
+#	tagindex	Optional tag index, since the n:nodename tag is not
+#			in the same spot for all canvas items.  If omitted,
+#			defaults to "end-1", so it works with "current" item.
+#
+# Results:
+#	node	name of the tree node.
+
+proc Tree::_get_node_name {path {item current} {tagindex end-1}} {
+    return [string range [lindex [$path.c gettags $item] $tagindex] 2 end]
+}
+
