@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.2 1999/09/17 17:46:47 ericm Exp $
+#  $Id: mainframe.tcl,v 1.3 1999/09/19 22:40:00 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -363,9 +363,18 @@ proc MainFrame::_destroy { path } {
     Widget::destroy $path
     catch {destroy [$_widget($path,top) cget -menu]}
     $_widget($path,top) configure -menu {}
-    unset _widget($path,top)
-    unset _widget($path,ntoolbar)
-    unset _widget($path,nindic)
+
+    # ericm@scriptics.com
+    # We really want to unset ALL of the state vars, not just some of them
+    # Otherwise, if we ever create a MainFrame with the same pathname, it has
+    # some residual (incorrect) state.
+    foreach var [array names _widget $path*] {
+	unset _widget($var)
+    }
+#    unset _widget($path,top)
+#    unset _widget($path,ntoolbar)
+#    unset _widget($path,nindic)
+    # ericm@scriptics.com
     rename $path {}
 }
 

@@ -1,3 +1,9 @@
+1999-09-19  Eric Melski  <ericm@scriptics.com>
+
+	* mainframe.tcl:  Fixed _destroy to unset ALL state variables, so that
+	when a new MainFrame of the same name as an old one is created, it doesn't
+	pick up residual state from the old one.
+
 1999-09-17  Eric Melski  <ericm@scriptics.com
 
 	* mainframe.tcl: Modified menu creation/setmenustate functions to support
@@ -5,6 +11,10 @@
 	whenever any one of its tags changes state, now it only enables menu items
 	if all of its tags are set.  This makes it really easy to, say, only enable
 	the "New Action" entry if both a project is open and an element is selected.
+
+	* buttonbox.tcl: Added tagging mechanism to buttonbox.  When using
+	$bbox add, the first parameter is a list of tags for the button.  Then
+	use $bbox setbuttonstate to change the state of a tag.
 
 1999-09-16  Eric Melski  <ericm@scriptics.com>
 
