@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.19 2004/04/22 22:50:15 hobbs Exp $
+#  $Id: listbox.tcl,v 1.20 2004/04/23 17:54:29 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -142,7 +142,7 @@ proc ListBox::create { path args } {
     set data(dnd,item)     ""
 
     eval [list canvas $path.c] [Widget::subcget $path .c] \
-	 [list -xscrollincrement 8 -highlightthickness 1]
+	[list -xscrollincrement 8]
     pack $path.c -expand yes -fill both
 
     DragSite::setdrag $path $path.c ListBox::_init_drag_cmd \
@@ -946,10 +946,8 @@ proc ListBox::_update_select_fill { path } {
 # ----------------------------------------------------------------------------
 #  Command ListBox::_draw_item
 # ----------------------------------------------------------------------------
-proc ListBox::_draw_item { path item x0 x1 y } {
+proc ListBox::_draw_item {path item x0 x1 y bg selfill multi ww} {
     set indent  [Widget::getoption $path.$item -indent]
-    set selfill [Widget::cget $path -selectfill]
-    set multi   [Widget::cget $path -multicolumn]
     set i [$path.c create text [expr {$x1+$indent}] $y \
         -text   [Widget::getoption $path.$item -text] \
         -fill   [_getoption        $path $item -foreground] \
@@ -958,10 +956,8 @@ proc ListBox::_draw_item { path item x0 x1 y } {
         -tags   [list item n:$item click]]
 
     if { $selfill && !$multi } {
-        set bg    [Widget::cget $path -background]
-        set width [winfo width $path.c]
         set bbox  [$path.c bbox n:$item]
-        set bbox  [list 0 [lindex $bbox 1] $width [lindex $bbox 3]]
+        set bbox  [list 0 [lindex $bbox 1] $ww [lindex $bbox 3]]
         set tags  [list box b:$item click]
         $path.c create rect $bbox -fill $bg -width 0 -tags $tags
         $path.c raise $i
@@ -1006,9 +1002,15 @@ proc ListBox::_redraw_items { path } {
     foreach item $data(upd,delete) {
         $path.c delete i:$item n:$item s:$item b:$item
     }
+    # Pass these to _draw_item so it doesn't have to request them
+    # for each item.
+    set bg      [Widget::cget $path -background]
+    set selfill [Widget::cget $path -selectfill]
+    set multi   [Widget::cget $path -multicolumn]
+    set ww      [winfo width $path]
     foreach item $data(items) {
         if { [info exists data(upd,create,$item)] } {
-            _draw_item $path $item $x0 $x1 $y0
+            _draw_item $path $item $x0 $x1 $y0 $bg $selfill $multi $ww
             unset data(upd,create,$item)
         } else {
             set indent [Widget::getoption $path.$item -indent]
@@ -1054,15 +1056,17 @@ proc ListBox::_redraw_selection { path } {
             -fill [_getoption $path $item -foreground]
     }
     $path.c delete sel
+    if {$selfill && !$multi} {
+	# cache window width for use below
+	set width [winfo width $path]
+    }
     foreach item $data(selitems) {
         set bbox [$path.c bbox "n:$item"]
-        if { $selfill && !$multi } {
-            set bbox2 [$path.c bbox "b:$item"]
-            set w1 [lindex $bbox 2]
-            set w2 [lindex $bbox2 2]
-            if {$w1 < $w2} { set bbox $bbox2 }
-        }
         if { [llength $bbox] } {
+	    if { $selfill && !$multi } {
+		# With -selectfill, make box occupy full width of widget
+		set bbox [list 0 [lindex $bbox 1] $width [lindex $bbox 3]]
+	    }
             set tags [list sel s:$item click]
             set id [$path.c create rectangle $bbox \
                 -fill $selbg -outline $selbg -tags $tags]
