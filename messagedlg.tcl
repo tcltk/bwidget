@@ -117,7 +117,7 @@ proc MessageDlg::create { path args } {
 	    set tkMBoxArgs(-icon) $icon
 	}
 	if { [info exists tkMBoxArgs(-parent)] } {
-	    if { ![winfo exists tkMBoxArgs(-parent)] } {
+	    if { ![winfo exists $tkMBoxArgs(-parent)] } {
 		unset tkMBoxArgs(-parent)
 	    }
 	}
