@@ -1,12 +1,6 @@
-
-
-source manager.tcl
-source basic.tcl
-source select.tcl
-source dnd.tcl
-source tree.tcl
-source tmpldlg.tcl
-
+#!/bin/sh
+# The next line is executed by /bin/sh, but not tcl \
+exec wish "$0" ${1+"$@"}
 
 namespace eval Demo {
     variable _wfont
@@ -20,11 +14,21 @@ namespace eval Demo {
     variable font_name
     variable toolbar1  1
     variable toolbar2  1
+
+    set pwd [pwd]
+    cd [file dirname [info script]]
+    variable DEMODIR [pwd]
+    cd $pwd
+
+    foreach script {
+	manager.tcl basic.tcl select.tcl dnd.tcl tree.tcl tmpldlg.tcl
+    } {
+	namespace inscope :: source $DEMODIR/$script
+    }
 }
 
 
 proc Demo::create { } {
-    global   tcl_platform
     global   tk_patchLevel
     variable _wfont
     variable notebook
@@ -157,20 +161,24 @@ proc Demo::update_font { newfont } {
 
 
 proc Demo::_create_intro { } {
-    global tcl_platform
+    variable DEMODIR
 
     set top [toplevel .intro -relief raised -borderwidth 2]
 
     wm withdraw $top
     wm overrideredirect $top 1
 
-    set ximg  [label $top.x -bitmap @x1.xbm -foreground grey90 -background white]
-    set bwimg [label $ximg.bw -bitmap @bwidget.xbm -foreground grey90 -background white]
+    set ximg  [label $top.x -bitmap @$DEMODIR/x1.xbm \
+	    -foreground grey90 -background white]
+    set bwimg [label $ximg.bw -bitmap @$DEMODIR/bwidget.xbm \
+	    -foreground grey90 -background white]
     set frame [frame $ximg.f -background white]
-    set lab1  [label $frame.lab1 -text "Loading demo" -background white -font {times 8}]
-    set lab2  [label $frame.lab2 -textvariable Demo::prgtext -background white -font {times 8} -width 35]
+    set lab1  [label $frame.lab1 -text "Loading demo" \
+	    -background white -font {times 8}]
+    set lab2  [label $frame.lab2 -textvariable Demo::prgtext \
+	    -background white -font {times 8} -width 35]
     set prg   [ProgressBar $frame.prg -width 50 -height 10 -background white \
-                   -variable Demo::prgindic -maximum 10]
+	    -variable Demo::prgindic -maximum 10]
     pack $lab1 $lab2 $prg
     place $frame -x 0 -y 0 -anchor nw
     place $bwimg -relx 1 -rely 1 -anchor se
@@ -180,12 +188,11 @@ proc Demo::_create_intro { } {
 }
 
 
-proc main {} {
-    global tcl_platform
-    global auto_path
+proc Demo::main {} {
+    variable DEMODIR
 
-    lappend auto_path ..
-    package require BWidget
+    lappend ::auto_path [file dirname $DEMODIR]
+    namespace inscope :: package require BWidget
 
     option add *TitleFrame.l.font {helvetica 11 bold italic}
 
@@ -199,5 +206,5 @@ proc main {} {
     focus -force .
 }
 
-main
+Demo::main
 wm geom . [wm geom .]
