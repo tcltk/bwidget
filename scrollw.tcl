@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.9 2003/10/20 21:23:52 damonc Exp $
+#  $Id: scrollw.tcl,v 1.10 2003/10/30 17:43:06 hobbs Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -117,7 +117,8 @@ proc ScrolledWindow::getframe { path } {
 proc ScrolledWindow::setwidget { path widget } {
     Widget::getVariable $path data
 
-    if {[info exists data(widget)] && ![string equal $data(widget) $widget]} {
+    if {[info exists data(widget)] && [winfo exists $data(widget)]
+	&& ![string equal $data(widget) $widget]} {
 	grid remove $data(widget)
 	$data(widget) configure -xscrollcommand "" -yscrollcommand ""
     }
