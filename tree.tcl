@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.51 2004/04/26 18:42:03 hobbs Exp $
+#  $Id: tree.tcl,v 1.52 2004/08/26 19:45:45 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -220,7 +220,6 @@ proc Tree::create { path args } {
     Tree::bindImage $path <Button-1>         [list $selectcmd $path set]
     Tree::bindText  $path <Control-Button-1> [list $selectcmd $path toggle]
     Tree::bindImage $path <Control-Button-1> [list $selectcmd $path toggle]
-
 
     # Add sentinal bindings for double-clicking on items, to handle the 
     # gnarly Tk bug wherein:
@@ -468,6 +467,7 @@ proc Tree::delete { path args } {
     variable $path
     upvar 0  $path data
 
+    set sel 0
     foreach lnodes $args {
 	foreach node $lnodes {
             set node [_node_name $path $node]
@@ -475,9 +475,13 @@ proc Tree::delete { path args } {
 		set parent [lindex $data($node) 0]
 		set idx	   [lsearch -exact $data($parent) $node]
 		set data($parent) [lreplace $data($parent) $idx $idx]
-		_subdelete $path [list $node]
+		incr sel [_subdelete $path [list $node]]
 	    }
 	}
+    }
+    if {$sel} {
+	# if selection changed, call the selectcommand
+	__call_selectcmd $path
     }
 
     _redraw_idle $path 3
@@ -1162,6 +1166,7 @@ proc Tree::_subdelete { path lnodes } {
     upvar 0  $path data
 
     set sel $data(selnodes)
+    set selchanged 0
 
     while { [llength $lnodes] } {
         set lsubnodes [list]
@@ -1173,6 +1178,7 @@ proc Tree::_subdelete { path lnodes } {
 	    set idx [lsearch -exact $sel $node]
 	    if { $idx >= 0 } {
 		set sel [lreplace $sel $idx $idx]
+		incr selchanged
 	    }
             if { [set win [Widget::getoption $path.$node -window]] != "" } {
                 destroy $win
@@ -1183,6 +1189,8 @@ proc Tree::_subdelete { path lnodes } {
     }
 
     set data(selnodes) $sel
+    # return number of sel items changes
+    return $selchanged
 }
 
 
