@@ -124,8 +124,9 @@ proc DemoDlg::_msgdlg { parent } {
 
 
 proc DemoDlg::_stddlg { parent } {
-    set labf  [LabelFrame $parent.f -text "Select a color "]
-    set color [SelectColor [$labf getframe].col -type menubutton]
+    set but0  [button $parent.but0 \
+                   -text "Select a color " \
+                   -command "DemoDlg::_show_color $parent.but0"]
     set but1  [button $parent.but1 \
                    -text    "Font selector dialog" \
                    -command DemoDlg::_show_fontdlg]
@@ -136,10 +137,16 @@ proc DemoDlg::_stddlg { parent } {
                    -text    "Password dialog" \
                    -command DemoDlg::_show_passdlg]
 
-    pack $color
-    pack $labf $but1 $but2 $but3 -side left -padx 5 -anchor w
+    pack $but0 $but1 $but2 $but3 -side left -padx 5 -anchor w
 }
 
+proc DemoDlg::_show_color {w} {
+    set color [SelectColor::menu $w.color [list below $w] \
+                       -color [$w cget -background]]
+    if {[string length $color]} {
+        $w configure -background $color
+    }
+}
 
 proc DemoDlg::_show_tmpldlg { } {
     variable tmpl
