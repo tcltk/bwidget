@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.9 2000/02/16 16:43:22 sven Exp $
+#  $Id: tree.tcl,v 1.10 2000/02/25 02:05:21 surles Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -139,7 +139,7 @@ proc Tree::create { path args } {
     bind $path <KeyPress-Down>  "Tree::_keynav down %W"
     bind $path <KeyPress-Right> "Tree::_keynav right %W"
     bind $path <KeyPress-Left>  "Tree::_keynav left %W"
-    bind $path <KeyPress-space> "+Tree::_keynav space %W"
+    bind $path <KeyPress-space> "Tree::_keynav space %W"
 
     # These allow keyboard control of the scrolling
     bind $path <Control-KeyPress-Up>    "$path yview scroll -1 units"
@@ -495,6 +495,13 @@ proc Tree::selection { path cmd args } {
 		    if { [Widget::getoption $path.$node -selectable] } {
 			lappend nodes $node
 		    }
+		}
+		# surles: Set the root string to the first element on the list.
+		if {$node1 == "root"} {
+		    set node1 [lindex $nodes 0]
+		}
+		if {$node2 == "root"} {
+		    set node2 [lindex $nodes 0]
 		}
 
 		# Find the first visible ancestor of node1, starting with node1
@@ -1605,7 +1612,8 @@ proc Tree::_keynav {which win} {
     }
 	
     # Keyboard navigation is all relative to the current node
-    set node      [$win selection get]
+    # surles: Get the current node for single or multiple selection schemas.
+    set node [_get_current_node $win]
 
     switch -exact -- $which {
 	"up" {
@@ -1618,6 +1626,7 @@ proc Tree::_keynav {which win} {
 	    incr index -1
 	    if { $index >= 0 } {
 		$win selection set [lindex $nodes $index]
+		_set_current_node $win [lindex $nodes $index]
 		$win see [lindex $nodes $index]
 		return
 	    }
@@ -1626,6 +1635,7 @@ proc Tree::_keynav {which win} {
 	    # Down goes to the node that is vertically below the current node
 	    if { [string equal $node ""] } {
 		$win selection set [lindex $nodes 0]
+		_set_current_node $win [lindex $nodes 0]
 		$win see [lindex $nodes 0]
 		return
 	    }
@@ -1634,6 +1644,7 @@ proc Tree::_keynav {which win} {
 	    incr index
 	    if { $index < [llength $nodes] } {
 		$win selection set [lindex $nodes $index]
+		_set_current_node $win [lindex $nodes $index]
 		$win see [lindex $nodes $index]
 		return
 	    }
@@ -1651,6 +1662,7 @@ proc Tree::_keynav {which win} {
 		    incr index
 		    if { $index < [llength $nodes] } {
 			$win selection set [lindex $nodes $index]
+			_set_current_node $win [lindex $nodes $index]
 			$win see [lindex $nodes $index]
 			return
 		    }
@@ -1672,18 +1684,15 @@ proc Tree::_keynav {which win} {
 		return
 	    } else {
 		set parent [$win parent $node]
-                if { [string equal $parent "root"] } {
-                    set parent $node
-                } else {
-		    while { ![$win itemcget $parent -selectable] } {
-		        set parent [$win parent $parent]
-		        if { [string equal $parent "root"] } {
-			    set parent $node
-			    break
-                        }
+		while { ![$win itemcget $parent -selectable] } {
+		    set parent [$win parent $parent]
+		    if { [string equal $parent "root"] } {
+			set parent $node
+			break
 		    }
 		}
 		$win selection set $parent
+		_set_current_node $win $parent
 		$win see $parent
 		return
 	    }
@@ -1697,6 +1706,50 @@ proc Tree::_keynav {which win} {
 		$win itemconfigure $node -open [expr {$open?0:1}]
 	    }
 	}
+    }
+    return
+}
+
+# Tree::_get_current_node --
+#
+#	Get the current node for either single or multiple
+#	node selection trees.  If the tree allows for 
+#	multiple selection, return the cursor node.  Otherwise,
+#	if there is a selection, return the first node in the
+#	list.  If there is no selection, return the root node.
+#
+# arguments:
+#       win        name of the tree widget
+#
+# Results:
+#	The current node.
+
+proc Tree::_get_current_node {win} {
+    if {[info exists selectTree::selectCursor($win)]} {
+	set result $selectTree::selectCursor($win)
+    } elseif {[set selList [$win selection get]] != {}} {
+	set result [lindex $selList 0]
+    } else {
+	set result root
+    }
+    return $result
+}
+
+# Tree::_set_current_node --
+#
+#	Set the current node for either single or multiple
+#	node selection trees.
+#
+# arguments:
+#       win        Name of the tree widget
+#	node	   The current node.
+#
+# Results:
+#	None.
+
+proc Tree::_set_current_node {win node} {
+    if {[info exists selectTree::selectCursor($win)]} {
+	set selectTree::selectCursor($win) $node
     }
     return
 }
