@@ -1,3 +1,16 @@
+2000-02-17  Eric Melski  <ericm@scriptics.com>
+
+	* notebook.tcl: Added an extra check to move the leftmost tab a
+	touch to the right when it is not selected (again, to make the
+	tabs more Windows-like).  Also replaced redundant [string equal]
+	checks with a stored pre-check (ie, set foo [string equal ...]).
+
+2000-02-16  Eric Melski  <ericm@scriptics.com>
+
+	* notebook.tcl: Changed appearance of tabs; leftmost tab is now 
+	flush with the left of the notebook, and the tabs look more
+	Windows-like.
+
 2000-02-16  Sven Delmas  <sven@scriptics.com>
 
 	* dialog.tcl: Added a new parameter to the draw procedure that

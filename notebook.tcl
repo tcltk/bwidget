@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.5 2000/02/17 03:06:01 ericm Exp $
+#  $Id: notebook.tcl,v 1.6 2000/02/17 18:37:19 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -694,6 +694,10 @@ proc NoteBook::_draw_page { path page create } {
     set xd  [_get_x_page $path $pos]
     set xf  [expr {$xd + $data($page,width)}]
 
+    # Set the initial text offsets -- a few pixels down, centered left-to-right
+    set textOffsetY 3
+    set textOffsetX 9
+
     # Coordinates of the tab corners are:
     #     c3        c4
     #
@@ -715,6 +719,13 @@ proc NoteBook::_draw_page { path page create } {
     if { $data(select) != $page } {
 	# Non-selected pages have tabs 2 pixels lower than the selected one
 	incr top 2
+	if { $pos == 0 } {
+	    # The leftmost page is a special case -- it is drawn with its
+	    # tab a little indented.  To achieve this, we incr xd.  We also
+	    # decr textOffsetX, so that the text doesn't move left/right.
+	    incr xd 2
+	    incr textOffsetX -2
+	}
     }
 
     # Precompute some coord values that we use a lot
@@ -724,9 +735,12 @@ proc NoteBook::_draw_page { path page create } {
 
     # Sven
     set side [Widget::getoption $path -side]
+    set tabsOnBottom [string equal $side "bottom"]
+
     set h1 [expr {[winfo height $path]}]
     set bd [Widget::getoption $path -borderwidth]
-    if { [string equal $side "bottom"] } {
+
+    if { $tabsOnBottom } {
 	set top [expr {$top * -1}]
 	set topPlusRadius [expr {$topPlusRadius * -1}]
 	# Hrm... the canvas has an issue with drawing diagonal segments
@@ -764,13 +778,8 @@ proc NoteBook::_draw_page { path page create } {
 
     set img [Widget::getoption $path.f$page -image]
 
-    # Text on the tab is down a few pixels from the top of the tab, and
-    # centered left-to-right.
-    set textOffsetY 3
-    set textOffsetX 9
-
     set ytext $top
-    if { [string equal $side "bottom"] } {
+    if { $tabsOnBottom } {
 	# The "+ 2" below moves the text closer to the bottom of the tab,
 	# so it doesn't look so cramped.  I should be able to achieve the
 	# same goal by changing the anchor of the text and using this formula:
