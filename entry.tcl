@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.5 2000/02/28 18:06:39 ericm Exp $
+#  $Id: entry.tcl,v 1.6 2000/02/29 02:41:35 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -173,7 +173,9 @@ proc Entry::configure { path args } {
 #  Command Entry::cget
 # ------------------------------------------------------------------------------
 proc Entry::cget { path option } {
-    Widget::configure $path [list -text [$path:cmd get]]
+    if { [string equal "-text" $option] } {
+	return [$path:cmd get]
+    }
     return [Widget::cget $path $option]
 }
 

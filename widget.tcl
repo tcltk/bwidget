@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.6 2000/02/28 18:06:40 ericm Exp $
+#  $Id: widget.tcl,v 1.7 2000/02/29 02:41:35 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1191,3 +1191,31 @@ proc Widget::focusOK { w } {
     }
     return 0
 }
+
+# Widget::varForOption --
+#
+#	Retrieve a fully qualified variable name for the option specified.
+#	If the option is not one for which a variable exists, throw an error 
+#	(ie, those options that map directly to widget options).
+#
+# Arguments:
+#	path	megawidget to get an option var for.
+#	option	option to get a var for.
+#
+# Results:
+#	varname	name of the variable, fully qualified, suitable for tracing.
+
+proc Widget::varForOption {path option} {
+    variable _class
+    variable _optiontype
+
+    set class $_class($path)
+    upvar 0 ${class}::$path:opt pathopt
+
+    if { ![info exists pathopt($option)] } {
+	error "unable to find variable for option \"$option\""
+    }
+    set varname "::Widget::${class}::$path:opt($option)"
+    return $varname
+}
+

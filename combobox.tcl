@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.10 2000/02/27 20:22:01 ericm Exp $
+#  $Id: combobox.tcl,v 1.11 2000/02/29 02:41:35 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -225,8 +225,8 @@ proc ComboBox::bind { path args } {
 # ------------------------------------------------------------------------------
 proc ComboBox::_create_popup { path } {
     set shell $path.shell
-    set lval  [Widget::getoption $path -values]
-    set h     [Widget::getoption $path -height] 
+    set lval  [Widget::cget $path -values]
+    set h     [Widget::cget $path -height]
     if { $h <= 0 } {
         set len [llength $lval]
         if { $len < 3 } {
@@ -250,13 +250,14 @@ proc ComboBox::_create_popup { path } {
 
         set sw     [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
         set listb  [listbox $shell.listb \
-                        -relief flat -borderwidth 0 -highlightthickness 0 \
-                        -exportselection false \
-                        -font   [Widget::getoption $path -font]  \
-                        -height $h]
+		-relief flat -borderwidth 0 -highlightthickness 0 \
+		-exportselection false \
+		-font   [Widget::cget $path -font]  \
+		-height $h \
+		-listvariable [Widget::varForOption $path -values]]
         pack $sw -fill both -expand yes
         $sw setwidget $listb
-        _update_listbox $path 1
+#        _update_listbox $path 1
 
         ::bind $listb <ButtonRelease-1> "ComboBox::_select $path @%x,%y"
         ::bind $listb <Return>          "ComboBox::_select $path active; break"
@@ -265,11 +266,11 @@ proc ComboBox::_create_popup { path } {
         set listb $shell.listb
         destroy $shell.sw
         set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
-        $listb configure -height $h -font [Widget::getoption $path -font]
+        $listb configure -height $h -font [Widget::cget $path -font]
         pack $sw -fill both -expand yes
         $sw setwidget $listb
         raise $listb
-        _update_listbox $path 0
+#        _update_listbox $path 0
     }
 }
 
