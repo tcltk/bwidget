@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.12 2002/01/15 18:51:03 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.13 2002/05/29 22:02:49 andreas_kupries Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -113,7 +113,7 @@ proc MainFrame::create { path args } {
         }
     }
 
-    # --- status bar -------------------------------------------------------------------------
+    # --- status bar -------------------------------------------------------------------
     if {[string length [Widget::getoption $path -statusbarfont]] >0 } {
 	set sbfnt [list -font [Widget::getoption $path -statusbarfont]]
     } else {
