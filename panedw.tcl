@@ -47,7 +47,8 @@ proc PanedWindow::create { path args } {
 
     Widget::init PanedWindow $path $args
 
-    frame $path -background [Widget::getoption $path -background]
+    frame $path -background [Widget::getoption $path -background] \
+		-class PanedWindow
     set _panedw($path,nbpanes) 0
 
     bind $path <Configure> "PanedWindow::_realize $path %w %h"
