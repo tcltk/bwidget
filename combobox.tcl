@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.30 2004/04/21 22:26:28 hobbs Exp $
+#  $Id: combobox.tcl,v 1.31 2004/09/03 04:33:57 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -101,12 +101,11 @@ proc ComboBox::create { path args } {
     }
     set height [winfo reqheight $entry]
     set arrow [eval [list ArrowButton::create $path.a] $maps(.a) \
-		   -width $width -height $height \
-		   -highlightthickness 0 -borderwidth 1 -takefocus 0 \
-		   -dir	  bottom \
-		   -type  button \
-		   -ipadx $ipadx \
-		   -command [list [list ComboBox::_mapliste $path]]]
+		   [list -width $width -height $height \
+			-highlightthickness 0 -borderwidth 1 -takefocus 0 \
+			-dir bottom -type  button -ipadx $ipadx \
+			-command [list ComboBox::_mapliste $path] \
+		       ]]
 
     pack $arrow -side right -fill y
     pack $entry -side left  -fill both -expand yes
@@ -353,7 +352,7 @@ proc ComboBox::insert { path idx args } {
 
     if {[Widget::cget $path -bwlistbox]} {
         set l [$path getlistbox]
-        set i [eval $l insert $idx #auto $args]
+        set i [eval [linsert $args 0 $l insert $idx #auto]]
         set text [$l itemcget $i -text]
         if {$idx == "end"} {
             lappend values $text
@@ -361,7 +360,7 @@ proc ComboBox::insert { path idx args } {
             set values [linsert $values $idx $text]
         }
     } else {
-        set values [eval linsert [list $values] $idx $args]
+        set values [eval [list linsert $values $idx] $args]
     }
 }
 
@@ -396,14 +395,13 @@ proc ComboBox::_create_popup { path } {
 
     toplevel            $shell -relief solid -bd 1
     wm withdraw         $shell
-    update idletasks
+    update idle
     wm overrideredirect $shell 1
     wm transient        $shell [winfo toplevel $path]
-    wm withdraw         $shell
     catch { wm attributes $shell -topmost 1 }
 
     set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
-    
+
     if {$bw} {
         set listb  [ListBox $shell.listb \
                 -relief flat -borderwidth 0 -highlightthickness 0 \
@@ -419,8 +417,8 @@ proc ComboBox::_create_popup { path } {
         foreach value $values image $images {
             $listb insert end #auto -text $value -image $image
         }
-	$listb bindText  <1> "ComboBox::_select $path"
-	$listb bindImage <1> "ComboBox::_select $path"
+	$listb bindText  <1> [list ComboBox::_select $path]
+	$listb bindImage <1> [list ComboBox::_select $path]
         if {[Widget::cget $path -hottrack]} {
             $listb bindText  <Enter> [list $listb selection set]
             $listb bindImage <Enter> [list $listb selection set]
@@ -445,7 +443,7 @@ proc ComboBox::_create_popup { path } {
     pack $sw -fill both -expand yes
     $sw setwidget $listb
 
-    ::bind $listb <Return>   "ComboBox::_select $path \[%W curselection]"
+    ::bind $listb <Return> "ComboBox::_select [list $path] \[%W curselection\]"
     ::bind $listb <Escape>   [list ComboBox::_unmapliste $path]
     ::bind $listb <FocusOut> [list ComboBox::_focus_out $path]
 }
