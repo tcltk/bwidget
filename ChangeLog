@@ -1,5 +1,9 @@
 2003-02-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* scrollw.tcl: add lock around grid remove scrollbar to prevent
+	infinite loop in small window situations. (kienzle)
+
+	* pkgIndex.tcl:
 	* configure.in: bumped to v1.6
 
 	* scrollw.tcl: complete rewrite of ScrolledWindow widget to
