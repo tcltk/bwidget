@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.3 2000/02/26 01:56:40 ericm Exp $
+#  $Id: listbox.tcl,v 1.4 2001/06/11 23:57:04 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -525,7 +525,7 @@ proc ListBox::find {path findInfo {confine ""}} {
     }
 
     if {$found} {
-        if {[string compare $confine "confine" 0] == 0} {
+        if {![string compare $confine "confine"]} {
             # test if x stand inside node bbox
             set xi [expr {[lindex [$path.c coords n:$item] 0]-[Widget::getoption $path -padx]}]
             set xs [lindex [$path.c bbox n:$item] 2]
