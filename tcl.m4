@@ -303,7 +303,7 @@ AC_DEFUN(SC_ENABLE_GCC, [
 	CC=gcc
     else
 	case "`uname -s`" in
-	    *win32* | *WIN32* | *CYGWIN_NT*)
+	    *win32* | *WIN32* | *CYGWIN_NT* | *CYGWIN_98* | *CYGWIN_95*)
 		CC=cl
 	    ;;
 	    *)
@@ -2247,8 +2247,8 @@ AC_DEFUN(SC_PROG_WISH, [
     AC_CACHE_VAL(ac_cv_path_wish, [
 	search_path=`echo ${exec_prefix}/bin:${prefix}/bin:${TCL_BIN_DIR}:${TCL_BIN_DIR}/../bin:${PATH} | sed -e 's/:/ /g'`
 	for dir in $search_path ; do
-	    for j in `ls -r $dir/wish[[8-9]]* 2> /dev/null` \
-		    `ls -r $dir/wish* 2> /dev/null` ; do
+	    for j in `ls -r $dir/wish[[8-9]]*${EXEEXT} 2> /dev/null` \
+		    `ls -r $dir/wish*${EXEEXT} 2> /dev/null` ; do
 		if test x"$ac_cv_path_wish" = x ; then
 		    if test -f "$j" ; then
 			ac_cv_path_wish=$j
