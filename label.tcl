@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.4 2000/03/01 20:16:03 ericm Exp $
+#  $Id: label.tcl,v 1.5 2000/09/05 21:18:43 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - BWLabel::create
@@ -92,7 +92,8 @@ proc BWLabel::create { path args } {
         bind [winfo toplevel $path] <Alt-$accel> "BWLabel::setfocus $path"
     }
 
-    bindtags $path [list $path BwLabel [winfo toplevel $path] all]
+    bindtags $path.l [list $path.l $path Label [winfo toplevel $path] all]
+    bindtags $path [list BwLabel [winfo toplevel $path] all]
     pack $path.l -expand yes -fill both
 
     DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd [Widget::cget $path -dragendcmd] 1
