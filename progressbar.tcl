@@ -181,7 +181,6 @@ proc ProgressBar::_modify { path args } {
 		$path.bar coords rect 0 [expr {$h-$x0*$h}] $w \
 			[expr {$x1*$h}]
 	    }
-	    
 	} else {
 	    if { $val > $max } {set val $max}
 	    if {[Widget::getoption $path -orient] == "horizontal"} {
@@ -193,6 +192,6 @@ proc ProgressBar::_modify { path args } {
 	}
     }
     if {![Widget::cget $path -idle]} {
-	update
+	update idletasks
     }
 }
