@@ -178,8 +178,8 @@ proc ButtonBox::add { path args } {
 #
 # Arguments:
 #	path        the button box widget name
-#       tag         the tag to modify
-#       state       the new state of $tag (0 or 1)
+#	tag         the tag to modify
+#	state       the new state of $tag (0 or 1)
 #
 # Results:
 #	None.
@@ -206,6 +206,27 @@ proc ::ButtonBox::setbuttonstate {path tag state} {
     return
 }
 
+# ::ButtonBox::getbuttonstate --
+#
+#	Retrieve the state of a given button tag.
+#
+# Arguments:
+#	path        the button box widget name
+#	tag         the tag to modify
+#
+# Results:
+#	None.
+
+proc ::ButtonBox::getbuttonstate {path tag} {
+    variable $path
+    upvar 0  $path data
+    # First see if this is a real tag
+    if { [info exists data(tagstate,$tag)] } {
+	return $data(tagstate,$tag)
+    } else {
+	error "unknown tag $tag"
+    }
+}
 
 # ------------------------------------------------------------------------------
 #  Command ButtonBox::itemconfigure

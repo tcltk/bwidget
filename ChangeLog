@@ -1,3 +1,8 @@
+1998-12-13  Eric Melski  <ericm@scriptics.com>
+
+	* buttonbox.tcl: Added a getbuttonstate function, which retrieves the value
+	of a tag used on a button in the buttonbox.
+
 1999-12-08  Eric Melski  <ericm@scriptics.com>
 
 	* combobox.tcl: Removed code that cleared entry selection on focus out 
