@@ -1,5 +1,11 @@
 2004-09-14  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* listbox.tcl: add FocusIn redirector to %W.c, add explicit
+	-takefocus 0 to the frame parent.
+
+	* widget.tcl (Widget::focusPrev): hack to avoid focus into direct
+	parent when it is a megawidget. [Bug 765667]
+
 	* notebook.tcl (NoteBook::_draw_page): adjust height for bottom
 	drawn tabs. [Bug 988628]
 
