@@ -3,6 +3,8 @@
 	* tree.tcl: liberal use of list where appropriate to make the code
 	safe for space-containing node names.
 	Make use of string equal instead of !string compare.
+	(Tree::_redraw_selection): correct -selectfill to include the
+	image, in any, in the bbox calculation since it may be larger.
 
 2003-04-15  Damon Courtney <damon@unreality.com>
 
