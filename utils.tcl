@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.11 2004/01/06 07:22:39 damonc Exp $
+#  $Id: utils.tcl,v 1.12 2004/09/24 23:57:13 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -463,6 +463,69 @@ proc BWidget::refocus {container component} {
 	::focus $component
     }
     return
+}
+
+## These mirror tk::(Set|Restore)FocusGrab
+
+# BWidget::SetFocusGrab --
+#   swap out current focus and grab temporarily (for dialogs)
+# Arguments:
+#   grab	new window to grab
+#   focus	window to give focus to
+# Results:
+#   Returns nothing
+#
+proc BWidget::SetFocusGrab {grab {focus {}}} {
+    variable _focusGrab
+    set index "$grab,$focus"
+
+    lappend _focusGrab($index) [::focus]
+    set oldGrab [::grab current $grab]
+    lappend _focusGrab($index) $oldGrab
+    if {[winfo exists $oldGrab]} {
+	lappend _focusGrab($index) [::grab status $oldGrab]
+    }
+    # The "grab" command will fail if another application
+    # already holds the grab.  So catch it.
+    catch {::grab $grab}
+    if {[winfo exists $focus]} {
+	::focus $focus
+    }
+}
+
+# BWidget::RestoreFocusGrab --
+#   restore old focus and grab (for dialogs)
+# Arguments:
+#   grab	window that had taken grab
+#   focus	window that had taken focus
+#   destroy	destroy|withdraw - how to handle the old grabbed window
+# Results:
+#   Returns nothing
+#
+proc BWidget::RestoreFocusGrab {grab focus {destroy destroy}} {
+    variable _focusGrab
+    set index "$grab,$focus"
+    if {[info exists _focusGrab($index)]} {
+	foreach {oldFocus oldGrab oldStatus} $_focusGrab($index) break
+	unset _focusGrab($index)
+    } else {
+	set oldGrab ""
+    }
+
+    catch {::focus $oldFocus}
+    ::grab release $grab
+    if {[string equal $destroy "withdraw"]} {
+	wm withdraw $grab
+    } else {
+	::destroy $grab
+    }
+    if {[winfo exists $oldGrab] && [winfo ismapped $oldGrab]} {
+	if {[string equal $oldStatus "global"]} {
+	    ::grab -global $oldGrab
+	} else {
+	    ::grab $oldGrab
+	}
+    }
 }
 
 # BWidget::badOptionString --
