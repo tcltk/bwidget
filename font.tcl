@@ -38,8 +38,7 @@ namespace eval SelectFont {
 
     variable _families
     variable _styleOff
-    array set _styleOff \
-	    [list bold normal italic roman underline 0 overstrike 0]
+    array set _styleOff [list bold normal italic roman]
     variable _sizes    {4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24}
 
     variable _widget
@@ -357,7 +356,9 @@ proc SelectFont::_update { path } {
         if { $data($st) } {
             lappend font $st
         } else {
-	    lappend font $_styleOff($st)
+	    if { [info exists _styleOff($st)] } {
+		lappend font $_styleOff($st)
+	    }
 	}
     }
     Widget::setoption "$path#SelectFont" -font $font
