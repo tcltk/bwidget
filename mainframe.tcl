@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.11 2001/12/29 02:06:36 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.12 2002/01/15 18:51:03 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -115,16 +115,16 @@ proc MainFrame::create { path args } {
 
     # --- status bar -------------------------------------------------------------------------
     if {[string length [Widget::getoption $path -statusbarfont]] >0 } {
-	set sbfnt "-font \"[Widget::getoption $path -statusbarfont]\""
+	set sbfnt [list -font [Widget::getoption $path -statusbarfont]]
     } else {
 	set sbfnt ""
     }
 
     set status   [frame $path.status -relief flat -borderwidth 0 \
                       -takefocus 0 -highlightthickness 0 -background $bg]
-    set label    [eval label $status.label \
+    set label    [eval [list label $status.label \
 	    -textvariable [Widget::getoption $path -textvariable] \
-	    -takefocus 0 -highlightthickness 0 -background $bg $sbfnt]
+	    -takefocus 0 -highlightthickness 0 -background $bg] $sbfnt]
     set indframe [frame $status.indf -relief flat -borderwidth 0 \
                       -takefocus 0 -highlightthickness 0 -background $bg]
     set prgframe [frame $status.prgf -relief flat -borderwidth 0 \
@@ -195,8 +195,8 @@ proc MainFrame::configure { path args } {
     }
 
     if { [Widget::hasChanged $path -menubarfont newmbfnt] } {
-	if {[string length $newmbfnt] >0 } {
-	    set mbfnt "-font \"$newmbfnt\""
+	if {[string length $newmbfnt]} {
+	    set mbfnt [list -font $newmbfnt]
 	} else {
 	    set mbfnt ""
 	}
@@ -208,8 +208,8 @@ proc MainFrame::configure { path args } {
 	}
     }
     if { [Widget::hasChanged $path -menuentryfont newmefnt] } {
-	if {[string length $newmefnt] >0 } {
-	    set mefnt "-font \"$newmefnt\""
+	if {[string length $newmefnt]} {
+	    set mefnt [list -font $newmefnt]
 	} else {
 	    set mefnt ""
 	}
@@ -231,8 +231,8 @@ proc MainFrame::configure { path args } {
 
 
     if { [Widget::hasChanged $path -statusbarfont newsbfnt] } {
-	if {[string length $newsbfnt] >0 } {
-	    set sbfnt "-font \"$newsbfnt\""
+	if {[string length $newsbfnt]} {
+	    set sbfnt [list -font $newsbfnt]
 	} else {
 	    set sbfnt ""
 	}
@@ -311,7 +311,7 @@ proc MainFrame::addindicator { path args } {
     variable _widget
 
     if {[string length [Widget::getoption $path -statusbarfont]]} {
-	set sbfnt "-font \"[Widget::getoption $path -statusbarfont]\""
+	set sbfnt [list -font [Widget::getoption $path -statusbarfont]]
     } else {
 	set sbfnt ""
     }
@@ -473,19 +473,17 @@ proc MainFrame::_create_menubar { path descmenu } {
 
     foreach {v x} {mbfnt -menubarfont mefnt -menuentryfont} {
 	if {[string length [Widget::getoption $path $x]]} {
-	    set $v "-font \"[Widget::getoption $path $x]\""
+	    set $v [list -font [Widget::getoption $path $x]]
 	} else {
 	    set $v ""
 	}
     }
 
-    if { $tcl_platform(platform) == "unix" } {
-	set menubar [eval menu $top.menubar -tearoff 0 \
-		-background $bg -borderwidth 1 $mbfnt]
-    } else {
-	set menubar [eval menu $top.menubar -tearoff 0 \
-		-background $bg $mbfnt]
+    if {$tcl_platform(platform) == "unix"} {
+	lappend mbfnt -borderwidth 1
     }
+    set menubar [eval [list menu $top.menubar -tearoff 0 \
+	    -background $bg] $mbfnt]
     $top configure -menu $menubar
 
     set count 0
