@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.39 2003/01/26 10:55:31 damonc Exp $
+#  $Id: tree.tcl,v 1.40 2003/02/08 10:21:17 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -59,8 +59,12 @@ namespace eval Tree {
             {-open       Boolean    0       0}
 	    {-selectable Boolean    1       0}
             {-drawcross  Enum       auto    0 {auto allways never}}
+	    {-padx       Int        -1      0 "%d >= -1"}
+	    {-deltax     Int        -1      0 "%d >= -1"}
         }
     }
+
+    DynamicHelp::include Tree::Node balloon
 
     Widget::tkinclude Tree canvas .c \
 	    remove     {
@@ -310,6 +314,7 @@ proc Tree::insert { path index parent node args } {
             _redraw_idle $path 2
         }
     }
+
     return $node
 }
 
@@ -326,6 +331,9 @@ proc Tree::itemconfigure { path node args } {
     }
 
     set result [Widget::configure $path.$node $args]
+
+    _set_help $path $node
+
     if { [visible $path $node] } {
         set lopt   {}
         set flag   0
@@ -345,6 +353,11 @@ proc Tree::itemconfigure { path node args } {
                 set flag [expr {$flag | 8}]
             }
         } 
+
+	if {$data(upd,level) < 3 && [Widget::hasChanged $path.$node -padx x]} {
+	    _redraw_idle $path 3
+	}
+
 	if { $data(upd,level) < 3 && $flag } {
             if { [set idx [lsearch $data(upd,nodes) $node]] == -1 } {
                 lappend data(upd,nodes) $node $flag
@@ -740,7 +753,8 @@ proc Tree::find {path findInfo {confine ""}} {
     if {$found} {
         if {[string compare $confine "confine"] == 0} {
             # test if x stand inside node bbox
-            set xi [expr {[lindex [$path.c coords n:$node] 0]-[Widget::cget $path -padx]}]
+	    set padx [_get_node_padx $path $node]
+            set xi [expr {[lindex [$path.c coords n:$node] 0] - $padx}]
             set xs [lindex [$path.c bbox n:$node] 2]
             if {$x >= $xi && $x <= $xs} {
                 return $node
@@ -1184,7 +1198,7 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
         -fill   [Widget::getoption $path.$node -fill] \
         -font   [Widget::getoption $path.$node -font] \
         -anchor w \
-        -tags   "TreeItemSentinal node n:$node"
+    	-tags   [Tree::_get_node_tags $path $node [list node n:$node]]
     set len [expr {[llength $data($node)] > 1}]
     set dc  [Widget::getoption $path.$node -drawcross]
     set exp [Widget::getoption $path.$node -open]
@@ -1209,11 +1223,14 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
 
     if { [set win [Widget::getoption $path.$node -window]] != "" } {
         $path.c create window $x1 $y0 -window $win -anchor w \
-		-tags "TreeItemSentinal win i:$node"
+		-tags [Tree::_get_node_tags $path $node [list win i:$node]]
     } elseif { [set img [Widget::getoption $path.$node -image]] != "" } {
         $path.c create image $x1 $y0 -image $img -anchor w \
-		-tags "TreeItemSentinal img i:$node"
+		-tags   [Tree::_get_node_tags $path $node [list img i:$node]]
     }
+
+    _set_help $path $node
+
     return $y1
 }
 
@@ -1224,6 +1241,8 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
 proc Tree::_draw_subnodes { path nodes x0 y0 deltax deltay padx showlines } {
     set y1 $y0
     foreach node $nodes {
+	set padx   [_get_node_padx $path $node]
+	set deltax [_get_node_deltax $path $node]
         set yp $y1
         set y1 [_draw_node $path $node $x0 [expr {$y1+$deltay}] $deltax $deltay $padx $showlines]
     }
@@ -1254,6 +1273,8 @@ proc Tree::_update_nodes { path } {
         if { $idn == "" } {
             continue
         }
+	set padx   [_get_node_padx $path $node]
+	set deltax [_get_node_deltax $path $node]
         set c  [$path.c coords $idn]
         set x0 [expr {[lindex $c 0]-$padx}]
         set y0 [lindex $c 1]
@@ -1269,7 +1290,8 @@ proc Tree::_update_nodes { path } {
                 } else {
                     $path.c delete $idi
                     $path.c create window $x0 $y0 -window $win -anchor w \
-			    -tags "TreeItemSentinal win i:$node"
+			    -tags [Tree::_get_node_tags $path $node \
+			    	[list win i:$node]]
                 }
             } elseif { [string length $img] } {
                 if { ![string compare $type "img"] } {
@@ -1277,7 +1299,8 @@ proc Tree::_update_nodes { path } {
                 } else {
                     $path.c delete $idi
                     $path.c create image $x0 $y0 -image $img -anchor w \
-			    -tags "TreeItemSentinal img i:$node"
+			    -tags [Tree::_get_node_tags $path $node \
+			    	[list img i:$node]]
                 }
             } else {
                 $path.c delete $idi
@@ -1552,7 +1575,9 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
 	    }
 	}
 	if {$found} {
-            set xi [expr {[lindex [$path.c coords n:$node] 0]-[Widget::getoption $path -padx]-1}]
+	    set padx   [_get_node_padx $path $node]
+	    set deltax [_get_node_deltax $path $node]
+            set xi [expr {[lindex [$path.c coords n:$node] 0] - $padx - 1}]
                 if { $data(dnd,mode) & 1 } {
                     # dropovermode includes node
                     lappend target $node
@@ -1577,7 +1602,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
                             # drop position is after $node in children of parent of $node
                             set parent [lindex $data($node) 0]
                             set index  [lsearch $data($parent) $node]
-                            set xli    [expr {$xi-[Widget::getoption $path -deltax]-5}]
+                            set xli    [expr {$xi - $deltax - 5}]
                         }
                         set yl $ys
                     } else {
@@ -1585,7 +1610,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
                         # drop position is before $node in children of parent of $node
                         set parent [lindex $data($node) 0]
                         set index  [expr {[lsearch $data($parent) $node] - 1}]
-                        set xli    [expr {$xi-[Widget::getoption $path -deltax]-5}]
+                        set xli    [expr {$xi - $deltax - 5}]
                         set yl     $yi
                     }
                     lappend target [list $parent $index]
@@ -1950,3 +1975,102 @@ proc Tree::_get_node_name {path {item current} {tagindex end-1}} {
     return [string range [lindex [$path.c gettags $item] $tagindex] 2 end]
 }
 
+# Tree::_get_node_padx --
+#
+#	Given a node in the tree, return it's padx value.  If the value is
+#	less than 0, default to the padx of the entire tree.
+#
+# Arguments:
+#	path		Tree to query
+#	node		Node in the tree
+#
+# Results:
+#	padx		The numeric padx value
+proc Tree::_get_node_padx {path node} {
+    set padx [Widget::getoption $path.$node -padx]
+    if {$padx < 0} { set padx [Widget::getoption $path -padx] }
+    return $padx
+}
+
+# Tree::_get_node_deltax --
+#
+#	Given a node in the tree, return it's deltax value.  If the value is
+#	less than 0, default to the deltax of the entire tree.
+#
+# Arguments:
+#	path		Tree to query
+#	node		Node in the tree
+#
+# Results:
+#	deltax		The numeric deltax value
+proc Tree::_get_node_deltax {path node} {
+    set deltax [Widget::getoption $path.$node -deltax]
+    if {$deltax < 0} { set deltax [Widget::getoption $path -deltax] }
+    return $deltax
+}
+
+# Tree::_get_node_tags --
+#
+#	Given a node in the tree, return a list of tags to apply to its
+#       canvas item.
+#
+# Arguments:
+#	path		Tree to query
+#	node		Node in the tree
+#	tags		A list of tags to add to the final list
+#
+# Results:
+#	list		The list of tags to apply to the canvas item
+proc Tree::_get_node_tags {path node {tags ""}} {
+    eval lappend list TreeItemSentinal $tags
+    if {[Widget::getoption $path.$node -helptext] == ""} { return $list }
+
+    switch -- [Widget::getoption $path.$node -helptype] {
+	balloon {
+	    lappend list BwHelpBalloon
+	}
+	variable {
+	    lappend list BwHelpVariable
+	}
+    }
+    return $list
+}
+
+# Tree::_set_help --
+#
+#	Register dynamic help for a node in the tree.
+#
+# Arguments:
+#	path		Tree to query
+#	node		Node in the tree
+#       force		Optional argument to force a reset of the help
+#
+# Results:
+#	none
+proc Tree::_set_help { path node } {
+    Widget::getVariable $path help
+
+    set item $path.$node
+    set opts [list -helptype -helptext -helpvar]
+    foreach {cty ctx cv} [eval Widget::hasChangedX $item $opts] break
+    set text [Widget::getoption $item -helptext]
+
+    ## If we've never set help for this item before, and text is not blank,
+    ## we need to setup help.  We also need to reset help if any of the
+    ## options have changed.
+    if { (![info exists help($item)] && $text != "") || $cty || $ctx || $cv } {
+	set help($item) 1
+	set type [Widget::getoption $item -helptype]
+        switch $type {
+            balloon {
+		DynamicHelp::register $path.c balloon n:$node $text
+		DynamicHelp::register $path.c balloon i:$node $text
+            }
+            variable {
+		set var [Widget::getoption $item -helpvar]
+		DynamicHelp::register $path.c variable n:$node $var $text
+		DynamicHelp::register $path.c variable i:$node $var $text
+            }
+        }
+    }
+}

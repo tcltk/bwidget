@@ -59,6 +59,11 @@ the balloon.
     for any registered widget.
     </dd>
 </dl>
+<DL><DT><A NAME="DynamicHelp-topbackground"><B>-topbackground</B></A></DT>
+<DD>
+The background color of the toplevel window created for a balloon.
+</DD>
+</DL>
 <BR>Other standard options are:
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
@@ -68,6 +73,10 @@ the balloon.
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="options.htm#M-foreground">-foreground or -fg</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="options.htm#M-justify">-justify</A></TR>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="options.htm#M-padx">-padx</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="options.htm#M-pady">-pady</A></TR>
 </TR>
 </TABLE></DD>
 </DD></DL>
@@ -88,13 +97,18 @@ Depending on <I>type</I>, other options must be provided.
 <BR>
 <TABLE CELLSPACING=5 CELLPADDING=0 BORDER=0>
 <TR><TD><B>    type      </B></TD><TD><B>     options      </B></TD></TR>
-<TR><TD><B><I> balloon   </I></B></TD><TD><I> text         </I></TD></TR>
-<TR><TD><B><I> variable  </I></B></TD><TD><I> varName text </I></TD></TR>
+<TR><TD><B><I> balloon   </I></B></TD><TD><I> ?tagOrItem? text </I></TD></TR>
+<TR><TD><B><I> variable  </I></B></TD><TD><I> ?tagOrItem? varName text </I></TD></TR>
 <TR><TD><B><I> menu      </I></B></TD><TD><I> varName      </I></TD></TR>
 <TR><TD><B><I> menuentry </I></B></TD><TD><I> index text   </I></TD></TR>
 </TABLE>
 <BR>If one of the option is missing or is empty, help is removed for this widget.
-<BR>For type other than <I>balloon</I>, <I>varName</I> is typically a variable
+<p>
+If <i>tagOrItem</i> is specified, then <i>path</i> is a canvas, and
+<i>tagOrItem</i> is the name of a tag or item on the canvas to which
+the help will be bound.
+</p>
+For type other than <I>balloon</I>, <I>varName</I> is typically a variable
 linked to a label.
 <BR>For menu, balloon type help is not available. To declare a help for menu,
 you first declare the menu, and then entries of this menu.

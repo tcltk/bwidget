@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.5 2002/01/28 21:56:32 patthoyts Exp $
+#  $Id: utils.tcl,v 1.6 2003/02/08 10:21:17 damonc Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -258,9 +258,10 @@ proc BWidget::place { path w h args } {
 
     if { $arglen > 0 } {
         set where [lindex $args 0]
-        set idx   [lsearch {"at" "center" "left" "right" "above" "below"} $where]
+	set list  [list "at" "center" "left" "right" "above" "below"]
+        set idx   [lsearch $list $where]
         if { $idx == -1 } {
-            return -code error "BWidget::place: incorrect position \"$where\""
+	    return -code error [BWidget::badOptionString position $where $list]
         }
         if { $idx == 0 } {
             set err [catch {
@@ -457,4 +458,22 @@ proc BWidget::refocus {container component} {
 	::focus $component
     }
     return
+}
+
+# BWidget::badOptionString --
+#
+#	Helper function to return a proper error string when an option
+#       doesn't match a list of given options.
+#
+# Arguments:
+#	type	A string that represents the type of option.
+#	value	The value that is in-valid.
+#       list	A list of valid options.
+#
+# Results:
+#	None.
+proc BWidget::badOptionString {type value list} {
+    set last [lindex $list end]
+    set list [lreplace $list end end]
+    return "bad $type \"$value\": must be [join $list ", "], or $last"
 }

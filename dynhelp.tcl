@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.10 2003/01/26 10:55:31 damonc Exp $
+#  $Id: dynhelp.tcl,v 1.11 2003/02/08 10:21:17 damonc Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -20,21 +20,26 @@
 
 namespace eval DynamicHelp {
     Widget::declare DynamicHelp {
-        {-foreground  TkResource black         0 label}
-        {-background  TkResource "#FFFFC0"     0 label}
-        {-borderwidth TkResource 1             0 label}
-        {-justify     TkResource left          0 label}
-        {-font        TkResource "helvetica 8" 0 label}
-        {-delay       Int        600           0 "%d >= 100 & %d <= 2000"}
-	{-state       Enum       "normal"      0 {normal disabled}}
-        {-bd          Synonym    -borderwidth}
-        {-bg          Synonym    -background}
-        {-fg          Synonym    -foreground}
+        {-foreground     TkResource black         0 label}
+        {-topbackground  TkResource black         0 {label -foreground}}
+        {-background     TkResource "#FFFFC0"     0 label}
+        {-borderwidth    TkResource 1             0 label}
+        {-justify        TkResource left          0 label}
+        {-font           TkResource "helvetica 8" 0 label}
+        {-delay          Int        600           0 "%d >= 100 & %d <= 2000"}
+	{-state          Enum       "normal"      0 {normal disabled}}
+        {-padx           TkResource 1             0 label}
+        {-pady           TkResource 1             0 label}
+        {-bd             Synonym    -borderwidth}
+        {-bg             Synonym    -background}
+        {-fg             Synonym    -foreground}
+        {-topbg          Synonym    -topbackground}
     }
 
     proc use {} {}
 
     variable _registered
+    variable _canvases
 
     variable _top     ".help_shell"
     variable _id      "" 
@@ -114,31 +119,69 @@ proc DynamicHelp::sethelp { path subpath {force 0}} {
     }
 }
 
-
 # ------------------------------------------------------------------------------
 #  Command DynamicHelp::register
+#
+#  DynamicHelp::register path balloon  ?itemOrTag? text
+#  DynamicHelp::register path variable ?itemOrTag? text varName
+#  DynamicHelp::register path menu varName
+#  DynamicHelp::register path menuentry index text
 # ------------------------------------------------------------------------------
 proc DynamicHelp::register { path type args } {
     variable _registered
+    variable _canvases
+
+    set len [llength $args]
+    if {$type == "balloon"  && $len > 1} { set type canvasBalloon  }
+    if {$type == "variable" && $len > 2} { set type canvasVariable }
 
     if { [winfo exists $path] } {
         set evt  [bindtags $path]
         switch $type {
             balloon {
-		set idx  [lsearch $evt "BwHelpBalloon"]
-		set evt  [lreplace $evt $idx $idx]
-                set text [lindex $args 0]
+		set text [lindex $args 0]
+		set idx [lsearch $evt "BwHelpBalloon"]
+		set evt [lreplace $evt $idx $idx]
                 if { $text != "" } {
-                    set _registered($path,balloon) $text
-                    lappend evt BwHelpBalloon
+		    set _registered($path,balloon) $text
+		    lappend evt BwHelpBalloon
                 } else {
                     if {[info exists _registered($path,balloon)]} {
                         unset _registered($path,balloon)
                     }
-                }
-                bindtags $path $evt
+		}
+		bindtags $path $evt
                 return 1
             }
+
+	    canvasBalloon {
+		set tagOrItem  [lindex $args 0]
+		set text       [lindex $args 1]
+		if { $text != "" } {
+		    set _registered($path,$tagOrItem,balloon) $text
+		} else {
+		    if {[info exists _registered($path,$tagOrItem,balloon)]} {
+			unset _registered($path,$tagOrItem,balloon)
+		    }
+		}
+
+		if {![info exists _canvases($path,balloon)]} {
+		    ## This canvas doesn't have the bindings yet.
+		    $path bind BwHelpBalloon <Enter> \
+			{DynamicHelp::_motion_balloon enter  %W %X %Y 1}
+		    $path bind BwHelpBalloon <Motion> \
+			{DynamicHelp::_motion_balloon motion %W %X %Y 1}
+		    $path bind BwHelpBalloon <Leave> \
+			{DynamicHelp::_motion_balloon leave  %W %X %Y 1}
+		    $path bind BwHelpBalloon <Button> \
+			{DynamicHelp::_motion_balloon button %W %X %Y 1}
+		    bind $path <Destroy> \
+			{DynamicHelp::_unset_help %W}
+		    set _canvases($path,balloon) 1
+		}
+		$path addtag BwHelpBalloon withtag $tagOrItem
+		return 1
+	    }
 
             variable {
 		set idx  [lsearch $evt "BwHelpVariable"]
@@ -156,6 +199,32 @@ proc DynamicHelp::register { path type args } {
                 bindtags $path $evt
                 return 1
             }
+
+	    canvasVariable {
+		set tagOrItem  [lindex $args 0]
+		set var        [lindex $args 1]
+		set text       [lindex $args 2]
+		if { $text != "" && $var != "" } {
+		    set _registered($path,$tagOrItem,variable) [list $var $text]
+		} else {
+		    if {[info exists _registered($path,$tagOrItem,variable)]} {
+			unset _registered($path,$tagOrItem,variable)
+		    }
+		}
+		if {![info exists _canvases($path,variable)]} {
+		    $path bind BwHelpVariable <Enter> \
+		    	{DynamicHelp::_motion_info %W 1}
+		    $path bind BwHelpVariable <Motion> \
+		    	{DynamicHelp::_motion_info %W 1}
+		    $path bind BwHelpVariable <Leave> \
+		    	{DynamicHelp::_leave_info  %W 1}
+		    bind $path <Destroy> \
+		    	{DynamicHelp::_unset_help  %W 1}
+		    set _canvases($path,variable) 1
+		}
+		$path addtag BwHelpVariable withtag $tagOrItem
+		return 1
+	    }
 
             menu {
                 set cpath [BWidget::clonename $path]
@@ -228,11 +297,14 @@ proc DynamicHelp::register { path type args } {
 # ------------------------------------------------------------------------------
 #  Command DynamicHelp::_motion_balloon
 # ------------------------------------------------------------------------------
-proc DynamicHelp::_motion_balloon { type path x y } {
+proc DynamicHelp::_motion_balloon { type path x y {isCanvasItem 0} } {
     variable _top
     variable _id
     variable _delay
     variable _current_balloon
+
+    set w $path
+    if {$isCanvasItem} { set path [_get_canvas_path $path balloon] }
 
     if { $_current_balloon != $path && $type == "enter" } {
         set _current_balloon $path
@@ -246,7 +318,7 @@ proc DynamicHelp::_motion_balloon { type path x y } {
         }
         if { $type == "motion" } {
             if { ![winfo exists $_top] } {
-                set _id [after $_delay "DynamicHelp::_show_help $path $x $y"]
+                set _id [after $_delay "DynamicHelp::_show_help $path $w $x $y"]
             }
         } else {
             destroy $_top
@@ -259,10 +331,12 @@ proc DynamicHelp::_motion_balloon { type path x y } {
 # ------------------------------------------------------------------------------
 #  Command DynamicHelp::_motion_info
 # ------------------------------------------------------------------------------
-proc DynamicHelp::_motion_info { path } {
+proc DynamicHelp::_motion_info { path {isCanvasItem 0} } {
     variable _registered
     variable _current_variable
     variable _saved
+
+    if {$isCanvasItem} { set path [_get_canvas_path $path variable] }
 
     if { $_current_variable != $path && [info exists _registered($path,variable)] } {
         if { ![info exists _saved] } {
@@ -277,17 +351,18 @@ proc DynamicHelp::_motion_info { path } {
 # ------------------------------------------------------------------------------
 #  Command DynamicHelp::_leave_info
 # ------------------------------------------------------------------------------
-proc DynamicHelp::_leave_info { path } {
+proc DynamicHelp::_leave_info { path {isCanvasItem 0} } {
     variable _registered
     variable _current_variable
     variable _saved
+
+    if {$isCanvasItem} { set path [_get_canvas_path $path variable] }
 
     if { [info exists _registered($path,variable)] } {
         GlobalVar::setvar [lindex $_registered($path,variable) 0] $_saved
     }
     unset _saved
     set _current_variable ""
-    
 }
 
 
@@ -315,7 +390,7 @@ proc DynamicHelp::_menu_info { event path } {
 # ------------------------------------------------------------------------------
 #  Command DynamicHelp::_show_help
 # ------------------------------------------------------------------------------
-proc DynamicHelp::_show_help { path x y } {
+proc DynamicHelp::_show_help { path w x y } {
     variable _top
     variable _registered
     variable _id
@@ -326,9 +401,9 @@ proc DynamicHelp::_show_help { path x y } {
     if { [info exists _registered($path,balloon)] } {
         destroy  $_top
         toplevel $_top -relief flat \
-            -bg [Widget::getoption $_top -foreground] \
+            -bg [Widget::getoption $_top -topbackground] \
             -bd [Widget::getoption $_top -borderwidth] \
-            -screen [winfo screen $path]
+            -screen [winfo screen $w]
 
         wm overrideredirect $_top 1
         wm transient $_top
@@ -336,6 +411,8 @@ proc DynamicHelp::_show_help { path x y } {
 
         label $_top.label -text $_registered($path,balloon) \
             -relief flat -bd 0 -highlightthickness 0 \
+	    -padx       [Widget::getoption $_top -padx] \
+	    -pady       [Widget::getoption $_top -pady] \
             -foreground [Widget::getoption $_top -foreground] \
             -background [Widget::getoption $_top -background] \
             -font       [Widget::getoption $_top -font] \
@@ -369,4 +446,29 @@ proc DynamicHelp::_show_help { path x y } {
     }
 }
 
+# ------------------------------------------------------------------------------
+#  Command DynamicHelp::_unset_help
+# ------------------------------------------------------------------------------
+proc DynamicHelp::_unset_help {path} {
+    variable _registered
+    foreach var [array names _registered $path,*] { unset _registered($var) }
+}
 
+# ------------------------------------------------------------------------------
+#  Command DynamicHelp::_get_canvas_path
+# ------------------------------------------------------------------------------
+proc DynamicHelp::_get_canvas_path { path type {item ""} } {
+    variable _registered
+
+    if {$item == ""} { set item [$path find withtag current] }
+
+    ## Check the tags related to this item for the one that
+    ## represents our text.  If we have text specific to this
+    ## item or for 'all' items, they override any other tags.
+    eval lappend tags $item all [$path itemcget $item -tags]
+    foreach tag $tags {
+	set check $path,$tag
+	if {![info exists _registered($check,$type)]} { continue }
+	return $check
+    }
+}

@@ -1,12 +1,14 @@
 namespace eval SelectColor {
     Widget::declare SelectColor {
-        {-title    String     "Select a color" 0}
-        {-parent   String     "" 0}
-        {-color    TkResource "" 0 {label -background}}
+        {-title     String     "Select a color" 0}
+        {-parent    String     ""               0}
+        {-color     TkResource ""               0 {label -background}}
+	{-type      Enum       "dialog"         1 {dialog popup}}
+	{-placement String     "center"         1}
     }
 
     proc ::SelectColor { path args } { 
-	return [eval SelectColor::dialog $path $args] 
+	return [eval SelectColor::create $path $args] 
     }
 
     variable _baseColors {
@@ -33,6 +35,36 @@ namespace eval SelectColor {
     variable _hsv
 }
 
+proc SelectColor::create { path args } {
+    Widget::init SelectColor $path $args
+
+    set type [Widget::cget $path -type]
+
+    switch -- [Widget::cget $path -type] {
+	"dialog" {
+	    return [eval SelectColor::dialog $path $args]
+	}
+
+	"popup" {
+	    set list      [list at center left right above below]
+	    set placement [Widget::cget $path -placement]
+	    set where     [lindex $placement 0]
+
+	    if {[lsearch $list $where] < 0} {
+		return -code error \
+		    [BWidget::badOptionString placement $placement $list]
+	    }
+
+	    ## If they specified a parent and didn't pass a second argument
+	    ## in the placement, set the placement relative to the parent.
+	    set parent [Widget::cget $path -parent]
+	    if {[string length $parent]} {
+		if {[llength $placement] == 1} { lappend placement $parent }
+	    }
+	    return [eval SelectColor::menu $path [list $placement] $args]
+	}
+    }
+}
 
 proc SelectColor::menu {path placement args} {
     variable _baseColors
@@ -149,6 +181,11 @@ proc SelectColor::dialog {path args} {
             bind $fround <ButtonPress-1> "SelectColor::_select_rgb $count"
             bind $fcolor <ButtonPress-1> "SelectColor::_select_rgb $count"
 
+	    bind $fround <Double-1> \
+	    	"SelectColor::_select_rgb $count; $top invoke 0"
+	    bind $fcolor <Double-1> \
+	    	"SelectColor::_select_rgb $count; $top invoke 0"
+
             incr count
             if {[incr col] == 6} {
                 incr lin
@@ -227,6 +264,10 @@ proc SelectColor::dialog {path args} {
     return $color
 }
 
+proc SelectColor::setcolor { idx color } {
+    variable _userColors
+    set _userColors [lreplace $_userColors $idx $idx $color]
+}
 
 proc SelectColor::_select_rgb {count} {
     variable _baseColors
