@@ -1,11 +1,15 @@
 2003-02-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* configure.in: bumped to v1.6
+
 	* scrollw.tcl: complete rewrite of ScrolledWindow widget to
 	address infinite loop scrollbar problems.  This one is much
 	simpler and does not suffer the infinite loop.  There still seems
 	to be an issue with shrinking smaller than one scrollbar width /
 	height in size, but that's not common (nor fatal).  Addresses
 	[Patch #671821, #520903] [Bug #472718, #564691]
+	This may introduce new incompatabilities, but it does work as
+	expected for noted bugs and in the demos.
 
 	* widget.tcl: code cleanup
 	* scrollframe.tcl: code cleanup
