@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  xpm2image.tcl
 #  Slightly modified xpm-to-image command
-#  $Id: xpm2image.tcl,v 1.4 2003/10/20 21:23:53 damonc Exp $
+#  $Id: xpm2image.tcl,v 1.5 2004/09/09 22:17:03 hobbs Exp $
 # ------------------------------------------------------------------------------
 #
 #  Copyright 1996 by Roger E. Critchlow Jr., San Francisco, California
@@ -61,7 +61,7 @@ proc xpm-to-image { file } {
             set key [lindex $record 0]
             set color [string tolower [join [lrange $record 1 end] { }]]
             set data(color-$key-$cname) $color
-            if { [string equal $color "none"] } {
+            if { [string equal -nocase $color "none"] } {
                 set data(transparent) $cname
             }
         }
