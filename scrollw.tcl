@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.5 2003/02/25 09:51:03 hobbs Exp $
+#  $Id: scrollw.tcl,v 1.6 2003/02/25 22:02:57 hobbs Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -200,12 +200,17 @@ proc ScrolledWindow::_set_hscroll { path vmin vmax } {
     if {$data(realized) && $data(hsb,present)} {
 	if {$data(hsb,auto)} {
 	    if {$data(hsb,packed) && $vmin == 0 && $vmax == 1} {
-		set data(hsb,packed) 0
-		grid remove $path.hscroll
+		if {![info exists data(hlock)]} {
+		    set data(hsb,packed) 0
+		    grid remove $path.hscroll
+		}
 	    } elseif {!$data(hsb,packed) && ($vmin != 0 || $vmax != 1)} {
 		set data(hsb,packed) 1
 		grid $path.hscroll -column 1 -row $data(hsb,row) \
 			-sticky ew -ipady $data(ipad)
+		set data(hlock) 1
+		update idletasks
+		unset data(hlock)
 	    }
 	}
 	$path.hscroll set $vmin $vmax
@@ -222,12 +227,17 @@ proc ScrolledWindow::_set_vscroll { path vmin vmax } {
     if {$data(realized) && $data(vsb,present)} {
 	if {$data(vsb,auto)} {
 	    if {$data(vsb,packed) && $vmin == 0 && $vmax == 1} {
-		set data(vsb,packed) 0
-		grid remove $path.vscroll
+		if {![info exists data(vlock)]} {
+		    set data(vsb,packed) 0
+		    grid remove $path.vscroll
+		}
 	    } elseif {!$data(vsb,packed) && ($vmin != 0 || $vmax != 1) } {
 		set data(vsb,packed) 1
 		grid $path.vscroll -column $data(vsb,column) -row 1 \
 			-sticky ns -ipadx $data(ipad)
+		set data(vlock) 1
+		update idletasks
+		unset data(vlock)
 	    }
 	}
 	$path.vscroll set $vmin $vmax
