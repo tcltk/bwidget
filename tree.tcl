@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.41 2003/03/13 06:59:59 damonc Exp $
+#  $Id: tree.tcl,v 1.42 2003/04/16 03:41:51 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -141,6 +141,9 @@ proc Tree::create { path args } {
     Widget::init Tree $path $args
     set ::Tree::sentinal($path.c) 0
     
+    Widget::getVariable $path autoIndex
+    set autoIndex 0
+
     set data(root)         {{}}
     set data(selnodes)     {}
     set data(upd,level)    0
@@ -284,6 +287,9 @@ proc Tree::cget { path option } {
 proc Tree::insert { path index parent node args } {
     variable $path
     upvar 0  $path data
+    Widget::getVariable $path autoIndex
+
+    set node [string map [list #auto [incr autoIndex]] $node]
 
     if { [info exists data($node)] } {
         return -code error "node \"$node\" already exists"
