@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.2 2000/02/19 02:12:40 ericm Exp $
+#  $Id: widget.tcl,v 1.3 2000/02/23 19:18:22 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -25,6 +25,27 @@
 #     - Widget::_test_int
 #     - Widget::_test_boolean
 # ------------------------------------------------------------------------------
+# Each megawidget gets a namespace of the same name inside the Widget namespace
+# Each of these has an array opt, which contains information about the 
+# megawidget options.  It maps megawidget options to a list with this format:
+#     {optionType defaultValue isReadonly {additionalOptionalInfo}}
+# Option types and their additional optional info are:
+#	TkResource	{genericTkWidget genericTkWidgetOptionName}
+#	BwResource	{nothing}
+#	Enum		{list of enumeration values}
+#	Int		{Boundary information}
+#	Boolean		{nothing}
+#	String		{nothing}
+#	Flag		{string of valid flag characters}
+#	Synonym		{nothing}
+#
+# Next, each namespace has an array map, which maps class options to their
+# component widget options:
+#	map(-foreground) => {.e -foreground .f -foreground}
+#
+# Each has an array ${path}:opt, which contains the value of each megawidget
+# option for a particular instance $path of the megawidget, and an array
+# ${path}:mod, which stores the "changed" status of configuration options.
 
 namespace eval Widget {
     variable _optiontype
