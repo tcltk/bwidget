@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.13 2000/02/28 16:46:43 sven Exp $
+#  $Id: tree.tcl,v 1.14 2000/02/28 18:06:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -100,6 +100,11 @@ namespace eval Tree {
 
     Widget::addmap Tree "" .c {-deltay -yscrollincrement}
 
+    # Trees on windows have a white (system window) background
+    if { $::tcl_platform(platform) == "windows" } {
+	option add *Tree.c.background SystemWindow widgetDefault
+    }
+
     proc ::Tree { path args } { return [eval Tree::create $path $args] }
     proc use {} {}
 
@@ -126,7 +131,8 @@ proc Tree::create { path args } {
     set data(dnd,selnodes) {}
     set data(dnd,node)     ""
 
-    frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat
+    frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat \
+	    -takefocus 0
     eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
     pack $path.c -expand yes -fill both
     $path.c bind cross <ButtonPress-1> [list Tree::_cross_event $path]
@@ -148,6 +154,7 @@ proc Tree::create { path args } {
 
     bind $path <Configure> "Tree::_update_scrollregion $path"
     bind $path <Destroy>   "Tree::_destroy $path"
+    bind $path <FocusIn>   "focus $path.c"
 
     DragSite::setdrag $path $path.c Tree::_init_drag_cmd \
 	    [Widget::cget $path -dragendcmd] 1
@@ -692,9 +699,16 @@ proc Tree::nodes { path node {first ""} {last ""} } {
 }
 
 
-# ------------------------------------------------------------------------------
-#  Command Tree::allnodes
-# ------------------------------------------------------------------------------
+# Tree::allnodes --
+#
+#	Retrieve a list of all the nodes in a tree.
+#
+# Arguments:
+#	path	tree to retrieve nodes for.
+#
+# Results:
+#	nodes	list of nodes in the tree.
+
 proc Tree::allnodes { path } {
     variable $path
     upvar 0  $path data
@@ -1627,9 +1641,9 @@ proc Tree::_keynav {which win} {
     # object for all the items with the "node" tag; since the tree is always
     # completely redrawn, this list will be in vertical order.
     set nodes {}
-    foreach nodeItem [$win:cmd find withtag node] {
-	set node [string range [lindex [$win:cmd gettags $nodeItem] 1] 2 end]
-	if { [Widget::getoption $win.$node -selectable] } {
+    foreach nodeItem [$win.c find withtag node] {
+	set node [string range [lindex [$win.c gettags $nodeItem] 1] 2 end]
+	if { [Widget::cget $win.$node -selectable] } {
 	    lappend nodes $node
 	}
     }

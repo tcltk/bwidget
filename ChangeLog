@@ -1,3 +1,16 @@
+2000-02-28  Eric Melski  <ericm@scriptics.com>
+
+	* tests/entry.test: tests for the Entry widget.
+
+	* widget.tcl: minor code cleanup.
+
+	* tree.tcl: Was not getting proper default bg color on Windows,
+	and keyboard navigation was goofy because of internal structure
+	changes.
+
+	* entry.tcl: Fixed an issue with initial foreground color not
+	being picked up correctly.
+
 2000-02-28  Sven Delmas  <sven@scriptics.com>
 
 	* tree.tcl: Added a procedure called "allnodes" to retrieve the
@@ -7,7 +20,13 @@
 
 2000-02-25  Eric Melski  <ericm@scriptics.com>
 
+	* combobox.tcl: Fixed a problem with non-editable comboboxes and
+	selecting values.
+
 	* arrow.tcl: 
+	Fixed a problem with the invoke method (doing one too many winfo
+	parents in some cases)
+
 	* button.tcl: 
 	* buttonbox.tcl: 
 	* combobox.tcl: 

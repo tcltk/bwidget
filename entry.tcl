@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.4 2000/02/26 01:56:39 ericm Exp $
+#  $Id: entry.tcl,v 1.5 2000/02/28 18:06:39 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -84,6 +84,8 @@ proc Entry::create { path args } {
     }
     if { ![string compare $state "disabled"] } {
         $path configure -foreground [Widget::cget $path -disabledforeground]
+    } else {
+	$path configure -foreground [Widget::cget $path -foreground]
     }
 
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd 1

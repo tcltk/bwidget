@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.5 2000/02/26 01:56:41 ericm Exp $
+#  $Id: widget.tcl,v 1.6 2000/02/28 18:06:40 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -370,7 +370,8 @@ proc Widget::declare { class optlist } {
             set tkoptions [_get_tkwidget_options $tkwidget]
             if { ![string length $value] } {
                 # We initialize default value
-                set value [lindex [lindex $tkoptions [lsearch $tkoptions [list $realopt *]]] end]
+		set ind [lsearch $tkoptions [list $realopt *]]
+                set value [lindex [lindex $tkoptions $ind] end]
             }
 	    set optionDbName ".[lindex [_configure_option $option ""] 0]"
 	    option add *${class}${optionDbName} $value widgetDefault
