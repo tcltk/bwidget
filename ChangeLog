@@ -1,3 +1,11 @@
+2002-09-11  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* color.tcl (SelectColor::menu): added tkwait and update to make
+	sure that the grab doesn't fail on Unix.
+
+	* listbox.tcl: corrected multiple selectmode bindings.
+	[Patch #483838, Bug #594853] (decoster)
+
 2002-08-23  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* tree.tcl: Modified subcommand 'includes' of the method

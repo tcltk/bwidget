@@ -75,7 +75,7 @@ proc SelectColor::menu {path placement args} {
                -relief flat -borderwidth 0 \
                -width 16 -height 16 -image [Bitmap::get palette]]
     grid $f -column $col -row $row -padx 1 -pady 1
-    bind $f <ButtonPress-1> "set SelectColor::_selection $count"
+    bind $f <ButtonPress-1> [list set SelectColor::_selection $count]
     bind $f <Enter>         {focus %W}
     pack $frame
 
@@ -84,8 +84,12 @@ proc SelectColor::menu {path placement args} {
     eval BWidget::place $top 0 0 $placement
 
     wm deiconify $top
-    focus -force $frame
     raise $top
+    if {$::tcl_platform(platform) == "unix"} {
+	tkwait visibility $top
+	update
+    }
+    focus -force $frame
     BWidget::grab set $frame
 
     tkwait variable SelectColor::_selection
