@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.14 2004/09/03 04:34:09 hobbs Exp $
+#  $Id: dialog.tcl,v 1.15 2004/09/24 23:56:59 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -78,6 +78,7 @@ proc Dialog::create { path args } {
 	set bd 0
     }
     toplevel $path -relief $re -borderwidth $bd -class $dialogClass
+    wm withdraw $path
 
     Widget::initFromODB Dialog $path $maps(Dialog)
 
@@ -92,7 +93,6 @@ proc Dialog::create { path args } {
     if { [Widget::getoption $path -transient] } {
 	wm transient $path [winfo toplevel $parent]
     }
-    wm withdraw $path
 
     set side [Widget::cget $path -side]
     if { [string equal $side "left"] || [string equal $side "right"] } {
