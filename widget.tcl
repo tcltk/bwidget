@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.8 2000/03/01 02:12:40 ericm Exp $
+#  $Id: widget.tcl,v 1.9 2000/03/10 16:58:13 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -567,7 +567,6 @@ proc Widget::parseArgs {class options} {
 #	None.
 
 proc Widget::initFromODB {class path options} {
-    upvar 0 ${class}::opt classopt
     upvar 0 ${class}::$path:opt  pathopt
     upvar 0 ${class}::$path:mod  pathmod
     upvar 0 ${class}::map classmap
@@ -589,7 +588,7 @@ proc Widget::initFromODB {class path options} {
 	    frame $fpath -class $rdbclass
 	}
     }
-    foreach {option optdesc} [array get classopt] {
+    foreach {option optdesc} [array get ${class}::opt] {
         set pathmod($option) 0
 	if { [info exists classmap($option)] } {
 	    continue
@@ -598,7 +597,7 @@ proc Widget::initFromODB {class path options} {
         if { ![string compare $type "Synonym"] } {
 	    continue
         }
-        if { ![string compare $type "TkResource"] } {
+	if { ![string compare $type "TkResource"] } {
             set alt [lindex [lindex $optdesc 3] 1]
         } else {
             set alt ""

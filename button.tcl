@@ -59,35 +59,37 @@ namespace eval Button {
 #  Command Button::create
 # ------------------------------------------------------------------------------
 proc Button::create { path args } {
-    Widget::init Button $path $args
+    array set maps [list Button {} :cmd {}]
+    array set maps [Widget::parseArgs Button $args]
+    eval button $path $maps(:cmd)
+    Widget::initFromODB Button $path $maps(Button)
 
-    set relief [Widget::getoption $path -relief]
+    # Do some extra configuration on the button
+    set relief [Widget::cget $path -relief]
     if { ![string compare $relief "link"] } {
         set relief "flat"
     }
-
     set var [Widget::cget $path -textvariable]
+    set st [Widget::cget $path -state]
     if {  ![string length $var] } {
-        set desc [BWidget::getname [Widget::getoption $path -name]]
+        set desc [BWidget::getname [Widget::cget $path -name]]
         if { [llength $desc] } {
             set text  [lindex $desc 0]
             set under [lindex $desc 1]
-            Widget::setoption $path -text $text
-            Widget::setoption $path -underline $under
+            Widget::configure $path [list -text $text]
+            Widget::configure $path [list -underline $under]
         } else {
-            set text  [Widget::getoption $path -text]
-            set under [Widget::getoption $path -underline]
+            set text  [Widget::cget $path -text]
+            set under [Widget::cget $path -underline]
         }
     } else {
         set under -1
         set text  ""
-        Widget::setoption $path -underline $under
+        Widget::configure $path [list -underline $under]
     }
 
-    set st [Widget::cget $path -state]
-    eval button $path [Widget::subcget $path :cmd] \
-        [list -relief $relief -text $text -underline $under \
-	    -textvariable $var -state $st]
+    $path configure -relief $relief -text $text -underline $under \
+	    -textvariable $var -state $st
     bindtags $path [list $path BwButton [winfo toplevel $path] all]
 
     set accel [string tolower [string index $text $under]]
@@ -175,21 +177,21 @@ proc Button::invoke { path } {
     if { [string compare [$path:cmd cget -state] "disabled"] } {
 	$path:cmd configure -state active -relief sunken
 	update idletasks
-        if { [set cmd [Widget::getoption $path -armcommand]] != "" } {
+        if { [set cmd [Widget::cget $path -armcommand]] != "" } {
             uplevel \#0 $cmd
         }
 	after 100
-        set relief [Widget::getoption $path -relief]
+        set relief [Widget::cget $path -relief]
         if { ![string compare $relief "link"] } {
             set relief flat
         }
 	$path:cmd configure \
-            -state  [Widget::getoption $path -state] \
+            -state  [Widget::cget $path -state] \
             -relief $relief
-        if { [set cmd [Widget::getoption $path -disarmcommand]] != "" } {
+        if { [set cmd [Widget::cget $path -disarmcommand]] != "" } {
             uplevel \#0 $cmd
         }
-        if { [set cmd [Widget::getoption $path -command]] != "" } {
+        if { [set cmd [Widget::cget $path -command]] != "" } {
             uplevel \#0 $cmd
         }
     }
@@ -208,7 +210,7 @@ proc Button::_enter { path } {
         $path:cmd configure -state active
         if { $_pressed == $path } {
             $path:cmd configure -relief sunken
-        } elseif { ![string compare [Widget::getoption $path -relief] "link"] } {
+        } elseif { ![string compare [Widget::cget $path -relief] "link"] } {
             $path:cmd configure -relief raised
         }
     }
@@ -224,8 +226,8 @@ proc Button::_leave { path } {
 
     set _current ""
     if { [string compare [$path:cmd cget -state] "disabled"] } {
-        $path:cmd configure -state [Widget::getoption $path -state]
-        set relief [Widget::getoption $path -relief]
+        $path:cmd configure -state [Widget::cget $path -state]
+        set relief [Widget::cget $path -relief]
         if { $_pressed == $path } {
             if { ![string compare $relief "link"] } {
                 set relief raised
@@ -247,10 +249,10 @@ proc Button::_press { path } {
     if { [string compare [$path:cmd cget -state] "disabled"] } {
         set _pressed $path
 	$path:cmd configure -relief sunken
-        if { [set cmd [Widget::getoption $path -armcommand]] != "" } {
+        if { [set cmd [Widget::cget $path -armcommand]] != "" } {
             uplevel \#0 $cmd
-            if { [set delay [Widget::getoption $path -repeatdelay]]    > 0 ||
-                 [set delay [Widget::getoption $path -repeatinterval]] > 0 } {
+            if { [set delay [Widget::cget $path -repeatdelay]]    > 0 ||
+                 [set delay [Widget::cget $path -repeatinterval]] > 0 } {
                 after $delay "Button::_repeat $path"
             }
         }
@@ -267,17 +269,17 @@ proc Button::_release { path } {
 
     if { $_pressed == $path } {
         set _pressed ""
-        set relief [Widget::getoption $path -relief]
+        set relief [Widget::cget $path -relief]
         if { ![string compare $relief "link"] } {
             set relief raised
         }
         $path:cmd configure -relief $relief
-        if { [set cmd [Widget::getoption $path -disarmcommand]] != "" } {
+        if { [set cmd [Widget::cget $path -disarmcommand]] != "" } {
             uplevel \#0 $cmd
         }
         if { $_current == $path &&
              [string compare [$path:cmd cget -state] "disabled"] &&
-             [set cmd [Widget::getoption $path -command]] != "" } {
+             [set cmd [Widget::cget $path -command]] != "" } {
             uplevel \#0 $cmd
         }
     }
@@ -293,12 +295,12 @@ proc Button::_repeat { path } {
 
     if { $_current == $path && $_pressed == $path &&
          [string compare [$path:cmd cget -state] "disabled"] &&
-         [set cmd [Widget::getoption $path -armcommand]] != "" } {
+         [set cmd [Widget::cget $path -armcommand]] != "" } {
         uplevel \#0 $cmd
     }
     if { $_pressed == $path &&
-         ([set delay [Widget::getoption $path -repeatinterval]] > 0 ||
-          [set delay [Widget::getoption $path -repeatdelay]]    > 0) } {
+         ([set delay [Widget::cget $path -repeatinterval]] > 0 ||
+          [set delay [Widget::cget $path -repeatdelay]]    > 0) } {
         after $delay "Button::_repeat $path"
     }
 }

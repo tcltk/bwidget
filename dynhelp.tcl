@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.2 2000/02/26 01:56:39 ericm Exp $
+#  $Id: dynhelp.tcl,v 1.3 2000/03/10 16:58:13 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -78,10 +78,11 @@ proc DynamicHelp::configure { args } {
 #  Command DynamicHelp::include
 # ------------------------------------------------------------------------------
 proc DynamicHelp::include { class type } {
-    set helpoptions {
-        {-helptext String "" 0}
-        {-helpvar  String "" 0}}
-    lappend helpoptions [list -helptype Enum $type 0 {balloon variable}]
+    set helpoptions [list \
+	    [list -helptext String "" 0] \
+	    [list -helpvar  String "" 0] \
+	    [list -helptype Enum $type 0 [list balloon variable]] \
+	    ]
     Widget::declare $class $helpoptions
 }
 
@@ -90,16 +91,20 @@ proc DynamicHelp::include { class type } {
 #  Command DynamicHelp::sethelp
 # ------------------------------------------------------------------------------
 proc DynamicHelp::sethelp { path subpath {force 0}} {
-    set ctype [Widget::hasChanged $path -helptype htype]
-    set ctext [Widget::hasChanged $path -helptext htext]
-    set cvar  [Widget::hasChanged $path -helpvar  hvar]
+    set ctype [Widget::hasChangedX $path -helptype]
+    set ctext [Widget::hasChangedX $path -helptext]
+    set cvar  [Widget::hasChangedX $path -helpvar]
     if { $force || $ctype || $ctext || $cvar } {
+	set htype [Widget::cget $path -helptype]
         switch $htype {
             balloon {
-                return [register $subpath balloon $htext]
+                return [register $subpath balloon \
+			[Widget::cget $path -helptext]]
             }
             variable {
-                return [register $subpath variable $hvar $htext]
+                return [register $subpath variable \
+			[Widget::cget $path -helpvar] \
+			[Widget::cget $path -helptext]]
             }
         }
         return [register $subpath $htype]
