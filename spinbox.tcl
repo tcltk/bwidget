@@ -1,6 +1,12 @@
-# -----------------------------------------------------------------------------
-#  spinbox.tcl
-#  This file is part of Unifix BWidget Toolkit
+# spinbox.tcl --
+#
+#	BWidget SpinBox implementation.
+#
+# Copyright (c) 1999 by Unifix
+# Copyright (c) 2000 by Scriptics Corporation.
+# All rights reserved.
+# 
+# RCS: @(#) $Id: spinbox.tcl,v 1.6 2000/03/03 23:54:14 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - SpinBox::create
@@ -15,13 +21,10 @@
 namespace eval SpinBox {
     ArrowButton::use
     Entry::use
-    LabelFrame::use
 
-    Widget::bwinclude SpinBox LabelFrame .labf \
-        rename     {-text -label} \
-        prefix     {label -justify -width -anchor -height -font} \
-        remove     {-focus} \
-        initialize {-relief sunken -borderwidth 2}
+    Widget::tkinclude SpinBox frame :cmd \
+	    include {-background -borderwidth -bg -bd -relief} \
+	    initialize {-relief sunken -borderwidth 2}
 
     Widget::bwinclude SpinBox Entry .e \
         remove {-relief -bd -borderwidth -fg -bg} \
@@ -33,6 +36,7 @@ namespace eval SpinBox {
         {-modifycmd      String ""  0}
         {-repeatdelay    Int    400 0 {%d >= 0}}
         {-repeatinterval Int    100 0 {%d >= 0}}
+	{-foreground     TkResource black 0 {button}}
     }
 
     Widget::addmap SpinBox "" :cmd {-background {}}
@@ -45,10 +49,10 @@ namespace eval SpinBox {
 		-repeatinterval {} -repeatdelay {}
     }
 
-    ::bind SpinBox <FocusIn> [list after idle {BWidget::refocus %W %W.labf}]
+    ::bind SpinBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
     ::bind SpinBox <Destroy> {SpinBox::_destroy %W}
 
-    proc ::SpinBox { path args } { return [eval SpinBox::create $path $args] }
+    interp alias {} ::SpinBox {} ::SpinBox::create
     proc use {} {}
 
     variable _widget
@@ -59,13 +63,12 @@ namespace eval SpinBox {
 #  Command SpinBox::create
 # -----------------------------------------------------------------------------
 proc SpinBox::create { path args } {
-    array set maps [list SpinBox {} :cmd {} .e {} .arrup {} .arrdn {} .labf {}]
+    array set maps [list SpinBox {} :cmd {} .e {} .arrup {} .arrdn {}]
     array set maps [Widget::parseArgs SpinBox $args]
-    eval frame $path $maps(:cmd) -highlightthickness 0 -bd 0 -relief flat \
+    eval frame $path $maps(:cmd) -highlightthickness 0 \
 	    -takefocus 0 -class SpinBox
     Widget::initFromODB SpinBox $path $maps(SpinBox)
 
-    set labf [eval LabelFrame::create $path.labf $maps(.labf) -focus $path.e]
     set entry [eval Entry::create $path.e $maps(.e) -relief flat -bd 0]
     bindtags $path.e [linsert [bindtags $path.e] 1 SpinBoxEntry]
 
@@ -86,7 +89,6 @@ proc SpinBox::create { path args } {
 	    -width $width -height $height \
 	    -armcommand    [list "SpinBox::_modify_value $path previous arm"] \
 	    -disarmcommand [list "SpinBox::_modify_value $path previous disarm"]]
-    set frame [LabelFrame::getframe $path.labf]
 
     # --- update SpinBox value ---
     _test_options $path
@@ -102,9 +104,8 @@ proc SpinBox::create { path args } {
     grid rowconfigure $farr 0 -weight 1
     grid rowconfigure $farr 2 -weight 1
 
-    pack $farr  -in $frame -side right -fill y
-    pack $entry -in $frame -side left  -fill both -expand yes
-    pack $labf  -fill both -expand yes
+    pack $farr  -side right -fill y
+    pack $entry -side left  -fill both -expand yes
 
     ::bind $entry <Key-Up>    "SpinBox::_modify_value $path next activate"
     ::bind $entry <Key-Down>  "SpinBox::_modify_value $path previous activate"
@@ -119,14 +120,13 @@ proc SpinBox::create { path args } {
     return $path
 }
 
-
 # -----------------------------------------------------------------------------
 #  Command SpinBox::configure
 # -----------------------------------------------------------------------------
 proc SpinBox::configure { path args } {
     set res [Widget::configure $path $args]
-    if { [Widget::hasChanged $path -values val] ||
-         [Widget::hasChanged $path -range  val] } {
+    if { [Widget::hasChangedX $path -values] ||
+         [Widget::hasChangedX $path -range] } {
         _test_options $path
     }
     return $res
