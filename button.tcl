@@ -18,8 +18,11 @@
 # ------------------------------------------------------------------------------
 
 namespace eval Button {
-    Widget::tkinclude Button button :cmd \
-        remove {-command -relief -text -textvariable -underline -state}
+    set remove [list -command -relief -text -textvariable -underline -state]
+    if {[info tclversion] > 8.3} {
+	lappend remove -repeatdelay -repeatinterval
+    }
+    Widget::tkinclude Button button :cmd remove $remove
 
     Widget::declare Button {
         {-name            String "" 0}
