@@ -1,5 +1,9 @@
 AC_INIT(init.tcl)
 
+AC_CONFIG_AUX_DIR(config)
+CONFIGDIR=${srcdir}/config
+AC_SUBST(CONFIGDIR)
+
 PACKAGE=bwidget
 
 MAJOR_VERSION=1
@@ -39,5 +43,4 @@ esac
 
 AC_SUBST(CYGPATH)
 
-AC_OUTPUT([Makefile],
-	chmod +x ${srcdir}/install-sh ${srcdir}/mkinstalldirs)
+AC_OUTPUT([Makefile])
