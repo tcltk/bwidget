@@ -54,7 +54,8 @@ proc PanedWindow::create { path args } {
 
     Widget::init PanedWindow $path $args
 
-    frame $path -background [Widget::cget $path -background] -class PanedWindow
+    frame $path -background [Widget::cget $path -background] \
+	    -class BwPanedWindow
     set _panedw($path,nbpanes) 0
     set _panedw($path,weights) ""
 
