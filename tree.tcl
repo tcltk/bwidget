@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.5 1999/11/05 03:38:55 ericm Exp $
+#  $Id: tree.tcl,v 1.6 2000/02/11 00:07:50 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -460,12 +460,51 @@ proc Tree::selection { path cmd args } {
         add {
             foreach node $args {
                 if { [info exists data($node)] } {
-                    if { [lsearch $data(selnodes) $node] == -1 } {
-                        lappend data(selnodes) $node
-                    }
+		    if { [Widget::getoption $path.$node -selectable] } {
+			if { [lsearch $data(selnodes) $node] == -1 } {
+			    lappend data(selnodes) $node
+			}
+		    }
                 }
             }
         }
+	range {
+	    # Here's our algorithm:
+	    #   make a list of all nodes, then take the range from node1
+	    #       to node2 and select those nodes
+	    # This works because of how this widget handles redraws:
+	    # the tree is always completely redraw, always from top to bottom.
+	    # So the list of visible nodes *is* the list of nodes, and we can
+	    # use that to decide which nodes to select.  NOTE:  if node1
+	    # is not actually drawn on the canvas (for example, it is in an
+	    # unexpanded branch), this will NOT WORK because we will get
+	    # a bogus index in the nodelist for that node.  The question is,
+	    # what can we do about it?  Probably the right thing to do is
+	    # to not rely on canvas visibility and _really_ do the range on
+	    # the tree.  That's hard though.
+	    foreach {node1 node2} $args break
+	    if { [info exists data($node1)] && [info exists data($node2)] } {
+		set nodes {}
+		foreach nodeItem [$path:cmd find withtag node] {
+		    set node [string range \
+			    [lindex [$path:cmd gettags $nodeItem] 1] 2 end]
+		    if { [Widget::getoption $path.$node -selectable] } {
+			lappend nodes $node
+		    }
+		}
+
+		set index1 [lsearch -exact $nodes $node1]
+		set index2 [lsearch -exact $nodes $node2]
+		# If the nodes were given in backwards order, flip the
+		# indices now
+		if { $index2 < $index1 } {
+		    incr index1 $index2
+		    set index2 [expr {$index1 - $index2}]
+		    set index1 [expr {$index1 - $index2}]
+		}
+		set data(selnodes) [lrange $nodes $index1 $index2]
+	    }
+	}
         remove {
             foreach node $args {
                 if { [set idx [lsearch $data(selnodes) $node]] != -1 } {
