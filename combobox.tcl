@@ -1,8 +1,8 @@
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.19 2002/05/29 22:02:49 andreas_kupries Exp $
-# -----------------------------------------------------------------------------
+#  $Id: combobox.tcl,v 1.20 2002/10/14 20:54:01 hobbs Exp $
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
 #     - ComboBox::configure
@@ -14,7 +14,7 @@
 #     - ComboBox::_unmapliste
 #     - ComboBox::_select
 #     - ComboBox::_modify_value
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 # ComboBox uses the 8.3 -listvariable listbox option
 package require Tk 8.3
@@ -161,21 +161,32 @@ proc ComboBox::configure { path args } {
         }
     }
 
+    # if the dropdown listbox is shown, simply force the actual entry
+    #  colors into it. If it is not shown, the next time the dropdown
+    #  is shown it'll get the actual colors anyway
+    if {[winfo exists $path.shell.listb]} {
+	$path.shell.listb configure \
+		-bg [Widget::cget $path -entrybg] \
+		-fg [Widget::cget $path -foreground] \
+		-selectbackground [Widget::cget $path -selectbackground] \
+		-selectforeground [Widget::cget $path -selectforeground] 
+    }
+
     return $res
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::setvalue
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::setvalue { path index } {
     set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
@@ -220,9 +231,9 @@ proc ComboBox::setvalue { path index } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::getvalue
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::getvalue { path } {
     set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
@@ -231,30 +242,30 @@ proc ComboBox::getvalue { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::bind
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::bind { path args } {
     return [eval ::bind $path.e $args]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_create_popup
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::_create_popup { path } {
     set shell $path.shell
     set lval  [Widget::cget $path -values]
     set h     [Widget::cget $path -height]
     if { $h <= 0 } {
-        set len [llength $lval]
-        if { $len < 3 } {
-            set h 3
-        } elseif { $len > 10 } {
-            set h 10
-        } else {
-            set h $len
-        }
+	set len [llength $lval]
+	if { $len < 3 } {
+	    set h 3
+	} elseif { $len > 10 } {
+	    set h 10
+	} else {
+	    set h $len
+	}
     }
     if { $::tcl_platform(platform) == "unix" } {
 	set sbwidth 11
@@ -264,39 +275,49 @@ proc ComboBox::_create_popup { path } {
 	set sbrelief ridge
     }
     if {![winfo exists $path.shell]} {
-        set shell [toplevel $path.shell -relief $sbrelief -bd 2]
-        wm overrideredirect $shell 1
-        wm transient $shell [winfo toplevel $path]
-        wm withdraw  $shell
+	set shell [toplevel $path.shell -relief $sbrelief -bd 2]
+	wm overrideredirect $shell 1
+	wm transient $shell [winfo toplevel $path]
+	wm withdraw  $shell
 
-        set sw     [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
-        set listb  [listbox $shell.listb \
+	set sw	   [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
+	set listb  [listbox $shell.listb \
 		-relief flat -borderwidth 0 -highlightthickness 0 \
 		-exportselection false \
-		-font   [Widget::cget $path -font]  \
+		-font	[Widget::cget $path -font]  \
 		-height $h \
+		-bg [Widget::cget $path -entrybg] \
+		-fg [Widget::cget $path -foreground] \
+		-selectbackground [Widget::cget $path -selectbackground] \
+		-selectforeground [Widget::cget $path -selectforeground] \
 		-listvariable [Widget::varForOption $path -values]]
-        pack $sw -fill both -expand yes
-        $sw setwidget $listb
+	pack $sw -fill both -expand yes
+	$sw setwidget $listb
 
-        ::bind $listb <ButtonRelease-1> "ComboBox::_select $path @%x,%y"
-        ::bind $listb <Return>          "ComboBox::_select $path active; break"
-        ::bind $listb <Escape>          "ComboBox::_unmapliste $path; break"
+	::bind $listb <ButtonRelease-1> "ComboBox::_select $path @%x,%y"
+	::bind $listb <Return>		"ComboBox::_select $path active; break"
+	::bind $listb <Escape>		"ComboBox::_unmapliste $path; break"
     } else {
-        set listb $shell.listb
-        destroy $shell.sw
-        set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
-        $listb configure -height $h -font [Widget::cget $path -font]
-        pack $sw -fill both -expand yes
-        $sw setwidget $listb
-        raise $listb
+	set listb $shell.listb
+	destroy $shell.sw
+	set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
+	$listb configure \
+		-height $h \
+		-font [Widget::cget $path -font] \
+		-bg [Widget::cget $path -entrybg] \
+		-fg [Widget::cget $path -foreground] \
+		-selectbackground [Widget::cget $path -selectbackground] \
+		-selectforeground [Widget::cget $path -selectforeground]
+	pack $sw -fill both -expand yes
+	$sw setwidget $listb
+	raise $listb
     }
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_mapliste
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::_mapliste { path } {
     set listb $path.shell.listb
     if {[winfo exists $path.shell] &&
@@ -341,9 +362,9 @@ proc ComboBox::_mapliste { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_unmapliste
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::_unmapliste { path } {
     if {[winfo exists $path.shell] && \
 	    ![string compare [wm state $path.shell] "normal"]} {
@@ -358,9 +379,9 @@ proc ComboBox::_unmapliste { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_select
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::_select { path index } {
     set index [$path.shell.listb index $index]
     _unmapliste $path
@@ -378,9 +399,9 @@ proc ComboBox::_select { path index } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ComboBox::_modify_value
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ComboBox::_modify_value { path direction } {
     if { [setvalue $path $direction] } {
         if { [set cmd [Widget::getMegawidgetOption $path -modifycmd]] != "" } {
