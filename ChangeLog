@@ -1,3 +1,14 @@
+2003-01-26  Damon Courtney <damon@unreality.com>
+	* BWman/DynamicHelp.html:
+	* dynhelp.tcl:  Added -state option to disable help balloons on a
+	  global scale.
+
+	* BWman/Tree.html:
+	* tree.tcl: Added -crossfill option to allow the + / - bitmap to
+	  be filled with a different color than the connecting node lines.
+	  -linesfill is now accurate in its help entry and only adjusts
+	  the foreground color of the lines between the nodes.
+
 2003-01-24  Joe English  <jenglish@users.sourceforge.net>
 	* tree.tcl (Tree::delete, Tree::_subdelete): remove all deleted
 	nodes from the the selection [Bug #621178].

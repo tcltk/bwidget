@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.38 2003/01/24 22:17:56 jenglish Exp $
+#  $Id: tree.tcl,v 1.39 2003/01/26 10:55:31 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -87,6 +87,7 @@ namespace eval Tree {
         {-showlines        Boolean 1  0}
         {-linesfill        TkResource black  0 {listbox -foreground}}
         {-linestipple      TkResource ""     0 {label -bitmap}}
+	{-crossfill        TkResource black  0 {listbox -foreground}}
         {-redraw           Boolean 1  0}
         {-opencmd          String  "" 0}
         {-closecmd         String  "" 0}
@@ -232,6 +233,9 @@ proc Tree::configure { path args } {
     if { [Widget::hasChanged $path -linesfill   fill] |
          [Widget::hasChanged $path -linestipple stipple] } {
         $path.c itemconfigure line  -fill $fill -stipple $stipple
+    }
+
+    if { [Widget::hasChanged $path -crossfill fill] } {
         $path.c itemconfigure cross -foreground $fill
     }
 
@@ -1199,7 +1203,7 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
         $path.c create bitmap $x0 $y0 \
             -bitmap     @$bmp \
             -background [$path.c cget -background] \
-            -foreground [Widget::getoption $path -linesfill] \
+            -foreground [Widget::getoption $path -crossfill] \
             -tags       "cross c:$node" -anchor c
     }
 
@@ -1297,7 +1301,7 @@ proc Tree::_update_nodes { path } {
                     $path.c create bitmap [expr {$x0-$deltax-5}] $y0 \
                         -bitmap     @$bmp \
                         -background [$path.c cget -background] \
-                        -foreground [Widget::getoption $path -linesfill] \
+                        -foreground [Widget::getoption $path -crossfill] \
                         -tags       "cross c:$node" -anchor c
                 } else {
                     $path.c itemconfigure $idc -bitmap @$bmp

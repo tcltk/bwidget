@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.9 2002/10/14 20:54:23 hobbs Exp $
+#  $Id: dynhelp.tcl,v 1.10 2003/01/26 10:55:31 damonc Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -26,6 +26,7 @@ namespace eval DynamicHelp {
         {-justify     TkResource left          0 label}
         {-font        TkResource "helvetica 8" 0 label}
         {-delay       Int        600           0 "%d >= 100 & %d <= 2000"}
+	{-state       Enum       "normal"      0 {normal disabled}}
         {-bd          Synonym    -borderwidth}
         {-bg          Synonym    -background}
         {-fg          Synonym    -foreground}
@@ -319,6 +320,8 @@ proc DynamicHelp::_show_help { path x y } {
     variable _registered
     variable _id
     variable _delay
+
+    if { [Widget::getoption $_top -state] == "disabled" } { return }
 
     if { [info exists _registered($path,balloon)] } {
         destroy  $_top
