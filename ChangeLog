@@ -1,5 +1,12 @@
 2004-09-02  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* buttonbox.tcl, combobox.tcl: code safety fixes
+
+	* dialog.tcl: default button width to -11 on Win8.4, 8 otherwise
+
+	* color.tcl, font.tcl, messagedlg.tcl:
+	* passwddlg.tcl, progressdlg.tcl: change dialogs to anchor buttons e
+
 	* statusbar.tcl: better -bg handling (configure too), and tighten
 	up spacing on resize control to place it flush bottom right
 
