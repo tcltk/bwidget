@@ -16,5 +16,18 @@ if { $tcl_platform(platform) == "windows" } {
 
 option read [file join $::BWIDGET::LIBRARY "lang" "en.rc"]
 
-bind all <Key-Tab>       {focus [Widget::focusNext %W]}
-bind all <Shift-Key-Tab> {focus [Widget::focusPrev %W]}
+bind Entry <<TraverseIn>> { %W selection range 0 end ; %W icursor end }
+
+namespace eval Widget {}
+
+proc Widget::traverseTo {w} {
+    if {[set oldfocus [focus]] != ""} {
+    	event generate $oldfocus <<TraverseOut>>
+    }
+    focus $w 
+    event generate $w <<TraverseIn>> 
+}
+
+bind all <Key-Tab>       {Widget::traverseTo [Widget::focusNext %W]}
+bind all <Shift-Key-Tab> {Widget::traverseTo [Widget::focusPrev %W]}
+

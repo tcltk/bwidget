@@ -1,3 +1,11 @@
+2003-07-17  Joe English  <jenglish@users.sourceforge.net>
+	* init.tcl, combobox.tcl:  Fix for [Bug 720032] "BWidget
+	breaks Tk entry behaviour".  Highlight the entry
+	in a <<TraverseIn>> binding, instead of doing so
+	on every <FocusIn> event.  Change the global <Tab> 
+	and <Shift-Tab> bindings to generate <<TraverseIn>>
+	and <<TraverseOut>> events.
+
 2003-07-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* notebook.tcl: Use list with eval for safety.
