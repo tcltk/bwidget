@@ -1,3 +1,9 @@
+2001-08-08  Andreas Kupries <andreas_kupries@users.sourceforge.net>
+
+	* color.tcl: Added the missing definition of the main
+	  'SelectColor' procedure. This prevented users from creating
+	  these widgets in the documented way. Bug [449276].
+
 2001-06-21  eric melski  <ericm@ajubasolutions.com>
 
 	* tree.tcl: Corrected keyboard navigation so that open/close
