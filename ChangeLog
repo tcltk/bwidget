@@ -1,3 +1,11 @@
+2003-03-12  Damon Courtney <damon@unreality.com>
+
+	* listbox.tcl: Added dynamic help support to listbox items.
+
+	* tree.tcl: Fixed a little inconsistency in the tree dynamic help.
+	We don't need to save the whole path in the help array, just the
+	node.
+
 2003-02-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* scrollw.tcl: add lock around grid remove scrollbar to prevent
