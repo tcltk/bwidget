@@ -1,8 +1,8 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.17 2001/06/11 23:58:40 hobbs Exp $
-# ------------------------------------------------------------------------------
+#  $Id: widget.tcl,v 1.18 2001/12/29 01:40:34 hobbs Exp $
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
 #     - Widget::bwinclude
@@ -24,7 +24,7 @@
 #     - Widget::_test_enum
 #     - Widget::_test_int
 #     - Widget::_test_boolean
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Each megawidget gets a namespace of the same name inside the Widget namespace
 # Each of these has an array opt, which contains information about the 
 # megawidget options.  It maps megawidget options to a list with this format:
@@ -77,14 +77,14 @@ namespace eval Widget {
 
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::tkinclude
 #     Includes tk widget resources to BWidget widget.
 #  class      class name of the BWidget
 #  tkwidget   tk widget to include
 #  subpath    subpath to configure
 #  args       additionnal args for included options
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::tkinclude { class tkwidget subpath args } {
     foreach {cmd lopt} $args {
         # cmd can be
@@ -184,14 +184,14 @@ proc Widget::tkinclude { class tkwidget subpath args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::bwinclude
 #     Includes BWidget resources to BWidget widget.
 #  class    class name of the BWidget
 #  subclass BWidget class to include
 #  subpath  subpath to configure
 #  args     additionnal args for included options
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::bwinclude { class subclass subpath args } {
     foreach {cmd lopt} $args {
         # cmd can be
@@ -297,10 +297,10 @@ proc Widget::bwinclude { class subclass subpath args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::declare
 #    Declares new options to BWidget class.
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::declare { class optlist } {
     variable _optiontype
 
@@ -395,9 +395,9 @@ proc Widget::declare { class optlist } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::addmap
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::addmap { class subclass subpath options } {
     upvar 0 ${class}::opt classopt
     upvar 0 ${class}::optionExports exports
@@ -424,9 +424,9 @@ proc Widget::addmap { class subclass subpath options } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::syncoptions
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::syncoptions { class subclass subpath options } {
     upvar 0 ${class}::sync classync
 
@@ -439,9 +439,9 @@ proc Widget::syncoptions { class subclass subpath options } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::init
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::init { class path options } {
     upvar 0 ${class}::opt classopt
     upvar 0 ${class}::$path:opt  pathopt
@@ -504,6 +504,63 @@ proc Widget::init { class path options } {
             set type    [lindex $optdesc 0]
         }
         set pathopt($option) [$Widget::_optiontype($type) $option $value [lindex $optdesc 3]]
+	set pathinit($option) $pathopt($option)
+    }
+}
+
+# Bastien Chevreux (bach@mwgdna.com)
+#
+# copyinit performs basically the same job as init, but it uses a
+#  existing template to initialize its values. So, first a perferct copy
+#  from the template is made just to be altered by any existing options
+#  afterwards.
+# But this still saves time as the first initialization parsing block is
+#  skipped.
+# As additional bonus, items that differ in just a few options can be
+#  initialized faster by leaving out the options that are equal.
+
+# This function is currently used only by ListBox::multipleinsert, but other
+#  calls should follow :)
+
+# ----------------------------------------------------------------------------
+#  Command Widget::copyinit
+# ----------------------------------------------------------------------------
+proc Widget::copyinit { class templatepath path options } {
+    upvar 0 ${class}::opt classopt \
+	    ${class}::$path:opt	 pathopt \
+	    ${class}::$path:mod	 pathmod \
+	    ${class}::$path:init pathinit \
+	    ${class}::$templatepath:opt	  templatepathopt \
+	    ${class}::$templatepath:mod	  templatepathmod \
+	    ${class}::$templatepath:init  templatepathinit
+
+    if { [info exists pathopt] } {
+	unset pathopt
+    }
+    if { [info exists pathmod] } {
+	unset pathmod
+    }
+
+    # We use the template widget for option db copying, but it has to exist!
+    array set pathmod  [array get templatepathmod]
+    array set pathopt  [array get templatepathopt]
+    array set pathinit [array get templatepathinit]
+
+    set Widget::_class($path) $class
+    foreach {option value} $options {
+	if { ![info exists classopt($option)] } {
+	    unset pathopt
+	    unset pathmod
+	    return -code error "unknown option \"$option\""
+	}
+	set optdesc $classopt($option)
+	set type    [lindex $optdesc 0]
+	if { ![string compare $type "Synonym"] } {
+	    set option	[lindex $optdesc 1]
+	    set optdesc $classopt($option)
+	    set type	[lindex $optdesc 0]
+	}
+	set pathopt($option) [$Widget::_optiontype($type) $option $value [lindex $optdesc 3]]
 	set pathinit($option) $pathopt($option)
     }
 }
@@ -620,9 +677,9 @@ proc Widget::initFromODB {class path options} {
 
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::destroy
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::destroy { path } {
     variable _class
 
@@ -643,9 +700,9 @@ proc Widget::destroy { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::configure { path options } {
     set len [llength $options]
     if { $len <= 1 } {
@@ -700,9 +757,9 @@ proc Widget::configure { path options } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::cget { path option } {
     if { ![info exists ::Widget::_class($path)] } {
         return -code error "unknown widget $path"
@@ -729,9 +786,9 @@ proc Widget::cget { path option } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::subcget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::subcget { path subwidget } {
     set class $::Widget::_class($path)
     upvar 0 ${class}::$path:opt pathopt
@@ -748,9 +805,9 @@ proc Widget::subcget { path subwidget } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::hasChanged
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::hasChanged { path option pvalue } {
     upvar    $pvalue value
     set class $::Widget::_class($path)
@@ -778,9 +835,9 @@ proc Widget::hasChangedX { path option args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::setoption
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::setoption { path option value } {
 #    variable _class
 
@@ -792,9 +849,9 @@ proc Widget::setoption { path option value } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::getoption
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::getoption { path option } {
 #    set class $::Widget::_class($path)
 #    upvar 0 ${class}::$path:opt pathopt
@@ -842,10 +899,10 @@ proc Widget::setMegawidgetOption {path option value} {
     set pathopt($option) $value
 }
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_get_window
 #  returns the window corresponding to widget path
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_get_window { class path } {
     set idx [string last "#" $path]
     if { $idx != -1 && ![string compare [string range $path [expr {$idx+1}] end] $class] } {
@@ -856,11 +913,11 @@ proc Widget::_get_window { class path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_get_configure
 #  returns the configuration list of options
 #  (as tk widget do - [$w configure ?option?])
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_get_configure { path options } {
     variable _class
 
@@ -920,9 +977,9 @@ proc Widget::_get_configure { path options } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_configure_option
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_configure_option { option altopt } {
     variable _optiondb
     variable _optionclass
@@ -947,9 +1004,9 @@ proc Widget::_configure_option { option altopt } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_get_tkwidget_options
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_get_tkwidget_options { tkwidget } {
     variable _tk_widget
     variable _optiondb
@@ -993,9 +1050,9 @@ proc Widget::_get_tkwidget_options { tkwidget } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_test_tkresource
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_test_tkresource { option value arg } {
 #    set tkwidget [lindex $arg 0]
 #    set realopt  [lindex $arg 1]
@@ -1010,33 +1067,33 @@ proc Widget::_test_tkresource { option value arg } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_test_bwresource
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_test_bwresource { option value arg } {
     return -code error "bad option type BwResource in widget"
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_test_synonym
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_test_synonym { option value arg } {
     return -code error "bad option type Synonym in widget"
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_test_string
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_test_string { option value arg } {
     set value
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::_test_flag
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::_test_flag { option value arg } {
     set len [string length $value]
     set res ""
@@ -1189,10 +1246,10 @@ proc Widget::focusPrev { w } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command Widget::focusOK
 #  Same as tk_focusOK, but handles -editable option and whole tags list.
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc Widget::focusOK { w } {
     set code [catch {$w cget -takefocus} value]
     if { $code == 1 } {
