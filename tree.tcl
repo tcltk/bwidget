@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.29 2000/05/09 00:01:21 ericm Exp $
+#  $Id: tree.tcl,v 1.30 2000/05/09 01:53:10 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -117,6 +117,8 @@ namespace eval Tree {
 	set ::Tree::sentinal(%W) 0
     }
     
+    bind TreeFocus <Button-1> [list focus %W]
+
     proc ::Tree { path args } { return [eval Tree::create $path $args] }
     proc use {} {}
 
@@ -147,7 +149,7 @@ proc Tree::create { path args } {
     frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat \
 	    -takefocus 0
     eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
-    bindtags $path.c [list TreeSentinalStart $path.c Canvas \
+    bindtags $path.c [list TreeSentinalStart TreeFocus $path.c Canvas \
 	    [winfo toplevel $path] all TreeSentinalEnd]
     pack $path.c -expand yes -fill both
     $path.c bind cross <ButtonPress-1> [list Tree::_cross_event $path]
@@ -200,9 +202,6 @@ proc Tree::create { path args } {
     # for the canvas)
     $path.c bind TreeItemSentinal <Double-Button-1> \
 	    "set ::Tree::sentinal($path.c) 1"
-    
-    bind $path.c <Button-1> "focus %W"
-
     # ericm
 
     return $path
@@ -661,7 +660,7 @@ proc Tree::find {path findInfo {confine ""}} {
         set xs [lindex $region 2]
         foreach id [$path.c find overlapping $xi $y $xs $y] {
             set ltags [$path.c gettags $id]
-            set item  [lindex $ltags 0]
+            set item  [lindex $ltags 1]
             if { ![string compare $item "node"] ||
                  ![string compare $item "img"]  ||
                  ![string compare $item "win"] } {
@@ -1195,7 +1194,7 @@ proc Tree::_update_nodes { path } {
             set win  [Widget::getoption $path.$node -window]
             set img  [Widget::getoption $path.$node -image]
             set idi  [$path.c find withtag i:$node]
-            set type [lindex [$path.c gettags $idi] 0]
+            set type [lindex [$path.c gettags $idi] 1]
             if { [string length $win] } {
                 if { ![string compare $type "win"] } {
                     $path.c itemconfigure $idi -window $win
@@ -1358,7 +1357,7 @@ proc Tree::_redraw_idle { path level } {
 proc Tree::_init_drag_cmd { path X Y top } {
     set path [winfo parent $path]
     set ltags [$path.c gettags current]
-    set item  [lindex $ltags 0]
+    set item  [lindex $ltags 1]
     if { ![string compare $item "node"] ||
          ![string compare $item "img"]  ||
          ![string compare $item "win"] } {
@@ -1474,7 +1473,7 @@ proc Tree::_over_cmd { path source event X Y op type dnddata } {
         set found 0
         foreach id [$path.c find overlapping $xi $yi $xs $ys] {
             set ltags [$path.c gettags $id]
-            set item  [lindex $ltags 0]
+            set item  [lindex $ltags 1]
             if { ![string compare $item "node"] ||
                  ![string compare $item "img"]  ||
                  ![string compare $item "win"] } {
