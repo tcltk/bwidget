@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.22 2003/02/08 10:21:17 damonc Exp $
+#  $Id: widget.tcl,v 1.23 2003/02/25 09:49:59 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -245,7 +245,7 @@ proc Widget::bwinclude { class subclass subpath args } {
         if { (![info exists include] || [info exists include($option)]) &&
              ![info exists remove($option)] } {
             set type [lindex $optdesc 0]
-            if { ![string compare $type "Synonym"] } {
+            if { [string equal $type "Synonym"] } {
                 # option is a synonym
                 set syn [lindex $optdesc 1]
                 if { ![info exists remove($syn)] } {
@@ -321,7 +321,7 @@ proc Widget::declare { class optlist } {
             return -code error "invalid option type \"$type\""
         }
 
-        if { ![string compare $type "Synonym"] } {
+        if { [string equal $type "Synonym"] } {
             # test existence of synonym option
             set syn [lindex $optdesc 1]
             if { ![info exists classopt($syn)] } {
@@ -337,7 +337,7 @@ proc Widget::declare { class optlist } {
         set ro    [lindex $optdesc 2]
         set arg   [lindex $optdesc 3]
 
-        if { ![string compare $type "BwResource"] } {
+        if { [string equal $type "BwResource"] } {
             # We don't keep BwResource. We simplify to type of sub BWidget
             set subclass    [lindex $arg 0]
             set realopt     [lindex $arg 1]
@@ -365,7 +365,7 @@ proc Widget::declare { class optlist } {
         }
 
         # retreive default value for TkResource
-        if { ![string compare $type "TkResource"] } {
+        if { [string equal $type "TkResource"] } {
             set tkwidget [lindex $arg 0]
 	    set foo [$tkwidget ".ericFoo##"]
             set realopt  [lindex $arg 1]
@@ -474,10 +474,10 @@ proc Widget::init { class path options } {
 	    continue
 	}
         set type [lindex $optdesc 0]
-        if { ![string compare $type "Synonym"] } {
+        if { [string equal $type "Synonym"] } {
 	    continue
         }
-        if { ![string compare $type "TkResource"] } {
+        if { [string equal $type "TkResource"] } {
             set alt [lindex [lindex $optdesc 3] 1]
         } else {
             set alt ""
@@ -500,7 +500,7 @@ proc Widget::init { class path options } {
         }
         set optdesc $classopt($option)
         set type    [lindex $optdesc 0]
-        if { ![string compare $type "Synonym"] } {
+        if { [string equal $type "Synonym"] } {
             set option  [lindex $optdesc 1]
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
@@ -557,7 +557,7 @@ proc Widget::copyinit { class templatepath path options } {
 	}
 	set optdesc $classopt($option)
 	set type    [lindex $optdesc 0]
-	if { ![string compare $type "Synonym"] } {
+	if { [string equal $type "Synonym"] } {
 	    set option	[lindex $optdesc 1]
 	    set optdesc $classopt($option)
 	    set type	[lindex $optdesc 0]
@@ -593,12 +593,12 @@ proc Widget::parseArgs {class options} {
 	}
         set optdesc $classopt($option)
         set type    [lindex $optdesc 0]
-        if { ![string compare $type "Synonym"] } {
+        if { [string equal $type "Synonym"] } {
             set option  [lindex $optdesc 1]
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
         }
-	if { ![string compare $type "TkResource"] } {
+	if { [string equal $type "TkResource"] } {
 	    # Make sure that the widget used for this TkResource exists
 	    Widget::_get_tkwidget_options [lindex [lindex $optdesc 3] 0]
 	}
@@ -656,10 +656,10 @@ proc Widget::initFromODB {class path options} {
 	    continue
 	}
         set type [lindex $optdesc 0]
-        if { ![string compare $type "Synonym"] } {
+        if { [string equal $type "Synonym"] } {
 	    continue
         }
-	if { ![string compare $type "TkResource"] } {
+	if { [string equal $type "TkResource"] } {
             set alt [lindex [lindex $optdesc 3] 1]
         } else {
             set alt ""
@@ -732,7 +732,7 @@ proc Widget::configure { path options } {
         }
         set optdesc $classopt($option)
         set type    [lindex $optdesc 0]
-        if { ![string compare $type "Synonym"] } {
+        if { [string equal $type "Synonym"] } {
             set option  [lindex $optdesc 1]
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
@@ -777,7 +777,7 @@ proc Widget::cget { path option } {
 
     set optdesc [set ${class}::opt($option)]
     set type    [lindex $optdesc 0]
-    if { ![string compare $type "Synonym"] } {
+    if {[string equal $type "Synonym"]} {
         set option [lindex $optdesc 1]
     }
 
@@ -910,7 +910,7 @@ proc Widget::setMegawidgetOption {path option value} {
 # ----------------------------------------------------------------------------
 proc Widget::_get_window { class path } {
     set idx [string last "#" $path]
-    if { $idx != -1 && ![string compare [string range $path [expr {$idx+1}] end] $class] } {
+    if { $idx != -1 && [string equal [string range $path [expr {$idx+1}] end] $class] } {
         return [string range $path 0 [expr {$idx-1}]]
     } else {
         return $path
@@ -938,7 +938,7 @@ proc Widget::_get_configure { path options } {
         foreach option [lsort [array names classopt]] {
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
-            if { ![string compare $type "Synonym"] } {
+            if { [string equal $type "Synonym"] } {
                 set syn     $option
                 set option  [lindex $optdesc 1]
                 set optdesc $classopt($option)
@@ -946,7 +946,7 @@ proc Widget::_get_configure { path options } {
             } else {
                 set syn ""
             }
-            if { ![string compare $type "TkResource"] } {
+            if { [string equal $type "TkResource"] } {
                 set alt [lindex [lindex $optdesc 3] 1]
             } else {
                 set alt ""
@@ -966,12 +966,12 @@ proc Widget::_get_configure { path options } {
         }
         set optdesc $classopt($option)
         set type    [lindex $optdesc 0]
-        if { ![string compare $type "Synonym"] } {
+        if { [string equal $type "Synonym"] } {
             set option  [lindex $optdesc 1]
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
         }
-        if { ![string compare $type "TkResource"] } {
+        if { [string equal $type "TkResource"] } {
             set alt [lindex [lindex $optdesc 3] 1]
         } else {
             set alt ""
@@ -1304,8 +1304,8 @@ proc Widget::focusOK { w } {
 
     set top [winfo toplevel $w]
     foreach tags [bindtags $w] {
-        if { [string compare $tags $top]  &&
-             [string compare $tags "all"] &&
+        if { ![string equal $tags $top]  &&
+             ![string equal $tags "all"] &&
              [regexp Key [bind $tags]] } {
             return 1
         }

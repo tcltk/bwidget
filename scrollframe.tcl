@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.3 2002/06/04 22:03:34 hobbs Exp $
+#  $Id: scrollframe.tcl,v 1.4 2003/02/25 09:47:50 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -137,14 +137,14 @@ proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOff
     set dx  0
     set dy  0
     
-    if { ![string compare $horz "left"] } {
+    if { [string equal $horz "left"] } {
 	if { $x1 > $xb1 } {
 	    set dx [expr {$x1-$xb1}]
 	}
 	if { $x0 < $xb0+$dx } {
 	    set dx [expr {$x0-$xb0}]
 	}
-    } elseif { ![string compare $horz "right"] } {
+    } elseif { [string equal $horz "right"] } {
 	if { $x0 < $xb0 } {
 	    set dx [expr {$x0-$xb0}]
 	}
@@ -153,14 +153,14 @@ proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOff
 	}
     }
 
-    if { ![string compare $vert "top"] } {
+    if { [string equal $vert "top"] } {
 	if { $y1 > $yb1 } {
 	    set dy [expr {$y1-$yb1}]
 	}
 	if { $y0 < $yb0+$dy } {
 	    set dy [expr {$y0-$yb0}]
 	}
-    } elseif { ![string compare $vert "bottom"] } {
+    } elseif { [string equal $vert "bottom"] } {
 	if { $y0 < $yb0 } {
 	    set dy [expr {$y0-$yb0}]
 	}
@@ -169,11 +169,11 @@ proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOff
 	}
     }
 
-    if { [expr {$dx + $xOffset}] != 0 } {
+    if {($dx + $xOffset) != 0} {
 	set x [expr {($xb0+$dx+$xOffset)/[winfo width $path.frame]}]
 	$path:cmd xview moveto $x
     }
-    if { [expr {$dy + $yOffset}] != 0 } {
+    if {($dy + $yOffset) != 0} {
 	set y [expr {($yb0+$dy+$yOffset)/[winfo height $path.frame]}]
 	$path:cmd yview moveto $y
     }
@@ -184,7 +184,7 @@ proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOff
 #  Command ScrollableFrame::xview
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::xview { path args } {
-    return [eval $path:cmd xview $args]
+    return [eval [list $path:cmd xview] $args]
 }
 
 
@@ -192,7 +192,7 @@ proc ScrollableFrame::xview { path args } {
 #  Command ScrollableFrame::yview
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::yview { path args } {
-    return [eval $path:cmd yview $args]
+    return [eval [list $path:cmd yview] $args]
 }
 
 
