@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.7 2000/02/26 01:56:40 ericm Exp $
+#  $Id: notebook.tcl,v 1.8 2000/02/29 22:05:22 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -129,7 +129,8 @@ proc NoteBook::create { path args } {
     set w [expr {[Widget::cget $path -width]+4}]
     set h [expr {[Widget::cget $path -height]+$data(hpage)+4}]
 
-    frame $path -class NoteBook
+    frame $path -class NoteBook -borderwidth 0 -highlightthickness 0 \
+	    -relief flat
     eval canvas $path.c			\
 	    [Widget::subcget $path .c] \
 	    -relief flat		\
@@ -263,13 +264,13 @@ proc NoteBook::insert { path index page args } {
     if { ![winfo exists $path.f$page] } {
         frame $path.f$page 						\
 		-relief flat						\
-		-background	[Widget::getoption $path -background]	\
-		-borderwidth	[Widget::getoption $path -internalborderwidth]
+		-background	[Widget::cget $path -background]	\
+		-borderwidth	[Widget::cget $path -internalborderwidth]
         set data($page,realized) 0
     } else {
 	$path.f$page configure						\
-		-background	[Widget::getoption $path -background]	\
-		-borderwidth	[Widget::getoption $path -internalborderwidth]
+		-background	[Widget::cget $path -background]	\
+		-borderwidth	[Widget::cget $path -internalborderwidth]
     }
     _compute_width $path
     _draw_page $path $page 1
@@ -493,7 +494,7 @@ proc NoteBook::_itemconfigure { path page lres } {
     if { [Widget::hasChanged $path.f$page -text foo] } {
         _compute_width $path
     } elseif  { [Widget::hasChanged $path.f$page -image foo] } {
-        set data(hpage) [expr {[font metrics [Widget::getoption $path -font] -linespace] + 6}]
+        set data(hpage) [expr {[font metrics [Widget::cget $path -font] -linespace] + 6}]
         _compute_width $path
     }
     if { [Widget::hasChanged $path.f$page -state state] &&
@@ -511,25 +512,24 @@ proc NoteBook::_compute_width { path } {
     variable $path
     upvar 0  $path data
 
-    set font [Widget::getoption $path -font]
+    set font [Widget::cget $path -font]
     set wmax 0
     set hmax $data(hpage)
     set wtot 0
     if { ![info exists data(textid)] } {
-        set data(textid) [$path.c create text 0 -100 -font [Widget::getoption $path -font] -anchor nw]
+        set data(textid) [$path.c create text 0 -100 -font $font -anchor nw]
     }
     set id $data(textid)
-    $path.c itemconfigure $id -font [Widget::getoption $path -font]
+    $path.c itemconfigure $id -font $font
     foreach page $data(pages) {
-        $path.c itemconfigure $id -text \
-		[Widget::getoption $path.f$page -text]
+        $path.c itemconfigure $id -text [Widget::cget $path.f$page -text]
 	# Get the bbox for this text to determine its width, then substract
 	# 6 from the width to account for canvas bbox oddness w.r.t. widths of
 	# simple text.
 	foreach {x1 y1 x2 y2} [$path.c bbox $id] break
 	set x2 [expr {$x2 - 6}]
         set  wtext [expr {$x2 - $x1 + 20}]
-        if { [set img [Widget::getoption $path.f$page -image]] != "" } {
+        if { [set img [Widget::cget $path.f$page -image]] != "" } {
             set wtext [expr {$wtext+[image width $img]+4}]
             set himg  [expr {[image height $img]+6}]
             if { $himg > $hmax } {
@@ -540,7 +540,7 @@ proc NoteBook::_compute_width { path } {
         incr wtot  $wtext
         set  data($page,width) $wtext
     }
-    if { [Widget::getoption $path -homogeneous] } {
+    if { [Widget::cget $path -homogeneous] } {
         foreach page $data(pages) {
             set data($page,width) $wmax
         }
@@ -606,7 +606,7 @@ proc NoteBook::_highlight { type path page } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare [Widget::getoption $path.f$page -state] "disabled"] } {
+    if { ![string compare [Widget::cget $path.f$page -state] "disabled"] } {
         return
     }
 
@@ -634,11 +634,11 @@ proc NoteBook::_select { path page } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare [Widget::getoption $path.f$page -state] "normal"] } {
+    if { ![string compare [Widget::cget $path.f$page -state] "normal"] } {
         set oldsel $data(select)
         if { [string compare $page $oldsel] } {
             if { ![string equal $oldsel ""] } {
-		set cmd [Widget::getoption $path.f$oldsel -leavecmd]
+		set cmd [Widget::cget $path.f$oldsel -leavecmd]
                 if { ![string equal $cmd ""] } {
 		    set code [catch {uplevel \#0 $cmd} res]
                     if { $code == 1 || $res == 0 } {
@@ -652,12 +652,12 @@ proc NoteBook::_select { path page } {
             if { ![string equal $page ""] } {
                 if { !$data($page,realized) } {
                     set data($page,realized) 1
-		    set cmd [Widget::getoption $path.f$page -createcmd]
+		    set cmd [Widget::cget $path.f$page -createcmd]
                     if { ![string equal $cmd ""] } {
                         uplevel \#0 $cmd
                     }
                 }
-		set cmd [Widget::getoption $path.f$page -raisecmd]
+		set cmd [Widget::cget $path.f$page -raisecmd]
                 if { ![string equal $cmd ""] } {
                     uplevel \#0 $cmd
                 }
@@ -747,11 +747,11 @@ proc NoteBook::_draw_page { path page create } {
     set leftPlusRadius	[expr {$xd + $arcRadius}]
 
     # Sven
-    set side [Widget::getoption $path -side]
+    set side [Widget::cget $path -side]
     set tabsOnBottom [string equal $side "bottom"]
 
     set h1 [expr {[winfo height $path]}]
-    set bd [Widget::getoption $path -borderwidth]
+    set bd [Widget::cget $path -borderwidth]
 
     if { $tabsOnBottom } {
 	set top [expr {$top * -1}]
@@ -789,7 +789,7 @@ proc NoteBook::_draw_page { path page create } {
 		]
     }
 
-    set img [Widget::getoption $path.f$page -image]
+    set img [Widget::cget $path.f$page -image]
 
     set ytext $top
     if { $tabsOnBottom } {
@@ -811,11 +811,11 @@ proc NoteBook::_draw_page { path page create } {
     }
 	
     if { $data(select) == $page } {
-        set bd    [Widget::getoption $path -borderwidth]
+        set bd    [Widget::cget $path -borderwidth]
         set fg    [_getoption $path $page -foreground]
     } else {
         set bd    1
-        if { [Widget::getoption $path.f$page -state] == "normal" } {
+        if { [Widget::cget $path.f$page -state] == "normal" } {
             set fg [_getoption $path $page -foreground]
         } else {
             set fg [_getoption $path $page -disabledforeground]
@@ -835,8 +835,8 @@ proc NoteBook::_draw_page { path page create } {
         eval $path.c create line $lb \
             -tags {"page p:$page $page:bot bot"} -fill $fgb -width $bd
         $path.c create text $xtext $ytext 			\
-		-text	[Widget::getoption $path.f$page -text]	\
-		-font	[Widget::getoption $path -font]		\
+		-text	[Widget::cget $path.f$page -text]	\
+		-font	[Widget::cget $path -font]		\
 		-fill	$fg					\
 		-anchor	nw					\
 		-tags	"page p:$page $page:text"
@@ -848,8 +848,8 @@ proc NoteBook::_draw_page { path page create } {
         $path.c coords "$page:text" $xtext $ytext
 
         $path.c itemconfigure "$page:text"    \
-            -text [Widget::getoption $path.f$page -text]     \
-            -font [Widget::getoption $path -font]    \
+            -text [Widget::cget $path.f$page -text]     \
+            -font [Widget::cget $path -font]    \
             -fill $fg
     }
     eval $path.c coords "$page:poly" [concat $lt $lb]
@@ -909,10 +909,10 @@ proc NoteBook::_draw_arrows { path } {
     set xl      0
     set xr      [expr {$w-$_warrow+1}]
     # Sven
-    set side [Widget::getoption $path -side]
+    set side [Widget::cget $path -side]
     if { [string equal $side "bottom"] } {
         set h1 [expr {[winfo height $path]-1}]
-        set bd [Widget::getoption $path -borderwidth]
+        set bd [Widget::cget $path -borderwidth]
         set y0 [expr {$h1 - $data(hpage) + $bd}]
     } else {
         set y0 1
@@ -967,10 +967,10 @@ proc NoteBook::_draw_area { path } {
 
     set w   [expr {[winfo width  $path]-1}]
     set h   [expr {[winfo height $path]-1}]
-    set bd  [Widget::getoption $path -borderwidth]
+    set bd  [Widget::cget $path -borderwidth]
     set x0  [expr {$bd-1}]
     # Sven
-    set side [Widget::getoption $path -side]
+    set side [Widget::cget $path -side]
     if {"$side" == "bottom"} {
         set y0 0
         set y1 [expr {$h - $data(hpage)}]
@@ -1059,8 +1059,8 @@ proc NoteBook::_realize { path } {
     variable $path
     upvar 0  $path data
 
-    if { [set width  [Widget::getoption $path -width]]  == 0 ||
-         [set height [Widget::getoption $path -height]] == 0 } {
+    if { [set width  [Widget::cget $path -width]]  == 0 ||
+         [set height [Widget::cget $path -height]] == 0 } {
         compute_size $path
     }
 

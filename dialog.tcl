@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.4 2000/02/26 01:56:39 ericm Exp $
+#  $Id: dialog.tcl,v 1.5 2000/02/29 22:05:22 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -36,6 +36,7 @@ namespace eval Dialog {
         {-parent      String     ""       0}
         {-side        Enum       bottom   1 {bottom left top right}}
         {-anchor      Enum       c        1 {n e w s c}}
+	{-class       String     ""       1}
     }
 
     Widget::addmap Dialog "" :cmd   {-background {}}
@@ -58,10 +59,11 @@ proc Dialog::create { path args } {
     variable _widget
 
     Widget::init Dialog $path $args
+    set dialogClass [Widget::cget $path -class]
     if { ![string compare $tcl_platform(platform) "unix"] } {
-        toplevel $path -relief raised -borderwidth 1
+        toplevel $path -relief raised -borderwidth 1 -class $dialogClass
     } else {
-        toplevel $path -relief flat   -borderwidth 0
+        toplevel $path -relief flat   -borderwidth 0 -class $dialogClass
     }
     bindtags $path [list $path BwDialog all]
     wm overrideredirect $path 1
