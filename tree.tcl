@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.3 1999/10/22 17:49:56 ericm Exp $
+#  $Id: tree.tcl,v 1.4 1999/10/22 18:16:08 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -129,11 +129,20 @@ proc Tree::create { path args } {
     $path bind cross <ButtonPress-1> {Tree::_cross_event %W}
 
     # Added by ericm@scriptics.com
+    # These allow keyboard traversal of the tree
     bind $path <KeyPress-Up>    "Tree::_keynav up %W"
     bind $path <KeyPress-Down>  "Tree::_keynav down %W"
     bind $path <KeyPress-Right> "Tree::_keynav right %W"
     bind $path <KeyPress-Left>  "Tree::_keynav left %W"
     bind $path <KeyPress-space> "Tree::_keynav space %W"
+
+    # These allow keyboard control of the scrolling
+    bind $path <Control-KeyPress-Up>    "$path yview scroll -1 units"
+    bind $path <Control-KeyPress-Down>  "$path yview scroll  1 units"
+    bind $path <Control-KeyPress-Left>  "$path xview scroll -1 units"
+    bind $path <Control-KeyPress-Right> "$path xview scroll  1 units"
+
+    bind $path
     # ericm@scriptics.com
 
     bind $path <Configure> "Tree::_update_scrollregion $path"
@@ -1462,6 +1471,7 @@ proc Tree::_keynav {which win} {
 	    incr index -1
 	    if { $index >= 0 } {
 		$win selection set [lindex $nodes $index]
+		$win see [lindex $nodes $index]
 		return
 	    }
 	}
@@ -1469,6 +1479,7 @@ proc Tree::_keynav {which win} {
 	    # Down goes to the node that is vertically below the current node
 	    if { [string equal $node ""] } {
 		$win selection set [lindex $nodes 0]
+		$win see [lindex $nodes 0]
 		return
 	    }
 
@@ -1476,6 +1487,7 @@ proc Tree::_keynav {which win} {
 	    incr index
 	    if { $index < [llength $nodes] } {
 		$win selection set [lindex $nodes $index]
+		$win see [lindex $nodes $index]
 		return
 	    }
 	}
@@ -1492,6 +1504,7 @@ proc Tree::_keynav {which win} {
 		    incr index
 		    if { $index < [llength $nodes] } {
 			$win selection set [lindex $nodes $index]
+			$win see [lindex $nodes $index]
 			return
 		    }
 		} else {
@@ -1520,6 +1533,7 @@ proc Tree::_keynav {which win} {
 		    }
 		}
 		$win selection set $parent
+		$win see $parent
 		return
 	    }
 	}
