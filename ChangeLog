@@ -1,3 +1,9 @@
+2000-03-10  Sven Delmas  <sven@scriptics.com>
+
+	* tree.tcl: Changed the allnodes procedure to visiblenodes, and
+	also the mechanism of retrieving those nodes. This took care of
+	the previously required update.
+
 2000-03-09  Eric Melski  <ericm@scriptics.com>
 
 	* entry.tcl: Added code to re-sync the -text option with the
