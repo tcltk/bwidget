@@ -1,8 +1,8 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.2 1999/10/14 20:23:21 sven Exp $
-# ------------------------------------------------------------------------------
+#  $Id: scrollframe.tcl,v 1.3 2002/06/04 22:03:34 hobbs Exp $
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
 #     - ScrollableFrame::configure
@@ -12,7 +12,7 @@
 #     - ScrollableFrame::xview
 #     - ScrollableFrame::yview
 #     - ScrollableFrame::_resize
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval ScrollableFrame {
     Widget::declare ScrollableFrame {
@@ -47,9 +47,9 @@ namespace eval ScrollableFrame {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::create { path args } {
     Widget::init ScrollableFrame $path $args
 
@@ -63,19 +63,21 @@ proc ScrollableFrame::create { path args } {
         -width  [Widget::cget $path -areawidth] \
         -height [Widget::cget $path -areaheight]
 
-    bind $frame <Configure> "$canvas:cmd configure -scrollregion {0 0 %w %h}"
+    bind $frame <Configure> \
+	    [list ScrollableFrame::_frameConfigure $canvas $frame %w %h]
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval ScrollableFrame::\$cmd $path \$args\]"
+    proc ::$path { cmd args } \
+	    "return \[eval ScrollableFrame::\$cmd [list $path] \$args\]"
 
     return $canvas
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::configure { path args } {
     set res [Widget::configure $path $args]
     set upd 0
@@ -105,24 +107,24 @@ proc ScrollableFrame::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::getframe
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::getframe { path } {
     return $path.frame
 }
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::see
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOffset 0}} {
     set x0  [winfo x $widget]
     set y0  [winfo y $widget]
@@ -178,25 +180,25 @@ proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOff
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::xview
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::xview { path args } {
     return [eval $path:cmd xview $args]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::yview
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::yview { path args } {
     return [eval $path:cmd yview $args]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ScrollableFrame::_resize
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ScrollableFrame::_resize { path } {
     if { [Widget::getoption $path -constrainedwidth] } {
         $path:cmd itemconfigure win -width [winfo width $path]
@@ -207,3 +209,17 @@ proc ScrollableFrame::_resize { path } {
 }
 
 
+# ----------------------------------------------------------------------------
+#  Command ScrollableFrame::_frameConfigure
+# ----------------------------------------------------------------------------
+proc ScrollableFrame::_frameConfigure {canvas frame width height} {
+    # This ensures that we don't get funny scrollability in the frame
+    # when it is smaller than the canvas space
+    if {[winfo height $frame] < [winfo height $canvas]} {
+	set height [winfo height $canvas]
+    }
+    if {[winfo width $frame] < [winfo width $canvas]} {
+	set width [winfo width $canvas]
+    }
+    $canvas:cmd configure -scrollregion [list 0 0 $width $height]
+}
