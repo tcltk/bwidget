@@ -1,3 +1,22 @@
+2001-12-28  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* listbox.tcl: added multipleinsert command to allow faster
+	inserts of multiple items. [Patch #458446] (chevreux)
+	* widget.tcl: added Widget::copyinit. [Patch #458446] (chevreux)
+
+	* BWman/NoteBook.html:
+	* notebook.tcl: added options for enhanced tab shape in notebooks.
+	[Patch #402466] (haneef)
+
+	* configure.in:
+	* pkgIndex.tcl:
+	* README.txt: bumped version to 1.4.0 (not released)
+
+	* mainframe.tcl (_create_menubar): start tagstate initially on.
+	[Patch #470273] (chevreux)
+	(_parse_accelerator): improve F* function key accelerator support.
+	[Patch #444172] (venski)
+
 2001-10-14  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* pagesmgr.tcl: reverted fix of 2001-10-11 - it was bogus.
