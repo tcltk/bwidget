@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.8 2002/06/04 22:04:36 hobbs Exp $
+#  $Id: listbox.tcl,v 1.9 2002/09/11 19:33:01 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -156,12 +156,12 @@ proc ListBox::create { path args } {
 	    $path bindImage <Button-1> [list $path selection set]
 	}
 	multiple {
-	    $path bindText <Button-1>         [list ListBox::_multiple_select $path n]
-	    $path bindText <Control-Button-1> [list ListBox::_multiple_select $path c]
-	    $path bindText <Shift-Button-1>   [list ListBox::_multiple_select $path s]
-	    $path bindImage <Button-1>         [list ListBox::_multiple_select $path n]
-	    $path bindImage <Control-Button-1> [list ListBox::_multiple_select $path c]
-	    $path bindImage <Shift-Button-1>   [list ListBox::_multiple_select $path s]
+	    $path bindText <Button-1>         [list ListBox::_multiple_select $path n %x %y]
+	    $path bindText <Control-Button-1> [list ListBox::_multiple_select $path c %x %y]
+	    $path bindText <Shift-Button-1>   [list ListBox::_multiple_select $path s %x %y]
+	    $path bindImage <Button-1>         [list ListBox::_multiple_select $path n %x %y]
+	    $path bindImage <Control-Button-1> [list ListBox::_multiple_select $path c %x %y]
+	    $path bindImage <Shift-Button-1>   [list ListBox::_multiple_select $path s %x %y]
 	}
     }
 
@@ -1285,12 +1285,48 @@ proc ListBox::_auto_scroll { path x y } {
     variable $path
     upvar 0  $path data
 
+    set xmax   [winfo width  $path]
+    set ymax   [winfo height $path]
+    set scroll {}
+    if { $y <= 6 } {
+        if { [lindex [$path.c yview] 0] > 0 } {
+            set scroll [list yview -1]
+            DropSite::setcursor sb_up_arrow
+        }
+    } elseif { $y >= $ymax-6 } {
+        if { [lindex [$path.c yview] 1] < 1 } {
+            set scroll [list yview 1]
+            DropSite::setcursor sb_down_arrow
+        }
+    } elseif { $x <= 6 } {
+        if { [lindex [$path.c xview] 0] > 0 } {
+            set scroll [list xview -1]
+            DropSite::setcursor sb_left_arrow
+        }
+    } elseif { $x >= $xmax-6 } {
+        if { [lindex [$path.c xview] 1] < 1 } {
+            set scroll [list xview 1]
+            DropSite::setcursor sb_right_arrow
+        }
+    }
+
+    if { [string length $data(dnd,afterid)] && [string compare $data(dnd,scroll) $scroll] } {
+        after cancel $data(dnd,afterid)
+        set data(dnd,afterid) ""
+    }
+
+    set data(dnd,scroll) $scroll
+    if { [llength $scroll] && ![string length $data(dnd,afterid)] } {
+        set data(dnd,afterid) [after 200 ListBox::_scroll $path $scroll]
+    }
+    return $data(dnd,afterid)
+
 }
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command ListBox::_multiple_select
-# ------------------------------------------------------------------------------
-proc ListBox::_multiple_select { path mode idx } {
+# -----------------------------------------------------------------------------
+proc ListBox::_multiple_select { path mode x y idx } {
 
     variable $path
     upvar 0  $path data
@@ -1338,42 +1374,6 @@ proc ListBox::_multiple_select { path mode idx } {
   	    }
         }
     }
-
-    set xmax   [winfo width  $path]
-    set ymax   [winfo height $path]
-    set scroll {}
-    if { $y <= 6 } {
-        if { [lindex [$path.c yview] 0] > 0 } {
-            set scroll [list yview -1]
-            DropSite::setcursor sb_up_arrow
-        }
-    } elseif { $y >= $ymax-6 } {
-        if { [lindex [$path.c yview] 1] < 1 } {
-            set scroll [list yview 1]
-            DropSite::setcursor sb_down_arrow
-        }
-    } elseif { $x <= 6 } {
-        if { [lindex [$path.c xview] 0] > 0 } {
-            set scroll [list xview -1]
-            DropSite::setcursor sb_left_arrow
-        }
-    } elseif { $x >= $xmax-6 } {
-        if { [lindex [$path.c xview] 1] < 1 } {
-            set scroll [list xview 1]
-            DropSite::setcursor sb_right_arrow
-        }
-    }
-
-    if { [string length $data(dnd,afterid)] && [string compare $data(dnd,scroll) $scroll] } {
-        after cancel $data(dnd,afterid)
-        set data(dnd,afterid) ""
-    }
-
-    set data(dnd,scroll) $scroll
-    if { [llength $scroll] && ![string length $data(dnd,afterid)] } {
-        set data(dnd,afterid) [after 200 ListBox::_scroll $path $scroll]
-    }
-    return $data(dnd,afterid)
 }
 
 
