@@ -92,9 +92,11 @@ proc Button::create { path args } {
 	    -textvariable $var -state $st
     bindtags $path [list $path BwButton [winfo toplevel $path] all]
 
-    set accel [string tolower [string index $text $under]]
-    if { $accel != "" } {
-        bind [winfo toplevel $path] <Alt-$accel> "Button::invoke $path"
+    set accel1 [string tolower [string index $text $under]]
+    set accel2 [string toupper $accel1]
+    if { $accel1 != "" } {
+        bind [winfo toplevel $path] <Alt-$accel1> "Button::invoke $path"
+        bind [winfo toplevel $path] <Alt-$accel2> "Button::invoke $path"    
     }
 
     DynamicHelp::sethelp $path $path 1
@@ -112,9 +114,11 @@ proc Button::create { path args } {
 proc Button::configure { path args } {
     set oldunder [$path:cmd cget -underline]
     if { $oldunder != -1 } {
-        set oldaccel [string tolower [string index [$path:cmd cget -text] $oldunder]]
+        set oldaccel1 [string tolower [string index [$path:cmd cget -text] $oldunder]]
+        set oldaccel2 [string toupper $oldaccel1]
     } else {
-        set oldaccel ""
+        set oldaccel1 ""
+        set oldaccel2 ""
     }
     set res [Widget::configure $path $args]
 
@@ -149,10 +153,15 @@ proc Button::configure { path args } {
             set text  ""
         }
         set top [winfo toplevel $path]
-        bind $top <Alt-$oldaccel> {}
-        set accel [string tolower [string index $text $under]]
-        if { $accel != "" } {
-            bind $top <Alt-$accel> "Button::invoke $path"
+        if { $oldaccel1 != "" } {
+            bind $top <Alt-$oldaccel1> {}
+            bind $top <Alt-$oldaccel2> {}
+        }
+        set accel1 [string tolower [string index $text $under]]
+        set accel2 [string toupper $accel1]
+        if { $accel1 != "" } {
+            bind $top <Alt-$accel1> "Button::invoke $path"
+            bind $top <Alt-$accel2> "Button::invoke $path"
         }
         $path:cmd configure -text $text -underline $under -textvariable $var
     }
