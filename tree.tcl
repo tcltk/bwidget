@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.6 2000/02/11 00:07:50 ericm Exp $
+#  $Id: tree.tcl,v 1.7 2000/02/11 00:16:30 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -475,13 +475,7 @@ proc Tree::selection { path cmd args } {
 	    # This works because of how this widget handles redraws:
 	    # the tree is always completely redraw, always from top to bottom.
 	    # So the list of visible nodes *is* the list of nodes, and we can
-	    # use that to decide which nodes to select.  NOTE:  if node1
-	    # is not actually drawn on the canvas (for example, it is in an
-	    # unexpanded branch), this will NOT WORK because we will get
-	    # a bogus index in the nodelist for that node.  The question is,
-	    # what can we do about it?  Probably the right thing to do is
-	    # to not rely on canvas visibility and _really_ do the range on
-	    # the tree.  That's hard though.
+	    # use that to decide which nodes to select.
 	    foreach {node1 node2} $args break
 	    if { [info exists data($node1)] && [info exists data($node2)] } {
 		set nodes {}
@@ -493,8 +487,14 @@ proc Tree::selection { path cmd args } {
 		    }
 		}
 
-		set index1 [lsearch -exact $nodes $node1]
-		set index2 [lsearch -exact $nodes $node2]
+		# Find the first visible ancestor of node1, starting with node1
+		while {[set index1 [lsearch -exact $nodes $node1]] == -1} {
+		    set node1 [lindex $data($node1) 0]
+		}
+		# Find the first visible ancestor of node2, starting with node2
+		while {[set index2 [lsearch -exact $nodes $node2]] == -1} {
+		    set node2 [lindex $data($node2) 0]
+		}
 		# If the nodes were given in backwards order, flip the
 		# indices now
 		if { $index2 < $index1 } {
