@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.10 2003/03/13 06:59:58 damonc Exp $
+#  $Id: listbox.tcl,v 1.11 2003/04/16 03:41:51 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -112,6 +112,9 @@ proc ListBox::create { path args } {
 
     variable $path
     upvar 0  $path data
+
+    Widget::getVariable $path autoIndex
+    set autoIndex 0
 
     frame $path -class ListBox -bd 0 -highlightthickness 0 -relief flat
     # For 8.4+ we don't want to inherit the padding
@@ -231,6 +234,9 @@ proc ListBox::cget { path option } {
 proc ListBox::insert { path index item args } {
     variable $path
     upvar 0  $path data
+    Widget::getVariable $path autoIndex
+
+    set item [string map [list #auto [incr autoIndex]] $item]
 
     if { [lsearch $data(items) $item] != -1 } {
         return -code error "item \"$item\" already exists"

@@ -1,3 +1,12 @@
+2003-04-15  Damon Courtney <damon@unreality.com>
+
+        * listbox.tcl
+	* tree.tcl: Added a #auto substitution for inserting new items
+	into a tree or listbox.
+
+	* BWman/ListBox.html
+	* BWman/Tree.html: Added documentation for #auto substitution.
+
 2003-04-14  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* utils.tcl (BWidget::focus): add optional refocus arg
