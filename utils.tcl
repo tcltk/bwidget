@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.3 2001/06/11 23:58:40 hobbs Exp $
+#  $Id: utils.tcl,v 1.4 2001/12/29 02:06:25 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -269,7 +269,9 @@ proc BWidget::place { path w h args } {
                 if { ![winfo exists $widget] } {
                     return -code error "BWidget::place: \"$widget\" does not exist"
                 }
-            }
+	    } else {
+		set widget .
+	    }
             set sw [winfo screenwidth  $path]
             set sh [winfo screenheight $path]
             if { $idx == 1 } {
