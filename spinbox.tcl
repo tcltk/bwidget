@@ -6,7 +6,7 @@
 # Copyright (c) 2000 by Scriptics Corporation.
 # All rights reserved.
 # 
-# RCS: @(#) $Id: spinbox.tcl,v 1.7 2000/03/08 01:55:08 ericm Exp $
+# RCS: @(#) $Id: spinbox.tcl,v 1.8 2000/03/13 18:21:48 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - SpinBox::create
@@ -147,7 +147,7 @@ proc SpinBox::cget { path option } {
 proc SpinBox::setvalue { path index } {
     variable _widget
 
-    set values [Widget::cget $path -values]
+    set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
     
     if { [llength $values] } {
@@ -191,7 +191,9 @@ proc SpinBox::setvalue { path index } {
         }
     } else {
         # --- -range SpinBox ---
-	foreach {vmin vmax incr} [Widget::cget $path -range] {break}
+	foreach {vmin vmax incr} [Widget::getMegawidgetOption $path -range] {
+	    break
+	}
 	# Allow zero padding on the value; strip it out for calculation by
 	# scanning the value into a floating point number.
 	scan $value %f value
@@ -254,14 +256,16 @@ proc SpinBox::setvalue { path index } {
 proc SpinBox::getvalue { path } {
     variable _widget
 
-    set values [Widget::cget $path -values]
+    set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
 
     if { [llength $values] } {
         # --- -values SpinBox ---
         return  [lsearch $values $value]
     } else {
-	foreach {vmin vmax incr} [Widget::cget $path -range] break
+	foreach {vmin vmax incr} [Widget::getMegawidgetOption $path -range] {
+	    break
+	}
         if { ![catch {expr {double($value-$vmin)/$incr}} idx] &&
              $idx == int($idx) } {
             return [expr {int($idx)}]
@@ -299,7 +303,7 @@ proc SpinBox::_modify_value { path direction reason } {
         SpinBox::setvalue $path $direction
     }
     if { ($reason == "disarm" || $reason == "activate") &&
-         [set cmd [Widget::cget $path -modifycmd]] != "" } {
+         [set cmd [Widget::getMegawidgetOption $path -modifycmd]] != "" } {
         uplevel \#0 $cmd
     }
 }
@@ -310,11 +314,13 @@ proc SpinBox::_modify_value { path direction reason } {
 proc SpinBox::_test_options { path } {
     variable _widget
 
-    set values [Widget::cget $path -values]
+    set values [Widget::getMegawidgetOption $path -values]
     if { [llength $values] } {
         set _widget($path,curval) [lindex $values 0]
     } else {
-	foreach {vmin vmax incr} [Widget::cget $path -range] break
+	foreach {vmin vmax incr} [Widget::getMegawidgetOption $path -range] {
+	    break
+	}
         if { [catch {expr {int($vmin)}}] } {
             set vmin 0
         }

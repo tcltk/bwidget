@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dropsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dropsite.tcl,v 1.3 2000/02/19 02:12:40 ericm Exp $
+#  $Id: dropsite.tcl,v 1.4 2000/03/13 18:21:48 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DropSite::include
@@ -139,9 +139,9 @@ proc DropSite::register { path args } {
     if { [info exists drop] } {
         unset drop
     }
-    set dropcmd [Widget::getoption .drop$path -dropcmd]
-    set types   [Widget::getoption .drop$path -droptypes]
-    set overcmd [Widget::getoption .drop$path -dropovercmd]
+    set dropcmd [Widget::getMegawidgetOption .drop$path -dropcmd]
+    set types   [Widget::getMegawidgetOption .drop$path -droptypes]
+    set overcmd [Widget::getMegawidgetOption .drop$path -dropovercmd]
     Widget::destroy .drop$path
     if { $dropcmd != "" && $types != "" } {
         set drop(dropcmd) $dropcmd

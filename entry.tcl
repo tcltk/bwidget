@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.10 2000/03/10 00:49:21 ericm Exp $
+#  $Id: entry.tcl,v 1.11 2000/03/13 18:21:48 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -71,9 +71,9 @@ proc Entry::create { path args } {
     set data(afterid) ""
     eval entry $path $maps(:cmd)
     Widget::initFromODB Entry $path $maps(Entry)
-    set state    [Widget::cget $path -state]
-    set editable [Widget::cget $path -editable]
-    set text     [Widget::cget $path -text]
+    set state    [Widget::getMegawidgetOption $path -state]
+    set editable [Widget::getMegawidgetOption $path -editable]
+    set text     [Widget::getMegawidgetOption $path -text]
     if { $editable && ![string compare $state "normal"] } {
         bindtags $path [list $path BwEntry [winfo toplevel $path] all]
         $path configure -takefocus 1
@@ -85,9 +85,11 @@ proc Entry::create { path args } {
         $path configure -cursor left_ptr
     }
     if { ![string compare $state "disabled"] } {
-        $path configure -foreground [Widget::cget $path -disabledforeground]
+        $path configure -foreground \
+		[Widget::getMegawidgetOption $path -disabledforeground]
     } else {
-	$path configure -foreground [Widget::cget $path -foreground]
+	$path configure -foreground \
+		[Widget::getMegawidgetOption $path -foreground]
     }
     if { [string length $text] } {
 	set varName [$path cget -textvariable]
@@ -98,7 +100,7 @@ proc Entry::create { path args } {
 	    $path configure -validate none
 	    $path delete 0 end
 	    $path configure -validate $validateState
-	    $path insert 0 [Widget::cget $path -text]
+	    $path insert 0 [Widget::getMegawidgetOption $path -text]
 	}
     }	
 
@@ -211,7 +213,7 @@ proc Entry::cget { path option } {
 #  Command Entry::invoke
 # ------------------------------------------------------------------------------
 proc Entry::invoke { path } {
-    if { [set cmd [Widget::getoption $path -command]] != "" } {
+    if { [set cmd [Widget::getMegawidgetOption $path -command]] != "" } {
         uplevel \#0 $cmd
     }
 }

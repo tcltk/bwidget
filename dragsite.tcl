@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dragsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dragsite.tcl,v 1.4 2000/03/07 23:18:15 sven Exp $
+#  $Id: dragsite.tcl,v 1.5 2000/03/13 18:21:47 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DragSite::include
@@ -83,9 +83,9 @@ proc DragSite::register { path args } {
         unset drag
     }
     Widget::init DragSite .drag$path $args
-    set event   [Widget::getoption .drag$path -dragevent]
-    set initcmd [Widget::getoption .drag$path -draginitcmd]
-    set endcmd  [Widget::getoption .drag$path -dragendcmd]
+    set event   [Widget::getMegawidgetOption .drag$path -dragevent]
+    set initcmd [Widget::getMegawidgetOption .drag$path -draginitcmd]
+    set endcmd  [Widget::getMegawidgetOption .drag$path -dragendcmd]
     set tags    [bindtags $path]
     set idx     [lsearch $tags "BwDrag*"]
     Widget::destroy .drag$path

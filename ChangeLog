@@ -1,5 +1,15 @@
 2000-03-13  Eric Melski  <ericm@scriptics.com>
 
+	* tree.tcl: 
+	* spinbox.tcl: 
+	* entry.tcl: 
+	* dropsite.tcl: 
+	* dragsite.tcl: 
+	* arrow.tcl: Replaced selected cget/getoption calls with
+	getMegawidgetOption calls.
+
+	* combobox.tcl: Removed LabelFrame from ComboBox (30% faster).
+
 	* widget.tcl: Added getMegawidgetOption function, which allows
 	direct access to megawidget-specific options (those that do not
 	map to a component widget option).  This is dangerous, because it

@@ -94,8 +94,8 @@ proc ArrowButton::create { path args } {
 
     # Compute the width and height of the canvas from the width/height
     # of the ArrowButton and the borderwidth/hightlightthickness.
-    set w   [Widget::cget $path -width]
-    set h   [Widget::cget $path -height]
+    set w   [Widget::getMegawidgetOption $path -width]
+    set h   [Widget::getMegawidgetOption $path -height]
     set bd  [Widget::cget $path -borderwidth]
     set ht  [Widget::cget $path -highlightthickness]
     set pad [expr {2*($bd+$ht)}]
