@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.12 2003/06/06 00:50:09 damonc Exp $
+#  $Id: listbox.tcl,v 1.13 2003/07/17 20:00:05 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -97,7 +97,9 @@ namespace eval ListBox {
 
     Widget::addmap ListBox "" .c {-deltay -yscrollincrement}
 
-    proc ::ListBox { path args } { return [eval ListBox::create $path $args] }
+    proc ::ListBox { path args } {
+	return [eval [linsert $args 0 ListBox::create $path]]
+    }
     proc use {} {}
 
     variable _edit
@@ -137,7 +139,8 @@ proc ListBox::create { path args } {
     set data(dnd,afterid)  ""
     set data(dnd,item)     ""
 
-    eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
+    eval [list canvas $path.c] [Widget::subcget $path .c] \
+	    [list -xscrollincrement 8]
     pack $path.c -expand yes -fill both
 
     bind $path <Configure> "ListBox::_resize  $path"
@@ -148,7 +151,7 @@ proc ListBox::create { path args } {
     DropSite::setdrop $path $path.c ListBox::_over_cmd ListBox::_drop_cmd 1
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval ListBox::\$cmd $path \$args\]"
+    proc ::$path { cmd args } [subst { return \[eval \[linsert \$args 0 ListBox::\$cmd [list $path]\]\] }]
 
     set w [Widget::cget $path -width]
     set h [Widget::cget $path -height]
@@ -238,7 +241,7 @@ proc ListBox::insert { path index item args } {
 
     set item [string map [list #auto [incr autoIndex]] $item]
 
-    if { [lsearch $data(items) $item] != -1 } {
+    if { [lsearch -exact $data(items) $item] != -1 } {
         return -code error "item \"$item\" already exists"
     }
 
@@ -280,7 +283,7 @@ proc ListBox::multipleinsert { path index args } {
 
     set count 0
     foreach {item iargs} $args {
-	if { [lsearch $data(items) $item] != -1 } {
+	if { [lsearch -exact $data(items) $item] != -1 } {
 	    return -code error "item \"$item\" already exists"
 	}
 	
@@ -308,7 +311,7 @@ proc ListBox::itemconfigure { path item args } {
     variable $path
     upvar 0  $path data
 
-    if { [lsearch $data(items) $item] == -1 } {
+    if { [lsearch -exact $data(items) $item] == -1 } {
         return -code error "item \"$item\" does not exist"
     }
 
@@ -339,7 +342,7 @@ proc ListBox::itemconfigure { path item args } {
         set idi  [$path.c find withtag i:$item]
         set type [lindex [$path.c gettags $idi] 0]
         if { [string length $win] } {
-            if { ![string compare $type "win"] } {
+            if { [string equal $type "win"] } {
                 $path.c itemconfigure $idi -window $win
             } else {
                 $path.c delete $idi
@@ -347,7 +350,7 @@ proc ListBox::itemconfigure { path item args } {
 		    -tags [list win i:$item]
             }
         } elseif { [string length $img] } {
-            if { ![string compare $type "img"] } {
+            if { [string equal $type "img"] } {
                 $path.c itemconfigure $idi -image $img
             } else {
                 $path.c delete $idi
@@ -430,7 +433,7 @@ proc ListBox::delete { path args } {
 
     foreach litems $args {
         foreach item $litems {
-            set idx [lsearch $data(items) $item]
+            set idx [lsearch -exact $data(items) $item]
             if { $idx != -1 } {
                 set data(items) [lreplace $data(items) $idx $idx]
                 Widget::destroy $path.$item
@@ -445,7 +448,7 @@ proc ListBox::delete { path args } {
 
     set sel $data(selitems)
     set data(selitems) {}
-    eval selection $path set $sel
+    eval [list selection $path set] $sel
     _redraw_idle $path 2
 }
 
@@ -457,7 +460,7 @@ proc ListBox::move { path item index } {
     variable $path
     upvar 0  $path data
 
-    if { [set idx [lsearch $data(items) $item]] == -1 } {
+    if { [set idx [lsearch -exact $data(items) $item]] == -1 } {
         return -code error "item \"$item\" does not exist"
     }
 
@@ -490,8 +493,8 @@ proc ListBox::selection { path cmd args } {
         set {
             set data(selitems) {}
             foreach item $args {
-                if { [lsearch $data(selitems) $item] == -1 } {
-                    if { [lsearch $data(items) $item] != -1 } {
+                if { [lsearch -exact $data(selitems) $item] == -1 } {
+                    if { [lsearch -exact $data(items) $item] != -1 } {
                         lappend data(selitems) $item
                     }
                 }
@@ -499,8 +502,8 @@ proc ListBox::selection { path cmd args } {
         }
         add {
             foreach item $args {
-                if { [lsearch $data(selitems) $item] == -1 } {
-                    if { [lsearch $data(items) $item] != -1 } {
+                if { [lsearch -exact $data(selitems) $item] == -1 } {
+                    if { [lsearch -exact $data(items) $item] != -1 } {
                         lappend data(selitems) $item
                     }
                 }
@@ -508,7 +511,7 @@ proc ListBox::selection { path cmd args } {
         }
         remove {
             foreach item $args {
-                if { [set idx [lsearch $data(selitems) $item]] != -1 } {
+                if { [set idx [lsearch -exact $data(selitems) $item]] != -1 } {
                     set data(selitems) [lreplace $data(selitems) $idx $idx]
                 }
             }
@@ -520,7 +523,7 @@ proc ListBox::selection { path cmd args } {
             return $data(selitems)
         }
         includes {
-            return [expr {[lsearch $data(selitems) $args] != -1}]
+            return [expr {[lsearch -exact $data(selitems) $args] != -1}]
         }
         default {
             return
@@ -537,7 +540,7 @@ proc ListBox::exists { path item } {
     variable $path
     upvar 0  $path data
 
-    return [expr {[lsearch $data(items) $item] != -1}]
+    return [expr {[lsearch -exact $data(items) $item] != -1}]
 }
 
 
@@ -548,7 +551,7 @@ proc ListBox::index { path item } {
     variable $path
     upvar 0  $path data
 
-    return [lsearch $data(items) $item]
+    return [lsearch -exact $data(items) $item]
 }
 
 
@@ -580,9 +583,9 @@ proc ListBox::find {path findInfo {confine ""}} {
             foreach id [$path.c find overlapping $xi $y $xs $y] {
                 set ltags [$path.c gettags $id]
                 set item  [lindex $ltags 0]
-                if { ![string compare $item "item"] ||
-                     ![string compare $item "img"]  ||
-                     ![string compare $item "win"] } {
+                if { [string equal $item "item"] ||
+                     [string equal $item "img"]  ||
+                     [string equal $item "win"] } {
                     # item is the label or image/window of the node
                     set item [string range [lindex $ltags 1] 2 end]
                     set found 1
@@ -595,7 +598,7 @@ proc ListBox::find {path findInfo {confine ""}} {
     }
 
     if {$found} {
-        if {![string compare $confine "confine"]} {
+        if {[string equal $confine "confine"]} {
             # test if x stand inside node bbox
             set xi [expr {[lindex [$path.c coords n:$item] 0]-[Widget::getoption $path -padx]}]
             set xs [lindex [$path.c bbox n:$item] 2]
@@ -759,7 +762,7 @@ proc ListBox::edit { path item text {verifycmd ""} {clickres 0} {select 1}} {
 #  Command ListBox::xview
 # ----------------------------------------------------------------------------
 proc ListBox::xview { path args } {
-    return [eval $path.c xview $args]
+    return [eval [list $path.c xview] $args]
 }
 
 
@@ -767,7 +770,7 @@ proc ListBox::xview { path args } {
 #  Command ListBox::yview
 # ----------------------------------------------------------------------------
 proc ListBox::yview { path args } {
-    return [eval $path.c yview $args]
+    return [eval [list $path.c yview] $args]
 }
 
 
@@ -843,7 +846,7 @@ proc ListBox::_see { path idn side } {
     set xmax [lindex $scrl 2]
     set dx   [$path.c cget -xscrollincrement]
     set xv   [$path.c xview]
-    if { ![string compare $side "right"] } {
+    if { [string equal $side "right"] } {
         set xv1 [expr {round([lindex $xv 1]*$xmax/$dx)}]
         set x1  [expr {int([lindex $bbox 2]/$dx)}]
         if { $x1 >= $xv1 } {
@@ -954,7 +957,7 @@ proc ListBox::_redraw_items { path } {
         lappend drawn n:$item
         if { $nitem == $nrows } {
             set y0    [expr {$dy/2}]
-            set bbox  [eval $path.c bbox $drawn]
+            set bbox  [eval [list $path.c bbox] $drawn]
             set drawn {}
             set x0    [expr {[lindex $bbox 2]+$dx}]
             set x1    [expr {$x0+$padx}]
@@ -963,7 +966,7 @@ proc ListBox::_redraw_items { path } {
         }
     }
     if { $nitem && $nitem < $nrows } {
-        set bbox  [eval $path.c bbox $drawn]
+        set bbox  [eval [list $path.c bbox] $drawn]
         lappend data(xlist) [lindex $bbox 2]
     }
     set data(upd,delete) {}
@@ -988,9 +991,9 @@ proc ListBox::_redraw_selection { path } {
     foreach item $data(selitems) {
         set bbox [$path.c bbox "n:$item"]
         if { [llength $bbox] } {
-            set id [eval $path.c create rectangle $bbox \
-                        -fill $selbg -outline $selbg \
-	    		-tags [list [list sel s:$item]]]
+            set id [eval [list $path.c create rectangle] $bbox \
+		    [list -fill $selbg -outline $selbg \
+		    -tags [list [list sel s:$item]]]]
             $path.c itemconfigure "n:$item" -fill $selfg
             $path.c lower $id
         }
@@ -1074,9 +1077,9 @@ proc ListBox::_init_drag_cmd { path X Y top } {
     set path [winfo parent $path]
     set ltags [$path.c gettags current]
     set item  [lindex $ltags 0]
-    if { ![string compare $item "item"] ||
-         ![string compare $item "img"]  ||
-         ![string compare $item "win"] } {
+    if { [string equal $item "item"] ||
+         [string equal $item "img"]  ||
+         [string equal $item "win"] } {
         set item [string range [lindex $ltags 1] 2 end]
         if { [set cmd [Widget::getoption $path -draginitcmd]] != "" } {
             return [uplevel \#0 $cmd [list $path $item $top]]
@@ -1124,7 +1127,7 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
     variable $path
     upvar 0  $path data
 
-    if { ![string compare $event "leave"] } {
+    if { [string equal $event "leave"] } {
         # we leave the window listbox
         $path.c delete drop
         if { [string length $data(dnd,afterid)] } {
@@ -1135,7 +1138,7 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
         return 0
     }
 
-    if { ![string compare $event "enter"] } {
+    if { [string equal $event "enter"] } {
         # we enter the window listbox - dnd data initialization
         set mode [Widget::getoption $path -dropovermode]
         set data(dnd,mode) 0
@@ -1254,7 +1257,7 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
         if { ($vmode & 3) == 3 } {
             # result have both item and position
             # we choose the preferred method
-            if { ![string compare [lindex $target 3] "position"] } {
+            if { [string equal [lindex $target 3] "position"] } {
                 set vmode [expr {$vmode & ~1}]
             } else {
                 set vmode [expr {$vmode & ~2}]
@@ -1325,7 +1328,7 @@ proc ListBox::_auto_scroll { path x y } {
         }
     }
 
-    if { [string length $data(dnd,afterid)] && [string compare $data(dnd,scroll) $scroll] } {
+    if { [string length $data(dnd,afterid)] && ![string equal $data(dnd,scroll) $scroll] } {
         after cancel $data(dnd,afterid)
         set data(dnd,afterid) ""
     }
@@ -1342,10 +1345,8 @@ proc ListBox::_auto_scroll { path x y } {
 #  Command ListBox::_multiple_select
 # -----------------------------------------------------------------------------
 proc ListBox::_multiple_select { path mode x y idx } {
-
     variable $path
     upvar 0  $path data
-
 
     if { ![info exists data(anchor)] || ![info exists data(sel_anchor)] } {
 	set data(anchor) $idx
@@ -1369,24 +1370,27 @@ proc ListBox::_multiple_select { path mode x y idx } {
 	    set data(sel_anchor) {}
 	}
 	s {
-	    eval $path selection remove $data(sel_anchor)
+	    eval [list $path selection remove] $data(sel_anchor)
 
-  	    if { $idx > $data(anchor) } {
-  		set istart $data(anchor)
-  		set iend $idx
-  	    } else {
-  		set istart $idx
-  		set iend $data(anchor)
-  	    }
+	    set ix [$path index $idx]
+	    set ia [$path index $data(anchor)]
+	    if { $ix > $ia } {
+		set istart $ia
+		set iend $ix
+	    } else {
+		set istart $ix
+		set iend $ia
+	    }
 
-  	    for { set i $istart } { $i <= $iend } { incr i } {
-  		set l [$path selection get]
-  		set li [lsearch -exact $l $i]
+	    for { set i $istart } { $i <= $iend } { incr i } {
+		set l [$path selection get]
+		set t [$path items $i]
+		set li [lsearch -exact $l $t]
 		if { $li < 0 } {
-		    $path selection add $i
-		    lappend data(sel_anchor) $i
- 		}
-  	    }
+		    $path selection add $t
+		    lappend data(sel_anchor) $t
+		}
+	    }
         }
     }
 }
@@ -1425,7 +1429,7 @@ proc ListBox::_set_help { path node } {
 
     set item $path.$node
     set opts [list -helptype -helptext -helpvar]
-    foreach {cty ctx cv} [eval Widget::hasChangedX [list $item] $opts] break
+    foreach {cty ctx cv} [eval [list Widget::hasChangedX $item] $opts] break
     set text [Widget::getoption $item -helptext]
 
     ## If we've never set help for this item before, and text is not blank,
