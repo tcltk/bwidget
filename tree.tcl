@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.49 2004/04/21 22:26:41 hobbs Exp $
+#  $Id: tree.tcl,v 1.50 2004/04/22 21:29:14 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1048,7 +1048,7 @@ proc Tree::edit { path node text {verifycmd ""} {clickres 0} {select 1}} {
         set ok 0
         while { !$ok } {
             tkwait variable Tree::_edit(wait)
-            if { !$_edit(wait) || [llength $verifycmd] ||
+            if { !$_edit(wait) || [llength $verifycmd]==0 ||
                  [uplevel \#0 $verifycmd [list $_edit(text)]] } {
                 set ok 1
             }
