@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.2 2000/03/01 20:16:04 ericm Exp $
+#  $Id: utils.tcl,v 1.3 2001/06/11 23:58:40 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -96,7 +96,7 @@ proc BWidget::lreorder { list neworder } {
 #  Command BWidget::assert
 # ------------------------------------------------------------------------------
 proc BWidget::assert { exp {msg ""}} {
-    set res [uplevel expr $exp]
+    set res [uplevel 1 expr $exp]
     if { !$res} {
         if { $msg == "" } {
             return -code error "Assertion failed: {$exp}"
@@ -177,13 +177,13 @@ proc BWidget::parsetext { text } {
 # ------------------------------------------------------------------------------
 proc BWidget::get3dcolor { path bgcolor } {
     foreach val [winfo rgb $path $bgcolor] {
-        lappend dark [expr 60*$val/100]
-        set tmp1 [expr 14*$val/10]
+        lappend dark [expr {60*$val/100}]
+        set tmp1 [expr {14*$val/10}]
         if { $tmp1 > 65535 } {
             set tmp1 65535
         }
-        set tmp2 [expr (65535+$val)/2]
-        lappend light [expr ($tmp1 > $tmp2) ? $tmp1:$tmp2]
+        set tmp2 [expr {(65535+$val)/2}]
+        lappend light [expr {($tmp1 > $tmp2) ? $tmp1:$tmp2}]
     }
     return [list [eval format "#%04x%04x%04x" $dark] [eval format "#%04x%04x%04x" $light]]
 }
@@ -275,12 +275,12 @@ proc BWidget::place { path w h args } {
             if { $idx == 1 } {
                 if { $arglen == 2 } {
                     # center to widget
-                    set x0 [expr [winfo rootx $widget] + ([winfo width  $widget] - $w)/2]
-                    set y0 [expr [winfo rooty $widget] + ([winfo height $widget] - $h)/2]
+                    set x0 [expr {[winfo rootx $widget] + ([winfo width  $widget] - $w)/2}]
+                    set y0 [expr {[winfo rooty $widget] + ([winfo height $widget] - $h)/2}]
                 } else {
                     # center to screen
-                    set x0 [expr ([winfo screenwidth  $path] - $w)/2 - [winfo vrootx $path]]
-                    set y0 [expr ([winfo screenheight $path] - $h)/2 - [winfo vrooty $path]]
+                    set x0 [expr {([winfo screenwidth  $path] - $w)/2 - [winfo vrootx $path]}]
+                    set y0 [expr {([winfo screenheight $path] - $h)/2 - [winfo vrooty $path]}]
                 }
                 set x "+$x0"
                 set y "+$y0"

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.16 2000/09/17 23:39:11 ericm Exp $
+#  $Id: widget.tcl,v 1.17 2001/06/11 23:58:40 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -52,6 +52,9 @@
 # 2. Create frame with appropriate class and command line options
 # 3. Get initialization options from optionDB, using frame
 # 4. create subwidgets
+
+# Uses newer string operations
+package require Tcl 8.1.1
 
 namespace eval Widget {
     variable _optiontype
@@ -1050,9 +1053,9 @@ proc Widget::_test_flag { option value arg } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command Widget::_test_enum
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc Widget::_test_enum { option value arg } {
     if { [lsearch $arg $value] == -1 } {
         set last [lindex   $arg end]
@@ -1072,9 +1075,9 @@ proc Widget::_test_enum { option value arg } {
 #  Command Widget::_test_int
 # -----------------------------------------------------------------------------
 proc Widget::_test_int { option value arg } {
-    if { ![string is int $value] || \
+    if { ![string is int -strict $value] || \
 	    ([string length $arg] && \
-		![expr [string map [list %d $value] $arg]]) } {
+	    ![expr [string map [list %d $value] $arg]]) } {
 		    return -code error "bad $option value\
 			    \"$value\": must be integer ($arg)"
     }
@@ -1086,23 +1089,19 @@ proc Widget::_test_int { option value arg } {
 #  Command Widget::_test_boolean
 # -----------------------------------------------------------------------------
 proc Widget::_test_boolean { option value arg } {
-    if { ![string is boolean $value] } {
+    if { ![string is boolean -strict $value] } {
         return -code error "bad $option value \"$value\": must be boolean"
     }
 
     # Get the canonical form of the boolean value (1 for true, 0 for false)
-    if {$value} {
-	return 1
-    } else {
-	return 0
-    }
+    return [string is true $value]
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command Widget::focusNext
 #  Same as tk_focusNext, but call Widget::focusOK
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc Widget::focusNext { w } {
     set cur $w
     while 1 {
@@ -1145,10 +1144,10 @@ proc Widget::focusNext { w } {
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command Widget::focusPrev
 #  Same as tk_focusPrev, but call Widget::focusOK
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc Widget::focusPrev { w } {
     set cur $w
     while 1 {

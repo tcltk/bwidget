@@ -1,3 +1,31 @@
+2001-06-11  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* pkgIndex.tcl: bumped version to 1.3.1 and added Tk 8.1.1 package
+	require as Tcl 8.1.1 is needed in certain core areas for the new
+	string methods.
+
+	* mainframe.tcl: corrected state interpretation.  It doesn't do
+	exact argument matching, but it is consistent with the rest of
+	BWidget.  [Bug #224476]
+
+	* demo/demo.tcl: fixed demo script to run when called from
+	another directory
+
+	* messagedlg.tcl: corrected winfo exists call
+
+	* listbox.tcl: fixed string compare call
+
+	* combobox.tcl: added package require Tk 8.3.
+
+	* passwddlg.tcl: 
+	* xpm2image.tcl: 
+	* mainframe.tcl: 
+	* panedw.tcl: 
+	* utils.tcl: 
+	* entry.tcl: 
+	* dynhelp.tcl: 
+	* dragsite.tcl: 
+	* color.tcl: added braces to expr where appropriate
 
 2000-10-31  Dan Kuchler  <kuchler@ajubasolutions.com>
 

@@ -135,8 +135,8 @@ proc PanedWindow::add { path args } {
 		}
 	    }
             $activator configure -cursor sb_h_double_arrow 
-            grid $frame -column [expr 2*$num-1] -row 0 -sticky ns
-            grid columnconfigure $path [expr 2*$num-1] -weight 0
+            grid $frame -column [expr {2*$num-1}] -row 0 -sticky ns
+            grid columnconfigure $path [expr {2*$num-1}] -weight 0
         } else {
             place $sep -x 0 -rely 0.5 -height $sepsize -relwidth 1.0 -anchor w
 	    if { $placeButton } {
@@ -148,8 +148,8 @@ proc PanedWindow::add { path args } {
 		}
 	    }
             $activator configure -cursor sb_v_double_arrow 
-            grid $frame -row [expr 2*$num-1] -column 0 -sticky ew
-            grid rowconfigure $path [expr 2*$num-1] -weight 0
+            grid $frame -row [expr {2*$num-1}] -column 0 -sticky ew
+            grid rowconfigure $path [expr {2*$num-1}] -weight 0
         }
         bind $activator <ButtonPress-1> \
 		"PanedWindow::_beg_move_sash $path $num %X %Y"
@@ -162,15 +162,17 @@ proc PanedWindow::add { path args } {
         }
     }
 
-    set pane [frame $path.f$num -bd 0 -relief flat -highlightthickness 0 -bg $bg]
-    set user [frame $path.f$num.frame  -bd 0 -relief flat -highlightthickness 0 -bg $bg]
+    set pane [frame $path.f$num -bd 0 -relief flat \
+	    -highlightthickness 0 -bg $bg]
+    set user [frame $path.f$num.frame  -bd 0 -relief flat \
+	    -highlightthickness 0 -bg $bg]
     if { ![string compare $side "top"] || ![string compare $side "bottom"] } {
-        grid $pane -column [expr 2*$num] -row 0 -sticky nsew
-        grid columnconfigure $path [expr 2*$num] \
+        grid $pane -column [expr {2*$num}] -row 0 -sticky nsew
+        grid columnconfigure $path [expr {2*$num}] \
             -weight  [Widget::getoption $path.f$num -weight]
     } else {
-        grid $pane -row [expr 2*$num] -column 0 -sticky nsew
-        grid rowconfigure $path [expr 2*$num] \
+        grid $pane -row [expr {2*$num}] -column 0 -sticky nsew
+        grid rowconfigure $path [expr {2*$num}] \
             -weight  [Widget::getoption $path.f$num -weight]
     }
     pack $user -fill both -expand yes
@@ -211,9 +213,9 @@ proc PanedWindow::_destroy { path } {
 proc PanedWindow::_beg_move_sash { path num x y } {
     variable _panedw
 
-    set fprev $path.f[expr $num-1]
+    set fprev $path.f[expr {$num-1}]
     set fnext $path.f$num
-    set wsash [expr [Widget::getoption $path -width] + 2*[Widget::getoption $path -pad]]
+    set wsash [expr {[Widget::getoption $path -width] + 2*[Widget::getoption $path -pad]}]
 
     $path.sash$num.but configure -relief sunken
     set top  [toplevel $path.sash -borderwidth 1 -relief raised]
@@ -226,8 +228,8 @@ proc PanedWindow::_beg_move_sash { path num x y } {
         $top configure -cursor sb_h_double_arrow
         set h    [winfo height $path]
         set yr   [winfo rooty $path.sash$num]
-        set xmin [expr $wsash/2+[winfo rootx $fprev]+$minszg]
-        set xmax [expr -$wsash/2-1+[winfo rootx $fnext]+[winfo width $fnext]-$minszd]
+        set xmin [expr {$wsash/2+[winfo rootx $fprev]+$minszg}]
+        set xmax [expr {-$wsash/2-1+[winfo rootx $fnext]+[winfo width $fnext]-$minszd}]
         wm overrideredirect $top 1
         wm geom $top "2x${h}+$x+$yr"
 
@@ -240,8 +242,8 @@ proc PanedWindow::_beg_move_sash { path num x y } {
         $top configure -cursor sb_v_double_arrow
         set w    [winfo width $path]
         set xr   [winfo rootx $path.sash$num]
-        set ymin [expr $wsash/2+[winfo rooty $fprev]+$minszg]
-        set ymax [expr -$wsash/2-1+[winfo rooty $fnext]+[winfo height $fnext]-$minszd]
+        set ymin [expr {$wsash/2+[winfo rooty $fprev]+$minszg}]
+        set ymax [expr {-$wsash/2-1+[winfo rooty $fnext]+[winfo height $fnext]-$minszd}]
         wm overrideredirect $top 1
         wm geom $top "${w}x2+$xr+$y"
 
@@ -280,21 +282,21 @@ proc PanedWindow::_end_move_sash { path top num min max v rootv size } {
     } elseif { $v > $max } {
 	set v $max
     }
-    set fprev $path.f[expr $num-1]
+    set fprev $path.f[expr {$num-1}]
     set fnext $path.f$num
 
     $path.sash$num.but configure -relief raised
 
-    set wsash [expr [Widget::getoption $path -width] + 2*[Widget::getoption $path -pad]]
-    set dv    [expr $v-[winfo $rootv $path.sash$num]-$wsash/2]
+    set wsash [expr {[Widget::getoption $path -width] + 2*[Widget::getoption $path -pad]}]
+    set dv    [expr {$v-[winfo $rootv $path.sash$num]-$wsash/2}]
     set w1    [winfo $size $fprev]
     set w2    [winfo $size $fnext]
 
     for {set i 0} {$i < $_panedw($path,nbpanes)} {incr i} {
         if { $i == $num-1} {
-            $fprev configure -$size [expr [winfo $size $fprev]+$dv]
+            $fprev configure -$size [expr {[winfo $size $fprev]+$dv}]
         } elseif { $i == $num } {
-            $fnext configure -$size [expr [winfo $size $fnext]-$dv]
+            $fnext configure -$size [expr {[winfo $size $fnext]-$dv}]
         } else {
             $path.f$i configure -$size [winfo $size $path.f$i]
         }

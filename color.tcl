@@ -166,7 +166,7 @@ proc SelectColor::dialog {path args} {
     set c2  [canvas $f2.c -width 15  -height 200 -bd 0 -highlightthickness 0]
 
     for {set val 0} {$val < 40} {incr val} {
-        $c2 create rectangle 0 [expr 5*$val] 15 [expr 5*$val+5] -tags val[expr 39-$val]
+        $c2 create rectangle 0 [expr {5*$val}] 15 [expr {5*$val+5}] -tags val[expr {39-$val}]
     }
     $c2 create polygon 0 0 10 5 0 10 -fill black -outline white -tags target
 
@@ -186,9 +186,9 @@ proc SelectColor::dialog {path args} {
         for {set x 0} {$x < 200} {incr x 4} {
             for {set y 0} {$y < 200} {incr y 4} {
                 $_image put \
-                    [eval format "\#%04x%04x%04x" \
-                         [hsvToRgb [expr $x/196.0] [expr (196-$y)/196.0] 0.85]] \
-                    -to $x $y [expr $x+4] [expr $y+4]
+			[eval format "\#%04x%04x%04x" \
+			[hsvToRgb [expr {$x/196.0}] [expr {(196-$y)/196.0}] 0.85]] \
+			-to $x $y [expr {$x+4}] [expr {$y+4}]
             }
         }
     }
@@ -284,8 +284,8 @@ proc SelectColor::_select_hue_sat {x y} {
     } elseif {$y > 200} {
         set y 200
     }
-    set hue  [expr $x/200.0]
-    set sat  [expr (200-$y)/200.0]
+    set hue  [expr {$x/200.0}]
+    set sat  [expr {(200-$y)/200.0}]
     set _hsv [lreplace $_hsv 0 1 $hue $sat]
     $_widget(chs) coords target [expr {$x-9}] [expr {$y-9}]
     _draw_values $hue $sat
@@ -314,7 +314,7 @@ proc SelectColor::_select_value {x y} {
         set y 200
     }
     $_widget(cv) coords target 0 [expr {$y-5}] 10 $y 0 [expr {$y+5}]
-    set _hsv [lreplace $_hsv 2 2 [expr (200-$y)/200.0]]
+    set _hsv [lreplace $_hsv 2 2 [expr {(200-$y)/200.0}]]
     _set_rgb [eval format "\#%04x%04x%04x" [eval hsvToRgb $_hsv]]
 }
 
@@ -323,7 +323,7 @@ proc SelectColor::_draw_values {hue sat} {
     variable _widget
 
     for {set val 0} {$val < 40} {incr val} {
-        set l   [hsvToRgb $hue $sat [expr $val/39.0]]
+        set l   [hsvToRgb $hue $sat [expr {$val/39.0}]]
         set col [eval format "\#%04x%04x%04x" $l]
         $_widget(cv) itemconfigure val$val -fill $col -outline $col
     }
@@ -397,7 +397,7 @@ proc SelectColor::rgbToHsv {red green blue} {
 	    set min $blue.0
 	}
     }
-    set range [expr $max-$min]
+    set range [expr {$max-$min}]
     if {$max == 0} {
 	set sat 0
     } else {
@@ -419,7 +419,7 @@ proc SelectColor::rgbToHsv {red green blue} {
 	    }
 	}
 	if {$hue < 0.0} {
-	    set hue [expr $hue + 1.0]
+	    set hue [expr {$hue + 1.0}]
 	}
     }
     return [list $hue $sat [expr {$max/65535}]]

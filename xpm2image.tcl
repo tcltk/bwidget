@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  xpm2image.tcl
 #  Slightly modified xpm-to-image command
-#  $Id: xpm2image.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: xpm2image.tcl,v 1.2 2001/06/11 23:58:40 hobbs Exp $
 # ------------------------------------------------------------------------------
 #
 #  Copyright 1996 by Roger E. Critchlow Jr., San Francisco, California
@@ -84,7 +84,7 @@ proc xpm-to-image { file } {
     #
     set image [image create photo -width $data(width) -height $data(height)]
     set y 0
-    foreach line [lrange $xpm [expr 1+$data(ncolors)] [expr 1+$data(ncolors)+$data(height)]] {
+    foreach line [lrange $xpm [expr {1+$data(ncolors)}] [expr {1+$data(ncolors)+$data(height)}]] {
         set x 0
         set pixels {}
         while { [string length $line] > 0 } {

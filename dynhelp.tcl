@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.6 2000/10/10 21:17:53 kuchler Exp $
+#  $Id: dynhelp.tcl,v 1.7 2001/06/11 23:58:40 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -333,10 +333,10 @@ proc DynamicHelp::_show_help { path x y } {
         incr x 8
 
         if { $x+$width > $scrwidth } {
-            set x [expr $scrwidth - $width]
+            set x [expr {$scrwidth - $width}]
         }
         if { $y+$height > $scrheight } {
-            set y [expr $y - 12 - $height]
+            set y [expr {$y - 12 - $height}]
         }
 
         wm geometry  $_top "+$x+$y"

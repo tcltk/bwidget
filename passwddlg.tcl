@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.4 2000/03/08 00:17:56 sven Exp $
+#  $Id: passwddlg.tcl,v 1.5 2001/06/11 23:58:40 hobbs Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -172,5 +172,5 @@ proc PasswdDlg::_verifonpasswd { path lablog } {
 #  Command PasswdDlg::_max
 # -----------------------------------------------------------------------------
 proc PasswdDlg::_max { val1 val2 } { 
-    return [expr ($val1 > $val2) ? ($val1) : ($val2)] 
+    return [expr {($val1 > $val2) ? ($val1) : ($val2)}] 
 }

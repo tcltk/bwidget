@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.15 2001/05/31 20:01:14 jenglish Exp $
+#  $Id: entry.tcl,v 1.16 2001/06/11 23:58:40 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -295,9 +295,9 @@ proc Entry::_init_drag_cmd { path X Y top } {
     }
     if { [set drag [$path get]] != "" } {
         if { [$path:cmd selection present] } {
-            set idx  [$path:cmd index @[expr $X-[winfo rootx $path]]]
+            set idx  [$path:cmd index @[expr {$X-[winfo rootx $path]}]]
             set sel0 [$path:cmd index sel.first]
-            set sel1 [expr [$path:cmd index sel.last]-1]
+            set sel1 [expr {[$path:cmd index sel.last]-1}]
             if { $idx >=  $sel0 && $idx <= $sel1 } {
                 set drag [string range $drag $sel0 $sel1]
                 set data(dragstart) $sel0
@@ -351,7 +351,7 @@ proc Entry::_drop_cmd { path source X Y op type dnddata } {
         set data(afterid) ""
     }
     if { [set cmd [Widget::getoption $path -dropcmd]] != "" } {
-        set idx [$path:cmd index @[expr $X-[winfo rootx $path]]]
+        set idx [$path:cmd index @[expr {$X-[winfo rootx $path]}]]
         return [uplevel \#0 $cmd [list $path $source $idx $op $type $dnddata]]
     }
     if { $type == "COLOR" || $type == "FGCOLOR" } {
@@ -359,7 +359,7 @@ proc Entry::_drop_cmd { path source X Y op type dnddata } {
     } elseif { $type == "BGCOLOR" } {
         configure $path -background $dnddata
     } else {
-        $path:cmd icursor @[expr $X-[winfo rootx $path]]
+        $path:cmd icursor @[expr {$X-[winfo rootx $path]}]
         if { $op == "move" && $path == $source } {
             $path:cmd delete $data(dragstart) $data(dragend)
         }
@@ -379,7 +379,7 @@ proc Entry::_over_cmd { path source event X Y op type dnddata } {
     variable $path
     upvar 0  $path data
 
-    set x [expr $X-[winfo rootx $path]]
+    set x [expr {$X-[winfo rootx $path]}]
     if { ![string compare $event "leave"] } {
         if { [string length $data(afterid)] } {
             after cancel $data(afterid)
@@ -390,7 +390,7 @@ proc Entry::_over_cmd { path source event X Y op type dnddata } {
     }
 
     if { [set cmd [Widget::getoption $path -dropovercmd]] != "" } {
-        set x   [expr $X-[winfo rootx $path]]
+        set x   [expr {$X-[winfo rootx $path]}]
         set idx [$path:cmd index @$x]
         set res [uplevel \#0 $cmd [list $path $source $event $idx $op $type $dnddata]]
         return $res
