@@ -1,3 +1,8 @@
+2000-03-08  Sven Delmas  <sven@scriptics.com>
+
+	* tree.tcl: The new allnodes procedure was not handling the
+	"current" tag correctly. This is now stripped of.
+
 2000-03-03  Eric Melski  <ericm@scriptics.com>
 
 	* spinbox.tcl: Added a call in setvalue to scan the current value into
