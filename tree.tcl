@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.8 2000/02/11 22:54:29 ericm Exp $
+#  $Id: tree.tcl,v 1.9 2000/02/16 16:43:22 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -139,7 +139,7 @@ proc Tree::create { path args } {
     bind $path <KeyPress-Down>  "Tree::_keynav down %W"
     bind $path <KeyPress-Right> "Tree::_keynav right %W"
     bind $path <KeyPress-Left>  "Tree::_keynav left %W"
-    bind $path <KeyPress-space> "Tree::_keynav space %W"
+    bind $path <KeyPress-space> "+Tree::_keynav space %W"
 
     # These allow keyboard control of the scrolling
     bind $path <Control-KeyPress-Up>    "$path yview scroll -1 units"
@@ -1672,11 +1672,15 @@ proc Tree::_keynav {which win} {
 		return
 	    } else {
 		set parent [$win parent $node]
-		while { ![$win itemcget $parent -selectable] } {
-		    set parent [$win parent $parent]
-		    if { [string equal $parent "root"] } {
-			set parent $node
-			break
+                if { [string equal $parent "root"] } {
+                    set parent $node
+                } else {
+		    while { ![$win itemcget $parent -selectable] } {
+		        set parent [$win parent $parent]
+		        if { [string equal $parent "root"] } {
+			    set parent $node
+			    break
+                        }
 		    }
 		}
 		$win selection set $parent
