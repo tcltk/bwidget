@@ -1,3 +1,10 @@
+2002-01-22  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	**** BWidget 1.4.0 tagged ****
+
+	* widget.tcl: added Color as an optional type, with _test_color
+	test.  [RFE #443124].
+
 2002-01-15  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* BWman/ComboBox.html: removed reference to label options that
