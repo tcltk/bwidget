@@ -74,6 +74,7 @@
 <TD>&nbsp;&nbsp;<A HREF="#-redraw">-redraw</A></TR>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-selectmode">-selectmode</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TR>
 </TABLE></DD>
 </DL>
@@ -339,6 +340,18 @@ Specifies distance between image or window and text of the items.
 
 Specifies wether or not the listbox should be redrawn when entering idle.
 Set it to false if you call <B>update</B> while modifying the listbox.
+
+</DD>
+</DL>
+<DL><DT><A NAME="-selectmode"><B>-selectmode (read-only)</B></A></DT>
+<DD>
+
+Specifies the desired selection-mode for the listbox. Must be one of
+<B>none</B>, <B>single</B> or <B>multiple</B>. <B>selectmode</B> <I>single</I>
+allows to select 1 item by its text or image. <B>selectmode</B> <I>multiple</I>
+allows to select multiple items by their text or image. For more info on
+selectmodes <I>single</I> or <I>multiple</I>, see the Tk <B>listbox</B>
+command. Default value for <B>selectmode</B> is <I>none</I>.
 
 </DD>
 </DL>

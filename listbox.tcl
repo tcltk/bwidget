@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.5 2001/12/29 01:40:25 hobbs Exp $
+#  $Id: listbox.tcl,v 1.6 2001/12/29 02:06:08 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -41,6 +41,7 @@
 #     - ListBox::_scroll
 # ----------------------------------------------------------------------------
 
+# JDC: added -selectmode
 
 namespace eval ListBox {
     namespace eval Item {
@@ -83,7 +84,7 @@ namespace eval ListBox {
         {-redraw           Boolean 1  0}
         {-multicolumn      Boolean 0  0}
         {-dropovermode     Flag    "wpi" 0 "wpi"}
-
+	{-selectmode       Enum none 1 {none single multiple}}
         {-fg               Synonym -foreground}
         {-bg               Synonym -background}
     }
@@ -146,6 +147,21 @@ proc ListBox::create { path args } {
     set h [Widget::cget $path -height]
     set dy [Widget::cget $path -deltay]
     $path.c configure -width [expr {$w*8}] -height [expr {$h*$dy}]
+
+    switch -exact -- [Widget::getoption $path -selectmode] {
+	single {
+	    $path bindText <Button-1> [list $path selection set]
+	    $path bindImage <Button-1> [list $path selection set]
+	}
+	multiple {
+	    $path bindText <Button-1>         [list ListBox::_multiple_select $path n]
+	    $path bindText <Control-Button-1> [list ListBox::_multiple_select $path c]
+	    $path bindText <Shift-Button-1>   [list ListBox::_multiple_select $path s]
+	    $path bindImage <Button-1>         [list ListBox::_multiple_select $path n]
+	    $path bindImage <Control-Button-1> [list ListBox::_multiple_select $path c]
+	    $path bindImage <Shift-Button-1>   [list ListBox::_multiple_select $path s]
+	}
+    }
 
     return $path
 }
@@ -1279,6 +1295,60 @@ proc ListBox::_over_cmd { path source event X Y op type dnddata } {
 proc ListBox::_auto_scroll { path x y } {
     variable $path
     upvar 0  $path data
+
+}
+
+# ------------------------------------------------------------------------------
+#  Command ListBox::_multiple_select
+# ------------------------------------------------------------------------------
+proc ListBox::_multiple_select { path mode idx } {
+
+    variable $path
+    upvar 0  $path data
+
+
+    if { ![info exists data(anchor)] || ![info exists data(sel_anchor)] } {
+	set data(anchor) $idx
+	set data(sel_anchor) {}
+    }
+
+    switch -exact -- $mode {
+	n {
+	    $path selection set $idx
+	    set data(anchor) $idx
+	    set data(sel_anchor) {}
+	}
+	c {
+	    set l [$path selection get]
+	    if { [lsearch -exact $l $idx] >= 0 } {
+		$path selection remove $idx
+	    } else {
+		$path selection add $idx
+	    }
+	    set data(anchor) $idx
+	    set data(sel_anchor) {}
+	}
+	s {
+	    eval $path selection remove $data(sel_anchor)
+
+  	    if { $idx > $data(anchor) } {
+  		set istart $data(anchor)
+  		set iend $idx
+  	    } else {
+  		set istart $idx
+  		set iend $data(anchor)
+  	    }
+
+  	    for { set i $istart } { $i <= $iend } { incr i } {
+  		set l [$path selection get]
+  		set li [lsearch -exact $l $i]
+		if { $li < 0 } {
+		    $path selection add $i
+		    lappend data(sel_anchor) $i
+ 		}
+  	    }
+        }
+    }
 
     set xmax   [winfo width  $path]
     set ymax   [winfo height $path]
