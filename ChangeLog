@@ -1,5 +1,9 @@
 2000-02-16  Sven Delmas  <sven@scriptics.com>
 
+	* dialog.tcl: Added a new parameter to the draw procedure that
+	allows me to pass in the desired geometry for the window. This was
+	needed to support tracking of dialog window geometries.
+
 	* tree.tcl: Changed the <KeyPress-space> binding to use "+", so it
 	will not overwrite existing bindings (if there are any). Also
 	added some extra protection in the keynav procedure against the
