@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.18 2001/06/11 23:57:33 hobbs Exp $
+#  $Id: combobox.tcl,v 1.19 2002/05/29 22:02:49 andreas_kupries Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -258,11 +258,13 @@ proc ComboBox::_create_popup { path } {
     }
     if { $::tcl_platform(platform) == "unix" } {
 	set sbwidth 11
+	set sbrelief sunken
     } else {
 	set sbwidth 15
+	set sbrelief ridge
     }
     if {![winfo exists $path.shell]} {
-        set shell [toplevel $path.shell -relief sunken -bd 2]
+        set shell [toplevel $path.shell -relief $sbrelief -bd 2]
         wm overrideredirect $shell 1
         wm transient $shell [winfo toplevel $path]
         wm withdraw  $shell

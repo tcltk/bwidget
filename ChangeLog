@@ -1,3 +1,8 @@
+2002-05-29  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* combobox.tcl: Changed relief of popup list to ridge, for Win*
+	  platforms.
+
 2002-05-09  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* dynhelp.tcl: Accepted patch for bug 528929. Reported by
