@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: notebook.tcl,v 1.2 1999/09/16 15:36:22 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -611,12 +611,21 @@ proc NoteBook::_redraw { path } {
     }
     _draw_area   $path
     _draw_arrows $path
+    # ericm
+    set foo [lindex [split [winfo geometry $path] +] 0]
+    foreach {w h} [split $foo x] {
+	break
+    }
+#    $path:cmd scale all 0 0 1.0 -1.0
+#    $path:cmd itemconfigure window -anchor sw
+#    $path:cmd move all 0 $h
+    # ericm
 }
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Command NoteBook::_draw_page
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 proc NoteBook::_draw_page { path page create } {
     variable $path
     upvar 0  $path data
@@ -629,6 +638,15 @@ proc NoteBook::_draw_page { path page create } {
     set xf  [expr {$xd + $data($page,width)}]
     set lt  [list $xd $h $xd 4 [expr {$xd+3}] 1 $xf 1]
     set lb  [list $xf 1 [expr {$xf+3}] 4 [expr {$xf+3}] [expr {$h-3}] [expr {$xf+6}] $h]
+    # ericm
+#    set nbh [expr {[winfo height $path]-1} - $data(hpage)]
+#    set nlt {}
+#    set nlb {}
+#    foreach {x y} $lt { lappend nlt $x [expr $y + $nbh] }
+#    foreach {x y} $lb { lappend nlb $x [expr $y + $nbh] }
+#    set lb $nlb
+#    set lt $nlt
+    # ericm
     set img [Widget::getoption $path.f$page -image]
     if { $data(select) == $page } {
         set fgt   $data(lbg)
@@ -787,6 +805,10 @@ proc NoteBook::_draw_area { path } {
     set x0  [expr {$bd-1}]
     set y0  $data(hpage)
     set y1  $h
+    # ericm
+#    set y0 [expr $y0 - $data(hpage)]
+#    set y1 [expr $y1 - $data(hpage)]
+    # ericm
     set dbg $data(dbg)
     set sel $data(select)
     if {  $sel == "" } {
@@ -844,6 +866,15 @@ proc NoteBook::_draw_area { path } {
 proc NoteBook::_resize { path } {
     _draw_area   $path
     _draw_arrows $path
+    # ericm
+    set foo [lindex [split [winfo geometry $path] +] 0]
+    foreach {w h} [split $foo x] {
+	break
+    }
+#    $path:cmd scale all 0 0 1.0 -1.0
+#    $path:cmd itemconfigure window -anchor sw
+#    $path:cmd move all 0 $h
+    # ericm
 }
 
 
