@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.7 2000/09/06 21:47:42 ericm Exp $
+#  $Id: label.tcl,v 1.8 2001/09/06 00:08:35 andreas_kupries Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - BWLabel::create
@@ -163,7 +163,7 @@ proc BWLabel::configure { path args } {
     set force [Widget::hasChanged $path -dragendcmd dragend]
     DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd $dragend $force
     DropSite::setdrop $path $path.l BWLabel::_over_cmd BWLabel::_drop_cmd
-    DynamicHelp::sethelp $path $path
+    DynamicHelp::sethelp $path $path.l
 
     return $res
 }
