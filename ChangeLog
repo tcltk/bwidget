@@ -1,3 +1,7 @@
+2004-09-01  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* statusbar.tcl: add -showseparator optional horizontal separator.
+
 2004-08-31  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* statusbar.tcl: correct name of image for use on unix.
