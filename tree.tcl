@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.14 2000/02/28 18:06:40 ericm Exp $
+#  $Id: tree.tcl,v 1.15 2000/02/28 18:37:50 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -131,8 +131,7 @@ proc Tree::create { path args } {
     set data(dnd,selnodes) {}
     set data(dnd,node)     ""
 
-    frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat \
-	    -takefocus 0
+    frame $path -class Tree -bd 0 -highlightthickness 0 -relief flat
     eval canvas $path.c [Widget::subcget $path .c] -xscrollincrement 8
     pack $path.c -expand yes -fill both
     $path.c bind cross <ButtonPress-1> [list Tree::_cross_event $path]
