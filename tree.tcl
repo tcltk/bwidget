@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.33 2001/08/08 20:58:21 andreas_kupries Exp $
+#  $Id: tree.tcl,v 1.34 2001/12/29 02:05:07 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -783,7 +783,8 @@ proc Tree::see { path node } {
 # ------------------------------------------------------------------------------
 #  Command Tree::opentree
 # ------------------------------------------------------------------------------
-proc Tree::opentree { path node } {
+# JDC: added option recursive
+proc Tree::opentree { path node {recursive 1} } {
     variable $path
     upvar 0  $path data
 
@@ -791,7 +792,7 @@ proc Tree::opentree { path node } {
         return -code error "node \"$node\" does not exist"
     }
 
-    _recexpand $path $node 1 [Widget::getoption $path -opencmd]
+    _recexpand $path $node 1 $recursive [Widget::getoption $path -opencmd]
     _redraw_idle $path 3
 }
 
@@ -799,7 +800,7 @@ proc Tree::opentree { path node } {
 # ------------------------------------------------------------------------------
 #  Command Tree::closetree
 # ------------------------------------------------------------------------------
-proc Tree::closetree { path node } {
+proc Tree::closetree { path node {recursive 1} } {
     variable $path
     upvar 0  $path data
 
@@ -807,7 +808,7 @@ proc Tree::closetree { path node } {
         return -code error "node \"$node\" does not exist"
     }
 
-    _recexpand $path $node 0 [Widget::getoption $path -closecmd]
+    _recexpand $path $node 0 $recursive [Widget::getoption $path -closecmd]
     _redraw_idle $path 3
 }
 
@@ -996,7 +997,8 @@ proc Tree::_see { path idn side } {
 # ------------------------------------------------------------------------------
 #  Command Tree::_recexpand
 # ------------------------------------------------------------------------------
-proc Tree::_recexpand { path node expand cmd } {
+# JDC : added option recursive
+proc Tree::_recexpand { path node expand recursive cmd } {
     variable $path
     upvar 0  $path data
 
@@ -1007,8 +1009,10 @@ proc Tree::_recexpand { path node expand cmd } {
         }
     }
 
-    foreach subnode [lrange $data($node) 1 end] {
-        _recexpand $path $subnode $expand $cmd
+    if { $recursive } {
+	foreach subnode [lrange $data($node) 1 end] {
+	    _recexpand $path $subnode $expand $recursive $cmd
+	}
     }
 }
 
