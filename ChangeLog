@@ -1,5 +1,11 @@
 2002-01-15  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* BWman/ComboBox.html: removed reference to label options that
+	were removed when the LabelFrame was dropped.  [Bug #477130]
+
+	* listbox.tcl: allowed drop handler to work in empty listbox.
+	[Bug #456883]
+
 	* mainframe.tcl: correct unprotected eval calls.  [Patch #501210]
 	(chevreux)
 
