@@ -1,7 +1,7 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  buttonbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ButtonBox::create
 #     - ButtonBox::configure
@@ -13,7 +13,7 @@
 #     - ButtonBox::invoke
 #     - ButtonBox::index
 #     - ButtonBox::_destroy
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 namespace eval ButtonBox {
     Button::use
@@ -36,33 +36,37 @@ namespace eval ButtonBox {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::create
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::create { path args } {
     Widget::init ButtonBox $path $args
 
     variable $path
     upvar 0  $path data
 
-    eval frame $path [Widget::subcget $path :cmd] -takefocus 0 -highlightthickness 0
+    eval frame $path [Widget::subcget $path :cmd] -takefocus 0 \
+	    -highlightthickness 0
+    # For 8.4+ we don't want to inherit the padding
+    catch {$path configure -padx 0 -pady 0}
 
     set data(default)  [Widget::getoption $path -default]
     set data(nbuttons) 0
     set data(max)      0
 
-    bind $path <Destroy> "ButtonBox::_destroy $path"
+    bind $path <Destroy> [list ButtonBox::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval ButtonBox::\$cmd $path \$args\]"
+    proc ::$path { cmd args } \
+	    "return \[eval ButtonBox::\$cmd [list $path] \$args\]"
 
     return $path
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::configure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::configure { path args } {
     variable $path
     upvar 0  $path data
@@ -89,17 +93,17 @@ proc ButtonBox::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::cget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::add
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::add { path args } {
     variable $path
     upvar 0  $path data
@@ -228,9 +232,9 @@ proc ::ButtonBox::getbuttonstate {path tag} {
     }
 }
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::itemconfigure
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::itemconfigure { path index args } {
     if { [set idx [lsearch $args -default]] != -1 } {
         set args [lreplace $args $idx [expr {$idx+1}]]
@@ -239,17 +243,17 @@ proc ButtonBox::itemconfigure { path index args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::itemcget
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::itemcget { path index option } {
     return [Button::cget $path.b[index $path $index] $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::setfocus
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::setfocus { path index } {
     set but $path.b[index $path $index]
     if { [winfo exists $but] } {
@@ -258,9 +262,9 @@ proc ButtonBox::setfocus { path index } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::invoke
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::invoke { path index } {
     set but $path.b[index $path $index]
     if { [winfo exists $but] } {
@@ -269,13 +273,13 @@ proc ButtonBox::invoke { path index } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::index
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::index { path index } {
     if { ![string compare $index "default"] } {
         set res [Widget::getoption $path -default]
-    } elseif { ![string compare $index "end"] || ![string compare $index "last"] } {
+    } elseif {$index == "end" || $index == "last"} {
         variable $path
         upvar 0  $path data
 
@@ -287,9 +291,9 @@ proc ButtonBox::index { path index } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #  Command ButtonBox::_destroy
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 proc ButtonBox::_destroy { path } {
     variable $path
     upvar 0  $path data
