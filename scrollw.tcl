@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: scrollw.tcl,v 1.2 1999/12/23 19:30:59 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -206,6 +206,7 @@ proc ScrolledWindow::_set_hscroll { path vmin vmax } {
                 set _widget($path,hpack) 1
             }
         }
+        update idletask
         $grid.hscroll set $vmin $vmax
     }
 }
@@ -234,6 +235,7 @@ proc ScrolledWindow::_set_vscroll { path vmin vmax } {
                 set _widget($path,vpack) 1
             }
         }
+        update idletask
         $grid.vscroll set $vmin $vmax
     }
 }
