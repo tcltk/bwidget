@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.16 2004/02/04 00:11:43 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.17 2004/10/09 00:18:07 pointsman Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -633,14 +633,14 @@ proc MainFrame::_parse_accelerator { desc } {
 	set seq None
 	set key [string tolower [lindex $desc 0]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {f1?[0-9]} $key]} {
+	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} $key]} {
 	    set key [string toupper $key]
 	}
     } elseif { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
         set key [string tolower [lindex $desc 1]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {f1?[0-9]} $key]} {
+	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} $key]} {
 	    set key [string toupper $key]
 	}
     } else {
