@@ -1,5 +1,47 @@
 2001-12-28  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* BWman/Dialog.html:
+	* dialog.tcl: Added '-transient' and '-place' flags.
+	[Patch #483838] (decoster)
+
+	* BWman/Tree.html:
+	* tree.tcl: Added a 'recursive' argument to 'Tree::opentree' and
+	'Tree::closetree'. [Patch #483838] (decoster)
+
+	* BWman/ProgressBar.html:
+	* progressbar.tcl: Added new type 'nonincremental_infinite' and
+	modified movement of progressbar when in 'infinite' or
+	'nonincremental_infinite' mode. The 'nonincremental_infinite' can
+	be used when a certain process monitored by a ProgressBar returns
+	a total count and not an increment count. [Patch #483838] (decoster)
+
+	* BWman/PanedWindow.html:
+	* panedw.tcl: Added '-weights' flag with possible value 'extra' or
+	'available'.  Since BWidget-1.3.1, the meaning of the '-weight'
+	flag for the 'PanedWindow::add' command was changed. This made it
+	difficult to create a layout where the panes occupy a certain
+	amount of the screen. When using the '-weights extra' flag when
+	creating a PanedWindow widget, the >=1.3.1 behavior is used: the
+	weights for the different panes are only used for extra space.
+	When using the '-weights available' flag, the weights for the
+	different panes are used to set the size of each panes relative to
+	the total available space. [Patch #483838] (decoster)
+
+	* BWman/ListBox.html:
+	* listbox.tcl: Added '-selectmode' flag and 2 possible
+	select-modes: single and multiple. [Patch #483838] (decoster)
+
+	* widget.tcl: Select element 4 (was 3) from the config-options to
+	get value from optiondb. [Patch #483838] (decoster)
+
+	* utils.tcl: added else case to place is called with location
+	different from 'at' and 'center' and without a parent.
+	[Patch #484123] (decoster)
+
+	* mainframe.tcl: added options -menubarfont, -menuentryfont and
+	-statusbarfont at creation time of the widget as well as
+	subsequent configures. [Patch #479935] (chevreux)
+
 	* listbox.tcl: added multipleinsert command to allow faster
 	inserts of multiple items. [Patch #458446] (chevreux)
 	* widget.tcl: added Widget::copyinit. [Patch #458446] (chevreux)
