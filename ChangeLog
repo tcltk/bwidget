@@ -1,3 +1,12 @@
+2000-03-07  Sven Delmas  <sven@scriptics.com>
+
+	* passwddlg.tcl: Reenabled the <Return> binding to activate the ok
+	button. 
+
+	* dragsite.tcl: I added an extra protection into the _begin_drag
+	procedure to guard against a motion event that (sometimes) arrives
+	before the press event. This fixes bug # 4324.
+
 2000-03-01  Eric Melski  <ericm@scriptics.com>
 
 	* spinbox.tcl: Changed bindings to be on class SpinBox instead of BwSpinBox,
