@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.24 2003/06/23 20:27:24 damonc Exp $
+#  $Id: combobox.tcl,v 1.25 2003/07/17 23:45:14 jenglish Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -79,8 +79,9 @@ proc ComboBox::create { path args } {
 
     set entry [eval Entry::create $path.e $maps(.e) \
 		   -relief flat -borderwidth 0 -takefocus 1]
-    ::bind $path.e <FocusIn>  [list $path _focus_in]
+
     ::bind $path.e <FocusOut> [list $path _focus_out]
+    ::bind $path   <<TraverseIn>> [list $path _traverse_in]
 
     if {[Widget::cget $path -autocomplete]} {
 	::bind $path.e <KeyRelease> [list $path _auto_complete %K]
@@ -531,28 +532,11 @@ proc ComboBox::_best_match {l {e {}}} {
 
 
 # ----------------------------------------------------------------------------
-#  Command ComboBox::_focus_in
+#  Command ComboBox::_traverse_in
+#  Called when widget receives keyboard focus due to keyboard traversal.
 # ----------------------------------------------------------------------------
-proc ComboBox::_focus_in { path } {
-    variable background
-    variable foreground
-
-    if { [Widget::cget $path -editable] == 0 } {
-        set value  [Entry::cget $path.e -text]
-        if {[string equal $value ""]} {
-            # If the entry is empty, we need to do some magic to
-            # make it "selected"
-            if {[$path.e cget -bg] != [$path.e cget -selectbackground]} {
-                # Copy only if we know that this is not the selection
-                # background color (by accident... focus out without
-                # focus in etc.
-                set background [$path.e cget -bg]
-                set foreground [$path.e cget -fg]
-            }
-            $path.e configure -bg [$path.e cget -selectbackground]
-            $path.e configure -fg [$path.e cget -selectforeground]
-        }
-    }
+# 
+proc ComboBox::_traverse_in { path } {
     if {[$path.e selection present] != 1} {
 	# Autohighlight the selection, but not if one existed
 	$path.e selection range 0 end
@@ -564,20 +548,9 @@ proc ComboBox::_focus_in { path } {
 #  Command ComboBox::_focus_out
 # ----------------------------------------------------------------------------
 proc ComboBox::_focus_out { path } {
-    variable background
-    variable foreground
-
     if {[focus] == ""} {
 	# we lost focus to some other app, make sure we drop the listbox
 	_unmapliste $path 0
-    }
-    if { [Widget::cget $path -editable] == 0 } {
-        if {[info exists background]} {
-            $path.e configure -bg $background
-            $path.e configure -fg $foreground
-            unset background
-            unset foreground
-        }
     }
 }
 
