@@ -1,8 +1,8 @@
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.15 2002/10/14 20:56:22 hobbs Exp $
-# ------------------------------------------------------------------------------
+#  $Id: notebook.tcl,v 1.16 2003/05/15 00:09:03 hobbs Exp $
+# ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
 #     - NoteBook::configure
@@ -32,7 +32,7 @@
 #     - NoteBook::_draw_area
 #     - NoteBook::_resize
 #     - NoteBook::_realize
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 namespace eval NoteBook {
     ArrowButton::use
@@ -99,9 +99,9 @@ namespace eval NoteBook {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::create
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::create { path args } {
     variable $path
     upvar 0  $path data
@@ -124,13 +124,9 @@ proc NoteBook::create { path args } {
 
     frame $path -class NoteBook -borderwidth 0 -highlightthickness 0 \
 	    -relief flat
-    eval canvas $path.c			\
-	    [Widget::subcget $path .c] \
-	    -relief flat		\
-	    -borderwidth 0		\
-	    -highlightthickness 0	\
-	    -width $w			\
-	    -height $h
+    eval [list canvas $path.c] [Widget::subcget $path .c] \
+	    [list -relief flat -borderwidth 0 -highlightthickness 0 \
+	    -width $w -height $h]
     pack $path.c -expand yes -fill both
 
     # Removing the Canvas global bindings from our canvas as
@@ -145,21 +141,19 @@ proc NoteBook::create { path args } {
     bindtags $path.c $bindings
 
     # Create the arrow button
-    eval ArrowButton::create $path.c.fg [Widget::subcget $path .c.fg] \
-        -highlightthickness 0 \
-        -type button  -dir left \
-        -armcommand [list "NoteBook::_xview $path -1"]
+    eval [list ArrowButton::create $path.c.fg] [Widget::subcget $path .c.fg] \
+	    [list -highlightthickness 0 -type button -dir left \
+	    -armcommand [list NoteBook::_xview $path -1]]
 
-    eval ArrowButton::create $path.c.fd [Widget::subcget $path .c.fd] \
-        -highlightthickness 0 \
-        -type button  -dir right \
-        -armcommand [list "NoteBook::_xview $path 1"]
+    eval [list ArrowButton::create $path.c.fd] [Widget::subcget $path .c.fd] \
+	    [list -highlightthickness 0 -type button -dir right \
+	    -armcommand [list NoteBook::_xview $path 1]]
 
-    bind $path <Configure> "NoteBook::_realize $path"
-    bind $path <Destroy>   "NoteBook::_destroy $path"
+    bind $path <Configure> [list NoteBook::_realize $path]
+    bind $path <Destroy>   [list NoteBook::_destroy $path]
 
     rename $path ::$path:cmd
-    proc ::$path { cmd args } "return \[eval NoteBook::\$cmd $path \$args\]"
+    proc ::$path { cmd args } "return \[eval NoteBook::\$cmd [list $path] \$args\]"
 
     set bg [Widget::cget $path -background]
     foreach {data(dbg) data(lbg)} [BWidget::get3dcolor $path $bg] {break}
@@ -168,9 +162,9 @@ proc NoteBook::create { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::configure
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::configure { path args } {
     variable $path
     upvar 0  $path data
@@ -222,17 +216,17 @@ proc NoteBook::configure { path args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::cget
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::compute_size
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::compute_size { path } {
     variable $path
     upvar 0  $path data
@@ -253,9 +247,9 @@ proc NoteBook::compute_size { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::insert
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::insert { path index page args } {
     variable $path
     upvar 0  $path data
@@ -287,9 +281,9 @@ proc NoteBook::insert { path index page args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::delete
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::delete { path page {destroyframe 1} } {
     variable $path
     upvar 0  $path data
@@ -311,9 +305,9 @@ proc NoteBook::delete { path page {destroyframe 1} } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::itemconfigure
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::itemconfigure { path page args } {
     _test_page $path $page
     set res [_itemconfigure $path $page $args]
@@ -323,18 +317,18 @@ proc NoteBook::itemconfigure { path page args } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::itemcget
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::itemcget { path page option } {
     _test_page $path $page
     return [Widget::cget $path.f$page $option]
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::bindtabs
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::bindtabs { path event script } {
     if { $script != "" } {
         $path.c bind "page" $event \
@@ -345,9 +339,9 @@ proc NoteBook::bindtabs { path event script } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::move
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::move { path page index } {
     variable $path
     upvar 0  $path data
@@ -358,9 +352,9 @@ proc NoteBook::move { path page index } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::raise
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::raise { path {page ""} } {
     variable $path
     upvar 0  $path data
@@ -373,9 +367,9 @@ proc NoteBook::raise { path {page ""} } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::see
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::see { path page } {
     variable $path
     upvar 0  $path data
@@ -400,9 +394,9 @@ proc NoteBook::see { path page } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::page
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::page { path first {last ""} } {
     variable $path
     upvar 0  $path data
@@ -415,9 +409,9 @@ proc NoteBook::page { path first {last ""} } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::pages
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::pages { path {first ""} {last ""}} {
     variable $path
     upvar 0  $path data
@@ -434,9 +428,9 @@ proc NoteBook::pages { path {first ""} {last ""}} {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::index
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::index { path page } {
     variable $path
     upvar 0  $path data
@@ -445,9 +439,9 @@ proc NoteBook::index { path page } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_destroy
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_destroy { path } {
     variable $path
     upvar 0  $path data
@@ -461,17 +455,17 @@ proc NoteBook::_destroy { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::getframe
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::getframe { path page } {
     return $path.f$page
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_test_page
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_test_page { path page } {
     variable $path
     upvar 0  $path data
@@ -490,9 +484,9 @@ proc NoteBook::_getoption { path page option } {
     return $value
 }
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_itemconfigure
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_itemconfigure { path page lres } {
     variable $path
     upvar 0  $path data
@@ -512,9 +506,9 @@ proc NoteBook::_itemconfigure { path page lres } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_compute_width
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_compute_width { path } {
     variable $path
     upvar 0  $path data
@@ -558,9 +552,9 @@ proc NoteBook::_compute_width { path } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_get_x_page
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_get_x_page { path pos } {
     variable _warrow
     variable $path
@@ -582,9 +576,9 @@ proc NoteBook::_get_x_page { path pos } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_xview
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_xview { path inc } {
     variable $path
     upvar 0  $path data
@@ -606,9 +600,9 @@ proc NoteBook::_xview { path inc } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_highlight
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_highlight { type path page } {
     variable $path
     upvar 0  $path data
@@ -634,9 +628,9 @@ proc NoteBook::_highlight { type path page } {
 }
 
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #  Command NoteBook::_select
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 proc NoteBook::_select { path page } {
     variable $path
     upvar 0  $path data
@@ -761,6 +755,7 @@ proc NoteBook::_draw_page { path page create } {
 
     set h1 [expr {[winfo height $path]}]
     set bd [Widget::cget $path -borderwidth]
+    if {$bd < 1} { set bd 1 }
 
     if { $tabsOnBottom } {
 	set top [expr {$top * -1}]
@@ -821,6 +816,7 @@ proc NoteBook::_draw_page { path page create } {
 	
     if { $data(select) == $page } {
         set bd    [Widget::cget $path -borderwidth]
+	if {$bd < 1} { set bd 1 }
         set fg    [_getoption $path $page -foreground]
     } else {
         set bd    1
@@ -926,6 +922,7 @@ proc NoteBook::_draw_arrows { path } {
     if { [string equal $side "bottom"] } {
         set h1 [expr {[winfo height $path]-1}]
         set bd [Widget::cget $path -borderwidth]
+	if {$bd < 1} { set bd 1 }
         set y0 [expr {$h1 - $data(hpage) + $bd}]
     } else {
         set y0 1
@@ -981,6 +978,7 @@ proc NoteBook::_draw_area { path } {
     set w   [expr {[winfo width  $path]-1}]
     set h   [expr {[winfo height $path]-1}]
     set bd  [Widget::cget $path -borderwidth]
+    if {$bd < 1} { set bd 1 }
     set x0  [expr {$bd-1}]
 
     set arcRadius	[Widget::cget $path -arcradius]
