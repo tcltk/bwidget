@@ -7,7 +7,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.2 1999/09/14 03:32:07 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.3 1999/09/14 05:44:58 wart Exp $
 
 
 BWIDGET_SOURCES = \
@@ -123,7 +123,7 @@ install-libraries: installdirs
 	    $(INSTALL_SCRIPT) $$i $(pkglibdir)/lang ; \
 	done;
 	@echo "Installing image files in $(pkglibdir)/images"
-	@for i in $(srcdir)/lang/*.rc ; do \
+	@for i in $(srcdir)/images/*.gif $(srcdir)/images/*.xbm ; do \
 	    $(INSTALL_SCRIPT) $$i $(pkglibdir)/images ; \
 	done;
 	$(INSTALL_SCRIPT) $(PKGINDEX_TCL) $(pkglibdir)
@@ -137,6 +137,7 @@ install-doc:
 installdirs:
 	$(mkinstalldirs) $(pkglibdir)
 	$(mkinstalldirs) $(pkglibdir)/lang
+	$(mkinstalldirs) $(pkglibdir)/images
 	$(mkinstalldirs) $(prefix)/doc/$(PACKAGE)$(VERSION)
 
 clean:  
