@@ -1,3 +1,10 @@
+2004-08-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* statusbar.tcl: correct use of PNG vs. GIF image.
+	Don't abort creation of statusbar when gridded - just don't try
+	to resize.
+	Correct example to use label -width 1
+
 2004-08-20  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* statusbar.tcl (new): Addition of a statusbar container widget
