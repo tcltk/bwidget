@@ -57,6 +57,7 @@ proc PanedWindow::create { path args } {
     frame $path -background [Widget::cget $path -background] -class PanedWindow
     set _panedw($path,nbpanes) 0
     set _panedw($path,weights) ""
+    set _panedw($path,configuredone) 0
 
     bind $path <Configure> [list PanedWindow::_realize $path %w %h]
     bind $path <Destroy>   [list PanedWindow::_destroy $path]
@@ -144,11 +145,10 @@ proc PanedWindow::add { path args } {
 	    $sep configure -bd 3
 	    set placeButton 0
 	}
-        if { ![string compare $side "top"] || \
-		![string compare $side "bottom"] } {
+        if {[string equal $side "top"] || [string equal $side "bottom"]} {
             place $sep -relx 0.5 -y 0 -width $sepsize -relheight 1.0 -anchor n
 	    if { $placeButton } {
-		if { ![string compare $side "top"] } {
+		if {[string equal $side "top"]} {
 		    place $but -relx 0.5 -y [expr {6+$wbut/2}] -anchor c
 		} else {
 		    place $but -relx 0.5 -rely 1.0 -y [expr {-6-$wbut/2}] \
@@ -161,7 +161,7 @@ proc PanedWindow::add { path args } {
         } else {
             place $sep -x 0 -rely 0.5 -height $sepsize -relwidth 1.0 -anchor w
 	    if { $placeButton } {
-		if { ![string compare $side "left"] } {
+		if {[string equal $side "left"]} {
 		    place $but -rely 0.5 -x [expr {6+$wbut/2}] -anchor c
 		} else {
 		    place $but -rely 0.5 -relx 1.0 -x [expr {-6-$wbut/2}] \
@@ -175,8 +175,8 @@ proc PanedWindow::add { path args } {
         bind $activator <ButtonPress-1> \
 		"PanedWindow::_beg_move_sash $path $num %X %Y"
     } else {
-        if { ![string compare $side "top"] || \
-		![string compare $side "bottom"] } {
+        if { [string equal $side "top"] || \
+		[string equal $side "bottom"] } {
             grid rowconfigure $path 0 -weight 1
         } else {
             grid columnconfigure $path 0 -weight 1
@@ -187,7 +187,7 @@ proc PanedWindow::add { path args } {
 	    -highlightthickness 0 -bg $bg]
     set user [frame $path.f$num.frame  -bd 0 -relief flat \
 	    -highlightthickness 0 -bg $bg]
-    if { ![string compare $side "top"] || ![string compare $side "bottom"] } {
+    if { [string equal $side "top"] || [string equal $side "bottom"] } {
         grid $pane -column [expr {2*$num}] -row 0 -sticky nsew
         grid columnconfigure $path [expr {2*$num}] -weight $weight
     } else {
@@ -196,7 +196,9 @@ proc PanedWindow::add { path args } {
     }
     pack $user -fill both -expand yes
     incr _panedw($path,nbpanes)
-    _realize $path [winfo width $path] [winfo height $path]
+    if {$_panedw($path,configuredone)} {
+	_realize $path [winfo width $path] [winfo height $path]
+    }
 
     return $user
 }
@@ -244,7 +246,7 @@ proc PanedWindow::_beg_move_sash { path num x y } {
     set minszd [Widget::getoption $fnext -minsize]
     set side   [Widget::getoption $path -side]
 
-    if { ![string compare $side "top"] || ![string compare $side "bottom"] } {
+    if { [string equal $side "top"] || [string equal $side "bottom"] } {
         $top configure -cursor sb_h_double_arrow
         set h    [winfo height $path]
         set yr   [winfo rooty $path.sash$num]
@@ -346,6 +348,7 @@ proc PanedWindow::_realize { path width height } {
     bind $path <Configure> {}
 
     _apply_weights $path
+    set _panedw($path,configuredone) 1
     return
 }
 
@@ -356,12 +359,12 @@ proc PanedWindow::_apply_weights { path } {
     variable _panedw
 
     set weights [Widget::getoption $path -weights]
-    if { ![string compare $weights "extra"] } {
+    if {[string equal $weights "extra"]} {
 	return
     }
 
     set side   [Widget::getoption $path -side]
-    if { ![string compare $side "top"] || ![string compare $side "bottom"] } {
+    if {[string equal $side "top"] || [string equal $side "bottom"] } {
 	set size width
     } else {
 	set size height
