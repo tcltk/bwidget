@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.4 2000/02/11 22:54:27 ericm Exp $
+#  $Id: notebook.tcl,v 1.5 2000/02/17 03:06:01 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -508,8 +508,14 @@ proc NoteBook::_compute_width { path } {
     set id $data(textid)
     $path:cmd itemconfigure $id -font [Widget::getoption $path -font]
     foreach page $data(pages) {
-        $path:cmd itemconfigure $id -text [Widget::getoption $path.f$page -text]
-        set  wtext [expr {[lindex [$path:cmd bbox $id] 2]+20}]
+        $path:cmd itemconfigure $id -text \
+		[Widget::getoption $path.f$page -text]
+	# Get the bbox for this text to determine its width, then substract
+	# 6 from the width to account for canvas bbox oddness w.r.t. widths of
+	# simple text.
+	foreach {x1 y1 x2 y2} [$path:cmd bbox $id] break
+	set x2 [expr {$x2 - 6}]
+        set  wtext [expr {$x2 - $x1 + 20}]
         if { [set img [Widget::getoption $path.f$page -image]] != "" } {
             set wtext [expr {$wtext+[image width $img]+4}]
             set himg  [expr {[image height $img]+6}]
@@ -541,7 +547,8 @@ proc NoteBook::_get_x_page { path pos } {
     upvar 0  $path data
 
     set base $data(base)
-    set x    [expr {$_warrow+1}]
+    # notebook tabs start flush with the left side of the notebook
+    set x 0
     if { $pos < $base } {
         foreach page [lrange $data(pages) $pos [expr {$base-1}]] {
             incr x [expr {-$data($page,width)}]
@@ -678,60 +685,113 @@ proc NoteBook::_draw_page { path page create } {
     # --- calcul des coordonnees et des couleurs de l'onglet ------------------
     set pos [lsearch $data(pages) $page]
     set bg  [_getoption $path $page -background]
+
+    # lookup the tab colors
+    set fgt   $data(lbg)
+    set fgb   $data(dbg)
+
     set h   $data(hpage)
     set xd  [_get_x_page $path $pos]
     set xf  [expr {$xd + $data($page,width)}]
+
+    # Coordinates of the tab corners are:
+    #     c3        c4
+    #
+    # c2                c5
+    #
+    # c1                c6
+    #
+    # where
+    # c1 = $xd,	  $h
+    # c2 = $xd,	  4
+    # c3 = $xd+2, 2
+    # c4 = $xf+1, 2
+    # c5 = $xf+2, 4
+    # c6 = $xf+2, $h
+
+    set top		2
+    set arcRadius	2
+
+    if { $data(select) != $page } {
+	# Non-selected pages have tabs 2 pixels lower than the selected one
+	incr top 2
+    }
+
+    # Precompute some coord values that we use a lot
+    set topPlusRadius	[expr {$top + $arcRadius}]
+    set rightPlusRadius	[expr {$xf + $arcRadius}]
+    set leftPlusRadius	[expr {$xd + $arcRadius}]
+
     # Sven
     set side [Widget::getoption $path -side]
     set h1 [expr {[winfo height $path]}]
     set bd [Widget::getoption $path -borderwidth]
-    if {"$side" == "bottom"} {
-        set lt  [list $xd [expr {$h1-$h-1}] $xd [expr {$h1-4}] \
-            [expr {$xd+3}] [expr {$h1-1}]]
-        set lb  [list [expr {$xd+3}] [expr {$h1-1}] $xf [expr {$h1-1}] \
-            [expr {$xf+3}] [expr {$h1-4}] [expr {$xf+3}] [expr {$h1-$h+3}] \
-            [expr {$xf+6}] [expr {$h1-$h-1}]]
+    if { [string equal $side "bottom"] } {
+	set top [expr {$top * -1}]
+	set topPlusRadius [expr {$topPlusRadius * -1}]
+	# Hrm... the canvas has an issue with drawing diagonal segments
+	# of lines from the bottom to the top, so we have to draw this line
+	# backwards (ie, lt is actually the bottom, drawn from right to left)
+        set lt  [list 					\
+		$rightPlusRadius	[expr {$h1-$h-1}]		\
+		$rightPlusRadius	[expr {$h1 + $topPlusRadius}]	\
+		$xf			[expr {$h1 + $top}]		\
+		$leftPlusRadius		[expr {$h1 + $top}]		\
+		]
+        set lb  [list					\
+		$leftPlusRadius		[expr {$h1 + $top}]		\
+		$xd			[expr {$h1 + $topPlusRadius}] \
+		$xd			[expr {$h1-$h-1}]	\
+		]
+	# Because we have to do this funky reverse order thing, we have to
+	# swap the top/bottom colors too.
+	set tmp $fgt
+	set fgt $fgb
+	set fgb $tmp
     } else {
-        set lt  [list $xd $h $xd 4 [expr {$xd+3}] 1 $xf 1]
-        set lb  [list $xf 1 [expr {$xf+3}] 4 [expr {$xf+3}] [expr {$h-3}] \
-            [expr {$xf+6}] $h]
+	set lt [list					\
+		$xd			$h		\
+		$xd			$topPlusRadius	\
+		$leftPlusRadius		$top		\
+		[expr {$xf + 1}]	$top		\
+		]
+	set lb [list 						\
+		[expr {$xf + 1}] 	[expr {$top + 1}]	\
+		$rightPlusRadius	$topPlusRadius		\
+		$rightPlusRadius	$h			\
+		]
     }
-    # Sven end
+
     set img [Widget::getoption $path.f$page -image]
+
+    # Text on the tab is down a few pixels from the top of the tab, and
+    # centered left-to-right.
+    set textOffsetY 3
+    set textOffsetX 9
+
+    set ytext $top
+    if { [string equal $side "bottom"] } {
+	# The "+ 2" below moves the text closer to the bottom of the tab,
+	# so it doesn't look so cramped.  I should be able to achieve the
+	# same goal by changing the anchor of the text and using this formula:
+	# ytext = $top + $h1 - $textOffsetY
+	# but that doesn't quite work (I think the linespace from the text
+	# gets in the way)
+	incr ytext [expr {$h1 - $h + 2}]
+    }
+    incr ytext $textOffsetY
+
+    set xtext [expr {$xd + $textOffsetX}]
+    if { $img != "" } {
+	# if there's an image, put it on the left and move the text right
+	set ximg $xtext
+	incr ximg [expr {[image width $img] + 4}]
+    }
+	
     if { $data(select) == $page } {
-        set fgt   $data(lbg)
-        set fgb   $data(dbg)
-        # Sven
-        if {"$side" == "bottom"} {
-            set ytext [expr {($h1 - ($h/2))}]
-        } else {
-            set ytext [expr {$h/2-1}]
-        }
-        # Sven end
-        if { $img == "" } {
-            set xtext [expr {$xd+9}]
-        } else {
-            set ximg  [expr {$xd+9}]
-            set xtext [expr {$ximg+[image width $img]+4}]
-        }
         set bd    [Widget::getoption $path -borderwidth]
         set fg    [_getoption $path $page -foreground]
     } else {
-        set fgt   $data(dbg)
-        set fgb   $fgt
-        # Sven
-        if {"$side" == "bottom"} {
-            set ytext [expr {$h1 - ($h/2) - 1}]
-        } else {
-            set ytext [expr {$h/2}]
-        }
-        # Sven end
-        if { $img == "" } {
-            set xtext [expr {$xd+10}]
-        } else {
-            set ximg  [expr {$xd+10}]
-            set xtext [expr {$ximg+[image width $img]+4}]
-        }
         set bd    1
         if { [Widget::getoption $path.f$page -state] == "normal" } {
             set fg [_getoption $path $page -foreground]
@@ -743,6 +803,7 @@ proc NoteBook::_draw_page { path page create } {
     # --- creation ou modification de l'onglet --------------------------------
     # Sven
     if { $create } {
+	# Create the tab region
         eval $path:cmd create polygon [concat $lt $lb]		\
 		-tag		{"page p:$page $page:poly"}	\
 		-outline	$bg				\
@@ -751,12 +812,12 @@ proc NoteBook::_draw_page { path page create } {
             -tags {"page p:$page $page:top top"} -fill $fgt -width $bd
         eval $path:cmd create line $lb \
             -tags {"page p:$page $page:bot bot"} -fill $fgb -width $bd
-        $path:cmd create text $xtext $ytext           \
-            -text   [Widget::getoption $path.f$page -text] \
-            -font   [Widget::getoption $path -font]        \
-            -fill   $fg                               \
-            -anchor w                                 \
-            -tags   "page p:$page $page:text"
+        $path:cmd create text $xtext $ytext 			\
+		-text	[Widget::getoption $path.f$page -text]	\
+		-font	[Widget::getoption $path -font]		\
+		-fill	$fg					\
+		-anchor	nw					\
+		-tags	"page p:$page $page:text"
 
         $path:cmd bind p:$page <ButtonPress-1> "NoteBook::_select $path $page"
         $path:cmd bind p:$page <Enter>         "NoteBook::_highlight on  $path $page"
@@ -775,6 +836,7 @@ proc NoteBook::_draw_page { path page create } {
     $path:cmd itemconfigure "$page:poly" -fill $bg  -outline $bg
     $path:cmd itemconfigure "$page:top"  -fill $fgt -width $bd
     $path:cmd itemconfigure "$page:bot"  -fill $fgb -width $bd
+    
     # Sven end
         
     if { $img != "" } {
@@ -905,7 +967,7 @@ proc NoteBook::_draw_area { path } {
         set lbg $data(dbg)
     } else {
         set xd [_get_x_page $path [lsearch $data(pages) $data(select)]]
-        set xf [expr {$xd + $data($sel,width)+6}]
+        set xf [expr {$xd + $data($sel,width) + 3}]
         set lbg $data(lbg)
     }
 
