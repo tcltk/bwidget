@@ -1,3 +1,7 @@
+2005-02-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* lang/da.rc (new): Danish language file [Bug 1151534] (elhaard)
+
 2005-01-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* notebook.tcl: reverted lester patch - too many bugs related to
