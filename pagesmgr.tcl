@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  pagesmgr.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: pagesmgr.tcl,v 1.2 2000/02/26 01:56:40 ericm Exp $
+#  $Id: pagesmgr.tcl,v 1.3 2001/10/11 16:34:11 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - PagesManager::create
@@ -20,6 +20,7 @@
 #     - PagesManager::_draw_area
 #     - PagesManager::_realize
 # ------------------------------------------------------------------------------
+package require Tcl 8.1.1
 
 namespace eval PagesManager {
     Widget::declare PagesManager {
@@ -106,13 +107,14 @@ proc PagesManager::add { path page } {
     variable $path
     upvar 0  $path data
 
-    if { [lsearch $data(pages) $page] != -1 } {
+    if { [lsearch -exact $data(pages) $page] != -1 } {
         return -code error "page \"$page\" already exists"
     }
 
     lappend data(pages) $page
 
-    frame $path.f$page -relief flat -background [Widget::cget $path -background] -borderwidth 0
+    frame $path.f$page -relief flat \
+	    -background [Widget::cget $path -background] -borderwidth 0
 
     return $path.f$page
 }
@@ -157,9 +159,15 @@ proc PagesManager::page { path first {last ""} } {
     variable $path
     upvar 0  $path data
 
+    if {![string is integer -strict $first]} {
+	set first [lsearch -exact $data(pages) $first]
+    }
     if { $last == "" } {
         return [lindex $data(pages) $first]
     } else {
+	if {![string is integer -strict $last]} {
+	    set last [lsearch -exact $data(pages) $last]
+	}
         return [lrange $data(pages) $first $last]
     }
 }
@@ -176,9 +184,15 @@ proc PagesManager::pages { path {first ""} {last ""} } {
 	return $data(pages)
     }
 
+    if {![string is integer -strict $first]} {
+	set first [lsearch -exact $data(pages) $first]
+    }
     if { ![string length $last] } {
         return [lindex $data(pages) $first]
     } else {
+	if {![string is integer -strict $last]} {
+	    set last [lsearch -exact $data(pages) $last]
+	}
         return [lrange $data(pages) $first $last]
     }
 }
