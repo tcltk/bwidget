@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.6 2000/02/26 01:56:40 ericm Exp $
+#  $Id: mainframe.tcl,v 1.7 2000/09/07 16:20:42 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -567,7 +567,7 @@ proc MainFrame::_parse_accelerator { desc } {
 	    set event "<Control-Key-$key>"
 	}
 	Alt {
-	    set accel "Atl+[string toupper $key]"
+	    set accel "Alt+[string toupper $key]"
 	    set event "<Alt-Key-$key>"
 	}
 	CtrlAlt {
