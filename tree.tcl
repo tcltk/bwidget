@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.35 2002/06/04 22:04:36 hobbs Exp $
+#  $Id: tree.tcl,v 1.36 2002/08/23 20:12:48 andreas_kupries Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -191,6 +191,8 @@ proc Tree::create { path args } {
     # Bind <Button-1> to select the clicked node -- no reason not to, right?
     Tree::bindText  $path <Button-1> "$path selection set"
     Tree::bindImage $path <Button-1> "$path selection set"
+    Tree::bindText  $path <Control-Button-1> "$path selection toggle"
+    Tree::bindImage $path <Control-Button-1> "$path selection toggle"
 
 
     # Add sentinal bindings for double-clicking on items, to handle the 
@@ -489,80 +491,113 @@ proc Tree::selection { path cmd args } {
     upvar 0  $path data
 
     switch -- $cmd {
-        set {
-            set data(selnodes) {}
+	toggle {
             foreach node $args {
-                if { [info exists data($node)] } {
-		    if { [Widget::getoption $path.$node -selectable] } {
-			if { [lsearch $data(selnodes) $node] == -1 } {
-			    lappend data(selnodes) $node
-			}
-		    }
-                }
-            }
-
-	    if { ![string equal $data(selnodes) ""] } {
-		set selectcmd [Widget::getoption $path -selectcommand]
-		if { ![string equal $selectcmd ""] } {
-		    lappend selectcmd $path
-		    lappend selectcmd $data(selnodes)
-		    uplevel \#0 $selectcmd
+                if {![info exists data($node)]} {
+		    return -code error \
+			    "$path selection toggle: Cannot toggle unknown node \"$node\"."
 		}
 	    }
+            foreach node $args {
+		if {[$path selection includes $node]} {
+		    $path selection remove $node
+		} else {
+		    $path selection add $node
+		}
+            }
+	}
+        set {
+            foreach node $args {
+                if {![info exists data($node)]} {
+		    return -code error \
+			    "$path selection set: Cannot select unknown node \"$node\"."
+		}
+	    }
+            set data(selnodes) {}
+            foreach node $args {
+		if { [Widget::getoption $path.$node -selectable] } {
+		    if { [lsearch $data(selnodes) $node] == -1 } {
+			lappend data(selnodes) $node
+		    }
+		}
+            }
+	    __call_selectcmd $path
         }
         add {
             foreach node $args {
-                if { [info exists data($node)] } {
-		    if { [Widget::getoption $path.$node -selectable] } {
-			if { [lsearch $data(selnodes) $node] == -1 } {
-			    lappend data(selnodes) $node
-			}
+                if {![info exists data($node)]} {
+		    return -code error \
+			    "$path selection add: Cannot select unknown node \"$node\"."
+		}
+	    }
+            foreach node $args {
+		if { [Widget::getoption $path.$node -selectable] } {
+		    if { [lsearch $data(selnodes) $node] == -1 } {
+			lappend data(selnodes) $node
 		    }
-                }
+		}
             }
+	    __call_selectcmd $path
         }
 	range {
 	    # Here's our algorithm:
-	    #   make a list of all nodes, then take the range from node1
-	    #       to node2 and select those nodes
+	    #    make a list of all nodes, then take the range from node1
+	    #    to node2 and select those nodes
+	    #
 	    # This works because of how this widget handles redraws:
-	    # the tree is always completely redraw, always from top to bottom.
-	    # So the list of visible nodes *is* the list of nodes, and we can
-	    # use that to decide which nodes to select.
-	    foreach {node1 node2} $args break
-	    if { [info exists data($node1)] && [info exists data($node2)] } {
-		set nodes {}
-		foreach nodeItem [$path.c find withtag node] {
-		    set node [Tree::_get_node_name $path $nodeItem 2]
-		    if { [Widget::getoption $path.$node -selectable] } {
-			lappend nodes $node
-		    }
-		}
-		# surles: Set the root string to the first element on the list.
-		if {$node1 == "root"} {
-		    set node1 [lindex $nodes 0]
-		}
-		if {$node2 == "root"} {
-		    set node2 [lindex $nodes 0]
-		}
+	    #    The tree is always completely redrawn, and always from
+	    #    top to bottom. So the list of visible nodes *is* the
+	    #    list of nodes, and we can use that to decide which nodes
+	    #    to select.
 
-		# Find the first visible ancestor of node1, starting with node1
-		while {[set index1 [lsearch -exact $nodes $node1]] == -1} {
-		    set node1 [lindex $data($node1) 0]
-		}
-		# Find the first visible ancestor of node2, starting with node2
-		while {[set index2 [lsearch -exact $nodes $node2]] == -1} {
-		    set node2 [lindex $data($node2) 0]
-		}
-		# If the nodes were given in backwards order, flip the
-		# indices now
-		if { $index2 < $index1 } {
-		    incr index1 $index2
-		    set index2 [expr {$index1 - $index2}]
-		    set index1 [expr {$index1 - $index2}]
-		}
-		set data(selnodes) [lrange $nodes $index1 $index2]
+	    if {[llength $args] != 2} {
+		return -code error \
+			"wrong#args: Expected $path selection range node1 node2"
 	    }
+
+	    foreach {node1 node2} $args break
+
+	    if {![info exists data($node1)]} {
+		return -code error \
+			"$path selection range: Cannot start range at unknown node \"$node1\"."
+	    }
+	    if {![info exists data($node2)]} {
+		return -code error \
+			"$path selection range: Cannot end range at unknown node \"$node2\"."
+	    }
+
+	    set nodes {}
+	    foreach nodeItem [$path.c find withtag node] {
+		set node [Tree::_get_node_name $path $nodeItem 2]
+		if { [Widget::getoption $path.$node -selectable] } {
+		    lappend nodes $node
+		}
+	    }
+	    # surles: Set the root string to the first element on the list.
+	    if {$node1 == "root"} {
+		set node1 [lindex $nodes 0]
+	    }
+	    if {$node2 == "root"} {
+		set node2 [lindex $nodes 0]
+	    }
+
+	    # Find the first visible ancestor of node1, starting with node1
+	    while {[set index1 [lsearch -exact $nodes $node1]] == -1} {
+		set node1 [lindex $data($node1) 0]
+	    }
+	    # Find the first visible ancestor of node2, starting with node2
+	    while {[set index2 [lsearch -exact $nodes $node2]] == -1} {
+		set node2 [lindex $data($node2) 0]
+	    }
+	    # If the nodes were given in backwards order, flip the
+	    # indices now
+	    if { $index2 < $index1 } {
+		incr index1 $index2
+		set index2 [expr {$index1 - $index2}]
+		set index1 [expr {$index1 - $index2}]
+	    }
+	    set data(selnodes) [lrange $nodes $index1 $index2]
+	    __call_selectcmd $path
 	}
         remove {
             foreach node $args {
@@ -570,15 +605,30 @@ proc Tree::selection { path cmd args } {
                     set data(selnodes) [lreplace $data(selnodes) $idx $idx]
                 }
             }
+	    __call_selectcmd $path
         }
         clear {
+	    if {[llength $args] != 0} {
+		return -code error \
+			"wrong#args: Expected $path selection clear"
+	    }
             set data(selnodes) {}
+	    __call_selectcmd $path
         }
         get {
+	    if {[llength $args] != 0} {
+		return -code error \
+			"wrong#args: Expected $path selection get"
+	    }
             return $data(selnodes)
         }
         includes {
-            return [expr {[lsearch $data(selnodes) $args] != -1}]
+	    if {[llength $args] != 1} {
+		return -code error \
+			"wrong#args: Expected $path selection includes node"
+	    }
+	    set node [lindex $args 0]
+            return [expr {[lsearch $data(selnodes) $node] != -1}]
         }
         default {
             return
@@ -587,6 +637,18 @@ proc Tree::selection { path cmd args } {
     _redraw_idle $path 1
 }
 
+proc Tree::__call_selectcmd { path } {
+    variable $path
+    upvar 0  $path data
+
+    set selectcmd [Widget::getoption $path -selectcommand]
+    if { ![string equal $selectcmd ""] } {
+	lappend selectcmd $path
+	lappend selectcmd $data(selnodes)
+	uplevel \#0 $selectcmd
+    }
+    return
+}
 
 # ----------------------------------------------------------------------------
 #  Command Tree::exists

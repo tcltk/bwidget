@@ -42,47 +42,49 @@
 <DT><I><A HREF="#wso">WIDGET-SPECIFIC OPTIONS</A></I></DT>
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-closecmd">-closecmd</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-deltax">-deltax</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-closecmd">-closecmd</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-deltax">-deltax</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-deltay">-deltay</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-dragenabled">-dragenabled</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-deltay">-deltay</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-dragenabled">-dragenabled</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-dragendcmd">-dragendcmd</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-dragevent">-dragevent</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-dragendcmd">-dragendcmd</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-dragevent">-dragevent</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-draginitcmd">-draginitcmd</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-dragtype">-dragtype</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-draginitcmd">-draginitcmd</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-dragtype">-dragtype</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-dropcmd">-dropcmd</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-dropenabled">-dropenabled</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-dropcmd">-dropcmd</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-dropenabled">-dropenabled</A></TD>
 </TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-dropovercmd">-dropovercmd</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-dropovermode">-dropovermode</A></TR>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-droptypes">-droptypes</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-droptypes">-droptypes</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-linesfill">-linesfill</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-linestipple">-linestipple</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-linesfill">-linesfill</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-linestipple">-linestipple</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-opencmd">-opencmd</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-padx">-padx</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-opencmd">-opencmd</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-padx">-padx</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-redraw">-redraw</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="#-showlines">-showlines</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-redraw">-redraw</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-selectcommand">-selectcommand</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-showlines">-showlines</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TD>
+</TR>
 </TABLE></DD>
 </DL>
 <DL>
@@ -366,8 +368,8 @@ Specifies a stipple bitmap for the lines between nodes.
 <DL><DT><A NAME="-opencmd"><B>-opencmd</B></A></DT>
 <DD>
 
-Specifies a command to be called when user open a node. The
-opened node is appended to the command.
+Specifies a command to be called when the user opens a node. The path
+of the tree widget and the opened node are appended to the command.
 
 </DD>
 </DL>
@@ -383,6 +385,15 @@ Specifies distance between image or window and text of the nodes.
 
 Specifies wether or not the tree should be redrawn when entering idle.
 Set it to false if you call <B>update</B> while modifying the tree.
+
+</DD>
+</DL>
+<DL><DT><A NAME="-selectcommand"><B>-selectcommand</B></A></DT>
+<DD>
+
+Specifies a command to be called when the selection is changed. The
+path of the tree widget and the selected nodes are appended to the
+command.
 
 </DD>
 </DL>
@@ -559,6 +570,13 @@ Specifies wether or not the children of the node should be drawn.
 
 </DD>
 </DL>
+<DL><DT><A NAME="Node-selectable"><B>-selectable</B></A></DT>
+<DD>
+
+Specifies if the node can be selected or not.
+
+</DD>
+</DL>
 <DL><DT><A NAME="Node-text"><B>-text</B></A></DT>
 <DD>
 
@@ -662,17 +680,27 @@ Arrange the scrolling area to make <I>node</I> visible.
 
 Modifies the list of selected nodes following <I>cmd</I>:
 <DL>
-<DT><B>clear</B>
-<DD>remove all nodes of the selection.
-<DT><B>set</B>
-<DD>set the selection to all nodes in <I>arg</I>
 <DT><B>add</B>
-<DD>add all nodes of <I>arg</I> in the selection
-<DT><B>remove</B>
-<DD>remove all nodes of <I>arg</I> of the selection
+<DD>Adds all nodes in <I>arg</I> to the selection.
+<DT><B>clear</B>
+<DD>Removes all nodes from the selection.
 <DT><B>get</B>
-<DD>return the current selected nodes
+<DD>Returns a list containing the indices of current selected nodes.
+<DT><B>includes</B>
+<DD>Tests if the specified node is selected. Returns true if the answer is yes, and false else.
+<DT><B>range</B>
+<DD>Sets the selection to all nodes between the two specified ones.
+<DT><B>remove</B>
+<DD>Removes all nodes in <I>arg</I> from the selection.
+<DT><B>set</B>
+<DD>Sets the selection to all nodes in <I>arg</I>.
+<DT><B>toggle</B>
+<DD>Toggles the selection status of all nodes in <I>arg</I>.
 </DL>
+
+The subcommands <B>add</B>, <B>range</B>, and <B>set</B> silently
+ignore nodes which are declared unselectable. See the node option
+<a href="#Node-selectable">-selectable</a> to influence this.
 
 </DD></DL>
 <DL><DT><A NAME="visible"><I>pathName</I> <B>visible</B></A>
