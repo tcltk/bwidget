@@ -40,7 +40,7 @@ namespace eval ProgressDlg {
 #  Command ProgressDlg::create
 # ------------------------------------------------------------------------------
 proc ProgressDlg::create { path args } {
-    array set maps [list ProgessDlg {} :cmd {} .frame.msg {} .frame.pb {}]
+    array set maps [list ProgressDlg {} :cmd {} .frame.msg {} .frame.pb {}]
     array set maps [Widget::parseArgs ProgressDlg $args]
     
     eval Dialog::create $path $maps(:cmd) -image [Bitmap::get hourglass] \
