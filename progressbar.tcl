@@ -12,7 +12,7 @@
 
 namespace eval ProgressBar {
     Widget::declare ProgressBar {
-        {-type        Enum       normal     0 {normal incremental infinite}}
+        {-type        Enum       normal     0 {normal incremental infinite nonincremental_infinite}}
         {-maximum     Int        100        0 "%d >= 0"}
         {-background  TkResource ""         0 frame}
         {-foreground  TkResource blue       0 label}
@@ -148,49 +148,39 @@ proc ProgressBar::_modify { path args } {
          [set val [GlobalVar::getvar $_widget($path,var)]] < 0 } {
         catch {place forget $path.bar}
     } else {
-        place $path.bar -relx 0 -rely 0 -relwidth 1 -relheight 1
-        set type [Widget::getoption $path -type]
-        if { $val != 0 && [string compare $type "normal"] } {
-            set val [expr {$val+$_widget($path,val)}]
-        }
-        set _widget($path,val) $val
-        set max [Widget::getoption $path -maximum]
-        set bd  [expr {2*[$path.bar cget -bd]}]
-        set w   [winfo width  $path.bar]
-        set h   [winfo height $path.bar]
-        if { ![string compare $type "infinite"] } {
-            if { $val > $max } {
-                set _widget($path,dir) [expr {-$_widget($path,dir)}]
-                set val 0
-                set _widget($path,val) 0
-            }
-            if { $val <= $max/2.0 } {
-                set dx0 0.0
-                set dx1 [expr {double($val)/$max}]
-            } else {
-                set dx1 [expr {double($val)/$max}]
-                set dx0 [expr {$dx1-0.5}]
-            }
-            if { $_widget($path,dir) == 1 } {
-                set x0 $dx0
-                set x1 $dx1
-            } else {
-                set x0 [expr {1-$dx1}]
-                set x1 [expr {1-$dx0}]
-            }
-            if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
-                $path.bar coords rect [expr {$x0*$w}] 0 [expr {$x1*$w}] $h
-            } else {
-                $path.bar coords rect 0 [expr {$h-$x0*$h}] $w [expr {$x1*$h}]
-            }
-        } else {
-            if { $val > $max } {set val $max}
-            if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
-                $path.bar coords rect -1 0 [expr {$val*$w/$max}] $h
-            } else {
-                $path.bar coords rect 0 [expr {$h+1}] $w [expr {$h*($max-$val)}]
-            }
-        }
+	    place $path.bar -relx 0 -rely 0 -relwidth 1 -relheight 1
+	    set type [Widget::getoption $path -type]
+	    if { $val != 0 && [string compare $type "normal"] && [string compare $type "nonincremental_infinite"]} {
+		set val [expr {$val+$_widget($path,val)}]
+	    }
+	    set _widget($path,val) $val
+	    set max [Widget::getoption $path -maximum]
+	    set bd  [expr {2*[$path.bar cget -bd]}]
+	    set w   [winfo width  $path.bar]
+	    set h   [winfo height $path.bar]
+	    if { ![string compare $type "infinite"] || ![string compare $type "nonincremental_infinite"]} {
+		# JDC: New infinite behaviour
+		set tval [expr {$val % $max}]
+		if { $tval < ($max / 2.0) } {
+		    set x0 [expr {double($tval) / double($max) * 1.5}]
+		} else {
+		    set x0 [expr {(1.0 - (double($tval) / double($max))) * 1.5}]
+		}
+		set x1 [expr {$x0 + 0.25}]
+		if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
+		    $path.bar coords rect [expr {$x0*$w}] 0 [expr {$x1*$w}] $h
+		} else {
+		    $path.bar coords rect 0 [expr {$h-$x0*$h}] $w [expr {$x1*$h}]
+		}
+		
+	    } else {
+		if { $val > $max } {set val $max}
+		if { ![string compare [Widget::getoption $path -orient] "horizontal"] } {
+		    $path.bar coords rect -1 0 [expr {$val*$w/$max}] $h
+		} else {
+		    $path.bar coords rect 0 [expr {$h+1}] $w [expr {$h*($max-$val)}]
+		}
+	    }
     }
     if {![Widget::cget $path -idle]} {
         update
