@@ -21,6 +21,12 @@
  <I>value</I>
  <I>list</I>
 </DD>
+<DD>BWidget::<A HREF="#bindMouseWheel"><B>bindMouseWheel</B></A>
+ <I>widget</I>
+</DD>
+<DD>BWidget::<A HREF="#classes"><B>classes</B></A>
+ <I>class</I>
+</DD>
 <DD>BWidget::<A HREF="#clonename"><B>clonename</B></A>
  <I>menu</I>
 </DD>
@@ -39,6 +45,12 @@
  <I>option</I>
  <I>path</I>
 </DD>
+<DD>BWidget::<A HREF="#inuse"><B>inuse</B></A>
+ <I>class</I>
+</DD>
+<DD>BWidget::<A HREF="#library"><B>library</B></A>
+ <I>class</I> ?<i>class ...</i>?
+</DD>
 <DD>BWidget::<A HREF="#lreorder"><B>lreorder</B></A>
  <I>list</I>
  <I>neworder</I>
@@ -51,6 +63,12 @@
  <I>w</I>
  <I>h</I>
  ?<I>arg...</I>?
+</DD>
+<DD>BWidget::<A HREF="#write"><B>write</B></A>
+ <I>filename</I> ?<i>mode</i>?
+</DD>
+<DD>BWidget::<A HREF="#wrongNumArgsString"><B>wrongNumArgsString</B></A>
+ <I>string</I>
 </DD>
 </DL>
 <BR><HR WIDTH="100%"><BR>
@@ -80,6 +98,19 @@ Description text
 Return a proper error string for a <i>value</i> of <i>type</i> that doesn't
 match <i>list</i>.
 </DD></DL>
+
+<DL><DT><A NAME="bindMouseWheel">BWidget::<B>bindMouseWheel</B></A>
+ <I>widget</I>
+</DT><DD>
+    Bind the given <i>widget</i> with the standard mouse wheel bindings.
+</DD></DL>
+
+<DL><DT><A NAME="classes">BWidget::<B>classes</B></A>
+ <I>class</I>
+</DT><DD>
+    Returns a list of classes needed by the given <i>class</i>.
+</DD></DL>
+
 <DL><DT><A NAME="clonename">BWidget::<B>clonename</B></A>
  <I>menu</I>
 </DT><DD>
@@ -108,6 +139,24 @@ Description text
 </DT><DD>
 Description text
 </DD></DL>
+
+<DL><DT><A NAME="inuse">BWidget::<B>inuse</B></A>
+ <I>class</I>
+</DT><DD>
+    Returns true or false if the given <i>class</i> is being used by the
+    current running program.
+</DD></DL>
+
+<DL><DT><A NAME="library">BWidget::<B>library</B></A>
+ <I>class</I>
+ ?<i>class ...</i>?
+</DT><DD>
+    Returns a string of code that contains all the libraries needed to
+    use the widgets given by <i>class</i>.  Each class's code and the
+    code of its dependent classes is appended to the string and returned.
+    This is mostly useful for saving BWidgets to another project.
+</DD></DL>
+
 <DL><DT><A NAME="lreorder">BWidget::<B>lreorder</B></A>
  <I>list</I>
  <I>neworder</I>
@@ -153,4 +202,27 @@ the screen is controlled by additional arguments:
  placed either above or below the reference widget with the opposite
  placement being attempted if the newly placed widget will not be visible.
 </DL>
+</DL>
+
+<DL><DT><A NAME="write">BWidget::<B>write</B></A>
+ <I>filename</I>
+ ?<i>mode</i>?
+</DT><DD>
+    Writes the currently used set of BWidget class code to the given
+    <i>filename</i>.  All the code necessary to run the BWidgets
+    currently in use is written to the file.  This is mostly useful
+    for saving BWidget code to another project as a single file instead
+    of the entire BWidget package.
+</DD></DL>
+
+<DL>
+<DT><A NAME="wrongNumArgsString">BWidget::<B>wrongNumArgsString</B></A>
+ <I>string</I>
+</DT>
+<DD>
+    Returns a standard error string for the wrong number of arguments.
+    <i>string</i> is appended to the standard string.
+</DD>
+</DL>
+
 </BODY></HTML>

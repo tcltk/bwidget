@@ -17,24 +17,24 @@
 <TD>&nbsp;&nbsp;<A HREF="options.htm#M-borderwidth">-borderwidth or -bd</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-cursor">-cursor</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-highlightbackground">-highlightbackground</A></TR>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-cursor">-cursor</A></TD>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-highlightbackground">-highlightbackground</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-highlightcolor">-highlightcolor</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-highlightthickness">-highlightthickness</A></TR>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-highlightcolor">-highlightcolor</A></TD>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-highlightthickness">-highlightthickness</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-relief">-relief</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-selectbackground">-selectbackground</A></TR>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-relief">-relief</A></TD>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-selectbackground">-selectbackground</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-selectforeground">-selectforeground</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-takefocus">-takefocus</A></TR>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-selectforeground">-selectforeground</A></TD>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-takefocus">-takefocus</A></TD>
 </TR>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-xscrollcommand">-xscrollcommand</A></TR>
-<TD>&nbsp;&nbsp;<A HREF="options.htm#M-yscrollcommand">-yscrollcommand</A></TR>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-xscrollcommand">-xscrollcommand</A></TD>
+    <TD>&nbsp;&nbsp;<A HREF="options.htm#M-yscrollcommand">-yscrollcommand</A></TD>
 </TR>
 </TABLE></DD>
 </DL>
@@ -44,6 +44,13 @@
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-closecmd">-closecmd</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="#-crossfill">-crossfill</A></TD>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-crossclosebitmap">-crossclosebitmap</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-crosscloseimage">-crosscloseimage</A></TD>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-crossopenbitmap">-crossopenbitmap</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-crossopenimage">-crossopenimage</A></TD>
 </TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-deltax">-deltax</A></TD>
@@ -83,13 +90,15 @@
 </TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-selectcommand">-selectcommand</A></TD>
-<TD>&nbsp;&nbsp;<A HREF="#-showlines">-showlines</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-selectfill">-selectfill</A></TD>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-showlines">-showlines</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TD>
 </TR>
 </TABLE></DD>
 </DL>
+
 <DL>
 <DT><I><A HREF="#wc">WIDGET COMMAND</A></I></DT>
 <DD><I>pathName</I> <A HREF="#bindImage"><B>bindImage</B></A>
@@ -166,6 +175,9 @@
  <I>cmd</I>
  ?<I>arg...</I>?
 </DD>
+<DD><I>pathName</I> <A HREF="#toggle"><B>toggle</B></A>
+ <I>node</I>
+</DD>
 <DD><I>pathName</I> <A HREF="#visible"><B>visible</B></A>
  <I>node</I>
 </DD>
@@ -207,6 +219,34 @@ closed node is appended to the command.
     <DD>
     Specifies a foreground color for the cross bitmap.
     </DD>
+</DL>
+
+<DL><DT><A NAME="-crossclosebitmap"><B>-crossclosebitmap</B></A></DT>
+<DD>
+    Specifies a bitmap to be displayed in place of the standard cross
+    when a node is closed.
+</DD>
+</DL>
+
+<DL><DT><A NAME="-crosscloseimage"><B>-crosscloseimage</B></A></DT>
+<DD>
+    Specifies an image to be displayed in place of the standard cross
+    when a node is closed.  Overrides the -crossclosebitmap option.
+</DD>
+</DL>
+
+<DL><DT><A NAME="-crossopenbitmap"><B>-crossopenbitmap</B></A></DT>
+<DD>
+    Specifies a bitmap to be displayed in place of the standard cross
+    when a node is open.
+</DD>
+</DL>
+
+<DL><DT><A NAME="-crossopenimage"><B>-crossopenimage</B></A></DT>
+<DD>
+    Specifies an image to be displayed in place of the standard cross
+    when a node is open.  Overrides the -crossopenbitmap option.
+</DD>
 </DL>
 
 <DL><DT><A NAME="-deltax"><B>-deltax</B></A></DT>
@@ -408,6 +448,14 @@ command.
 
 </DD>
 </DL>
+
+<DL><DT><A NAME="-selectfill"><B>-selectfill</B></A></DT>
+<DD>
+    If true, the selection box will be drawn across the entire tree from
+    left-to-right instead of just around the item text.
+</DD>
+</DL>
+
 <DL><DT><A NAME="-showlines"><B>-showlines</B></A></DT>
 <DD>
 
@@ -423,6 +471,15 @@ Specifies the desired width for the tree in units of 8 pixels.
 </DD>
 </DL>
 <HR WIDTH="50%"><BR>
+
+<B><A NAME="nodes">NODE NAMES</A></B><BR>
+<p>
+Certain special characters in node names are automatically substituted
+by the tree during operation.  These characters are <b>&amp; | ^ !</b>.
+They are all substituted with a <b>_</b> character.  This is only to
+avoid errors because the characters are special to the tree widget.
+</p>
+
 <B><A NAME="wc">WIDGET COMMAND</A></B><BR>
 <DL><DT><A NAME="bindImage"><I>pathName</I> <B>bindImage</B></A>
  <I>event</I>
@@ -433,6 +490,10 @@ This command associates a command to execute whenever the event
 sequence given by <I>event</I> occurs on the image of a node.
 The node idenfier on which the event occurs is appended to the command.
 
+<p>
+Any occurrence of <b>%W</b> in script is substituted with the path of the tree.
+</p>
+
 </DD></DL>
 <DL><DT><A NAME="bindText"><I>pathName</I> <B>bindText</B></A>
  <I>event</I>
@@ -442,6 +503,10 @@ The node idenfier on which the event occurs is appended to the command.
 This command associates a command to execute whenever the event
 sequence given by <I>event</I> occurs on the label of a node.
 The node idenfier on which the event occurs is appended to the command.
+
+<p>
+Any occurrence of <b>%W</b> in script is substituted with the path of the tree.
+</p>
 
 </DD></DL>
 <DL><DT><A NAME="cget"><I>pathName</I> <B>cget</B></A>
@@ -542,6 +607,12 @@ number of the item in the order of insertion.
 
 
 <P>
+<DL><DT><A NAME="Node-anchor"><B>-anchor</B></A></DT>
+<DD>
+    Specifies the anchor of the image or window of the node.  Defaults to w.
+</DD>
+</DL>
+
 <DL><DT><A NAME="Node-data"><B>-data</B></A></DT>
 <DD>
 
@@ -757,6 +828,15 @@ ignore nodes which are declared unselectable. See the node option
 <a href="#Node-selectable">-selectable</a> to influence this.
 
 </DD></DL>
+
+</DD></DL>
+
+<DL><DT><A NAME="toggle"><I>pathName</I> <B>toggle</B></A>
+ <I>node</I>
+</DT><DD>
+    Toggle the open/close status of the given <i>node</i>.
+</DD></DL>
+
 <DL><DT><A NAME="visible"><I>pathName</I> <B>visible</B></A>
  <I>node</I>
 </DT><DD>
@@ -778,4 +858,19 @@ Standard command to enable horizontal scrolling of <I>pathName</I>.
 Standard command to enable vertical scrolling of <I>pathName</I>.
 
 </DD></DL>
+
+<B><A NAME="nodes">BINDINGS</A></B><BR>
+
+<p>
+A <b>&lt;&lt;TreeSelect&gt;&gt;</b> virtual event is generated any time the
+selection in the tree changes.  This is the default behavior of an
+item in the tree, but it can be overridden with the bindText or
+bindImage command.  If the button 1 binding is overridden, this event may
+not be generated.
+</p>
+
+<p>
+The tree has all the standard mouse wheel bindings when it has focus.
+</p>
+
 </BODY></HTML>
