@@ -49,6 +49,7 @@ namespace eval SelectFont {
     # loadfont process if desired.
     if { [string equal $::tcl_platform(platform) "windows"] } {
 	set presetVariable [list	\
+		7x14			\
 		Arial			\
 		{Arial Narrow}		\
 		{Lucida Sans}		\
@@ -58,7 +59,6 @@ namespace eval SelectFont {
 		]
 	set presetFixed    [list	\
 		6x13			\
-		7x14			\
 		{Courier New}		\
 		FixedSys		\
 		Terminal		\
