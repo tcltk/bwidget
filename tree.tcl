@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.32 2001/06/22 01:56:50 ericm Exp $
+#  $Id: tree.tcl,v 1.33 2001/08/08 20:58:21 andreas_kupries Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1794,7 +1794,24 @@ proc Tree::_keynav {which win} {
 	    }
 	    set open [$win itemcget $node -open]
 	    if { [llength [$win nodes $node]] } {
+
+		# Toggle the open status of the chosen node.
+
 		$win itemconfigure $node -open [expr {$open?0:1}]
+
+		if {$open} {
+		    # Node was open, is now closed. Call the close-cmd
+
+		    if { [set cmd [Widget::getoption $win -closecmd]] != "" } {
+			uplevel \#0 $cmd $node
+		    }
+		} else {
+		    # Node was closed, is now open. Call the open-cmd
+
+		    if { [set cmd [Widget::getoption $win -opencmd]] != "" } {
+			uplevel \#0 $cmd $node
+		    }
+                }
 	    }
 	}
     }
