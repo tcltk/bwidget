@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.12 2000/02/28 16:19:54 sven Exp $
+#  $Id: tree.tcl,v 1.13 2000/02/28 16:46:43 sven Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -701,8 +701,8 @@ proc Tree::allnodes { path } {
 
     update
     set result ""
-    foreach element [$path:cmd find withtag node] {
-        lappend result [string range [$path:cmd gettags $element] 7 end]
+    foreach element [$path.c find withtag node] {
+        lappend result [string range [$path.c gettags $element] 7 end]
     }
     return $result
 }
