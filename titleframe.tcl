@@ -16,6 +16,7 @@ namespace eval TitleFrame {
         {-borderwidth TkResource 2      0 frame}
         {-font        TkResource ""     0 label}
         {-foreground  TkResource ""     0 label}
+        {-state       TkResource ""     0 label}
         {-background  TkResource ""     0 frame}
         {-text        String     ""     0}
         {-ipad        Int        4      0 "%d >=0"}
@@ -28,6 +29,7 @@ namespace eval TitleFrame {
 
     Widget::addmap TitleFrame "" :cmd {-background {}}
     Widget::addmap TitleFrame "" .l   {-background {} -foreground {} -text {} -font {}}
+    Widget::addmap TitleFrame "" .l   {-state {}}
     Widget::addmap TitleFrame "" .p   {-background {}}
     Widget::addmap TitleFrame "" .b   {-background {} -relief {} -borderwidth {}}
     Widget::addmap TitleFrame "" .b.p {-background {}}

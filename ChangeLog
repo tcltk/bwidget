@@ -1,3 +1,9 @@
+2000-05-08  Dan Kuchler  <kuchler@scriptics.com>
+
+        * titleframe.tcl: Added a '-state' flag that is associated to the
+        state of the label.  Now that labels can be disabled (in 8.3 and
+        beyond) this allows for the titleframe to have a disabled appearence.
+
 2000-05-02  Eric Melski  <ericm@scriptics.com>
 
 	* tree.tcl: Did some fancy focus footwork [Bug: 4491].  Now you
