@@ -103,83 +103,79 @@ assumes that dragged data type is valid for the drop target.
 <BR><BR>
 
 <TABLE BORDER CELLSPACING=1 CELLPADDING=4>
-<TR><TD WIDTH="18%" VALIGN="TOP">
-<P ALIGN="CENTER"><FONT SIZE=2>Event</FONT></TD>
-<TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P ALIGN="CENTER">Old status</FONT></TD>
-<TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P ALIGN="CENTER">Action</FONT></TD>
-<TD WIDTH="24%" VALIGN="TOP">
-<FONT SIZE=2><P ALIGN="CENTER">New status</FONT></TD>
+<TR>
+<TD WIDTH="18%" VALIGN="TOP" ALIGN="CENTER">Event</TD>
+<TD WIDTH="10%" VALIGN="TOP" ALIGN="CENTER">Old status</TD>
+<TD WIDTH="48%" VALIGN="TOP" ALIGN="CENTER">Action</TD>
+<TD WIDTH="24%" VALIGN="TOP" ALIGN="CENTER">New status</TD>
 </TR>
 <TR><TD WIDTH="18%" VALIGN="TOP" ROWSPAN=2>
-<FONT SIZE=2><P>&lt;Enter&gt;</FONT></TD>
+<FONT SIZE=2>&lt;Enter&gt;</FONT></TD>
 <TD WIDTH="10%" VALIGN="TOP" ROWSPAN=2>
-<FONT SIZE=2><P>-</FONT></TD>
+<FONT SIZE=2>-</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>if DropSite has <B>dropovercmd</B>, call it with <I>enter</I></FONT></TD>
+<FONT SIZE=2>if DropSite has <B>dropovercmd</B>, call it with <I>enter</I></FONT></TD>
 <TD WIDTH="24%" VALIGN="TOP">
-<FONT SIZE=2><P>result of <B>dropovercmd</B></FONT></TD>
+<FONT SIZE=2>result of <B>dropovercmd</B></FONT></TD>
 </TR>
 <TR><TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>else</FONT></TD>
+<FONT SIZE=2>else</FONT></TD>
 <TD WIDTH="24%" VALIGN="TOP">
-<FONT SIZE=2><P>1</FONT></TD>
+<FONT SIZE=2>1</FONT></TD>
 </TR>
 <TR><TD WIDTH="18%" VALIGN="TOP" ROWSPAN=2>
-<FONT SIZE=2><P>&lt;Motion&gt;</FONT></TD>
+<FONT SIZE=2>&lt;Motion&gt;</FONT></TD>
 <TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>0 or 1</FONT></TD>
+<FONT SIZE=2>0 or 1</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">&nbsp;</TD>
 <TD WIDTH="24%" VALIGN="TOP">
-<FONT SIZE=2><P>unchanged</FONT></TD>
+<FONT SIZE=2>unchanged</FONT></TD>
 </TR>
 <TR><TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>2 or 3</FONT></TD>
+<FONT SIZE=2>2 or 3</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>call <B>dropovercmd</B> with <I>motion</I></FONT></TD>
+<FONT SIZE=2>call <B>dropovercmd</B> with <I>motion</I></FONT></TD>
 <TD WIDTH="24%" VALIGN="TOP">
-<FONT SIZE=2><P>result of <B>dropovercmd</B></FONT></TD>
+<FONT SIZE=2>result of <B>dropovercmd</B></FONT></TD>
 </TR>
 <TR><TD WIDTH="18%" VALIGN="TOP" ROWSPAN=2>
-<FONT SIZE=2><P>&lt;Leave&gt;</P>
-</FONT><P>&nbsp;</TD>
+<FONT SIZE=2>&lt;Leave&gt;</FONT>&nbsp;</TD>
 <TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>0 or 1</FONT></TD>
+<FONT SIZE=2>0 or 1</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">&nbsp;</TD>
 <TD WIDTH="24%" VALIGN="TOP">
-<FONT SIZE=2><P>-</FONT></TD>
+<FONT SIZE=2>-</FONT></TD>
 </TR>
 <TR><TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>2 or 3</FONT></TD>
+<FONT SIZE=2>2 or 3</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>call <B>dropovercmd</B> with <I>leave</I></FONT></TD>
+<FONT SIZE=2>call <B>dropovercmd</B> with <I>leave</I></FONT></TD>
 <TD WIDTH="24%" VALIGN="TOP">
-<FONT SIZE=2><P>-</FONT></TD>
+<FONT SIZE=2>-</FONT></TD>
 </TR>
 <TR><TD WIDTH="18%" VALIGN="TOP" ROWSPAN=4>
-<FONT SIZE=2><P>&lt;Drop&gt;</FONT></TD>
+<FONT SIZE=2>&lt;Drop&gt;</FONT></TD>
 <TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>0</FONT></TD>
+<FONT SIZE=2>0</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>call <B>dragendcmd</B> of drag source</FONT></TD>
+<FONT SIZE=2>call <B>dragendcmd</B> of drag source</FONT></TD>
 <TD WIDTH="24%" VALIGN="TOP" ROWSPAN=4>
-<FONT SIZE=2><P>-</FONT></TD>
+<FONT SIZE=2>-</FONT></TD>
 </TR>
 <TR><TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>1</FONT></TD>
+<FONT SIZE=2>1</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>call <B>dropcmd</B> and call <B>dragendcmd</B> of drag source</FONT></TD>
+<FONT SIZE=2>call <B>dropcmd</B> and call <B>dragendcmd</B> of drag source</FONT></TD>
 </TR>
 <TR><TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>2</FONT></TD>
+<FONT SIZE=2>2</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>call <B>dropovercmd</B> with <I>leave</I> and call <B>dragendcmd</B> of drag source</FONT></TD>
+<FONT SIZE=2>call <B>dropovercmd</B> with <I>leave</I> and call <B>dragendcmd</B> of drag source</FONT></TD>
 </TR>
 <TR><TD WIDTH="10%" VALIGN="TOP">
-<FONT SIZE=2><P>3</FONT></TD>
+<FONT SIZE=2>3</FONT></TD>
 <TD WIDTH="48%" VALIGN="TOP">
-<FONT SIZE=2><P>call <B>dropcmd</B> and call <B>dragendcmd</B> of drag source</FONT></TD>
+<FONT SIZE=2>call <B>dropcmd</B> and call <B>dragendcmd</B> of drag source</FONT></TD>
 </TR>
 </TABLE>
 <BR>
@@ -196,7 +192,7 @@ For each type, <I>oplist</I> is a list
 modifier keys for these operations.
 <I>descops</I> describe an operation. It can be a predefined operations (<B>copy</B>,
 <B>move</B> or <B>link</B>) or a new user defined operation, of the form {<I>subop</I>
-<B>baseop</I> ?<I>bitmap</I>?}.
+<B>baseop</B> ?<I>bitmap</I>?}.
 <I>subop</I> is the name given to the sub operation, <I>baseop</I> is the name of the
 base operation (<B>copy</B>, <B>move</B> or <B>link</B>) and <I>bitmap</I> is a bitmap
 to display for the operation.
