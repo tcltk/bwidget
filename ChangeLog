@@ -1,7 +1,12 @@
+2004-12-01  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* notebook.tcl: speed improvements via array hashing for many tabs
+	(lester).
+
 2004-10-09  Rolf Ade  <pointsman@users.sourceforge.net>
 
-        * mainframe.tcl: (MainFrame::_parse_accelerator) made
-          accelerator Ctrl-f in -menu definitions work. [Bug 1043107] 
+	* mainframe.tcl: (MainFrame::_parse_accelerator) made
+	  accelerator Ctrl-f in -menu definitions work. [Bug 1043107] 
 
 2004-09-24  Jeff Hobbs  <jeffh@ActiveState.com>
 
