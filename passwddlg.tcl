@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: passwddlg.tcl,v 1.2 2000/02/23 18:54:06 ericm Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -17,7 +17,7 @@ namespace eval PasswdDlg {
     Dialog::use
     LabelEntry::use
 
-    Widget::bwinclude PasswdDlg Dialog "" \
+    Widget::bwinclude PasswdDlg Dialog :cmd \
         remove     {-image -bitmap -side -default -cancel -separator} \
         initialize {-modal local -anchor c}
 
@@ -77,7 +77,7 @@ proc PasswdDlg::create { path args } {
         okcancel  { set lbut {ok cancel} ; set defb 0; set canb 1 }
     }
 
-    eval Dialog::create $path [Widget::subcget "$path#PasswdDlg" ""] \
+    eval Dialog::create $path [Widget::subcget "$path#PasswdDlg" :cmd] \
         -image [Bitmap::get passwd] -side bottom -default $defb -cancel $canb
     foreach but $lbut {
         if { $but == "ok" && $cmd != "" } {
