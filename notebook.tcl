@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.13 2001/12/29 01:40:10 hobbs Exp $
+#  $Id: notebook.tcl,v 1.14 2002/04/25 18:11:22 andreas_kupries Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -738,8 +738,6 @@ proc NoteBook::_draw_page { path page create } {
     set xBevel		[Widget::cget $path -tabbevelsize]
 
     if { $data(select) != $page } {
-	# Non-selected pages have tabs 2 pixels lower than the selected one
-	incr top 2
 	if { $pos == 0 } {
 	    # The leftmost page is a special case -- it is drawn with its
 	    # tab a little indented.  To achieve this, we incr xd.  We also
@@ -747,6 +745,9 @@ proc NoteBook::_draw_page { path page create } {
 	    incr xd 2
 	    incr textOffsetX -2
 	}
+    } else {
+	# The selected page's text is raised higher than the others
+	incr top -2
     }
 
     # Precompute some coord values that we use a lot

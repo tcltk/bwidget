@@ -1,3 +1,9 @@
+2002-04-25  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* notebook.tcl: Accepted patch for bug #532246, fixing the
+	  appearance of the tabs so that text is always visible
+	  completely.
+
 2002-01-26  Pat Thoyts  <patthoyts@users.sourceforge.net>
 
 	* utils.tcl: Modified BWidget::place to support multiple screens
