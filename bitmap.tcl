@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  bitmap.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: bitmap.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: bitmap.tcl,v 1.2 1999/11/05 03:38:54 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Bitmap::get
@@ -79,7 +79,7 @@ proc Bitmap::_init { } {
     variable _bmp
     variable _types
 
-    set path [list "." [file join $env(BWIDGET_LIBRARY) images]]
+    set path [list "." [file join $::BWIDGET::LIBRARY images]]
     set supp [image types]
     foreach {type ext} $_types {
         if { [lsearch $supp $type] != -1} {

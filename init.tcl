@@ -15,7 +15,7 @@ if { $tcl_platform(platform) == "windows" } {
     option add *MainFrame.separator     none   widgetDefault
 }
 
-option read [file join $env(BWIDGET_LIBRARY) "lang" "en.rc"]
+option read [file join $::BWIDGET::LIBRARY "lang" "en.rc"]
 
 bind all <Key-Tab>       {focus [Widget::focusNext %W]}
 bind all <Shift-Key-Tab> {focus [Widget::focusPrev %W]}

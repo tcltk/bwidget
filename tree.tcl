@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.4 1999/10/22 18:16:08 ericm Exp $
+#  $Id: tree.tcl,v 1.5 1999/11/05 03:38:55 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -922,9 +922,9 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
 
     if { [string compare $dc "never"] && ($len || ![string compare $dc "allways"]) } {
         if { $exp } {
-            set bmp [file join $env(BWIDGET_LIBRARY) "images" "minus.xbm"]
+            set bmp [file join $::BWIDGET::LIBRARY "images" "minus.xbm"]
         } else {
-            set bmp [file join $env(BWIDGET_LIBRARY) "images" "plus.xbm"]
+            set bmp [file join $::BWIDGET::LIBRARY "images" "plus.xbm"]
         }
         $path:cmd create bitmap $x0 $y0 \
             -bitmap     @$bmp \
@@ -1015,9 +1015,9 @@ proc Tree::_update_nodes { path } {
 
             if { [string compare $dc "never"] && ($len || ![string compare $dc "allways"]) } {
                 if { $exp } {
-                    set bmp [file join $env(BWIDGET_LIBRARY) "images" "minus.xbm"]
+                    set bmp [file join $::BWIDGET::LIBRARY "images" "minus.xbm"]
                 } else {
-                    set bmp [file join $env(BWIDGET_LIBRARY) "images" "plus.xbm"]
+                    set bmp [file join $::BWIDGET::LIBRARY "images" "plus.xbm"]
                 }
                 if { $idc == "" } {
                     $path:cmd create bitmap [expr {$x0-$deltax-5}] $y0 \

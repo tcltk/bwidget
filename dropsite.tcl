@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dropsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dropsite.tcl,v 1.1.1.1 1999/08/03 20:20:23 ericm Exp $
+#  $Id: dropsite.tcl,v 1.2 1999/11/05 03:38:54 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DropSite::include
@@ -63,9 +63,9 @@ namespace eval DropSite {
              copy,mod  shift   \
              move,mod  control \
              link,mod  alt     \
-             copy,img  @[file join $env(BWIDGET_LIBRARY) "images" "opcopy.xbm"] \
-             move,img  @[file join $env(BWIDGET_LIBRARY) "images" "opmove.xbm"] \
-             link,img  @[file join $env(BWIDGET_LIBRARY) "images" "oplink.xbm"]]
+             copy,img  @[file join $::BWIDGET::LIBRARY "images" "opcopy.xbm"] \
+             move,img  @[file join $::BWIDGET::LIBRARY "images" "opmove.xbm"] \
+             link,img  @[file join $::BWIDGET::LIBRARY "images" "oplink.xbm"]]
 
     bind DragTop <KeyPress-Shift_L>     {DropSite::_update_operation [expr %s | 1]}
     bind DragTop <KeyPress-Shift_R>     {DropSite::_update_operation [expr %s | 1]}

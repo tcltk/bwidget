@@ -17,7 +17,7 @@ proc DemoDlg::create { nb } {
     set titf4 [TitleFrame $frame.titf4 -text "Other dialog"]
 
     set subf [$titf1 getframe]
-    set cmd  {option read [file join $env(BWIDGET_LIBRARY) "lang" $DemoDlg::resources.rc]}
+    set cmd  {option read [file join $::BWIDGET::LIBRARY) "lang" $DemoDlg::resources.rc]}
     set rad1 [radiobutton $subf.rad1 -text "English" \
                   -variable DemoDlg::resources -value en \
                   -command  $cmd]

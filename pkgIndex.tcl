@@ -36,7 +36,8 @@ package ifneeded BWidget 1.2.1 "\
 {widgetdoc.tcl source {Widget::generate-doc Widget::generate-widget-doc}}
 {xpm2image.tcl source {xpm-to-image}}
 }]; \
-    [list set env(BWIDGET_LIBRARY) $dir]; \
+	[list namespace eval ::BWIDGET {}]; \
+	[list set ::BWIDGET::LIBRARY $dir]; \
     [list source [file join $dir widget.tcl]]; \
     [list source [file join $dir init.tcl]]; \
     [list source [file join $dir utils.tcl]]; \
