@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.8 2002/05/09 21:01:06 andreas_kupries Exp $
+#  $Id: dynhelp.tcl,v 1.9 2002/10/14 20:54:23 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -15,6 +15,8 @@
 #     - DynamicHelp::_show_help
 #     - DynamicHelp::_init
 # ------------------------------------------------------------------------------
+
+# JDC: allow variable and ballon help at the same timees
 
 namespace eval DynamicHelp {
     Widget::declare DynamicHelp {
@@ -36,7 +38,8 @@ namespace eval DynamicHelp {
     variable _top     ".help_shell"
     variable _id      "" 
     variable _delay   600
-    variable _current ""
+    variable _current_balloon ""
+    variable _current_variable ""
     variable _saved
 
     Widget::init DynamicHelp $_top {}
@@ -45,12 +48,12 @@ namespace eval DynamicHelp {
     bind BwHelpBalloon <Motion>  {DynamicHelp::_motion_balloon motion %W %X %Y}
     bind BwHelpBalloon <Leave>   {DynamicHelp::_motion_balloon leave  %W %X %Y}
     bind BwHelpBalloon <Button>  {DynamicHelp::_motion_balloon button %W %X %Y}
-    bind BwHelpBalloon <Destroy> {if {[info exists DynamicHelp::_registered(%W)]} {unset DynamicHelp::_registered(%W)}}
+    bind BwHelpBalloon <Destroy> {if {[info exists DynamicHelp::_registered(%W,balloon)]} {unset DynamicHelp::_registered(%W,balloon)}}
 
     bind BwHelpVariable <Enter>   {DynamicHelp::_motion_info %W}
     bind BwHelpVariable <Motion>  {DynamicHelp::_motion_info %W}
     bind BwHelpVariable <Leave>   {DynamicHelp::_leave_info  %W}
-    bind BwHelpVariable <Destroy> {if {[info exists DynamicHelp::_registered(%W)]} {unset DynamicHelp::_registered(%W)}}
+    bind BwHelpVariable <Destroy> {if {[info exists DynamicHelp::_registered(%W,variable)]} {unset DynamicHelp::_registered(%W,variable)}}
 
     bind BwHelpMenu <<MenuSelect>> {DynamicHelp::_menu_info select %W}
     bind BwHelpMenu <Unmap>        {DynamicHelp::_menu_info unmap  %W}
@@ -119,17 +122,17 @@ proc DynamicHelp::register { path type args } {
 
     if { [winfo exists $path] } {
         set evt  [bindtags $path]
-        set idx  [lsearch $evt "BwHelp*"]
-        set evt  [lreplace $evt $idx $idx]
         switch $type {
             balloon {
+		set idx  [lsearch $evt "BwHelpBalloon"]
+		set evt  [lreplace $evt $idx $idx]
                 set text [lindex $args 0]
                 if { $text != "" } {
-                    set _registered($path) $text
+                    set _registered($path,balloon) $text
                     lappend evt BwHelpBalloon
                 } else {
-                    if {[info exists _registered($path)]} {
-                        unset _registered($path)
+                    if {[info exists _registered($path,balloon)]} {
+                        unset _registered($path,balloon)
                     }
                 }
                 bindtags $path $evt
@@ -137,14 +140,16 @@ proc DynamicHelp::register { path type args } {
             }
 
             variable {
+		set idx  [lsearch $evt "BwHelpVariable"]
+		set evt  [lreplace $evt $idx $idx]
                 set var  [lindex $args 0]
                 set text [lindex $args 1]
                 if { $text != "" && $var != "" } {
-                    set _registered($path) [list $var $text]
+                    set _registered($path,variable) [list $var $text]
                     lappend evt BwHelpVariable
                 } else {
-                    if {[info exists _registered($path)]} { 
-                        unset _registered($path)
+                    if {[info exists _registered($path,variable)]} { 
+                        unset _registered($path,variable)
                     }
                 }
                 bindtags $path $evt
@@ -193,12 +198,24 @@ proc DynamicHelp::register { path type args } {
                 return 0
             }
         }
+        if {[info exists _registered($path,balloon)]} {
+            unset _registered($path,balloon)
+        }
+        if {[info exists _registered($path,variable)]} {
+            unset _registered($path,variable)
+        }
         if {[info exists _registered($path)]} {
             unset _registered($path)
         }
         bindtags $path $evt
         return 1
     } else {
+        if {[info exists _registered($path,balloon)]} {
+            unset _registered($path,balloon)
+        }
+	if {[info exists _registered($path,variable)]} {
+            unset _registered($path,variable)
+        }
         if {[info exists _registered($path)]} {
             unset _registered($path)
         }
@@ -214,14 +231,14 @@ proc DynamicHelp::_motion_balloon { type path x y } {
     variable _top
     variable _id
     variable _delay
-    variable _current
+    variable _current_balloon
 
-    if { $_current != $path && $type == "enter" } {
-        set _current $path
+    if { $_current_balloon != $path && $type == "enter" } {
+        set _current_balloon $path
         set type "motion"
         destroy $_top
     }
-    if { $_current == $path } {
+    if { $_current_balloon == $path } {
         if { $_id != "" } {
             after cancel $_id
             set _id ""
@@ -232,7 +249,7 @@ proc DynamicHelp::_motion_balloon { type path x y } {
             }
         } else {
             destroy $_top
-            set _current ""
+            set _current_balloon ""
         }
     }
 }
@@ -243,15 +260,15 @@ proc DynamicHelp::_motion_balloon { type path x y } {
 # ------------------------------------------------------------------------------
 proc DynamicHelp::_motion_info { path } {
     variable _registered
-    variable _current
+    variable _current_variable
     variable _saved
 
-    if { $_current != $path && [info exists _registered($path)] } {
+    if { $_current_variable != $path && [info exists _registered($path,variable)] } {
         if { ![info exists _saved] } {
-            set _saved [GlobalVar::getvar [lindex $_registered($path) 0]]
+            set _saved [GlobalVar::getvar [lindex $_registered($path,variable) 0]]
         }
-        GlobalVar::setvar [lindex $_registered($path) 0] [lindex $_registered($path) 1]
-        set _current $path
+        GlobalVar::setvar [lindex $_registered($path,variable) 0] [lindex $_registered($path,variable) 1]
+        set _current_variable $path
     }
 }
 
@@ -261,14 +278,14 @@ proc DynamicHelp::_motion_info { path } {
 # ------------------------------------------------------------------------------
 proc DynamicHelp::_leave_info { path } {
     variable _registered
-    variable _current
+    variable _current_variable
     variable _saved
 
-    if { [info exists _registered($path)] } {
-        GlobalVar::setvar [lindex $_registered($path) 0] $_saved
+    if { [info exists _registered($path,variable)] } {
+        GlobalVar::setvar [lindex $_registered($path,variable) 0] $_saved
     }
     unset _saved
-    set _current ""
+    set _current_variable ""
     
 }
 
@@ -303,7 +320,7 @@ proc DynamicHelp::_show_help { path x y } {
     variable _id
     variable _delay
 
-    if { [info exists _registered($path)] } {
+    if { [info exists _registered($path,balloon)] } {
         destroy  $_top
         toplevel $_top -relief flat \
             -bg [Widget::getoption $_top -foreground] \
@@ -314,7 +331,7 @@ proc DynamicHelp::_show_help { path x y } {
         wm transient $_top
         wm withdraw $_top
 
-        label $_top.label -text $_registered($path) \
+        label $_top.label -text $_registered($path,balloon) \
             -relief flat -bd 0 -highlightthickness 0 \
             -foreground [Widget::getoption $_top -foreground] \
             -background [Widget::getoption $_top -background] \
