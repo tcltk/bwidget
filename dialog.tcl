@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.6 2000/03/01 02:12:39 ericm Exp $
+#  $Id: dialog.tcl,v 1.7 2000/05/03 01:22:20 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -28,6 +28,7 @@ namespace eval Dialog {
 
     Widget::declare Dialog {
         {-title       String     ""       0}
+	{-geometry    String     ""       0}
         {-modal       Enum       local    0 {none local global}}
         {-bitmap      TkResource ""       1 label}
         {-image       TkResource ""       1 label}
@@ -243,14 +244,23 @@ proc Dialog::draw { path {focus ""} {overrideredirect 0} {geometry ""}} {
         pack $path.frame -padx 1m -pady 1m -fill both -expand yes
     }
 
-    if { [string equal $geometry ""] } {
+    set geom [Widget::getMegawidgetOption $path -geometry]
+    if { $geom != "" } {
+	wm geometry $path $geom
+    }
+
+    if { [string equal $geometry ""] && ($geom == "") } {
         if { [winfo exists $parent] } {
             BWidget::place $path 0 0 center $parent
         } else {
             BWidget::place $path 0 0 center
         }
     } else {
-        wm geometry $path $geometry
+	if { $geom != "" } {
+	    wm geometry $path $geom
+	} else {
+	    wm geometry $path $geometry
+	}
     }
     update idletasks
     wm overrideredirect $path $overrideredirect

@@ -1,3 +1,18 @@
+2000-05-02  Eric Melski  <ericm@scriptics.com>
+
+	* tree.tcl: Did some fancy focus footwork [Bug: 4491].  Now you
+	can do this: "Tree .t ; bind .t <Button-1> foo", and it will do
+	the right thing.  This will enable the use of proper
+	focus-on-mouse-click bindings for trees, which in turn will fix
+	the focus problem described in 4491.  In addition, I added a
+	binding to the canvas widget in the tree that redirects focus when
+	it leaves the canvas and goes to the frame, just in case.
+	
+	* dialog.tcl: Added a -geometry option, to allow the specification
+	of geometry for the dialog.  No particular care is taken to
+	validate the geometry string, so if it is bogus, you lose. [RFE:
+	5188].
+
 2000-04-27  Eric Melski  <ericm@scriptics.com>
 
 	* entry.tcl: Added smarts to handle Copy for non-editable entries
