@@ -73,13 +73,13 @@ namespace eval StatusBar {
     bind StatusBar <Destroy> [list StatusBar::_destroy %W]
 
     # PNG version has partial alpha transparency for better look
-    set pngdata {
+    variable pngdata {
 	iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAFM0aXcAAAABGdBTUEAAYagM
 	eiWXwAAAGJJREFUGJW9kVEOgCAMQzs8GEezN69fkKlbUAz2r3l5NGTA+pCU+Q
 	IA5sv39wGgZKClZGBhJMVTklRr3VNwMz04mVfQzQiEm79EkrYZycxIkq8kkv2
 	v6RFGku9TUrj8RGr9AGy6mhv2ymLwAAAAAElFTkSuQmCC
     }
-    set gifdata {
+    variable gifdata {
 	R0lGODlhDwAPAJEAANnZ2f///4CAgD8/PyH5BAEAAAAALAAAAAAPAA8AAAJEh
 	I+py+1IQvh4IZlG0Qg+QshkAokGQfAvZCBIhG8hA0Ea4UPIQJBG+BAyEKQhCH
 	bIQAgNEQCAIA0hAyE0AEIGgjSEDBQAOw==
@@ -92,9 +92,6 @@ namespace eval StatusBar {
 }
 
 
-
-
-
 # ------------------------------------------------------------------------
 #  Command StatusBar::create
 # ------------------------------------------------------------------------
@@ -102,6 +99,10 @@ proc StatusBar::create { path args } {
     variable _widget
     variable HaveMarlett
 
+    # Allow for img::png loaded after us
+    if {[package provide img::png] != ""} {
+	::StatusBar::resizer configure -format PNG -data $pngdata
+    }
     array set maps [list StatusBar {} :cmd {} .resize {}]
     array set maps [Widget::parseArgs StatusBar $args]
     eval [list frame $path -class StatusBar] $maps(:cmd)
@@ -127,7 +128,7 @@ proc StatusBar::create { path args } {
     if {$HaveMarlett} {
 	$resize configure -font "Marlett -16" -text \u006f
     } else {
-	$resize configure -image StatusBar::resizer
+	$resize configure -image ::StatusBar::resizer
     }
     bindtags $resize [list all [winfo toplevel $path] StatusResize $resize]
 

@@ -1,3 +1,8 @@
+2004-08-31  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* statusbar.tcl: correct name of image for use on unix.
+	Try to use of PNG image at each create (it just looks better).
+
 2004-08-26  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tree.tcl (Tree::delete): call -selectcommand if we delete
