@@ -1,5 +1,13 @@
 2003-07-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* notebook.tcl: Use list with eval for safety.
+	Use lsearch -exact instead of default -glob in all uses.
+
+	* listbox.tcl (_multiple_select): correct shift-selection when
+	selectmode is multiple.  [Bug 653266]
+	Use lsearch -exact instead of default -glob in all uses.
+	Use list with eval for safety.
+
 	* BWman/ScrolledWindow.html: clarify management of embedded widget.
 
 2003-06-23  Damon Courtney <damon@unreality.com>
