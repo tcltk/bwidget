@@ -43,6 +43,8 @@ proc Demo::create { } {
     update
     SelectFont::loadfont
 
+    bind all <F12> { catch {console show} }
+
     # Menu description
     set descmenu {
         "&File" all file 0 {
