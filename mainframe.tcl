@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.8 2001/06/11 23:57:50 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.9 2001/09/24 19:18:52 jenglish Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -224,7 +224,7 @@ proc MainFrame::addtoolbar { path } {
     }
     set toolbar [frame $toolbar -relief flat -borderwidth 2 \
                      -takefocus 0 -highlightthickness 0 -background $bg]
-    pack $toolbar -in $toolframe -anchor w
+    pack $toolbar -in $toolframe -anchor w -expand yes -fill x
     incr _widget($path,ntoolbar)
     grid $toolframe -column 0 -row $index -sticky ew
     return $toolbar
