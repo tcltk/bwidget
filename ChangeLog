@@ -1,3 +1,14 @@
+2003-05-14  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* demo/tree.tcl: make the tree scrollview make sense in demo.
+	[Bug 684462]
+
+	* notebook.tcl: ensure that bd is min 1 at all times. [Bug 688227]
+	Correct use of eval with list.
+
+	* tree.tcl: correct node lsearch'ing to use -exact to allow for []
+	containing nodes [Bug 628041] (decoster)
+
 2003-05-07  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* dynhelp.tcl (DynamicHelp::_motion_balloon): correctly listify

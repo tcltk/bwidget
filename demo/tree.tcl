@@ -101,15 +101,18 @@ proc DemoTree::init { tree list args } {
     $list configure -redraw 1
 
     # ScrollView
-    toplevel .top -relief raised -borderwidth 2
-    wm protocol .top WM_DELETE_WINDOW {
+    set w .top
+    toplevel $w
+    wm withdraw $w
+    wm protocol $w WM_DELETE_WINDOW {
         # don't kill me
     }
-    wm overrideredirect .top 1
-    wm withdraw .top
-    wm transient .top .
-    ScrollView .top.sv -window $tree -fill black
-    pack .top.sv -fill both -expand yes
+    wm resizable $w 0 0 
+    wm title $w "Drag rectangle to scroll directory tree"
+    wm transient $w .
+    ScrollView $w.sv -window $tree -fill white -relief sunken -bd 1 \
+	    -width 300 -height 300
+    pack $w.sv -fill both -expand yes
 }
 
 
