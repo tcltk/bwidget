@@ -122,7 +122,6 @@ proc MessageDlg::create { path args } {
 	    }
 	}
 	set tkMBoxArgs(-type) $type
-	puts "[array get tkMBoxArgs]"
 	set res [eval tk_messageBox [array get tkMBoxArgs]]
 	set res [lsearch $lbut $res]
     }
