@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.20 2004/04/23 17:54:29 hobbs Exp $
+#  $Id: listbox.tcl,v 1.21 2004/05/04 15:57:31 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -1628,5 +1628,7 @@ proc ListBox::_keyboard_navigation { path dir } {
 	incr sel -1
 	if {$sel < 0} { return }
     }
-    _mouse_select $path set [lindex $data(items) $sel]
+    set item [lindex $data(items) $sel]
+    $path see $item
+    _mouse_select $path set $item
 }
