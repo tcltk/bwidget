@@ -44,6 +44,8 @@ namespace eval StatusBar {
         {-background  TkResource ""     0 frame}
         {-borderwidth TkResource 0      0 frame}
         {-relief      TkResource flat   0 frame}
+        {-showseparator Boolean  1      0}
+        {-showresizesep Boolean  0      0}
         {-showresize  Boolean    1      0}
         {-width       TkResource 100    0 frame}
         {-height      TkResource 18     0 frame}
@@ -114,7 +116,7 @@ proc StatusBar::create { path args } {
 
     set bg [Widget::cget $path -background]
     if {[package provide tile] != ""} {
-	set sbar   [tframe $path.sbar -padding [list $padx $pady]]
+	set sbar   [tile::frame $path.sbar -padding [list $padx $pady]]
     } else {
 	set sbar   [frame $path.sbar -padx $padx -pady $pady -bg $bg]
     }
@@ -132,15 +134,25 @@ proc StatusBar::create { path args } {
     }
     bindtags $resize [list all [winfo toplevel $path] StatusResize $resize]
 
-    set show [Widget::cget $path -showresize]
+    if {[package provide tile] != ""} {
+	set fsep [tile::separator $path.hsep -orient horizontal]
+    } else {
+	set fsep [frame $path.hsep -bd 1 -height 2 -relief sunken]
+    }
     set sep  [_sep $path sepresize {}]
 
-    grid $sbar   -row 0 -column 0 -sticky news
-    grid $sep    -row 0 -column 1 -sticky ns -padx $ipadx -pady $ipady
-    grid $resize -row 0 -column 2 -sticky se -padx $ipadx -pady $ipady
+    grid $fsep   -row 0 -column 0 -columnspan 3 -sticky ew
+    grid $sbar   -row 1 -column 0 -sticky news
+    grid $sep    -row 1 -column 1 -sticky ns -padx $ipadx -pady $ipady
+    grid $resize -row 1 -column 2 -sticky se -padx $ipadx -pady $ipady
     grid columnconfigure $path 0 -weight 1
-    if {!$show} {
+    if {![Widget::cget $path -showseparator]} {
+	grid remove $fsep
+    }
+    if {![Widget::cget $path -showresize]} {
 	grid remove $sep $resize
+    } elseif {![Widget::cget $path -showresizesep]} {
+	grid remove $sep
     }
     set _widget($path,items) {}
 
@@ -156,16 +168,27 @@ proc StatusBar::configure { path args } {
 
     set res [Widget::configure $path $args]
 
-    foreach {chshow chipad chpad chbg chbd chrelief} \
-	[Widget::hasChangedX $path -showresize -ipad -pad -background \
-	     -borderwidth -relief] { break }
+    foreach {chshow chshowrsep chshowsep chipad chpad chbg chbd chrelief} \
+	[Widget::hasChangedX $path -showresize -showresizesep -showseparator \
+	     -ipad -pad -background -borderwidth -relief] { break }
 
     if {$chshow} {
 	set show [Widget::cget $path -showresize]
+	set showrsep [Widget::cget $path -showresizesep]
         if {$show} {
-	    grid $sep $show
+	    if {$showrsep} {
+		grid $path.sepresize
+	    }
+	    grid $path.resize
         } else {
-	    grid remove $sep $show
+	    grid remove $path.sepresize $path.resize
+	}
+    }
+    if {$chshowsep} {
+        if {$show} {
+	    grid $path.hsep
+        } else {
+	    grid remove $path.hsep
 	}
     }
     if {$chipad} {
