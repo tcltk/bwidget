@@ -1,3 +1,11 @@
+2004-04-23  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* listbox.tcl (create): don't force -highlightthickness 1 as it
+	prevents the user changing it on creation.
+	(_draw_item): pass more cached info from _redraw_items for speed.
+	(_redraw_selection): correct drawing of selfill for items that
+	extend beyond the width of the window.
+
 2004-04-22  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tree.tcl (edit): correct inversion of verifycmd emptiness test.
