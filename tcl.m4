@@ -230,6 +230,7 @@ AC_DEFUN(SC_LOAD_TCLCONFIG, [
     eval TCL_LIB_FILE=${TCL_LIB_FILE}
     eval TCL_LIB_FLAG=${TCL_LIB_FLAG}
 
+    AC_SUBST(TCL_DBGX)
     AC_SUBST(TCL_BIN_DIR)
     AC_SUBST(TCL_SRC_DIR)
     AC_SUBST(TCL_LIB_FILE)
@@ -1846,7 +1847,7 @@ AC_DEFUN(SC_LIB_SPEC, [
     # fail (NONE/lib)
 
     if test x"${exec_prefix}" != x"NONE" ; then
-	sc_lib_name_dir="${exec_prefix}"
+	sc_lib_name_dir="${exec_prefix}/lib"
     elif test x"${prefix}" != "NONE" ; then
 	sc_lib_name_dir="${prefix}/lib"
     else
@@ -2196,7 +2197,7 @@ AC_DEFUN(SC_SIMPLE_EXEEXT, [
 #------------------------------------------------------------------------
 
 AC_DEFUN(SC_PROG_TCLSH, [
-    AC_PATH_PROGS(TCLSH_PROG, tclsh8.2${EXEEXT} tclsh82${EXEEXT} tclsh82d${EXEEXT} tclsh${EXEEXT}, :, ${exec_prefix}:${prefix}/bin:${TCL_BIN_DIR}/../bin:${PATH})
+    AC_PATH_PROGS(TCLSH_PROG, tclsh8.2${EXEEXT} tclsh82${EXEEXT} tclsh82d${EXEEXT} tclsh${EXEEXT}, :, ${exec_prefix}/bin:${prefix}/bin:${TCL_BIN_DIR}:${TCL_BIN_DIR}/../bin:${PATH})
 
     if test "x${TCLSH_PROG}" = "x:" ; then
 	AC_MSG_WARN(No tclsh executable found.  You will have to build the pkgIndex.tcl file manually.)
