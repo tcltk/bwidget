@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.40 2003/02/08 10:21:17 damonc Exp $
+#  $Id: tree.tcl,v 1.41 2003/03/13 06:59:59 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -2058,8 +2058,8 @@ proc Tree::_set_help { path node } {
     ## If we've never set help for this item before, and text is not blank,
     ## we need to setup help.  We also need to reset help if any of the
     ## options have changed.
-    if { (![info exists help($item)] && $text != "") || $cty || $ctx || $cv } {
-	set help($item) 1
+    if { (![info exists help($node)] && $text != "") || $cty || $ctx || $cv } {
+	set help($node) 1
 	set type [Widget::getoption $item -helptype]
         switch $type {
             balloon {

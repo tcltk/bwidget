@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.9 2002/09/11 19:33:01 hobbs Exp $
+#  $Id: listbox.tcl,v 1.10 2003/03/13 06:59:58 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -58,6 +58,8 @@ namespace eval ListBox {
             {-fg         Synonym    -foreground}
         }
     }
+
+    DynamicHelp::include ListBox::Item balloon
 
     Widget::tkinclude ListBox canvas .c \
         remove {
@@ -370,6 +372,8 @@ proc ListBox::itemconfigure { path item args } {
             _redraw_idle $path 2
         }
     }
+
+    _set_help $path $item
 
     return $res
 }
@@ -897,6 +901,8 @@ proc ListBox::_draw_item { path item x0 x1 y } {
         $path.c create image [expr {$x0+$indent}] $y \
             -image $img -anchor w -tags "img i:$item"
     }
+
+    _set_help $path $item
 }
 
 
@@ -1391,5 +1397,44 @@ proc ListBox::_scroll { path cmd dir } {
     } else {
         set data(dnd,afterid) ""
         DropSite::setcursor dot
+    }
+}
+
+# ListBox::_set_help --
+#
+#	Register dynamic help for an item in the listbox.
+#
+# Arguments:
+#	path		ListBox to query
+#	item		Item in the listbox
+#       force		Optional argument to force a reset of the help
+#
+# Results:
+#	none
+proc ListBox::_set_help { path node } {
+    Widget::getVariable $path help
+
+    set item $path.$node
+    set opts [list -helptype -helptext -helpvar]
+    foreach {cty ctx cv} [eval Widget::hasChangedX $item $opts] break
+    set text [Widget::getoption $item -helptext]
+
+    ## If we've never set help for this item before, and text is not blank,
+    ## we need to setup help.  We also need to reset help if any of the
+    ## options have changed.
+    if { (![info exists help($node)] && $text != "") || $cty || $ctx || $cv } {
+	set help($node) 1
+	set type [Widget::getoption $item -helptype]
+        switch $type {
+            balloon {
+		DynamicHelp::register $path.c balloon n:$node $text
+		DynamicHelp::register $path.c balloon i:$node $text
+            }
+            variable {
+		set var [Widget::getoption $item -helpvar]
+		DynamicHelp::register $path.c variable n:$node $var $text
+		DynamicHelp::register $path.c variable i:$node $var $text
+            }
+        }
     }
 }
