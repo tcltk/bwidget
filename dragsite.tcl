@@ -1,8 +1,8 @@
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #  dragsite.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dragsite.tcl,v 1.7 2003/10/17 18:33:06 hobbs Exp $
-# ----------------------------------------------------------------------------
+#  $Id: dragsite.tcl,v 1.8 2003/10/20 21:23:52 damonc Exp $
+# ------------------------------------------------------------------------------
 #  Index of commands:
 #     - DragSite::include
 #     - DragSite::setdrag
@@ -14,6 +14,8 @@
 # ----------------------------------------------------------------------------
 
 namespace eval DragSite {
+    Widget::define DragSite dragsite -classonly
+
     Widget::declare DragSite [list \
 	    [list	-dragevent	Enum	1	0	[list 1 2 3]] \
 	    [list	-draginitcmd	String	""	0] \

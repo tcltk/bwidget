@@ -1,8 +1,8 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.14 2003/10/17 18:33:06 hobbs Exp $
-# ----------------------------------------------------------------------------
+#  $Id: mainframe.tcl,v 1.15 2003/10/20 21:23:52 damonc Exp $
+# ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
 #     - MainFrame::configure
@@ -23,7 +23,7 @@
 # ----------------------------------------------------------------------------
 
 namespace eval MainFrame {
-    ProgressBar::use
+    Widget::define MainFrame mainframe ProgressBar
 
     Widget::bwinclude MainFrame ProgressBar .status.prg \
 	    remove {
@@ -60,9 +60,6 @@ namespace eval MainFrame {
     Widget::addmap MainFrame "" .status.prgf  {-background {}}
     Widget::addmap MainFrame ProgressBar .status.prg {-background {} -background -troughcolor}
 
-    Widget::redir_create_command ::MainFrame
-    proc use {} {}
-
     variable _widget
 }
 
@@ -76,7 +73,7 @@ proc MainFrame::create { path args } {
 
     set path [frame $path -takefocus 0 -highlightthickness 0]
     set top  [winfo parent $path]
-    if { [string compare [winfo toplevel $path] $top] } {
+    if { ![string equal [winfo toplevel $path] $top] } {
         destroy $path
         return -code error "parent must be a toplevel"
     }
@@ -153,12 +150,9 @@ proc MainFrame::create { path args } {
         _create_menubar $path $menu
     }
 
-    bind $path <Destroy> {MainFrame::_destroy %W}
+    bind $path <Destroy> [list MainFrame::_destroy %W]
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path MainFrame
-
-    return $path
+    return [Widget::create MainFrame $path]
 }
 
 
@@ -214,7 +208,7 @@ proc MainFrame::configure { path args } {
 	    set mefnt ""
 	}
 	set top     $_widget($path,top)
-	if {[string compare $top .] == 0} {
+	if {[string equal $top .]} {
 	    set mb .menubar
 	} else {
 	    set mb $top.menubar
@@ -371,7 +365,7 @@ proc MainFrame::setmenustate { path tag state } {
 
     # First see if this is a real tag
     if { [info exists _widget($path,tagstate,$tag)] } {
-	if { [string compare $state "disabled"] } {
+	if { ![string equal $state "disabled"] } {
 	    set _widget($path,tagstate,$tag) 1
 	} else {
 	    set _widget($path,tagstate,$tag) 0
@@ -457,7 +451,6 @@ proc MainFrame::_destroy { path } {
     foreach index [array names _widget $path,*] {
 	unset _widget($index)
     }
-    rename $path {}
 }
 
 
@@ -632,14 +625,14 @@ proc MainFrame::_parse_accelerator { desc } {
 	set seq None
 	set key [string tolower [lindex $desc 0]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {f[1]?[0-9]*} $key]} {
+	if {[regexp {f1?[0-9]} $key]} {
 	    set key [string toupper $key]
 	}
     } elseif { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
         set key [string tolower [lindex $desc 1]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {f[1]?[0-9]*} $key]} {
+	if {[regexp {f1?[0-9]} $key]} {
 	    set key [string toupper $key]
 	}
     } else {
@@ -668,5 +661,3 @@ proc MainFrame::_parse_accelerator { desc } {
     }
     return [list $accel $event]
 }
-
-

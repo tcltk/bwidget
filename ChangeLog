@@ -1,3 +1,147 @@
+2003-10-20  Damon Courtney  <damon@unreality.com>
+	* arrow.tcl, bitmap.tcl, button.tcl, buttonbox.tcl, color.tcl,
+	* combobox.tcl, dialog.tcl, dragsite.tcl, dropsite.tcl, entry.tcl
+	* font.tcl, label.tcl, labelentry.tcl, labelframe.tcl, listbox.tcl
+	* mainframe.tcl, messagedlg.tcl, notebook.tcl, pagesmgr.tcl
+	* panedw.tcl, passwddlg.tcl, progressbar.tcl, progressdlg.tcl
+	* scrollframe.tcl, scrollview.tcl, scrollw.tcl, separator.tcl
+	* spinbox.tcl, titleframe.tcl, tree.tcl, utils.tcl, widget.tcl
+	* xpm2image.tcl: Revamp again to let core Widget commands handle
+	most of the esoteric work of creating and destroying widgets
+	properly in the BWidget environment.
+
+	The command Widget::define defines a class, its filename and a
+	list of classes which it uses.  This command handles creating
+	the command to create new widgets, creates a ::use command for
+	the class and calls the ::use command for each class included.
+
+	The command Widget::create does the renaming of the widget to
+	$path:cmd and creates the proc to redirect the widget commands.
+
+	Widget::destroy now does the rename $path "" that almost all
+	widgets do.
+
+	* button.tcl: Added a -state option to configure the state of the
+	entire box at once.
+
+	Added new insert and delete subcommands.
+
+	Added an after cancel to stop button repeat upon release.
+	[Bug 697022]
+
+	* combobox.tcl: Added -bwlistbox, -listboxwidth and -hottrack options.
+	-images option already existed, but now it actually does something.
+
+	Added getlistbox, get, icursor, post and unpost subcommands.
+
+	* dynhelp.tcl: Added add subcommand to replace the (now) deprecated
+	register command.  The new command adds for a lot more flexibility
+	in applying dynamic help.
+
+	Help popup now comes up -topmost 1 on Windows if available.
+
+	* entry.tcl: Added -disabledbackground option so that the BWidget
+	entry more closely resembles the standard Tk entry.
+	[Bug 638236].
+
+	* init.tcl: Moved Widget::traverseTo into widget.tcl.
+
+	* label.tcl: Renamed BWLabel class to just Label.
+
+	* listbox.tcl: Added a default -dropcmd so that if -dragenabled
+	and -dropenabled are true, drag-and-drop within the same widget
+	is possible without any other options.
+
+	Added -autofocus option to specify that clicking within the listbox
+	should draw the focus in order to handle mouse wheel events.
+
+	Added -selectfill option for drawing a full selection rectangle
+	around selected items instead of just around the item.
+
+	Added getcanvas subcommand.  [Bug 436762].
+
+	bindImage and bindText now map %W to $path in order to get an
+	accurate path in events.  This can probably be fixed better
+	when we have more control over event parameters.  [Bug 607745]
+
+	Added mouse wheel bindings by default.
+
+	Added <<ListboxSelect>> event when selection changes.
+
+	* mainframe.tcl: Fixed bug for adding CTRL-F items to a mainframe
+	[Bug 784269]
+
+	* messagedlg.tcl: Added -buttonwidth option.
+
+	* notebook.tcl: Added dynamic help to tabs.
+
+	Added -tabpady option to specify the padding between the text and
+	the tab.
+
+	Notebooks now handle multi-line text properly.  [Bug 565284]
+
+	* scrollview.tcl: Rewritten to use a variable per path instead of
+	a big array.
+
+	* tree.tcl: Added -anchor option to nodes to specify the anchor for
+	an image or window when displayed.
+
+	Added -crossopenimage, -crosscloseimage, -crossopenbitmap and
+	-crossclosebitmap options to change the open / close cross.
+
+	Added mouse wheel bindings by default.
+
+	Added toggle subcommand to toggle a single tree node.
+
+	Added <<TreeSelect>> event when selection changes.
+
+	The characters "& | ^ !" are all converted to | silently in
+	node names.  This is to avoid errors because these characters
+	are special to the canvas widget.  [Bug 746960]
+
+	bindImage and bindText now map %W to $path in order to get an
+	accurate path in events.  This can probably be fixed better
+	when we have more control over event parameters.  [Bug 607745]
+
+	* utils.tcl: Added BWidget::wrongNumArgsString command to return
+	a standard wrong # args error string.
+
+	Added BWidget::classes command that returns a list of all classes
+	required by a given class.
+
+	Added BWidget::inuse command to determine if a given class is inuse.
+
+	Added BWidget::library command to return a body of code that can
+	be saved into a project or other code based on the given classes.
+	When called with a list of classes, all the classes and code
+	necessary to use those classes is returned in a large string which
+	can then be written out to a file.
+
+	Added BWidget::write command to write to a given file the current
+	set of classes that are in use.
+
+	Added BWidget::bindMouseWheel command to setup default mouse
+	bindings on a given widget.
+
+	* widget.tcl: Added a new option type 'Padding' which will accept
+	the standard padding arguments in Tcl 8.4+.
+
+	Added Widget::define command to define a new BWidget class.
+
+	Added Widget::create command to create a BWidget properly.
+
+	Widget::destroy now attempts to delete a widget command created
+	through Widget::create.
+
+	Added Widget::options command to return the current options of
+	a given widget in a style that can be used to serialize a widget.
+
+	Added Widget::getOption command to get options based on children
+	having the same option.
+
+	* wizard.tcl: Added new Wizard widget.
+
+
 2003-10-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* arrow.tcl, bitmap.tcl, button.tcl, buttonbox.tcl, color.tcl,

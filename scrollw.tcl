@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.8 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: scrollw.tcl,v 1.9 2003/10/20 21:23:52 damonc Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -17,6 +17,8 @@
 # -----------------------------------------------------------------------------
 
 namespace eval ScrolledWindow {
+    Widget::define ScrolledWindow scrollw
+
     Widget::declare ScrolledWindow {
 	{-background  TkResource ""   0 button}
 	{-scrollbar   Enum	 both 0 {none both vertical horizontal}}
@@ -32,9 +34,6 @@ namespace eval ScrolledWindow {
     }
 
     Widget::addmap ScrolledWindow "" :cmd {-relief {} -borderwidth {}}
-
-    Widget::redir_create_command ::ScrolledWindow
-    proc use {} {}
 }
 
 
@@ -42,9 +41,9 @@ namespace eval ScrolledWindow {
 #  Command ScrolledWindow::create
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::create { path args } {
-    upvar \#0 ScrolledWindow::$path data
-
     Widget::init ScrolledWindow $path $args
+
+    Widget::getVariable $path data
 
     set bg     [Widget::cget $path -background]
     set sbsize [Widget::cget $path -size]
@@ -99,10 +98,8 @@ proc ScrolledWindow::create { path args } {
 
     bind $path <Configure> [list ScrolledWindow::_realize $path]
     bind $path <Destroy>   [list ScrolledWindow::_destroy $path]
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path ScrolledWindow
 
-    return $path
+    return [Widget::create ScrolledWindow $path]
 }
 
 
@@ -118,7 +115,7 @@ proc ScrolledWindow::getframe { path } {
 #  Command ScrolledWindow::setwidget
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::setwidget { path widget } {
-    upvar \#0 ScrolledWindow::$path data
+    Widget::getVariable $path data
 
     if {[info exists data(widget)] && ![string equal $data(widget) $widget]} {
 	grid remove $data(widget)
@@ -139,7 +136,7 @@ proc ScrolledWindow::setwidget { path widget } {
 #  Command ScrolledWindow::configure
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::configure { path args } {
-    upvar \#0 ScrolledWindow::$path data
+    Widget::getVariable $path data
 
     set res [Widget::configure $path $args]
     if { [Widget::hasChanged $path -background bg] } {
@@ -183,22 +180,10 @@ proc ScrolledWindow::cget { path option } {
 
 
 # -----------------------------------------------------------------------------
-#  Command ScrolledWindow::_destroy
-# -----------------------------------------------------------------------------
-proc ScrolledWindow::_destroy { path } {
-    upvar \#0 ScrolledWindow::$path data
-
-    unset data
-    Widget::destroy $path
-    rename $path {}
-}
-
-
-# -----------------------------------------------------------------------------
 #  Command ScrolledWindow::_set_hscroll
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::_set_hscroll { path vmin vmax } {
-    upvar \#0 ScrolledWindow::$path data
+    Widget::getVariable $path data
 
     if {$data(realized) && $data(hsb,present)} {
 	if {$data(hsb,auto)} {
@@ -225,7 +210,7 @@ proc ScrolledWindow::_set_hscroll { path vmin vmax } {
 #  Command ScrolledWindow::_set_vscroll
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::_set_vscroll { path vmin vmax } {
-    upvar \#0 ScrolledWindow::$path data
+    Widget::getVariable $path data
 
     if {$data(realized) && $data(vsb,present)} {
 	if {$data(vsb,auto)} {
@@ -249,7 +234,7 @@ proc ScrolledWindow::_set_vscroll { path vmin vmax } {
 
 
 proc ScrolledWindow::_setData {path scrollbar auto sides} {
-    upvar \#0 ScrolledWindow::$path data
+    Widget::getVariable $path data
 
     set sb    [lsearch {none horizontal vertical both} $scrollbar]
     set auto  [lsearch {none horizontal vertical both} $auto]
@@ -263,12 +248,21 @@ proc ScrolledWindow::_setData {path scrollbar auto sides} {
     set data(vsb,column)   [expr {[string match *w* $sides] ? 0 : 2}]
 }
 
+
 # -----------------------------------------------------------------------------
 #  Command ScrolledWindow::_realize
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::_realize { path } {
-    upvar \#0 ScrolledWindow::$path data
+    Widget::getVariable $path data
 
     bind $path <Configure> {}
     set data(realized) 1
+}
+
+
+# -----------------------------------------------------------------------------
+#  Command ScrolledWindow::_destroy
+# -----------------------------------------------------------------------------
+proc ScrolledWindow::_destroy { path } {
+    Widget::destroy $path
 }

@@ -1,20 +1,20 @@
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #  labelframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelframe.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
-# ----------------------------------------------------------------------------
+#  $Id: labelframe.tcl,v 1.6 2003/10/20 21:23:52 damonc Exp $
+# ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelFrame::create
 #     - LabelFrame::getframe
 #     - LabelFrame::configure
 #     - LabelFrame::cget
 #     - LabelFrame::align
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 namespace eval LabelFrame {
-    BWLabel::use
+    Widget::define LabelFrame labelframe Label
 
-    Widget::bwinclude LabelFrame BWLabel .l \
+    Widget::bwinclude LabelFrame Label .l \
         remove     {
             -highlightthickness -highlightcolor -highlightbackground
             -takefocus -relief -borderwidth
@@ -35,11 +35,8 @@ namespace eval LabelFrame {
 
     Widget::syncoptions LabelFrame Label .l {-text {} -underline {}}
 
-    bind BwLabelFrame <FocusIn> {BWLabel::setfocus %W.l}
-    bind BwLabelFrame <Destroy> {Widget::destroy %W; rename %W {}}
-
-    Widget::redir_create_command ::LabelFrame
-    proc use {} {}
+    bind BwLabelFrame <FocusIn> [list Label::setfocus %W.l]
+    bind BwLabelFrame <Destroy> [list LabelFrame::_destroy %W]
 }
 
 
@@ -53,7 +50,7 @@ proc LabelFrame::create { path args } {
 	    -relief flat -bd 0 -takefocus 0 -highlightthickness 0 \
 	    -class LabelFrame]
 
-    set label [eval [list BWLabel::create $path.l] [Widget::subcget $path .l] \
+    set label [eval [list Label::create $path.l] [Widget::subcget $path .l] \
                    -takefocus 0 -highlightthickness 0 -relief flat \
 		   -borderwidth 0 -dropenabled 0 -dragenabled 0]
     set frame [eval [list frame $path.f] [Widget::subcget $path .f] \
@@ -71,10 +68,7 @@ proc LabelFrame::create { path args } {
 
     bindtags $path [list $path BwLabelFrame [winfo toplevel $path] all]
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path LabelFrame
-
-    return $path
+    return [Widget::create LabelFrame $path]
 }
 
 
@@ -158,4 +152,9 @@ proc LabelFrame::align { args } {
     foreach {w widthopt} $wlist {
         $w configure $widthopt $maxlen
     }
+}
+
+
+proc LabelFrame::_destroy { path } {
+    Widget::destroy $path
 }

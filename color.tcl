@@ -1,4 +1,6 @@
 namespace eval SelectColor {
+    Widget::define SelectColor color Dialog
+
     Widget::declare SelectColor {
         {-title     String     "Select a color" 0}
         {-parent    String     ""               0}
@@ -6,8 +8,6 @@ namespace eval SelectColor {
 	{-type      Enum       "dialog"         1 {dialog popup}}
 	{-placement String     "center"         1}
     }
-
-    Widget::redir_create_command ::SelectColor
 
     variable _baseColors {
         \#0000ff \#00ff00 \#00ffff \#ff0000 \#ff00ff \#ffff00
@@ -230,8 +230,8 @@ proc SelectColor::dialog {path args} {
             for {set y 0} {$y < 200} {incr y 4} {
                 $_image put \
 		    [eval [list format "\#%04x%04x%04x"] \
-			 [hsvToRgb [expr {$x/196.0}] [expr {(196-$y)/196.0}] 0.85]] \
-		    -to $x $y [expr {$x+4}] [expr {$y+4}]
+			[hsvToRgb [expr {$x/196.0}] [expr {(196-$y)/196.0}] 0.85]] \
+			-to $x $y [expr {$x+4}] [expr {$y+4}]
             }
         }
     }

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: scrollframe.tcl,v 1.6 2003/10/20 21:23:52 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -15,6 +15,8 @@
 # ----------------------------------------------------------------------------
 
 namespace eval ScrollableFrame {
+    Widget::define ScrollableFrame scrollframe
+
     Widget::declare ScrollableFrame {
         {-background        TkResource "" 0 frame}
         {-width             Int        0  0 {}}
@@ -39,11 +41,8 @@ namespace eval ScrollableFrame {
 
     variable _widget
 
-    bind BwScrollableFrame <Configure> {ScrollableFrame::_resize %W}
-    bind BwScrollableFrame <Destroy>   {Widget::destroy %W; rename %W {}}
-
-    Widget::redir_create_command ::ScrollableFrame
-    proc use {} {}
+    bind BwScrollableFrame <Configure> [list ScrollableFrame::_resize %W]
+    bind BwScrollableFrame <Destroy>   [list Widget::destroy %W]
 }
 
 
@@ -67,10 +66,7 @@ proc ScrollableFrame::create { path args } {
 	    [list ScrollableFrame::_frameConfigure $canvas $frame %w %h]
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path ScrollableFrame
-
-    return $canvas
+    return [Widget::create ScrollableFrame $path]
 }
 
 

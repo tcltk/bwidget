@@ -1,37 +1,40 @@
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.9 2003/10/17 18:33:06 hobbs Exp $
-# ----------------------------------------------------------------------------
+#  $Id: label.tcl,v 1.10 2003/10/20 21:23:52 damonc Exp $
+# ------------------------------------------------------------------------------
 #  Index of commands:
-#     - BWLabel::create
-#     - BWLabel::configure
-#     - BWLabel::cget
-#     - BWLabel::setfocus
-#     - BWLabel::_drag_cmd
-#     - BWLabel::_drop_cmd
-#     - BWLabel::_over_cmd
-# ----------------------------------------------------------------------------
+#     - Label::create
+#     - Label::configure
+#     - Label::cget
+#     - Label::setfocus
+#     - Label::_drag_cmd
+#     - Label::_drop_cmd
+#     - Label::_over_cmd
+# ------------------------------------------------------------------------------
 
-namespace eval BWLabel {
-    Widget::tkinclude BWLabel label .l \
-        remove {-foreground -text -textvariable -underline}
+namespace eval Label {
+    Widget::define Label label DragSite DropSite DynamicHelp
 
-    Widget::declare BWLabel {
-        {-name               String     "" 0}
-        {-text               String     "" 0}
-        {-textvariable       String     "" 0}
-        {-underline          Int        -1 0 "%d >= -1"}
-        {-focus              String     "" 0}
-        {-foreground         TkResource "" 0 label}
-        {-disabledforeground TkResource "" 0 button}
+    Widget::tkinclude Label label .l \
+        remove { -foreground -text -textvariable -underline }
+
+    Widget::declare Label {
+        {-name               String     ""     0}
+        {-text               String     ""     0}
+        {-textvariable       String     ""     0}
+        {-underline          Int        -1     0 "%d >= -1"}
+        {-focus              String     ""     0}
+        {-foreground         TkResource ""     0 label}
+        {-disabledforeground TkResource ""     0 button}
         {-state              Enum       normal 0  {normal disabled}}
-        {-fg                 Synonym    -foreground}
 
+        {-fg                 Synonym    -foreground}
     }
-    DynamicHelp::include BWLabel balloon
-    DragSite::include    BWLabel "" 1
-    DropSite::include    BWLabel {
+
+    DynamicHelp::include Label balloon
+    DragSite::include    Label "" 1
+    DropSite::include    Label {
         TEXT    {move {}}
         IMAGE   {move {}}
         BITMAP  {move {}}
@@ -40,25 +43,22 @@ namespace eval BWLabel {
         COLOR   {move {}}
     }
 
-    Widget::syncoptions BWLabel "" .l {-text {} -underline {}}
+    Widget::syncoptions Label "" .l {-text {} -underline {}}
 
-    Widget::redir_create_command ::Label BWLabel::create
-    proc use {} {}
-
-    bind BwLabel <FocusIn> {BWLabel::setfocus %W}
+    bind BwLabel <FocusIn> [list Label::setfocus %W]
+    bind BwLabel <Destroy> [list Label::_destroy %W]
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command BWLabel::create
-# ----------------------------------------------------------------------------
-proc BWLabel::create { path args } {
-    array set maps [list BWLabel {} .l {}]
-    array set maps [Widget::parseArgs BWLabel $args]
-    frame $path -class BWLabel -borderwidth 0 -highlightthickness 0 -relief flat
-    Widget::initFromODB BWLabel $path $maps(BWLabel)
+# ------------------------------------------------------------------------------
+#  Command Label::create
+# ------------------------------------------------------------------------------
+proc Label::create { path args } {
+    array set maps [list Label {} .l {}]
+    array set maps [Widget::parseArgs Label $args]
+    frame $path -class Label -borderwidth 0 -highlightthickness 0 -relief flat
+    Widget::initFromODB Label $path $maps(Label)
 
-    bind real${path} <Destroy> {Widget::destroy %W; rename %W {}}
     eval [list label $path.l] $maps(.l)
 
     if { [Widget::cget $path -state] == "normal" } {
@@ -89,28 +89,26 @@ proc BWLabel::create { path args } {
 
     set accel [string tolower [string index $text $under]]
     if { $accel != "" } {
-        bind [winfo toplevel $path] <Alt-$accel> [list BWLabel::setfocus $path]
+        bind [winfo toplevel $path] <Alt-$accel> "Label::setfocus $path"
     }
 
+    bindtags $path   [list BwLabel [winfo toplevel $path] all]
     bindtags $path.l [list $path.l $path Label [winfo toplevel $path] all]
-    bindtags $path [list real${path} BwLabel [winfo toplevel $path] all]
     pack $path.l -expand yes -fill both
 
-    DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd [Widget::cget $path -dragendcmd] 1
-    DropSite::setdrop $path $path.l BWLabel::_over_cmd BWLabel::_drop_cmd 1
+    set dragendcmd [Widget::cget $path -dragendcmd]
+    DragSite::setdrag $path $path.l Label::_init_drag_cmd $dragendcmd 1
+    DropSite::setdrop $path $path.l Label::_over_cmd Label::_drop_cmd 1
     DynamicHelp::sethelp $path $path.l 1
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path BWLabel
-
-    return $path
+    return [Widget::create Label $path]
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command BWLabel::configure
-# ----------------------------------------------------------------------------
-proc BWLabel::configure { path args } {
+# ------------------------------------------------------------------------------
+#  Command Label::configure
+# ------------------------------------------------------------------------------
+proc Label::configure { path args } {
     set oldunder [$path.l cget -underline]
     if { $oldunder != -1 } {
         set oldaccel [string tolower [string index [$path.l cget -text] $oldunder]]
@@ -155,32 +153,32 @@ proc BWLabel::configure { path args } {
         }
         set accel [string tolower [string index $text $under]]
         if { $accel != "" } {
-            bind $top <Alt-$accel> [list BWLabel::setfocus $path]
+            bind $top <Alt-$accel> [list Label::setfocus $path]
         }
         $path.l configure -text $text -underline $under -textvariable $var
     }
 
     set force [Widget::hasChanged $path -dragendcmd dragend]
-    DragSite::setdrag $path $path.l BWLabel::_init_drag_cmd $dragend $force
-    DropSite::setdrop $path $path.l BWLabel::_over_cmd BWLabel::_drop_cmd
+    DragSite::setdrag $path $path.l Label::_init_drag_cmd $dragend $force
+    DropSite::setdrop $path $path.l Label::_over_cmd Label::_drop_cmd
     DynamicHelp::sethelp $path $path.l
 
     return $res
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command BWLabel::cget
-# ----------------------------------------------------------------------------
-proc BWLabel::cget { path option } {
+# ------------------------------------------------------------------------------
+#  Command Label::cget
+# ------------------------------------------------------------------------------
+proc Label::cget { path option } {
     return [Widget::cget $path $option]
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command BWLabel::setfocus
-# ----------------------------------------------------------------------------
-proc BWLabel::setfocus { path } {
+# ------------------------------------------------------------------------------
+#  Command Label::setfocus
+# ------------------------------------------------------------------------------
+proc Label::setfocus { path } {
     if { [string equal [Widget::cget $path -state] "normal"] } {
         set w [Widget::cget $path -focus]
         if { [winfo exists $w] && [Widget::focusOK $w] } {
@@ -190,10 +188,10 @@ proc BWLabel::setfocus { path } {
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command BWLabel::_init_drag_cmd
-# ----------------------------------------------------------------------------
-proc BWLabel::_init_drag_cmd { path X Y top } {
+# ------------------------------------------------------------------------------
+#  Command Label::_init_drag_cmd
+# ------------------------------------------------------------------------------
+proc Label::_init_drag_cmd { path X Y top } {
     set path [winfo parent $path]
     if { [set cmd [Widget::cget $path -draginitcmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $X $Y $top]]
@@ -216,10 +214,10 @@ proc BWLabel::_init_drag_cmd { path X Y top } {
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command BWLabel::_drop_cmd
-# ----------------------------------------------------------------------------
-proc BWLabel::_drop_cmd { path source X Y op type data } {
+# ------------------------------------------------------------------------------
+#  Command Label::_drop_cmd
+# ------------------------------------------------------------------------------
+proc Label::_drop_cmd { path source X Y op type data } {
     set path [winfo parent $path]
     if { [set cmd [Widget::cget $path -dropcmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $source $X $Y $op $type $data]]
@@ -250,10 +248,10 @@ proc BWLabel::_drop_cmd { path source X Y op type data } {
 }
 
 
-# ----------------------------------------------------------------------------
-#  Command BWLabel::_over_cmd
-# ----------------------------------------------------------------------------
-proc BWLabel::_over_cmd { path source event X Y op type data } {
+# ------------------------------------------------------------------------------
+#  Command Label::_over_cmd
+# ------------------------------------------------------------------------------
+proc Label::_over_cmd { path source event X Y op type data } {
     set path [winfo parent $path]
     if { [set cmd [Widget::cget $path -dropovercmd]] != "" } {
         return [uplevel \#0 $cmd [list $path $source $event $X $Y $op $type $data]]
@@ -265,4 +263,9 @@ proc BWLabel::_over_cmd { path source event X Y op type data } {
     }
     DropSite::setcursor dot
     return 0
+}
+
+
+proc Label::_destroy { path } {
+    Widget::destroy $path
 }

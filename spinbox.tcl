@@ -6,7 +6,7 @@
 # Copyright (c) 2000 by Ajuba Solutions
 # All rights reserved.
 # 
-# RCS: @(#) $Id: spinbox.tcl,v 1.11 2003/10/17 18:33:06 hobbs Exp $
+# RCS: @(#) $Id: spinbox.tcl,v 1.12 2003/10/20 21:23:52 damonc Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - SpinBox::create
@@ -19,8 +19,7 @@
 # -----------------------------------------------------------------------------
 
 namespace eval SpinBox {
-    ArrowButton::use
-    Entry::use
+    Widget::define SpinBox spinbox Entry ArrowButton
 
     Widget::tkinclude SpinBox frame :cmd \
 	    include {-background -borderwidth -bg -bd -relief} \
@@ -50,10 +49,7 @@ namespace eval SpinBox {
     }
 
     ::bind SpinBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
-    ::bind SpinBox <Destroy> {SpinBox::_destroy %W}
-
-    Widget::redir_create_command ::SpinBox
-    proc use {} {}
+    ::bind SpinBox <Destroy> [list SpinBox::_destroy %W]
 
     variable _widget
 }
@@ -76,13 +72,13 @@ proc SpinBox::create { path args } {
     set height [expr {[winfo reqheight $path.e]/2-2}]
     set width  11
     set arrup  [eval [list ArrowButton::create $path.arrup -dir top] \
-		    $maps(.arrup) \
+	    $maps(.arrup) \
 		    [list -highlightthickness 0 -borderwidth 1 -takefocus 0 \
 			 -type button -width $width -height $height \
 			 -armcommand    [list SpinBox::_modify_value $path next arm] \
 			 -disarmcommand [list SpinBox::_modify_value $path next disarm]]]
     set arrdn  [eval [list ArrowButton::create $path.arrdn -dir bottom] \
-		    $maps(.arrdn) \
+	    $maps(.arrdn) \
 		    [list -highlightthickness 0 -borderwidth 1 -takefocus 0 \
 			 -type button -width $width -height $height \
 			 -armcommand    [list SpinBox::_modify_value $path previous arm] \
@@ -112,10 +108,7 @@ proc SpinBox::create { path args } {
 
     ::bind $farr <Configure> {grid rowconfigure %W 1 -minsize [expr {%h%%2}]}
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path SpinBox
-
-    return $path
+    return [Widget::create SpinBox $path]
 }
 
 # -----------------------------------------------------------------------------
@@ -147,7 +140,7 @@ proc SpinBox::setvalue { path index } {
 
     set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
-
+    
     if { [llength $values] } {
         # --- -values SpinBox ---
         switch -- $index {
@@ -282,18 +275,6 @@ proc SpinBox::bind { path args } {
 
 
 # -----------------------------------------------------------------------------
-#  Command SpinBox::_destroy
-# -----------------------------------------------------------------------------
-proc SpinBox::_destroy { path } {
-    variable _widget
-
-    unset _widget($path,curval)
-    Widget::destroy $path
-    rename $path {}
-}
-
-
-# -----------------------------------------------------------------------------
 #  Command SpinBox::_modify_value
 # -----------------------------------------------------------------------------
 proc SpinBox::_modify_value { path direction reason } {
@@ -338,3 +319,13 @@ proc SpinBox::_test_options { path } {
     }
 }
 
+
+# -----------------------------------------------------------------------------
+#  Command SpinBox::_destroy
+# -----------------------------------------------------------------------------
+proc SpinBox::_destroy { path } {
+    variable _widget
+
+    unset _widget($path,curval)
+    Widget::destroy $path
+}

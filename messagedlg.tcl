@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------
 
 namespace eval MessageDlg {
-    Dialog::use
+    Widget::define MessageDlg messagedlg Dialog
 
     Widget::tkinclude MessageDlg message .frame.msg \
 	    remove [list -cursor -highlightthickness		\
@@ -25,15 +25,13 @@ namespace eval MessageDlg {
         {-icon       Enum   info 0 {none error info question warning}}
         {-type       Enum   user 0 {abortretryignore ok okcancel \
 		retrycancel yesno yesnocancel user}}
-        {-buttons    String ""   0}
+        {-buttons     String "" 0}
+        {-buttonwidth String 0  0}
     }
 
     Widget::addmap MessageDlg "" tkMBox {
 	-parent {} -message {} -default {} -title {}
     }
-
-    Widget::redir_create_command ::MessageDlg
-    proc use { } {}
 }
 
 
@@ -51,6 +49,7 @@ proc MessageDlg::create { path args } {
 
     set type  [Widget::cget "$path#Message" -type]
     set icon  [Widget::cget "$path#Message" -icon]
+    set width [Widget::cget "$path#Message" -buttonwidth]
 
     set defb  -1
     set canb  -1
@@ -97,7 +96,7 @@ proc MessageDlg::create { path args } {
         eval [list Dialog::create $path] $maps(:cmd) \
 	    [list -image $image -modal local -side bottom -anchor c]
         foreach but $lbut {
-            Dialog::add $path -text $but -name $but
+            Dialog::add $path -text $but -name $but -width $width
         }
         set frame [Dialog::getframe $path]
 

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.25 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: widget.tcl,v 1.26 2003/10/20 21:23:53 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -15,6 +15,7 @@
 #     - Widget::cget
 #     - Widget::subcget
 #     - Widget::hasChanged
+#     - Widget::options
 #     - Widget::_get_tkwidget_options
 #     - Widget::_test_tkresource
 #     - Widget::_test_bwresource
@@ -72,6 +73,7 @@ namespace eval Widget {
         Flag       Widget::_test_flag
         Synonym    Widget::_test_synonym
         Color      Widget::_test_color
+        Padding    Widget::_test_padding
     }
 
     proc use {} {}
@@ -397,6 +399,33 @@ proc Widget::declare { class optlist } {
 }
 
 
+proc Widget::define { class filename args } {
+    variable ::BWidget::use
+    set use($class)      $args
+    set use($class,file) $filename
+    lappend use(classes) $class
+
+    if {[set x [lsearch -exact $args "-classonly"]] > -1} {
+	set args [lreplace $args $x $x]
+    } else {
+	interp alias {} ::${class} {} ${class}::create
+	proc ::${class}::use {} {}
+
+	bind $class <Destroy> [list Widget::destroy %W]
+    }
+
+    foreach class $args { ${class}::use }
+}
+
+
+proc Widget::create { class path {rename 1} } {
+    if {$rename} { rename $path ::$path:cmd }
+    proc ::$path { cmd args } \
+    	[subst {return \[eval \[linsert \$args 0 ${class}::\$cmd [list $path]\]\]}]
+    return $path
+}
+
+
 # ----------------------------------------------------------------------------
 #  Command Widget::addmap
 # ----------------------------------------------------------------------------
@@ -445,6 +474,8 @@ proc Widget::syncoptions { class subclass subpath options } {
 #  Command Widget::init
 # ----------------------------------------------------------------------------
 proc Widget::init { class path options } {
+    variable _inuse
+
     upvar 0 ${class}::opt classopt
     upvar 0 ${class}::$path:opt  pathopt
     upvar 0 ${class}::$path:mod  pathmod
@@ -490,6 +521,9 @@ proc Widget::init { class path options } {
             set pathopt($option) [lindex $optdesc 1]
         }
     }
+
+    if {![info exists _inuse($class)]} { set _inuse($class) 0 }
+    incr _inuse($class)
 
     set Widget::_class($path) $class
     foreach {option value} $options {
@@ -629,6 +663,9 @@ proc Widget::parseArgs {class options} {
 #	None.
 
 proc Widget::initFromODB {class path options} {
+    variable _inuse
+    variable _class
+
     upvar 0 ${class}::$path:opt  pathopt
     upvar 0 ${class}::$path:mod  pathmod
     upvar 0 ${class}::map classmap
@@ -650,6 +687,7 @@ proc Widget::initFromODB {class path options} {
 	    frame $fpath -class $rdbclass
 	}
     }
+
     foreach {option optdesc} [array get ${class}::opt] {
         set pathmod($option) 0
 	if { [info exists classmap($option)] } {
@@ -673,7 +711,10 @@ proc Widget::initFromODB {class path options} {
         }
     }
 
-    set Widget::_class($path) $class
+    if {![info exists _inuse($class)]} { set _inuse($class) 0 }
+    incr _inuse($class)
+
+    set _class($path) $class
     array set pathopt $options
 }
 
@@ -684,11 +725,16 @@ proc Widget::initFromODB {class path options} {
 # ----------------------------------------------------------------------------
 proc Widget::destroy { path } {
     variable _class
+    variable _inuse
+
+    if {![info exists _class($path)]} { return }
 
     set class $_class($path)
     upvar 0 ${class}::$path:opt pathopt
     upvar 0 ${class}::$path:mod pathmod
     upvar 0 ${class}::$path:init pathinit
+
+    if {[info exists _inuse($class)]} { incr _inuse($class) -1 }
 
     if {[info exists pathopt]} {
         unset pathopt
@@ -699,6 +745,8 @@ proc Widget::destroy { path } {
     if {[info exists pathinit]} {
         unset pathinit
     }
+
+    if {![string equal [info commands $path] ""]} { rename $path "" }
 
     ## Unset any variables used in this widget.
     foreach var [info vars ::${class}::$path:*] { unset $var }
@@ -1179,6 +1227,48 @@ proc Widget::_test_boolean { option value arg } {
 
 
 # -----------------------------------------------------------------------------
+#  Command Widget::_test_padding
+# -----------------------------------------------------------------------------
+proc Widget::_test_padding { option values arg } {
+    set len [llength $values]
+    if {$len < 1 || $len > 2} {
+        return -code error "bad pad value \"$values\":\
+                        must be positive screen distance"
+    }
+
+    foreach value $values {
+        if { ![string is int -strict $value] || \
+            ([string length $arg] && \
+            ![expr [string map [list %d $value] $arg]]) } {
+                return -code error "bad pad value \"$value\":\
+                                must be positive screen distance ($arg)"
+        }
+    }
+    return $values
+}
+
+
+# Widget::_get_padding --
+#
+#       Return the requesting padding value for a padding option.
+#
+# Arguments:
+#	path		Widget to get the options for.
+#       option          The name of the padding option.
+#	index		The index of the padding.  If the index is empty,
+#                       the first padding value is returned.
+#
+# Results:
+#	Return a numeric value that can be used for padding.
+proc Widget::_get_padding { path option {index 0} } {
+    set pad [Widget::cget $path $option]
+    set val [lindex $pad $index]
+    if {$val == ""} { set val [lindex $pad 0] }
+    return $val
+}
+
+
+# -----------------------------------------------------------------------------
 #  Command Widget::focusNext
 #  Same as tk_focusNext, but call Widget::focusOK
 # -----------------------------------------------------------------------------
@@ -1313,6 +1403,18 @@ proc Widget::focusOK { w } {
     return 0
 }
 
+
+proc Widget::traverseTo { w } {
+    set focus [focus]
+    if {![string equal $focus ""]} {
+	event generate $focus <<TraverseOut>>
+    }
+    focus $w
+
+    event generate $w <<TraverseIn>>
+}
+
+
 # Widget::varForOption --
 #
 #	Retrieve a fully qualified variable name for the option specified.
@@ -1358,41 +1460,67 @@ proc Widget::getVariable { path varName {newVarName ""} } {
     uplevel 1 [list upvar \#0 ${class}::$path:$varName $newVarName]
 }
 
-# Widget::redir_create_command --
+# Widget::options --
 #
-#   Create the redirecting command for widget instantiation procs
+#       Return a key-value list of options for a widget.  This can
+#       be used to serialize the options of a widget and pass them
+#       on to a new widget with the same options.
 #
 # Arguments:
-#   args	comments
-# Results:
-#   Returns ...
+#	path		Widget to get the options for.
+#	args		A list of options.  If empty, all options are returned.
 #
-proc Widget::redir_create_command {cmd {recmd {}}} {
-    if {$recmd eq ""} { set recmd ${cmd}::create }
-    if 0 {
-	proc $cmd {path args} \
-	    "return \[eval \[list [list $recmd] \$path\] \$args\]"
+# Results:
+#	Returns list of options as: -option value -option value ...
+proc Widget::options { path args } {
+    if {[llength $args]} {
+        foreach option $args {
+            lappend options [_get_configure $path $option]
+        }
     } else {
-	interp alias {} $cmd {} $recmd
+        set options [_get_configure $path {}]
     }
+
+    set result [list]
+    foreach list $options {
+        if {[llength $list] < 5} { continue }
+        lappend result [lindex $list 0] [lindex $list end]
+    }
+    return $result
 }
 
-# Widget::redir_widget_command --
+
+# Widget::getOption --
 #
-#   Create the redirecting command for widget instance procs
-#   Widget namespaces cannot contain spaces.
+#	Given a list of widgets, determine which option value to use.
+#	The widgets are given to the command in order of highest to
+#	lowest.  Starting with the lowest widget, whichever one does
+#	not match the default option value is returned as the value.
+#	If all the widgets are default, we return the highest widget's
+#	value.
 #
 # Arguments:
-#   args	comments
-# Results:
-#   Returns ...
+#	option		The option to check.
+#	default		The default value.  If any widget in the list
+#			does not match this default, its value is used.
+#	args		A list of widgets.
 #
-proc Widget::redir_widget_command {path ns} {
-    if 0 {
-	proc ::$path {cmd args} \
-	    "return \[eval \[list ${ns}::\$cmd [list $path]\] \$args\]"
-    } else {
-	proc ::$path {cmd args} \
-	    [subst {return \[eval \[linsert \$args 0 ${ns}::\$cmd [list $path]\]\]}]
+# Results:
+#	Returns the value of the given option to use.
+#
+proc Widget::getOption { option default args } {
+    for {set i [expr [llength $args] -1]} {$i >= 0} {incr i -1} {
+	set widget [lindex $args $i]
+	set value  [Widget::cget $widget $option]
+	if {[string equal $value $default]} { continue }
+	return $value
     }
+    return $value
+}
+
+
+proc Widget::nextIndex { path node } {
+    Widget::getVariable $path autoIndex
+    if {![info exists autoIndex]} { set autoIndex -1 }
+    return [string map [list #auto [incr autoIndex]] $node]
 }

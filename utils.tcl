@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.9 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: utils.tcl,v 1.10 2003/10/20 21:23:53 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -331,7 +331,7 @@ proc BWidget::place { path w h args } {
                     if { $idx == 2 } {
                         # try left, then right if out, then 0 if out
                         if { $x0 >= $w } {
-                            set x [expr {$x0-$sw}]
+                            set x "+[expr {$x0-$sw}]"
                         } elseif { $x1+$w <= $sw } {
                             set x "+$x1"
                         } else {
@@ -342,7 +342,7 @@ proc BWidget::place { path w h args } {
                         if { $x1+$w <= $sw } {
                             set x "+$x1"
                         } elseif { $x0 >= $w } {
-                            set x [expr {$x0-$sw}]
+                            set x "+[expr {$x0-$sw}]"
                         } else {
                             set x "-0"
                         }
@@ -356,7 +356,7 @@ proc BWidget::place { path w h args } {
                     if { $idx == 4 } {
                         # try top, then bottom, then 0
                         if { $h <= $y0 } {
-                            set y [expr {$y0-$sh}]
+                            set y "+[expr {$y0-$sh}]"
                         } elseif { $y1+$h <= $sh } {
                             set y "+$y1"
                         } else {
@@ -367,7 +367,7 @@ proc BWidget::place { path w h args } {
                         if { $y1+$h <= $sh } {
                             set y "+$y1"
                         } elseif { $h <= $y0 } {
-                            set y [expr {$y0-$sh}]
+                            set y "+[expr {$y0-$sh}]"
                         } else {
                             set y "-0"
                         }
@@ -395,7 +395,7 @@ proc BWidget::grab { option path } {
             set grinfo  [lindex $_gstack end]
             set _gstack [lreplace $_gstack end end]
             foreach {oldg mode} $grinfo {
-                if { [string compare $oldg $path] && [winfo exists $oldg] } {
+                if { ![string equal $oldg $path] && [winfo exists $oldg] } {
                     if { $mode == "global" } {
                         catch {::grab -global $oldg}
                     } else {
@@ -476,4 +476,102 @@ proc BWidget::badOptionString {type value list} {
     set last [lindex $list end]
     set list [lreplace $list end end]
     return "bad $type \"$value\": must be [join $list ", "], or $last"
+}
+
+
+proc BWidget::wrongNumArgsString { string } {
+    return "wrong # args: should be \"$string\""
+}
+
+
+proc BWidget::read_file { file } {
+    set fp [open $file]
+    set x  [read $fp [file size $file]]
+    close $fp
+    return $x
+}
+
+
+proc BWidget::classes { class } {
+    variable use
+
+    ${class}::use
+    set classes [list $class]
+    if {![info exists use($class)]} { return }
+    foreach class $use($class) {
+	eval lappend classes [classes $class]
+    }
+    return [lsort -unique $classes]
+}
+
+
+proc BWidget::library { args } {
+    variable use
+
+    set libs    [list widget init utils]
+    set classes [list]
+    foreach class $args {
+	${class}::use
+        eval lappend classes [classes $class]
+    }
+
+    eval lappend libs [lsort -unique $classes]
+
+    set library ""
+    foreach lib $libs {
+	if {![info exists use($lib,file)]} {
+	    set file [file join $::BWIDGET::LIBRARY $lib.tcl]
+	} else {
+	    set file [file join $::BWIDGET::LIBRARY $use($lib,file).tcl]
+	}
+        append library [read_file $file]
+    }
+
+    return $library
+}
+
+
+proc BWidget::inuse { class } {
+    variable ::Widget::_inuse
+
+    if {![info exists _inuse($class)]} { return 0 }
+    return [expr $_inuse($class) > 0]
+}
+
+
+proc BWidget::write { filename {mode w} } {
+    variable use
+
+    if {![info exists use(classes)]} { return }
+
+    set classes [list]
+    foreach class $use(classes) {
+	if {![inuse $class]} { continue }
+	lappend classes $class
+    }
+
+    set fp [open $filename $mode]
+    puts $fp [eval library $classes]
+    close $fp
+
+    return
+}
+
+
+# BWidget::bindMouseWheel --
+#
+#	Bind mouse wheel actions to a given widget.
+#
+# Arguments:
+#	widget - The widget to bind.
+#
+# Results:
+#	None.
+proc BWidget::bindMouseWheel { widget } {
+    bind $widget <MouseWheel>         {%W yview scroll [expr {-%D/24}]  units}
+    bind $widget <Shift-MouseWheel>   {%W yview scroll [expr {-%D/120}] pages}
+    bind $widget <Control-MouseWheel> {%W yview scroll [expr {-%D/120}] units}
+
+    bind $widget <Button-4> {event generate %W <MouseWheel> -delta  120}
+    bind $widget <Button-5> {event generate %W <MouseWheel> -delta -120}
 }

@@ -1,13 +1,13 @@
 # ----------------------------------------------------------------------------
 #  xpm2image.tcl
 #  Slightly modified xpm-to-image command
-#  $Id: xpm2image.tcl,v 1.3 2003/10/17 18:33:06 hobbs Exp $
-# ----------------------------------------------------------------------------
+#  $Id: xpm2image.tcl,v 1.4 2003/10/20 21:23:53 damonc Exp $
+# ------------------------------------------------------------------------------
 #
 #  Copyright 1996 by Roger E. Critchlow Jr., San Francisco, California
 #  All rights reserved, fair use permitted, caveat emptor.
 #  rec@elf.org
-#
+# 
 # ----------------------------------------------------------------------------
 
 proc xpm-to-image { file } {
@@ -44,7 +44,7 @@ proc xpm-to-image { file } {
             set data(y_hotspot) [lindex $sizes 5]
         }
     } else {
-	error "size line {$sizes} in $file did not compute"
+	    error "size line {$sizes} in $file did not compute"
     }
 
     #

@@ -21,6 +21,8 @@
 #    -weights available : apply weights to total available space (as before (<1.3.1) with place command)
 
 namespace eval PanedWindow {
+    Widget::define PanedWindow panedw
+
     namespace eval Pane {
         Widget::declare PanedWindow::Pane {
             {-minsize Int 0 0 "%d >= 0"}
@@ -39,9 +41,6 @@ namespace eval PanedWindow {
     }
 
     variable _panedw
-
-    Widget::redir_create_command ::PanedWindow
-    proc use {} {}
 }
 
 
@@ -62,10 +61,7 @@ proc PanedWindow::create { path args } {
     bind $path <Configure> [list PanedWindow::_realize $path %w %h]
     bind $path <Destroy>   [list PanedWindow::_destroy $path]
 
-    rename $path ::$path:cmd
-    Widget::redir_widget_command $path PanedWindow
-
-    return $path
+    return [Widget::create PanedWindow $path]
 }
 
 
@@ -210,21 +206,6 @@ proc PanedWindow::getframe { path index } {
     if { [winfo exists $path.f$index.frame] } {
         return $path.f$index.frame
     }
-}
-
-
-# ----------------------------------------------------------------------------
-#  Command PanedWindow::_destroy
-# ----------------------------------------------------------------------------
-proc PanedWindow::_destroy { path } {
-    variable _panedw
-
-    for {set i 0} {$i < $_panedw($path,nbpanes)} {incr i} {
-        Widget::destroy $path.f$i
-    }
-    unset _panedw($path,nbpanes)
-    Widget::destroy $path
-    rename $path {}
 }
     
 
@@ -371,9 +352,9 @@ proc PanedWindow::_apply_weights { path } {
     set wsash [expr {[Widget::getoption $path -width] + 2*[Widget::getoption $path -pad]}]
     set rs [winfo $size $path]
     set s [expr {$rs - ($_panedw($path,nbpanes) - 1) * $wsash}]
-
+    
     set tw 0.0
-    foreach w $_panedw($path,weights) {
+    foreach w $_panedw($path,weights) { 
 	set tw [expr {$tw + $w}]
     }
 
@@ -381,6 +362,20 @@ proc PanedWindow::_apply_weights { path } {
 	set rw [lindex $_panedw($path,weights) $i]
 	set ps [expr {int($rw / $tw * $s)}]
 	$path.f$i configure -$size $ps
-    }
+    }    
     return
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command PanedWindow::_destroy
+# ----------------------------------------------------------------------------
+proc PanedWindow::_destroy { path } {
+    variable _panedw
+
+    for {set i 0} {$i < $_panedw($path,nbpanes)} {incr i} {
+        Widget::destroy $path.f$i
+    }
+    unset _panedw($path,nbpanes)
+    Widget::destroy $path
 }

@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.7 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: passwddlg.tcl,v 1.8 2003/10/20 21:23:52 damonc Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -14,13 +14,12 @@
 #------------------------------------------------------------------------------
 
 namespace eval PasswdDlg {
-    Dialog::use
-    LabelEntry::use
+    Widget::define PasswdDlg passwddlg Dialog LabelEntry
 
     Widget::bwinclude PasswdDlg Dialog :cmd \
 	    remove     {-image -bitmap -side -default -cancel -separator} \
 	    initialize {-modal local -anchor c}
-
+    
     Widget::bwinclude PasswdDlg LabelEntry .frame.lablog \
 	    remove [list -command -justify -name -show -side	        \
 		-state -takefocus -width -xscrollcommand -padx -pady	\
@@ -33,7 +32,7 @@ namespace eval PasswdDlg {
 	    initialize [list -relief sunken -borderwidth 2		\
 		-labelanchor w -width 15 -loginlabel "Login"		\
 		]
-
+    
     Widget::bwinclude PasswdDlg LabelEntry .frame.labpass		\
 	    remove [list -command -width -show -side -takefocus		\
 		-xscrollcommand -dragenabled -dragendcmd -dragevent	\
@@ -46,15 +45,12 @@ namespace eval PasswdDlg {
 	    initialize [list -relief sunken -borderwidth 2		\
 		-labelanchor w -width 15 -passwdlabel "Password"	\
 		]
-
+    
     Widget::declare PasswdDlg {
         {-type        Enum       ok           0 {ok okcancel}}
         {-labelwidth  TkResource -1           0 {label -width}}
         {-command     String     ""           0}
     }
-
-    Widget::redir_create_command ::PasswdDlg
-    proc use {} {}
 }
 
 
@@ -118,7 +114,7 @@ proc PasswdDlg::create { path args } {
     $lablog  configure -labelwidth $labwidth
     $labpass configure -labelwidth $labwidth
 
-    Widget::redir_widget_command $path PasswdDlg
+    Widget::create PasswdDlg $path 0
 
     pack  $frame.lablog $frame.labpass -fill x -expand 1
 

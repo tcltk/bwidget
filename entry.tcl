@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.17 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: entry.tcl,v 1.18 2003/10/20 21:23:52 damonc Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -17,12 +17,14 @@
 # ------------------------------------------------------------------------------
 
 namespace eval Entry {
+    Widget::define Entry entry DragSite DropSite DynamicHelp
 
     # Note:  -textvariable is pulled off of the tk entry and put onto the
     # BW Entry so that we avoid the TkResource test for it, which screws up
     # the existance/non-existance bits of the -textvariable.
-    set remove  [list -state -cursor -foreground -textvariable]
+    set remove  [list -state -background -foreground -textvariable]
     set declare [list \
+	    [list -background		TkResource	""	0 entry] \
 	    [list -foreground		TkResource	""	0 entry] \
 	    [list -state	Enum	normal	0 [list normal disabled]] \
 	    [list -text			String	""	0] \
@@ -44,7 +46,8 @@ namespace eval Entry {
 	#
 	lappend remove -disabledforeground -disabledbackground
 	lappend declare \
-	    [list -disabledforeground	TkResource	""	0 entry]
+	    [list -disabledforeground	TkResource	""	0 entry] \
+	    [list -disabledbackground	TkResource	""	0 entry]
     } else {
 	lappend declare \
 	    [list -disabledforeground	TkResource	""	0 button]
@@ -74,12 +77,9 @@ namespace eval Entry {
     bind BwEntry <<Copy>> {}
     bind BwEditableEntry <<Copy>> [bind Entry <<Copy>>]
 
-    bind BwEntry <Return>  {Entry::invoke %W}
-    bind BwEntry <Destroy> {Entry::_destroy %W}
-    bind BwDisabledEntry <Destroy> {Entry::_destroy %W}
-
-    Widget::redir_create_command ::Entry
-    proc use {} {}
+    bind BwEntry <Return>          [list Entry::invoke %W]
+    bind BwEntry <Destroy>         [list Entry::_destroy %W]
+    bind BwDisabledEntry <Destroy> [list Entry::_destroy %W]
 }
 
 
@@ -110,12 +110,15 @@ proc Entry::create { path args } {
         $path configure -cursor left_ptr
     }
     if { [string equal $state "disabled"] } {
-        $path configure -foreground \
-		[Widget::getMegawidgetOption $path -disabledforeground]
+        $path configure \
+            -foreground [Widget::getMegawidgetOption $path -disabledforeground]
+            -background [Widget::getMegawidgetOption $path -disabledbackground]
     } else {
-	$path configure -foreground \
-		[Widget::getMegawidgetOption $path -foreground]
-	bindtags $path [linsert [bindtags $path] 2 BwEditableEntry]
+	$path configure \
+                -foreground [Widget::getMegawidgetOption $path -foreground] \
+                -background [Widget::getMegawidgetOption $path -background]
+                
+	bindtags $path [linsert [bindtags $path] 2 BwEditableEntry] 
     }
     if { [string length $text] } {
 	set varName [$path cget -textvariable]
@@ -128,16 +131,15 @@ proc Entry::create { path args } {
 	    $path configure -validate $validateState
 	    $path insert 0 [Widget::getMegawidgetOption $path -text]
 	}
-    }
+    }	
 
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd 1
     DropSite::setdrop $path $path Entry::_over_cmd Entry::_drop_cmd 1
     DynamicHelp::sethelp $path $path 1
 
-    rename $path ::$path:cmd
-    proc ::$path {cmd args} \
-	"return \[Entry::_path_command [list $path] \$cmd \$args\]"
-
+    Widget::create Entry $path
+    proc ::$path { cmd args } \
+    	"return \[Entry::_path_command $path \$cmd \$args\]"
     return $path
 }
 
@@ -153,8 +155,10 @@ proc Entry::configure { path args } {
     set res [Widget::configure $path $args]
 
     # Extract the modified bits that we are interested in.
-    foreach {chstate cheditable chfg chdfg chtext} [Widget::hasChangedX $path \
-	    -state -editable -foreground -disabledforeground -text] break
+    set vars [list chstate cheditable chfg chdfg chbg chdbg chtext]
+    set opts [list -state -editable -foreground -disabledforeground \
+                -background -disabledbackground -text]
+    foreach $vars [eval Widget::hasChangedX $path $opts] { break }
 
     if { $chstate || $cheditable } {
 	set state [Widget::getMegawidgetOption $path -state]
@@ -178,14 +182,16 @@ proc Entry::configure { path args } {
         }
     }
 
-    if { $chstate || $chfg || $chdfg } {
+    if { $chstate || $chfg || $chdfg || $chbg || $chdbg } {
 	set state [Widget::getMegawidgetOption $path -state]
         if { [string equal $state "disabled"] } {
-	    set dfg [Widget::cget $path -disabledforeground]
-            $path:cmd configure -fg $dfg
+            $path:cmd configure \
+                -fg [Widget::cget $path -disabledforeground] \
+                -bg [Widget::cget $path -disabledbackground]
         } else {
-	    set fg [Widget::cget $path -foreground]
-            $path:cmd configure -fg $fg
+            $path:cmd configure \
+                -fg [Widget::cget $path -foreground] \
+                -bg [Widget::cget $path -background]
         }
     }
     if { $chstate } {
@@ -264,19 +270,6 @@ proc Entry::_path_command { path cmd larg } {
     } else {
         return [eval [list $path:cmd $cmd] $larg]
     }
-}
-
-
-# ------------------------------------------------------------------------------
-#  Command Entry::_destroy
-# ------------------------------------------------------------------------------
-proc Entry::_destroy { path } {
-    variable $path
-    upvar 0 $path data
-
-    Widget::destroy $path
-    rename $path {}
-    unset data
 }
 
 
@@ -403,8 +396,9 @@ proc Entry::_over_cmd { path source event X Y op type dnddata } {
         DropSite::setcursor based_arrow_down
         return 1
     }
-    if { [Widget::getoption $path -editable] && [string equal [Widget::getoption $path -state] "normal"] } {
-        if { [string compare $event "leave"] } {
+    if { [Widget::getoption $path -editable]
+	&& [string equal [Widget::getoption $path -state] "normal"] } {
+        if { ![string equal $event "leave"] } {
             $path:cmd selection clear
             $path:cmd icursor @$x
             DropSite::setcursor based_arrow_down
@@ -466,3 +460,13 @@ proc Entry::_scroll { path dir x xmax } {
     }
 }
 
+
+# ------------------------------------------------------------------------------
+#  Command Entry::_destroy
+# ------------------------------------------------------------------------------
+proc Entry::_destroy { path } {
+    variable $path
+    upvar 0 $path data
+    Widget::destroy $path
+    unset data
+}

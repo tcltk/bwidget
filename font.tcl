@@ -15,9 +15,7 @@
 # ----------------------------------------------------------------------------
 
 namespace eval SelectFont {
-    Dialog::use
-    LabelFrame::use
-    ScrolledWindow::use
+    Widget::define SelectFont font Dialog LabelFrame ScrolledWindow
 
     Widget::declare SelectFont {
         {-title		String		"Font selection" 0}
@@ -34,15 +32,12 @@ namespace eval SelectFont {
         {-bg		Synonym		-background}
     }
 
-    Widget::redir_create_command ::SelectFont
-    proc use {} {}
-
     variable _families
     variable _styleOff
     array set _styleOff [list bold normal italic roman]
     variable _sizes     {4 5 6 7 8 9 10 11 12 13 14 15 16 \
 	    17 18 19 20 21 22 23 24}
-
+    
     # Set up preset lists of fonts, so the user can avoid the painfully slow
     # loadfont process if desired.
     if { [string equal $::tcl_platform(platform) "windows"] } {
@@ -107,7 +102,7 @@ namespace eval SelectFont {
 	    presetfixed		$presetFixed	\
 	    presetall		$presetAll	\
 	    ]
-
+		
     variable _widget
 }
 
@@ -157,6 +152,7 @@ proc SelectFont::create { path args } {
 		        SelectFont::_update [list $path]"
         bind $lbf <ButtonRelease-1> $script
         bind $lbf <space>           $script
+	bind $lbf <1>               [list focus %W]
         pack $sw -fill both -expand yes
 
         set labf2 [LabelFrame::create $topf.labf2 -text "Size" -name size \
@@ -172,6 +168,7 @@ proc SelectFont::create { path args } {
 			SelectFont::_update [list $path]"
         bind $lbs <ButtonRelease-1> $script
         bind $lbs <space>           $script
+	bind $lbs <1>               [list focus %W]
         pack $sw -fill both -expand yes
 
         set labf3 [LabelFrame::create $topf.labf3 -text "Style" -name style \
@@ -219,7 +216,9 @@ proc SelectFont::create { path args } {
 
         _getfont $path
 
-	set res [_draw $path]
+	Widget::create SelectFont $path 0
+
+        return [_draw $path]
     } else {
 	if { [Widget::getoption "$path#SelectFont" -querysystem] } {
 	    set fams [Widget::getoption "$path#SelectFont" -families]
@@ -257,12 +256,10 @@ proc SelectFont::create { path args } {
         set data(lbs)   $lbs
         _getfont $path
 
-        rename $path ::$path:cmd
-	set res $path
+	return [Widget::create SelectFont $path]
     }
 
-    Widget::redir_widget_command $path SelectFont
-    return $res
+    return $path
 }
 
 
@@ -374,19 +371,6 @@ proc SelectFont::_draw { path } {
 
 
 # ----------------------------------------------------------------------------
-#  Command SelectFont::_destroy
-# ----------------------------------------------------------------------------
-proc SelectFont::_destroy { path } {
-    variable $path
-    upvar 0  $path data
-
-    unset data
-    Widget::destroy "$path#SelectFont"
-    rename $path {}
-}
-
-
-# ----------------------------------------------------------------------------
 #  Command SelectFont::_modstyle
 # ----------------------------------------------------------------------------
 proc SelectFont::_modstyle { path style } {
@@ -485,3 +469,13 @@ proc SelectFont::_getfont { path } {
     }
 }
 
+
+# ----------------------------------------------------------------------------
+#  Command SelectFont::_destroy
+# ----------------------------------------------------------------------------
+proc SelectFont::_destroy { path } {
+    variable $path
+    upvar 0  $path data
+    unset data
+    Widget::destroy "$path#SelectFont"
+}

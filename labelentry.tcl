@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  labelentry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: labelentry.tcl,v 1.5 2003/10/17 18:33:06 hobbs Exp $
+#  $Id: labelentry.tcl,v 1.6 2003/10/20 21:23:52 damonc Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - LabelEntry::create
@@ -11,8 +11,7 @@
 # ------------------------------------------------------------------------------
 
 namespace eval LabelEntry {
-    Entry::use
-    LabelFrame::use
+    Widget::define LabelEntry labelentry Entry LabelFrame
 
     Widget::bwinclude LabelEntry LabelFrame .labf \
         remove {-relief -borderwidth -focus} \
@@ -28,11 +27,8 @@ namespace eval LabelEntry {
     Widget::syncoptions LabelEntry Entry .e {-text {}}
     Widget::syncoptions LabelEntry LabelFrame .labf {-label -text -underline {}}
 
-    ::bind BwLabelEntry <FocusIn> {focus %W.labf}
-    ::bind BwLabelEntry <Destroy> {Widget::destroy %W; rename %W {}}
-
-    Widget::redir_create_command ::LabelEntry
-    proc use { } {}
+    ::bind BwLabelEntry <FocusIn> [list focus %W.labf]
+    ::bind BwLabelEntry <Destroy> [list LabelEntry::_destroy %W]
 }
 
 
@@ -46,7 +42,7 @@ proc LabelEntry::create { path args } {
     eval [list frame $path] $maps(:cmd) -class LabelEntry \
 	    -relief flat -bd 0 -highlightthickness 0 -takefocus 0
     Widget::initFromODB LabelEntry $path $maps(LabelEntry)
-
+	
     set labf  [eval [list LabelFrame::create $path.labf] $maps(.labf) \
                    [list -relief flat -borderwidth 0 -focus $path.e]]
     set subf  [LabelFrame::getframe $labf]
@@ -57,11 +53,7 @@ proc LabelEntry::create { path args } {
 
     bindtags $path [list $path BwLabelEntry [winfo toplevel $path] all]
 
-    rename $path ::$path:cmd
-    proc ::$path {cmd args} \
-	"return \[LabelEntry::_path_command [list $path] \$cmd \$args\]"
-
-    return $path
+    return [Widget::create LabelEntry $path]
 }
 
 
@@ -100,4 +92,9 @@ proc LabelEntry::_path_command { path cmd larg } {
     } else {
         return [eval [list $path.e:cmd $cmd] $larg]
     }
+}
+
+
+proc LabelEntry::_destroy { path } {
+    Widget::destroy $path
 }
