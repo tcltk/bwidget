@@ -1,8 +1,11 @@
-07/19/2001
-BWidget ToolKit 1.3.1
-Copyright (c) 1998-1999 UNIFIX. 
+BWidget ToolKit 1.4.0				Dec 2001
+Copyright (c) 1998-1999 UNIFIX.
+Copyright (c) 2001 ActiveState Corp. 
+
+See the file LICENSE.txt for license info (uses Tcl's BSD-style license).
 
 --------------------------------------------------------------------------
+
 WHAT IS BWIDGET ?
 
 The BWidget Toolkit is a high-level Widget Set for Tcl/Tk built using
@@ -21,7 +24,7 @@ community developers.  See the ChangeLog file for details.
 
 --------------------------------------------------------------------------
 
-WIDGET LIST (1.3.1)
+WIDGET LIST (1.4)
 
 Simple Widgets 
       Label           Extended Label widget
@@ -67,7 +70,7 @@ Commands Classes
 INSTALLATION AND USE
 
 - On Unix Platform:
-  Uncompress the file BWidget-1.2.1.tar.Z or BWidget-1.2.1.tar.gz
+  Uncompress the file BWidget-<version>.tar.Z|gz
 
   To use the BWidget:
   - If you have uncompressed the archive file under the Tcl Library Path
@@ -83,7 +86,7 @@ INSTALLATION AND USE
       $ wish demo.tcl
 
 - On Windows and others Platforms:
-  Uncompress the file BWidget-1.2.1.zip
+  Uncompress the file BWidget-<version>.zip
 
   To use the BWidget:
   - If you uncompressed the archive file under the Tcl Library Path
@@ -100,7 +103,7 @@ INSTALLATION AND USE
 
 Distribution contains these directories:
 
-BWidget-1.3.1   Root directory and BWidget Tcl sources
+BWidget-<version>   Root directory and BWidget Tcl sources
    BWman        HTML manual pages
    images       images used by BWidget
    lang         Resources for language customization
@@ -116,28 +119,9 @@ HTML manual pages are available in the BWman subdirectory.  Point to
 index.html for frame version with tree navigation, or to contents.html
 for no frame version.
 
-
---------------------------------------------------------------------------
-
-LICENSE
-
-BWidget ToolKit 1.3.1
-Copyright (c) 1998-1999 UNIFIX. 
-
-The BWidget toolkit was originally released under the GNU Public
-License (GPL), and then under the Lesser GPL (LGPL), and finally under
-the Tcl license, which is similar to the BSD license.
-
-See the file LICENSE.txt for details.
-
 --------------------------------------------------------------------------
 
 CONTACTS
 
 The BWidget toolkit is maintained on Sourceforge, at
 http://www.sourceforge.net/projects/tcllib/
-
-
-
-
-

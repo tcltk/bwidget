@@ -1,5 +1,6 @@
 BWidget ToolKit
 Copyright (c) 1998-1999 UNIFIX. 
+Copyright (c) 2001 ActiveState Corp. 
 
 The following terms apply to all files associated with the software
 unless explicitly disclaimed in individual files.
