@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.9 2000/03/10 16:58:13 ericm Exp $
+#  $Id: widget.tcl,v 1.10 2000/03/13 17:21:25 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -807,6 +807,23 @@ proc Widget::getoption { path option } {
     return [Widget::cget $path $option]
 }
 
+# Widget::getMegawidgetOption --
+#
+#	Bypass the superfluous checks in cget and just directly peer at the
+#	widget's data space.  This is much more fragile than cget, so it 
+#	should only be used with great care, in places where speed is critical.
+#
+# Arguments:
+#	path	widget to lookup options for.
+#	option	option to retrieve.
+#
+# Results:
+#	value	option value.
+
+proc Widget::getMegawidgetOption {path option} {
+    set class $::Widget::_class($path)
+    set ${class}::$path:opt($option)
+}
 
 # ------------------------------------------------------------------------------
 #  Command Widget::_get_window

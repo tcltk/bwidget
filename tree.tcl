@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.19 2000/03/11 02:19:14 sven Exp $
+#  $Id: tree.tcl,v 1.20 2000/03/13 17:21:25 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -713,13 +713,21 @@ proc Tree::visiblenodes { path } {
     variable $path
     upvar 0  $path data
 
-    set result ""
-    foreach element [array names data] {
-        if {![catch {Widget::cget $path.$element -open} exp]} {
-            if {$exp} {
-                lappend result $element
-            }
-        }
+    # Root is always open (?), so all of its children automatically get added
+    # to the result, and to the stack.
+    set st [lrange $data(root) 1 end]
+    set result $st
+
+    while { [llength $st] } { 
+	set node [lindex $st end]
+	set st [lreplace $st end end]
+	# Danger, danger!  Using getMegawidgetOption is fragile, but much
+	# much faster than going through cget.
+	if { [Widget::getMegawidgetOption $path.$node -open] } {
+	    set nodes [lrange $data($node) 1 end]
+	    set result [concat $result $nodes]
+	    set st [concat $st $nodes]
+	}
     }
     return $result
 }

@@ -1,3 +1,30 @@
+2000-03-13  Eric Melski  <ericm@scriptics.com>
+
+	* widget.tcl: Added getMegawidgetOption function, which allows
+	direct access to megawidget-specific options (those that do not
+	map to a component widget option).  This is dangerous, because it
+	bypasses some checks, and it will only work with options that are
+	specific to the megawidget.  However, it is much faster, and
+	enables some functions (like visiblenodes) to be much faster.
+
+	* tree.tcl: Reworked visiblenodes function to do a tree walk to
+	find visible nodes.  This is faster and more correct than the
+	previous implementation, which queried all the nodes in the tree
+	for their open bit.
+	
+
+2000-03-10  Eric Melski  <ericm@scriptics.com>
+
+	* widget.tcl: Replaced an upvar with a direct reference to the
+	variable in initFromODB.
+
+	* dynhelp.tcl: Changed sethelp function to use new hasChangedX
+	function instead of hasChanged, which avoids an unneeded upvar,
+	for a little better speed.
+
+	* button.tcl: Changed to parseArgs/initFromODB format for a small
+	(25%) speedup in creation time.
+
 2000-03-10  Sven Delmas  <sven@scriptics.com>
 
 	* tree.tcl: Changed the allnodes procedure to visiblenodes, and
