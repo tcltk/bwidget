@@ -1,3 +1,8 @@
+2003-11-17  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* entry.tcl (Entry::create): add missing line continuation.
+	[Patch #843932] (oehlmann)
+
 2003-11-10  Damon Courtney  <damon@unreality.com>
 
 	* entry.tcl: Use a button widget for -disabled options if
