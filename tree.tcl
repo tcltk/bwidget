@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.21 2000/03/13 18:21:48 ericm Exp $
+#  $Id: tree.tcl,v 1.22 2000/03/14 00:22:08 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -333,7 +333,7 @@ proc Tree::itemcget { path node option } {
         return -code error "node \"$node\" does not exist"
     }
 
-    return [Widget::getMegawidgetOption $path.$node $option]
+    return [Widget::cget $path.$node $option]
 }
 
 
