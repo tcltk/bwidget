@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.11 2000/03/13 18:21:48 ericm Exp $
+#  $Id: entry.tcl,v 1.12 2000/03/14 01:23:03 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -63,8 +63,8 @@ namespace eval Entry {
 # ------------------------------------------------------------------------------
 proc Entry::create { path args } {
     variable $path
-    upvar 0  $path data
-    
+    upvar 0 $path data
+
     array set maps [list Entry {} :cmd {}]
     array set maps [Widget::parseArgs Entry $args]
 
@@ -119,9 +119,6 @@ proc Entry::create { path args } {
 #  Command Entry::configure
 # ------------------------------------------------------------------------------
 proc Entry::configure { path args } {
-    variable $path
-    upvar 0  $path data
-
     # Cheat by setting the -text value to the current contents of the entry
     # This might be better hidden behind a function in ::Widget.
     set Widget::Entry::${path}:opt(-text) [$path:cmd get]
@@ -205,7 +202,7 @@ proc Entry::cget { path option } {
     if { [string equal "-text" $option] } {
 	return [$path:cmd get]
     }
-    return [Widget::cget $path $option]
+    Widget::cget $path $option
 }
 
 
@@ -236,7 +233,7 @@ proc Entry::_path_command { path cmd larg } {
 # ------------------------------------------------------------------------------
 proc Entry::_destroy { path } {
     variable $path
-    upvar 0  $path data
+    upvar 0 $path data
 
     Widget::destroy $path
     rename $path {}

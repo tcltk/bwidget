@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.22 2000/03/14 00:22:08 ericm Exp $
+#  $Id: tree.tcl,v 1.23 2000/03/14 01:23:04 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -103,6 +103,7 @@ namespace eval Tree {
     # Trees on windows have a white (system window) background
     if { $::tcl_platform(platform) == "windows" } {
 	option add *Tree.c.background SystemWindow widgetDefault
+	option add *TreeNode.fill SystemWindowText widgetDefault
     }
 
     proc ::Tree { path args } { return [eval Tree::create $path $args] }

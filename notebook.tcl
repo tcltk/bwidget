@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.8 2000/02/29 22:05:22 ericm Exp $
+#  $Id: notebook.tcl,v 1.9 2000/03/14 01:23:03 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -88,16 +88,6 @@ namespace eval NoteBook {
     }
 
     Widget::addmap NoteBook "" .c {-background {}}
-#    Widget::addmap NoteBook ArrowButton .c.fg {
-#        -foreground {} -background {} 
-#	-activeforeground {} -activebackground {} -disabledforeground {}
-#	-borderwidth {} -repeatinterval {} -repeatdelay {}
-#    }
-#    Widget::addmap NoteBook ArrowButton .c.fd {
-#        -foreground {} -background {}
-#        -activeforeground {} -activebackground {} -disabledforeground {}
-#        -borderwidth {} -repeatinterval {} -repeatdelay {}
-#    }
 
     variable _warrow 12
 

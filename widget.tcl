@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.10 2000/03/13 17:21:25 ericm Exp $
+#  $Id: widget.tcl,v 1.11 2000/03/14 01:23:04 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -700,40 +700,25 @@ proc Widget::cget { path option } {
     }
 
     set class $::Widget::_class($path)
-    upvar 0 ${class}::opt  classopt
-    upvar 0 ${class}::map classmap
-
-    if { ![info exists classopt($option)] } {
+    # It'd be prettier to upvar ${class}::opt as classopt, but it's faster
+    # to avoid it, and use [set ${class}::opt($option)].  Same holds for
+    # ${class}::map/classmap and ${class}::${path}:opt/pathopt.
+    if { ![info exists ${class}::opt($option)] } {
         return -code error "unknown option \"$option\""
     }
 
-    set optdesc $classopt($option)
+    set optdesc [set ${class}::opt($option)]
     set type    [lindex $optdesc 0]
     if { ![string compare $type "Synonym"] } {
         set option [lindex $optdesc 1]
     }
 
-    if { [info exists classmap($option)] } {
-	foreach {subpath subclass realopt} $classmap($option) {break}
+    if { [info exists ${class}::map($option)] } {
+	foreach {subpath subclass realopt} [set ${class}::map($option)] {break}
 	set path "[_get_window $class $path]$subpath"
 	return [$path cget $realopt]
     }
-    upvar 0 ${class}::$path:opt pathopt
-    return $pathopt($option)
-
-    upvar 0 ${class}::sync classync
-    if { [info exists classync($option)] } {
-        set window [_get_window $class $path]
-        foreach {subpath subclass realopt} $classync($option) {
-            if { [string length $subclass] } {
-                set pathopt($option) [${subclass}::cget $window$subpath $realopt]
-            } else {
-                set pathopt($option) [$window$subpath cget $realopt]
-            }
-        }
-    }
-
-    return $pathopt($option)
+    set ${class}::${path}:opt($option)
 }
 
 
