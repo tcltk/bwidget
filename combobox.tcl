@@ -1,8 +1,8 @@
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.17 2000/10/31 15:48:51 kuchler Exp $
-# ------------------------------------------------------------------------------
+#  $Id: combobox.tcl,v 1.18 2001/06/11 23:57:33 hobbs Exp $
+# -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
 #     - ComboBox::configure
@@ -14,7 +14,10 @@
 #     - ComboBox::_unmapliste
 #     - ComboBox::_select
 #     - ComboBox::_modify_value
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# ComboBox uses the 8.3 -listvariable listbox option
+package require Tk 8.3
 
 namespace eval ComboBox {
     ArrowButton::use
@@ -200,7 +203,7 @@ proc ComboBox::setvalue { path index } {
         default {
             if { [string index $index 0] == "@" } {
                 set idx [string range $index 1 end]
-		if { ![string is integer $idx] } {
+		if { ![string is integer -strict $idx] } {
                     return -code error "bad index \"$index\""
                 }
             } else {
