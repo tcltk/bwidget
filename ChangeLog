@@ -1,3 +1,11 @@
+2000-03-09  Sven Delmas  <sven@scriptics.com>
+
+	* tree.tcl: Disabled the update before the find withtag in the
+	allnodes procedure. The nodes are apparently created delayed, so
+	before this procedure is called, the program has to do an
+	update. I don't do this in the procedure anymore, because it
+	caused multiple updates, making the app slower.
+
 2000-03-08  Sven Delmas  <sven@scriptics.com>
 
 	* tree.tcl: The new allnodes procedure was not handling the
