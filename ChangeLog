@@ -1,3 +1,9 @@
+2001-09-11  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* notebook.tcl: Removed 'Canvas' from the list of bindtags for the
+	  internal canvas to prevent interference from application
+	  specific bindings with our special widget. [459033].
+
 2001-09-06  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* passwddlg.tcl: Accepted change by Bastien Chevreux

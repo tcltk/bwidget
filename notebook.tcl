@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.11 2000/10/01 17:36:02 ericm Exp $
+#  $Id: notebook.tcl,v 1.12 2001/09/13 17:28:44 andreas_kupries Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -129,6 +129,17 @@ proc NoteBook::create { path args } {
 	    -width $w			\
 	    -height $h
     pack $path.c -expand yes -fill both
+
+    # Removing the Canvas global bindings from our canvas as
+    # application specific bindings on that tag may interfere with its
+    # operation here. [SF item #459033]
+
+    set bindings [bindtags $path.c]
+    set pos [lsearch -exact $bindings Canvas]
+    if {$pos >= 0} {
+	set bindings [lreplace $bindings $pos $pos]
+    }
+    bindtags $path.c $bindings
 
     # Create the arrow button
     eval ArrowButton::create $path.c.fg [Widget::subcget $path .c.fg] \
