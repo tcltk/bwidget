@@ -26,6 +26,8 @@ namespace eval SelectFont {
 
         {-type       Enum       dialog        0 {dialog toolbar}}
         {-font       TkResource ""            0 label}
+	{-families   String     "all"         1}
+	{-styles     String     "bold italic underline overstrike" 1}
         {-command    String     ""            0}
         {-sampletext String     "Sample Text" 0}
         {-bg         Synonym    -background}
@@ -35,7 +37,9 @@ namespace eval SelectFont {
     proc use {} {}
 
     variable _families
-    variable _styles   {bold italic underline overstrike}
+    variable _styleOff
+    array set _styleOff \
+	    [list bold normal italic roman underline 0 overstrike 0]
     variable _sizes    {4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24}
 
     variable _widget
@@ -48,7 +52,7 @@ namespace eval SelectFont {
 proc SelectFont::create { path args } {
     variable _families
     variable _sizes
-    variable _styles
+#    variable _styles
     variable $path
     upvar 0  $path data
 
@@ -57,6 +61,7 @@ proc SelectFont::create { path args } {
     }
     Widget::init SelectFont "$path#SelectFont" $args
     set bg [Widget::getoption "$path#SelectFont" -background]
+    set _styles [Widget::getoption "$path#SelectFont" -styles]
     if { [Widget::getoption "$path#SelectFont" -type] == "dialog" } {
         Dialog::create $path -modal local -default 0 -cancel 1 -background $bg \
             -title  [Widget::getoption "$path#SelectFont" -title] \
@@ -73,7 +78,8 @@ proc SelectFont::create { path args } {
                        -height 5 -width 25 -exportselection false -selectmode browse]
         ScrolledWindow::setwidget $sw $lbf
         LabelFrame::configure $labf1 -focus $lbf
-        eval $lbf insert end $_families
+        eval $lbf insert end \
+		$_families([Widget::getoption "$path#SelectFont" -families])
         set script "set SelectFont::$path\(family\) \[%W curselection\]; SelectFont::_update $path"
         bind $lbf <ButtonRelease-1> $script
         bind $lbf <space>           $script
@@ -142,11 +148,12 @@ proc SelectFont::create { path args } {
 
         return [_draw $path]
     } else {
+	set fams [Widget::getoption "$path#SelectFont" -families]
         frame $path -relief flat -borderwidth 0 -background $bg
         bind $path <Destroy> "SelectFont::_destroy $path"
         set lbf [ComboBox::create $path.font \
                      -highlightthickness 0 -takefocus 0 -background $bg \
-                     -values   $_families \
+                     -values   $_families($fams) \
                      -textvariable SelectFont::$path\(family\) \
                      -editable 0 \
                      -modifycmd "SelectFont::_update $path"]
@@ -184,7 +191,8 @@ proc SelectFont::create { path args } {
 #  Command SelectFont::configure
 # ------------------------------------------------------------------------------
 proc SelectFont::configure { path args } {
-    variable _styles
+#    variable _styles
+    set _styles [Widget::getoption "$path#SelectFont" -styles]
 
     set res [Widget::configure "$path#SelectFont" $args]
 
@@ -238,16 +246,26 @@ proc SelectFont::loadfont { } {
     variable _families
 
     # initialize families
-    set _families {}
+    set _families(all) {}
+    set _families(fixed) {}
+    set _families(variable) {}
     set lfont     [font families]
     lappend lfont times courier helvetica
     foreach font $lfont {
         set family [font actual [list $font] -family]
-        if { [lsearch -exact $_families $family] == -1 } {
-            lappend _families $family
+        if { [lsearch -exact $_families(all) $family] == -1 } {
+            lappend _families(all) $family
         }
     }
-    set _families [lsort $_families]
+    set _families(all) [lsort $_families(all)]
+    foreach family $_families(all) {
+	if { [font metrics [list $family] -fixed] } {
+	    lappend _families(fixed) $family
+	} else {
+	    lappend _families(variable) $family
+	}
+    }
+    return
 }
 
 
@@ -317,18 +335,20 @@ proc SelectFont::_modstyle { path style } {
 proc SelectFont::_update { path } {
     variable _families
     variable _sizes
-    variable _styles
+    variable _styleOff
     variable $path
     upvar 0  $path data
 
     set type [Widget::getoption "$path#SelectFont" -type]
+    set fams [Widget::getoption "$path#SelectFont" -families]
+    set _styles [Widget::getoption "$path#SelectFont" -styles]
     if { $type == "dialog" } {
         set curs [$path:cmd cget -cursor]
         $path:cmd configure -cursor watch
     }
     if { [Widget::getoption "$path#SelectFont" -type] == "dialog" } {
         set font [list \
-                      [lindex $_families $data(family)] \
+                      [lindex $_families($fams) $data(family)] \
                       [lindex $_sizes $data(size)]]
     } else {
         set font [list $data(family) $data(size)]
@@ -336,7 +356,9 @@ proc SelectFont::_update { path } {
     foreach st $_styles {
         if { $data($st) } {
             lappend font $st
-        }
+        } else {
+	    lappend font $_styleOff($st)
+	}
     }
     Widget::setoption "$path#SelectFont" -font $font
     if { $type == "dialog" } {
@@ -353,7 +375,7 @@ proc SelectFont::_update { path } {
 # ------------------------------------------------------------------------------
 proc SelectFont::_getfont { path } {
     variable _families
-    variable _styles
+#    variable _styles
     variable _sizes
     variable $path
     upvar 0  $path data
@@ -363,8 +385,10 @@ proc SelectFont::_getfont { path } {
     set data(italic)     [expr {[string compare $font(-slant)  "roman"]  != 0}]
     set data(underline)  $font(-underline)
     set data(overstrike) $font(-overstrike)
+    set _styles [Widget::getoption "$path#SelectFont" -styles]
+    set fams [Widget::getoption "$path#SelectFont" -families]
     if { [Widget::getoption "$path#SelectFont" -type] == "dialog" } {
-        set idxf [lsearch $_families $font(-family)]
+        set idxf [lsearch $_families($fams) $font(-family)]
         set idxs [lsearch $_sizes    $font(-size)]
         set data(family) [expr {$idxf >= 0 ? $idxf : 0}]
         set data(size)   [expr {$idxs >= 0 ? $idxs : 0}]

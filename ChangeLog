@@ -1,9 +1,16 @@
+1999-10-25  Eric Melski  <ericm@scriptics.com>
+
+	* font.tcl: Added support for two new flags: -families and -styles; 
+	-families allows you to specify one of all, fixed, or variable, to limit 
+	the choice of fonts to those fonts; -styles allows you to specify a list
+	of styles that can be set with the widget (ie, bold, italic, etc).
+
 1999-10-22  Eric Melski  <ericm@scriptics.com>
 
 	* tree.tcl: Fixed some problems with keyboard traversal.  Added
 	support for left/right arrows a la MS Explorer.
 	Added support for keyboard-based scrolling.
-
+	
 1999-10-21  Eric Melski  <ericm@scriptics.com>
 
 	* tree.tcl: Added a -selectable option to tree nodes, which
