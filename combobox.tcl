@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.28 2003/10/28 05:03:17 damonc Exp $
+#  $Id: combobox.tcl,v 1.29 2003/11/06 05:49:44 damonc Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -436,7 +436,7 @@ proc ComboBox::_create_popup { path } {
                 -selectbackground [Widget::cget $path -selectbackground] \
                 -selectforeground [Widget::cget $path -selectforeground] \
                 -listvariable [Widget::varForOption $path -values]]
-        ::bind $listb <1>      "ComboBox::_select $path \[%W curselection]"
+        ::bind $listb <ButtonRelease-1> [list ComboBox::_select $path @%x,%y]
 
         if {[Widget::cget $path -hottrack]} {
             bindtags $listb [concat [bindtags $listb] ListBoxHotTrack]

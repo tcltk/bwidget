@@ -1,3 +1,8 @@
+2003-11-05  Damon Courtney  <damon@unreality.com>
+
+	* combobox.tcl: Fixed dropdown listbox selection for
+	standard Tk listbox [Bug 831496].
+
 2003-11-05  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* scrollview.tcl (ScrollView::_set_view): correct :canvas to
