@@ -5,6 +5,10 @@
 	(_redraw_listbox): call _update_select_fill on redraw, otherwise
 	the insert of items causes wonkiness.
 	(_redraw_items): call update idle after changing cursor.
+	(create): Insert $path into the canvas bindings, so that anyone
+	binding directly onto the widget will see their bindings activated
+	when the canvas has focus. Add slightly modified up/down bindings
+	to the canvas, in case it gets the focus (like with -autofocus).
 
 2004-04-21  Jeff Hobbs  <jeffh@ActiveState.com>
 

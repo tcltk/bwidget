@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.18 2004/04/22 21:29:26 hobbs Exp $
+#  $Id: listbox.tcl,v 1.19 2004/04/22 22:50:15 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -156,13 +156,23 @@ proc ListBox::create { path args } {
     set dy [Widget::cget $path -deltay]
     $path.c configure -width [expr {$w*8}] -height [expr {$h*$dy}]
 
-    ## Let any click within the canvas focus on the canvas so that
-    ## MouseWheel scroll events will be properly handled by the
-    ## canvas.
+    # Insert $path into the canvas bindings, so that anyone binding
+    # directly onto the widget will see their bindings activated when
+    # the canvas has focus.
+    set bindtags [bindtags $path.c]
+    set bindtags [linsert $bindtags 1 $path]
+    # Let any click within the canvas focus on the canvas so that
+    # MouseWheel scroll events will be properly handled by the canvas.
     if {[Widget::cget $path -autofocus]} {
-	bindtags $path.c [concat [bindtags $path.c] ListBoxFocus]
+	lappend bindtags ListBoxFocus
 	BWidget::bindMouseWheel $path.c
     }
+    bindtags $path.c $bindtags
+
+    # Add slightly modified up/down bindings to the canvas, in case
+    # it gets the focus (like with -autofocus).
+    bind $path.c <Key-Up> {ListBox::_keyboard_navigation [winfo parent %W] -1}
+    bind $path.c <Key-Down> {ListBox::_keyboard_navigation [winfo parent %W] 1}
 
     switch -exact -- [Widget::getoption $path -selectmode] {
 	single {
