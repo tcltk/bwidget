@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  scrollview.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollview.tcl,v 1.6 2003/10/20 21:23:52 damonc Exp $
+#  $Id: scrollview.tcl,v 1.7 2003/11/05 18:04:29 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -49,7 +49,7 @@ namespace eval ScrollView {
 # ------------------------------------------------------------------------------
 proc ScrollView::create { path args } {
     Widget::init ScrollView $path $args
-    eval canvas $path [Widget::subcget $path :cmd] -highlightthickness 0
+    eval [list canvas $path] [Widget::subcget $path :cmd] -highlightthickness 0
 
     Widget::create ScrollView $path
 
@@ -193,7 +193,7 @@ proc ScrollView::_set_view { path cmd x y } {
     set w [Widget::getoption $path -window]
     if {[winfo exists $w]} {
         if {[string equal $cmd "set"]} {
-            set c  [$path:canvas coords view]
+            set c  [$path:cmd coords view]
             set x0 [lindex $c 0]
             set y0 [lindex $c 1]
             set x1 [lindex $c 2]
