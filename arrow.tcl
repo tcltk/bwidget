@@ -164,7 +164,9 @@ proc ArrowButton::cget { path option } {
 #  Command ArrowButton::invoke
 # ------------------------------------------------------------------------------
 proc ArrowButton::invoke { path } {
-    set path [winfo parent $path]
+    if { ![string equal [winfo class $path] "ArrowButton"] } {
+	set path [winfo parent $path]
+    }
     if { [string compare [Widget::getoption $path -state] "disabled"] } {
         set oldstate [Widget::getoption $path -state]
         if { ![string compare [Widget::getoption $path -type] "button"] } {

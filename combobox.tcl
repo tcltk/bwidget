@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.8 2000/02/26 01:56:39 ericm Exp $
+#  $Id: combobox.tcl,v 1.9 2000/02/26 03:51:17 ericm Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -96,12 +96,12 @@ proc ComboBox::create { path args } {
     pack $entry -in $frame -side left  -fill both -expand yes
     pack $labf  -fill x -expand yes
 
-    if { [Widget::getoption $path -editable] != 0 } {
+    if { [Widget::cget $path -editable] } {
         ::bind $entry <ButtonPress-1> "ComboBox::_unmapliste $path"
-        $path.e config -state normal
+        Entry::configure $path.e -state normal
     } else {
         ::bind $entry <ButtonPress-1> "ArrowButton::invoke $path.a"
-        $path.e config -state disabled
+        Entry::configure $path.e -state disabled
     }
 
     ::bind $path  <ButtonPress-1> "ComboBox::_unmapliste $path"
@@ -134,10 +134,10 @@ proc ComboBox::configure { path args } {
     if { [Widget::hasChanged $path -editable ed] } {
         if { $ed } {
             ::bind $path.e <ButtonPress-1> "ComboBox::_unmapliste $path"
-             $path.e config -state normal
-       } else {
-            ::bind $path.e <ButtonPress-1> "ArrowButton::invoke $path.a"
-            $path.e config -state disabled
+	    Entry::configure $path.e -state normal
+	} else {
+	    ::bind $path.e <ButtonPress-1> "ArrowButton::invoke $path.a"
+	    Entry::configure $path.e -state disabled
         }
     }
 
@@ -184,7 +184,7 @@ proc ComboBox::setvalue { path index } {
         default {
             if { [string index $index 0] == "@" } {
                 set idx [string range $index 1 end]
-                if { [catch {string compare [expr {int($idx)}] $idx} res] || $res != 0 } {
+		if { ![string is integer $idx] } {
                     return -code error "bad index \"$index\""
                 }
             } else {
@@ -194,12 +194,7 @@ proc ComboBox::setvalue { path index } {
     }
     if { $idx >= 0 && $idx < [llength $values] } {
         set newval [lindex $values $idx]
-        Widget::setoption $path -text $newval
-        if { [set varname [Entry::cget $path.e -textvariable]] != "" } {
-            GlobalVar::setvar $varname $newval
-        } else {
-            Entry::configure $path.e -text $newval
-        }
+	Entry::configure $path.e -text $newval
         return 1
     }
     return 0
