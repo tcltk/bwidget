@@ -1,3 +1,16 @@
+2005-07-27  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* statusbar.tcl: if themed, use ttk::separator
+	* scrollframe.tcl: if themed, use ttk::frame
+	* font.tcl: if themed, use ttk::comboboxes and ttk::checkbuttons
+	* widget.tcl: encapsulate all .#BWidget* hidden widgets into a
+	single frame .#BWidget to clean up main '.' childspace.
+	Add 'Widget::theme ?boolean?' that, if enabled, has BWidgets try
+	to use some ttk themed widgets (*very* incomplete).
+
+	* init.tcl (Widget::_opt_defaults): make a proc for opt defaults,
+	recognize aqua as a platform
+
 2005-02-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* lang/da.rc (new): Danish language file [Bug 1151534] (elhaard)
