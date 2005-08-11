@@ -1,3 +1,7 @@
+2005-08-10  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* mainframe.tcl (MainFrame::create): make ttk theme aware
+
 2005-07-27  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* statusbar.tcl: if themed, use ttk::separator
