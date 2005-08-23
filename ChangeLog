@@ -1,3 +1,7 @@
+2005-08-23  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* mainframe.tcl: extend ttk theme awareness to subframes/separators
+
 2005-08-10  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* mainframe.tcl (MainFrame::create): make ttk theme aware
