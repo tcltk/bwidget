@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.18 2005/08/11 02:35:27 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.19 2005/08/23 23:37:02 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -113,15 +113,25 @@ proc MainFrame::create { path args } {
     grid columnconfigure $topframe 0 -weight 1
 
     set bg [Widget::cget $path -background]
-    $path configure -background $bg
+    if {![Widget::theme]} {
+	$path configure -background $bg
+    }
     if { $tcl_platform(platform) != "unix" } {
         set sepopt [Widget::getoption $path -separator]
         if { $sepopt == "both" || $sepopt == "top" } {
-            set sep [Separator::create $path.sep -orient horizontal -background $bg]
+	    if {[Widget::theme]} {
+		set sep [ttk::separator $path.sep -orient horizontal]
+	    } else {
+		set sep [Separator::create $path.sep -orient horizontal -background $bg]
+	    }
             pack $sep -fill x
         }
         if { $sepopt == "both" || $sepopt == "bottom" } {
-            set sep [Separator::create $botframe.sep -orient horizontal -background $bg]
+	    if {[Widget::theme]} {
+		set sep [ttk::separator $botframe.sep -orient horizontal]
+	    } else {
+		set sep [Separator::create $botframe.sep -orient horizontal -background $bg]
+	    }
             pack $sep -fill x
         }
     }
@@ -136,8 +146,7 @@ proc MainFrame::create { path args } {
     if {[Widget::theme]} {
 	set status   [ttk::frame $path.status]
 	set label    [eval [list ttk::label $status.label \
-				-textvariable [Widget::getoption $path -textvariable] \
-				-background $bg] $sbfnt]
+				-textvariable [Widget::getoption $path -textvariable]] $sbfnt]
 	set indframe [ttk::frame $status.indf]
 	set prgframe [ttk::frame $status.prgf]
     } else {
@@ -203,14 +212,16 @@ proc MainFrame::configure { path args } {
 		set listmenu $newlist
 	    }
 	}
-        foreach sep {.sep .botf.sep} {
-            if { [winfo exists $path.$sep] } {
-                Separator::configure $path.$sep -background $bg
-            }
-        }
-        foreach w [winfo children $path.topf] {
-            $w configure -background $bg
-        }
+	if {![Widget::theme]} {
+	    foreach sep {.sep .botf.sep} {
+		if {[winfo exists $path.$sep]} {
+		    Separator::configure $path.$sep -background $bg
+		}
+	    }
+	    foreach w [winfo children $path.topf] {
+		$w configure -background $bg
+	    }
+	}
     }
 
     if { [Widget::hasChanged $path -menubarfont newmbfnt] } {
@@ -298,16 +309,29 @@ proc MainFrame::addtoolbar { path } {
     set toolbar   $path.topf.tb$index
     set bg        [Widget::getoption $path -background]
     if { $tcl_platform(platform) == "unix" } {
-        frame $toolframe -relief raised -borderwidth 1 \
-            -takefocus 0 -highlightthickness 0 -background $bg
+	if {[Widget::theme]} {
+	    ttk::frame $toolframe -padding 1
+	} else {
+	    frame $toolframe -relief raised -borderwidth 1 \
+		-takefocus 0 -highlightthickness 0 -background $bg
+	}
     } else {
-        frame $toolframe -relief flat -borderwidth 0 -takefocus 0 \
-            -highlightthickness 0 -background $bg
-        set sep [Separator::create $toolframe.sep -orient horizontal -background $bg]
+	if {[Widget::theme]} {
+	    ttk::frame $toolframe
+	    set sep [ttk::separator $toolframe.sep -orient horizontal]
+	} else {
+	    frame $toolframe -relief flat -borderwidth 0 -takefocus 0 \
+		-highlightthickness 0 -background $bg
+	    set sep [Separator::create $toolframe.sep -orient horizontal -background $bg]
+	}
         pack $sep -fill x
     }
-    set toolbar [frame $toolbar -relief flat -borderwidth 2 \
-                     -takefocus 0 -highlightthickness 0 -background $bg]
+    if {[Widget::theme]} {
+	set toolbar [ttk::frame $toolbar -padding 2]
+    } else {
+	set toolbar [frame $toolbar -relief flat -borderwidth 2 \
+			 -takefocus 0 -highlightthickness 0 -background $bg]
+    }
     pack $toolbar -in $toolframe -anchor w -expand yes -fill x
     incr _widget($path,ntoolbar)
     grid $toolframe -column 0 -row $index -sticky ew
