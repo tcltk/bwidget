@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.19 2005/08/23 23:37:02 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.20 2005/09/19 22:16:46 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -91,19 +91,16 @@ proc MainFrame::create { path args } {
         set bd     0
     }
     if {[Widget::theme]} {
-	set topframe  [eval [list ttk::frame $path.topf] \
-			   [Widget::subcget $path .topf]]
 	set userframe [eval [list ttk::frame $path.frame] \
 			   [Widget::subcget $path .frame]]
-	set botframe  [eval [list ttk::frame $path.botf] \
-			   [Widget::subcget $path .botf]]
+	set topframe  [ttk::frame $path.topf]
+	set botframe  [ttk::frame $path.botf]
     } else {
-	set topframe  [eval [list frame $path.topf] \
-			   -relief flat -borderwidth 0 \
-			   [Widget::subcget $path .topf]]
 	set userframe [eval [list frame $path.frame] \
 			   [Widget::subcget $path .frame] \
 			   -relief $relief -borderwidth $bd]
+	set topframe  [eval [list frame $path.topf] \
+			   [Widget::subcget $path .topf]]
 	set botframe  [eval [list frame $path.botf] \
 			   -relief $relief -borderwidth $bd \
 			   [Widget::subcget $path .botf]]
@@ -112,8 +109,8 @@ proc MainFrame::create { path args } {
     pack $topframe -fill x
     grid columnconfigure $topframe 0 -weight 1
 
-    set bg [Widget::cget $path -background]
     if {![Widget::theme]} {
+	set bg [Widget::cget $path -background]
 	$path configure -background $bg
     }
     if { $tcl_platform(platform) != "unix" } {

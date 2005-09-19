@@ -1,5 +1,6 @@
 2005-09-19  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* mainframe.tcl: 
 	* font.tcl: remove tile compat options that aren't valid.
 
 2005-08-23  Jeff Hobbs  <jeffh@ActiveState.com>
