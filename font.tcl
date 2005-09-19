@@ -263,7 +263,7 @@ proc SelectFont::create { path args } {
         pack $lbs -side left -anchor w -padx 4
         foreach st $_styles {
 	    if {$::Widget::_theme} {
-		ttk::checkbutton $path.$st -indicatoron 0 -takefocus 0 \
+		ttk::checkbutton $path.$st -takefocus 0 \
 		    -style BWSlim.Toolbutton \
 		    -image [Bitmap::get $st] \
 		    -variable SelectFont::${path}($st) \
@@ -481,12 +481,12 @@ proc SelectFont::_getfont { path } {
         set idxs [lsearch $_sizes    $font(-size)]
         set data(family) [expr {$idxf >= 0 ? $idxf : 0}]
         set data(size)   [expr {$idxs >= 0 ? $idxs : 0}]
-    } else {
-        set data(family) $font(-family)
-        set data(size)   $font(-size)
-        foreach st $_styles {
-            $path.$st configure -relief [expr {$data($st) ? "sunken":"raised"}]
-        }
+    } elseif {![Widget::theme]} {
+	set data(family) $font(-family)
+	set data(size)   $font(-size)
+	foreach st $_styles {
+	    $path.$st configure -relief [expr {$data($st) ? "sunken":"raised"}]
+	}
     }
 }
 
