@@ -76,7 +76,7 @@ proc SelectColor::menu {path placement args} {
     wm withdraw  $top
     wm transient $top [winfo toplevel [winfo parent $top]]
     wm overrideredirect $top 1
-    catch { wm attributes $shell -topmost 1 }
+    catch { wm attributes $top -topmost 1 }
 
     set frame [frame $top.frame \
                    -highlightthickness 0 \
