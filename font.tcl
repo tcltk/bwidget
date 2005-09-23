@@ -481,11 +481,14 @@ proc SelectFont::_getfont { path } {
         set idxs [lsearch $_sizes    $font(-size)]
         set data(family) [expr {$idxf >= 0 ? $idxf : 0}]
         set data(size)   [expr {$idxs >= 0 ? $idxs : 0}]
-    } elseif {![Widget::theme]} {
+    } else {
 	set data(family) $font(-family)
 	set data(size)   $font(-size)
-	foreach st $_styles {
-	    $path.$st configure -relief [expr {$data($st) ? "sunken":"raised"}]
+	if {![Widget::theme]} {
+	    foreach st $_styles {
+		$path.$st configure \
+		    -relief [expr {$data($st) ? "sunken":"raised"}]
+	    }
 	}
     }
 }
