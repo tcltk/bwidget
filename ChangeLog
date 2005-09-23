@@ -1,3 +1,8 @@
+2005-09-22  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* font.tcl (SelectFont::_getfont): fix tile compat to still set
+	data(family) and data(size) in any case.
+
 2005-09-19  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* mainframe.tcl: 
