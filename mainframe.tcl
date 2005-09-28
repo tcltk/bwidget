@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.20 2005/09/19 22:16:46 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.21 2005/09/28 22:19:14 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -517,7 +517,7 @@ proc MainFrame::_create_menubar { path descmenu } {
 	}
     }
 
-    if {$tcl_platform(platform) == "unix"} {
+    if {![Widget::theme] && $tcl_platform(platform) == "unix"} {
 	set menuopts [list -background [Widget::getoption $path -background] \
 			  -borderwidth 1]
     } else {
