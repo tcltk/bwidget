@@ -1,3 +1,8 @@
+2005-09-28  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* mainframe.tcl (MainFrame::_create_menubar): ignore -bg -bd opts
+	when themed
+
 2005-09-22  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* font.tcl (SelectFont::_getfont): fix tile compat to still set
