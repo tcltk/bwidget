@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.21 2005/09/28 22:19:14 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.22 2005/10/12 18:59:01 hobbs Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -197,7 +197,8 @@ proc MainFrame::configure { path args } {
         uplevel \#0 $path.status.label configure -textvariable [list $newv]
     }
 
-    if { [Widget::hasChanged $path -background bg] } {
+    # The ttk frame has no -background
+    if {![Widget::theme] && [Widget::hasChanged $path -background bg] } {
 	if {$::tcl_platform(platform) == "unix"} {
 	    set listmenu [$_widget($path,top) cget -menu]
 	    while { [llength $listmenu] } {
@@ -209,15 +210,13 @@ proc MainFrame::configure { path args } {
 		set listmenu $newlist
 	    }
 	}
-	if {![Widget::theme]} {
-	    foreach sep {.sep .botf.sep} {
-		if {[winfo exists $path.$sep]} {
-		    Separator::configure $path.$sep -background $bg
-		}
+	foreach sep {.sep .botf.sep} {
+	    if {[winfo exists $path.$sep]} {
+		Separator::configure $path.$sep -background $bg
 	    }
-	    foreach w [winfo children $path.topf] {
-		$w configure -background $bg
-	    }
+	}
+	foreach w [winfo children $path.topf] {
+	    $w configure -background $bg
 	}
     }
 

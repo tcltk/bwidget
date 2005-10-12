@@ -1,3 +1,8 @@
+2005-10-12  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* mainframe.tcl (MainFrame::configure): need to ignore -bg change
+	check when themed.
+
 2005-09-28  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* mainframe.tcl (MainFrame::_create_menubar): ignore -bg -bd opts
