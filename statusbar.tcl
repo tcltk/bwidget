@@ -127,7 +127,7 @@ proc StatusBar::create { path args } {
     foreach {padx pady} [_padval [Widget::cget $path -pad]] \
 	{ipadx ipady} [_padval [Widget::cget $path -ipad]] { break }
 
-    if {[Widge::theme]} {
+    if {[Widget::theme]} {
 	set sbar   [ttk::frame $path.sbar -padding [list $padx $pady]]
     } else {
 	set sbar   [eval [list frame $path.sbar -padx $padx -pady $pady] \
@@ -149,7 +149,7 @@ proc StatusBar::create { path args } {
     }
     bindtags $resize [list all [winfo toplevel $path] StatusResize $resize]
 
-    if {[Widge::theme]} {
+    if {[Widget::theme]} {
 	set fsep [ttk::separator $path.hsep -orient horizontal]
     } else {
 	set fsep [eval [list frame $path.hsep -bd 1 -height 2 -relief sunken] \
@@ -336,7 +336,7 @@ proc StatusBar::items {path} {
 }
 
 proc StatusBar::_sep {path name {sub .sbar}} {
-    if {[Widge::theme]} {
+    if {[Widget::theme]} {
 	return [ttk::separator $path$sub.$name -orient vertical]
     } else {
 	return [frame $path$sub.$name -bd 1 -width 2 -relief sunken]
