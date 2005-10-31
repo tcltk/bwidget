@@ -1,3 +1,7 @@
+2005-10-31  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* statusbar.tcl: correct Widget::theme typos
+
 2005-10-12  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* mainframe.tcl (MainFrame::configure): need to ignore -bg change
