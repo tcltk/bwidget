@@ -73,8 +73,9 @@ proc SelectColor::menu {path placement args} {
 
     Widget::init SelectColor $path $args
     set top [toplevel $path]
+    set parent [winfo toplevel [winfo parent $top]]
     wm withdraw  $top
-    wm transient $top [winfo toplevel [winfo parent $top]]
+    wm transient $top $parent
     wm overrideredirect $top 1
     catch { wm attributes $top -topmost 1 }
 
@@ -128,7 +129,26 @@ proc SelectColor::menu {path placement args} {
     BWidget::RestoreFocusGrab $top $frame.c0 destroy
     Widget::destroy $top
     if {$_selection == $count} {
-        return [eval [list dialog $path] $args]
+	array set opts {
+	    -parent -parent
+	    -title  -title
+	    -color  -initialcolor
+	}
+	if {[Widget::theme]} {
+	    set native 1
+	    set nativecmd [list tk_chooseColor -parent $parent]
+	    foreach {key val} $args {
+		if {![info exists opts($key)]} {
+		    set native 0
+		    break
+		}
+		lappend nativecmd $opts($key) $val
+	    }
+	    if {$native} {
+		return [eval $nativecmd]
+	    }
+	}
+	return [eval [list dialog $path] $args]
     } else {
         return [lindex $colors $_selection]
     }
@@ -245,7 +265,7 @@ proc SelectColor::dialog {path args} {
     set _widget(cv)     $c2
     set rgb             [winfo rgb $path [Widget::cget $path:SelectColor -color]]
     set _hsv            [eval rgbToHsv $rgb]
-    _set_rgb     [eval format "\#%04x%04x%04x" $rgb]
+    _set_rgb     [eval [list format "\#%04x%04x%04x"] $rgb]
     _set_hue_sat [lindex $_hsv 0] [lindex $_hsv 1]
     _set_value   [lindex $_hsv 2]
 
