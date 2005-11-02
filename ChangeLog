@@ -1,3 +1,8 @@
+2005-11-01  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* color.tcl (SelectColor::menu): use native dialog for palette
+	menu item where possible (and Widget::theme is used).
+
 2005-10-31  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* statusbar.tcl: correct Widget::theme typos
