@@ -1,3 +1,7 @@
+2006-01-25  J. Tang  <tang@jtang.org>
+
+	* buttonbox.tcl: fixed -homogeneous calculation [bug 1362899]
+
 2005-11-01  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* color.tcl (SelectColor::menu): use native dialog for palette
