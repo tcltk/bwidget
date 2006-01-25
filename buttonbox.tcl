@@ -355,7 +355,7 @@ proc ButtonBox::_redraw { path } {
                     grid columnconfigure $path [expr {2*$i}] -minsize $req
                     set data(max) $req
                 }
-                grid columnconfigure $path $idx -minsize $data(max) -weight 1
+                grid columnconfigure $path $idx -weight 1
             } else {
                 grid columnconfigure $path $idx -weight 0
             }
@@ -378,6 +378,16 @@ proc ButtonBox::_redraw { path } {
 	    }
         }
         incr idx 2
+    }
+
+    # Now that the maximum size has been calculated, go back through
+    # and correctly set the size for homogeneous horizontal buttons.
+    if { [string equal [Widget::getoption $path -orient] "horizontal"] && [Widget::getoption $path -homogeneous] } {
+        set idx 0
+        foreach i $data(buttons) {
+            grid columnconfigure $path $idx -minsize $data(max)
+            incr idx 2
+        }
     }
 }
 
