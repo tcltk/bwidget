@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.31 2004/09/03 04:33:57 hobbs Exp $
+#  $Id: combobox.tcl,v 1.32 2006/02/08 16:47:31 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -39,6 +39,7 @@ namespace eval ComboBox {
 	{-postcommand  String	  ""   0}
 	{-expand       Enum	  none 0 {none tab}}
 	{-autocomplete Boolean	  0    0}
+        {-autopost     Boolean    0    0}
         {-bwlistbox    Boolean    0    0}
         {-listboxwidth Int        0    0}
         {-hottrack     Boolean    0    0}
@@ -92,6 +93,13 @@ proc ComboBox::create { path args } {
 	::bind $path.e <KeyRelease> [list $path _auto_complete %K]
     }
 
+    if {[Widget::cget $path -autopost]} {
+        ::bind $path.e <KeyRelease> +[list $path _auto_post %K]
+    } else {
+        ::bind $entry <Key-Up>	  [list ComboBox::_unmapliste $path]
+        ::bind $entry <Key-Down>  [list ComboBox::_mapliste $path]
+    }
+
     if {[string equal $::tcl_platform(platform) "unix"]} {
 	set ipadx 0
 	set width 11
@@ -122,8 +130,6 @@ proc ComboBox::create { path args } {
     }
 
     ::bind $path  <ButtonPress-1> [list ComboBox::_unmapliste $path]
-    ::bind $entry <Key-Up>	  [list ComboBox::_unmapliste $path]
-    ::bind $entry <Key-Down>	  [list ComboBox::_mapliste $path]
     ::bind $entry <Control-Up>	  [list ComboBox::_modify_value $path previous]
     ::bind $entry <Control-Down>  [list ComboBox::_modify_value $path next]
     ::bind $entry <Control-Prior> [list ComboBox::_modify_value $path first]
@@ -715,10 +721,9 @@ proc ComboBox::_focus_out { path } {
 }
 
 proc ComboBox::_auto_complete { path key } {
-    ## Anything that is all lowercase is either a letter, number
-    ## or special key we're ok with.  Everything else is a
-    ## functional key of some kind.
-    if {[string tolower $key] != $key} { return }
+    ## Any key string with more than one character and is not entirely
+    ## lower-case is considered a function key and is thus ignored.
+    if {[string length $key] > 1 && [string tolower $key] != $key} { return }
 
     set text [string map [list {[} {\[} {]} {\]}] [$path.e get]]
     if {[string equal $text ""]} { return }
@@ -730,4 +735,67 @@ proc ComboBox::_auto_complete { path key } {
     $path.e configure -text [lindex $values $x]
     $path.e icursor $idx
     $path.e select range insert end
+}
+
+proc ComboBox::_auto_post { path key } {
+    if {[string equal $key "Escape"]} {
+        _unmapliste $path
+        return
+    }
+    if {[catch {$path.shell.listb curselection} x] || $x == ""} {
+        if {[string equal $key "Up"]} {
+            _unmapliste $path
+            return
+        }
+        set x -1
+    }
+    if {([string length $key] > 1 && [string tolower $key] != $key) && \
+            [string equal $key "Backspace"] != 0 && \
+            [string equal $key "Up"] != 0 && \
+            [string equal $key "Down"] != 0} {
+        return
+    }
+
+    # post the listbox
+    _create_popup $path
+    set width [Widget::cget $path -listboxwidth]
+    if {!$width} { set width [winfo width $path] }
+    BWidget::place $path.shell $width 0 below $path
+    wm deiconify $path.shell
+    BWidget::grab release $path
+    BWidget::focus release $path.shell.listb 1
+    focus -force $path.e
+
+    set values [Widget::cget $path -values]
+    switch -- $key {
+        Up {
+            if {[incr x -1] < 0} {
+                set x 0
+            } else {
+                Entry::configure $path.e -text [lindex $values $x]
+            }
+        }
+        Down {
+            if {[incr x] >= [llength $values]} {
+                set x [expr {[llength $values] - 1}]
+            } else {
+                Entry::configure $path.e -text [lindex $values $x]
+            }
+        }
+        default {
+            # auto-select within the listbox the item closest to the entry's value
+            set text [string map [list {[} {\[} {]} {\]}] [$path.e get]]
+            if {[string equal $text ""]} {
+                set x 0
+            } else {
+                set x [lsearch $values $text*]
+            }
+        }
+    }
+
+    if {$x >= 0} {
+        $path.shell.listb selection clear 0 end
+        $path.shell.listb selection set $x
+        $path.shell.listb see $x
+    }
 }

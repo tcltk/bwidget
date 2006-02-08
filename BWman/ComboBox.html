@@ -108,23 +108,25 @@
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-autocomplete">-autocomplete</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-autopost">-autopost</A></TD>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-bwlistbox">-bwlistbox</A></TD>
-</TR>
-<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-expand">-expand</A></TD>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TD>
-</TR>
-<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-hottrack">-hottrack</A></TD>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-images">-images</A></TD>
-</TR>
-<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-listboxwidth">-listboxwidth</A></TD>
-<TD>&nbsp;&nbsp;<A HREF="#-modifycmd">-modifycmd</A></TD>
-<TD></TD>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-modifycmd">-modifycmd</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="#-postcommand">-postcommand</A></TD>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-values">-values</A></TD>
 </TR>
 </TABLE></DD>
@@ -178,6 +180,15 @@ value is displayed.
     the value in the entry field as the user types.  If true, the combobox
     will fill in a value that it finds in its value list as the user types
     into the entry.
+    </DD>
+</DL>
+
+<DL>
+    <DT><A NAME="-autopost"><B>-autopost</B></A></DT>
+    <DD>
+    Specifies whether or not the combobox should post the drop down as
+    the user types.  If true, the combobox will post and scroll to the
+    entry that most closely matches the user entry.
     </DD>
 </DL>
 
@@ -372,6 +383,7 @@ to the default Entry bindings:
 <LI>Page down set the value of the ComboBox to the last value.
 <LI>Arrow up set the value of the ComboBox to the previous value.
 <LI>Arrow down set the value of the ComboBox to the next value.
+<LI>If <B>-autopost</B> is enabled, Escape unposts the listbox.
 </UL>
 If the listbox is not mapped and ComboBox is not editable or disabled,
 mouse button 1 on the Entry cause the listbox to popup, as if the user press the ArrowButton.
