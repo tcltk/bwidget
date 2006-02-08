@@ -1,3 +1,10 @@
+2006-02-08  J. Tang  <tang@jtang.org>
+
+	* combobox.tcl: allow -autocomplete with uppercase chars [bug
+	996569]; added -autopost option [patch 1359041]
+
+	* dynamic help man page: added clarification to -variable
+
 2006-01-25  J. Tang  <tang@jtang.org>
 
 	* buttonbox.tcl: fixed -homogeneous calculation [bug 1362899]
