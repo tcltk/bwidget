@@ -60,9 +60,11 @@
 <B><A NAME="descr"></A>DESCRIPTION</B><BR>
 <P>
 
-PagesManager widget manage a set of pages and displays one of them.
-PagesManager does not provide any user access method, as NoteBook does,
-so it can be done through a listbox, a menu, radiobutton, or whatever.
+PagesManager widget manages a set of pages and displays one of them.
+PagesManager does not provide any user access method, as NoteBook
+does, so it can be done through a listbox, a menu, radiobutton, or
+whatever.  The widget shows no pages during creation; there must be an
+explicit call to <B>raise</B> to display one.
 
 </P>
 <BR><HR WIDTH="50%"><BR>
@@ -91,8 +93,12 @@ larger enough to contains the largest page.
  <I>page</I>
 </DT><DD>
 
-Add a new page idendified by <I>page</I>. The pathname of the new page
-is returned.
+Add a new page identified by <I>page</I>, which is an arbitrary
+identifier.  The pathname of the new page is returned and widgets for
+the page should be created with this as the parent or ancestor.
+However, PagesManager manages its own geometry. <B>pack</B>,
+<B>grid</B> or an equivalent should not be used with the pathname
+returned by <B>add</B>.
 
 </DD></DL>
 <DL><DT><A NAME="cget"><I>pathName</I> <B>cget</B></A>
