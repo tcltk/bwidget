@@ -16,7 +16,7 @@ namespace eval ProgressBar {
     Widget::declare ProgressBar {
         {-type        Enum       normal     0
                       {normal incremental infinite nonincremental_infinite}}
-        {-maximum     Int        100        0 "%d >= 0"}
+        {-maximum     Int        100        0 "%d > 0"}
         {-background  TkResource ""         0 frame}
         {-foreground  TkResource "blue"     0 label}
         {-borderwidth TkResource 2          0 frame}
@@ -173,7 +173,7 @@ proc ProgressBar::_modify { path args } {
 	} else {
 	    if { $val > $max } {set val $max}
 	    if {[Widget::getoption $path -orient] == "horizontal"} {
-		$path.bar coords rect -1 0 [expr {int($val*$w/$max)}] $h
+		$path.bar coords rect -1 0 [expr {int(double($val)*$w/$max)}] $h
 	    } else {
 		$path.bar coords rect 0 [expr {$h+1}] $w \
 		    [expr {int($h*(1.0 - double($val)/$max))}]
