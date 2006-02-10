@@ -90,7 +90,9 @@ You have to destroy the dialog after use.
 <DL><DT><A NAME="-command"><B>-command</B></A></DT>
 <DD>
 
-Specifies a command to call when user press stop button.
+Specifies a command to call when user press stop button.  Note that it
+is the program's responsibility to periodically call <B>update</B> so
+that button press events can be generated.
 
 </DD>
 </DL>

@@ -1,5 +1,13 @@
 2006-02-10  J. Tang  <tang@jtang.org>
 
+	* ProgressDlg man page: note that caller must invoke [update], the
+	progressbar will not do it automatically [bug 1105778]
+
+	* progressbar.tcl: -maximum value must now be non-zero, else
+	divide by 0 occurs [bug 1145523]; use double() calculations to
+	prevent integer overflow with very large -maximum values [bug
+	900165]
+
 	* PagesManager man page: clarified [add] behavior and default
 	state [bug 1305988]
 
