@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.14 2004/05/12 21:09:54 hobbs Exp $
+#  $Id: dynhelp.tcl,v 1.15 2006/03/23 23:32:12 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -593,6 +593,7 @@ proc DynamicHelp::_show_help { path w x y } {
 proc DynamicHelp::_unset_help { path } {
     variable _canvases
     variable _registered
+    variable _top
 
     if {[info exists _registered($path)]} { unset _registered($path) }
     if {[winfo exists $path]} {
@@ -601,6 +602,7 @@ proc DynamicHelp::_unset_help { path } {
     }
     array unset _canvases   $path,*
     array unset _registered $path,*
+    destroy $_top
 }
 
 # ----------------------------------------------------------------------------

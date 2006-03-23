@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.22 2004/09/14 23:43:45 hobbs Exp $
+#  $Id: listbox.tcl,v 1.23 2006/03/23 23:32:12 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -453,12 +453,14 @@ proc ListBox::bindImage { path event script } {
 proc ListBox::delete { path args } {
     variable $path
     upvar 0  $path data
+    Widget::getVariable $path help
 
     foreach litems $args {
         foreach item $litems {
             set idx [lsearch -exact $data(items) $item]
             if { $idx != -1 } {
                 set data(items) [lreplace $data(items) $idx $idx]
+                array unset help $item
                 Widget::destroy $path.$item
                 if { [info exists data(upd,create,$item)] } {
                     unset data(upd,create,$item)
