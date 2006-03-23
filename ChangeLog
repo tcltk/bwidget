@@ -1,3 +1,13 @@
+2006-03-23  J. Tang  <tang@jtang.org>
+
+	* dynhelp.tcl: if a widget's help balloon is being displayed when
+	that widget is destroyed, also destroy the associated balloon [bug
+	1448424]
+
+	* listbox.tcl: when deleting an item from the ListBox that has
+	dynamic help text, also remove its entry from the help array [bug
+	1443461]
+
 2006-02-10  J. Tang  <tang@jtang.org>
 
 	* ProgressDlg man page: note that caller must invoke [update], the
