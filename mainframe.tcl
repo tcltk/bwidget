@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.22 2005/10/12 18:59:01 hobbs Exp $
+#  $Id: mainframe.tcl,v 1.23 2006/03/24 22:19:57 dev_null42a Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -466,10 +466,11 @@ proc MainFrame::showtoolbar { path index bool } {
 # ----------------------------------------------------------------------------
 proc MainFrame::showstatusbar { path name } {
     set status $path.status
+    set botframe $path.botf
     if { [string equal $name "none"] } {
         pack forget $status
     } else {
-        pack $status -fill x
+        pack $status -fill x -in $botframe -fill x -pady 2
         switch -- $name {
             status {
                 catch {pack forget $status.prg}
