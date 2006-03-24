@@ -1,3 +1,12 @@
+2006-03-24  J. Tang  <tang@jtang.org>
+
+	* pkgIndex.tcl: removed bogus "ControlFrame" entry [bug 1429405]
+
+	* MainFrame man page: fixed some typos on man page
+
+	* mainframe.tcl: fixed status bar placement when it is re-shown
+	after a [showstatusbar none] command [bug 1027568]
+
 2006-03-23  J. Tang  <tang@jtang.org>
 
 	* dynhelp.tcl: if a widget's help balloon is being displayed when
