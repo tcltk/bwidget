@@ -305,16 +305,24 @@ proc StatusBar::remove {path args} {
 	if {[string match .* $sep]} {
 	    # not one of our separators
 	    incr sidx
-	} else {
+	} elseif {$sep != ""} {
 	    # destroy separator too
 	    set sep $path.sbar.$sep
-	    grid forget $sep
 	    destroy $sep
 	}
 	if {$destroy} {
 	    destroy $w
 	} else {
 	    grid forget $w
+	}
+	if {$idx == 0} {
+	    # separator of next item is no longer necessary
+	    set sep [lindex $_widget($path,items) [expr {$idx + 1}]]
+	    if {$sep != "" && ![string match .* $sep]} {
+		incr idx
+		set sep $path.sbar.$sep
+		destroy $sep
+	    }
 	}
 	set _widget($path,items) [lreplace $_widget($path,items) $sidx $idx]
     }
