@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.32 2006/02/08 16:47:31 dev_null42a Exp $
+#  $Id: combobox.tcl,v 1.33 2006/08/21 20:54:14 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -714,8 +714,8 @@ proc ComboBox::_traverse_in { path } {
 #  Command ComboBox::_focus_out
 # ----------------------------------------------------------------------------
 proc ComboBox::_focus_out { path } {
-    if {[focus] == ""} {
-	# we lost focus to some other app, make sure we drop the listbox
+    if {[string first $path [focus]] != 0} {
+	# we lost focus to some other app or window, so remove the listbox
 	return [_unmapliste $path 0]
     }
 }
@@ -738,7 +738,7 @@ proc ComboBox::_auto_complete { path key } {
 }
 
 proc ComboBox::_auto_post { path key } {
-    if {[string equal $key "Escape"]} {
+    if {[string equal $key "Escape"] || [string equal $key "Return"]} {
         _unmapliste $path
         return
     }

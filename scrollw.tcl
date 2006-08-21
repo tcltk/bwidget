@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.11 2004/02/04 00:11:29 hobbs Exp $
+#  $Id: scrollw.tcl,v 1.12 2006/08/21 20:54:14 dev_null42a Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -162,11 +162,21 @@ proc ScrolledWindow::configure { path args } {
 
 	if {$data(hsb,packed)} {
 	    grid $path.hscroll -column 1 -row $data(hsb,row) \
-		    -sticky ew -ipady $data(ipad)
+		-sticky ew -ipady $data(ipad)
+	} else {
+	    if {![info exists data(hlock)]} {
+		set data(hsb,packed) 0
+		grid remove $path.hscroll
+	    }
 	}
 	if {$data(vsb,packed)} {
 	    grid $path.vscroll -column $data(vsb,column) -row 1 \
-		    -sticky ns -ipadx $data(ipad)
+		-sticky ns -ipadx $data(ipad)
+	} else {
+	    if {![info exists data(hlock)]} {
+		set data(vsb,packed) 0
+		grid remove $path.vscroll
+	    }
 	}
     }
     return $res
