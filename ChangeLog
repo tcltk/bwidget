@@ -1,3 +1,18 @@
+2006-08-21  J. Tang  <tang@jtang.org>
+
+	* combobox.tcl: unpost after autoposting when another Tk window
+	gets the focus; unpost upon hitting the enter key
+
+	* scrollw.tcl: allow toggling of scrollbars [bug 1488712]
+
+	* Tree.html: corrected documentation for Tree::opencmd (callback
+	does not append the path to the tree to the command) [bug 1507713]
+
+	* tree.tcl: disable keyboard navigation for empty trees [bug 1514855]
+
+	* tree.tcl: changed '-drawcross allways' to be '-drawcross
+	always'; updated documentation
+
 2006-06-29  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* statusbar.tcl (StatusBar::remove): remove neighboring separator

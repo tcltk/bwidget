@@ -419,8 +419,8 @@ Specifies a stipple bitmap for the lines between nodes.
 <DL><DT><A NAME="-opencmd"><B>-opencmd</B></A></DT>
 <DD>
 
-Specifies a command to be called when the user opens a node. The path
-of the tree widget and the opened node are appended to the command.
+Specifies a command to be called when the user opens a node. The name
+of the opened node is appended to the command.
 
 </DD>
 </DL>
@@ -633,10 +633,12 @@ node will be drawn with the deltax for the entire tree.
 
 Specifies how the cross used to expand or collapse the children of a node
 should be drawn. 
-Must be one of <B>auto</B>, <B>allways</B> or <B>never</B>.
+Must be one of <B>auto</B>, <B>always</B> or <B>never</B>.
 <BR>If <B>auto</B>, the cross is drawn only if the node has children.
-If <B>allways</B>, the cross is always drawn.
+If <B>always</B>, the cross is always drawn.
 If <B>never</B>, the cross is never drawn.
+To maintain compatibility with older versions of this widget,
+<B>allways</B> is a deprecated synonym to <B>always</B>.
 
 </DD>
 </DL>

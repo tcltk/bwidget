@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.52 2004/08/26 19:45:45 hobbs Exp $
+#  $Id: tree.tcl,v 1.53 2006/08/21 20:54:14 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -60,7 +60,7 @@ namespace eval Tree {
             {-data       String     ""      0}
             {-open       Boolean    0       0}
 	    {-selectable Boolean    1       0}
-            {-drawcross  Enum       auto    0 {auto allways never}}
+            {-drawcross  Enum       auto    0 {auto always never allways}}
 	    {-padx       Int        -1      0 "%d >= -1"}
 	    {-deltax     Int        -1      0 "%d >= -1"}
 	    {-anchor     String     "w"     0 ""}
@@ -1320,7 +1320,7 @@ proc Tree::_draw_node { path node x0 y0 deltax deltay padx showlines } {
     }
 
     if {![string equal $dc "never"]
-	&& ($len || [string equal $dc "allways"])} {
+	&& ($len || [string equal $dc "always"] || [string equal $dc "allways"])} {
         _draw_cross $path $node $exp $x0 $y0
     }
 
@@ -1427,7 +1427,7 @@ proc Tree::_update_nodes { path } {
 	    set exp [Widget::getoption $path.$node -open]
 
 	    if {![string equal $dc "never"]
-		&& ($len || [string equal $dc "allways"])} {
+		&& ($len || [string equal $dc "always"] || [string equal $dc "allways"])} {
 		_draw_cross $path $node $exp $x0 $y0
 	    } else {
 		set idc [$path.c find withtag c:$node]
@@ -1873,6 +1873,11 @@ proc Tree::_scroll { path cmd dir } {
 #	None.
 
 proc Tree::_keynav {which win} {
+    # check for an empty tree
+    if {[$win nodes root] eq ""} {
+        return
+    }
+
     # Keyboard navigation is riddled with special cases.  In order to avoid
     # the complex logic, we will instead make a list of all the visible,
     # selectable nodes, then do a simple next or previous operation.
