@@ -1,3 +1,8 @@
+2006-09-26  J. Tang  <tang@jtang.org>
+
+	* demo/basic.tcl: fixed Entry's enter command callback [bug
+	1400838]
+
 2006-08-21  J. Tang  <tang@jtang.org>
 
 	* combobox.tcl: unpost after autoposting when another Tk window
