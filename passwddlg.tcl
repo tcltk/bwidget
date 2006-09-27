@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.9 2004/09/03 04:34:44 hobbs Exp $
+#  $Id: passwddlg.tcl,v 1.10 2006/09/27 03:26:47 dev_null42a Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -89,7 +89,7 @@ proc PasswdDlg::create { path args } {
     }
 
     set frame [Dialog::getframe $path]
-#    bind $path  <Return>  ""
+    bind $path  <Return>  ""
     bind $frame <Destroy> [list Widget::destroy $path\#PasswdDlg]
 
     set lablog [eval [list LabelEntry::create $frame.lablog] \
@@ -105,14 +105,15 @@ proc PasswdDlg::create { path args } {
 			  -command [list PasswdDlg::_verifonlogin \
 					$path $frame.lablog]]]
 
-    # compute label width -- TODO: this should probably not override the
-    # cmdline arg
-    set loglabel  [$lablog cget -label]
-    set passlabel [$labpass cget -label]
-    set labwidth  [_max [string length $loglabel] [string length $passlabel]]
-    incr labwidth 1
-    $lablog  configure -labelwidth $labwidth
-    $labpass configure -labelwidth $labwidth
+    # compute label width
+    if {[$lablog cget -labelwidth] == 0} {
+        set loglabel  [$lablog cget -label]
+        set passlabel [$labpass cget -label]
+        set labwidth  [_max [string length $loglabel] [string length $passlabel]]
+        incr labwidth 1
+        $lablog  configure -labelwidth $labwidth
+        $labpass configure -labelwidth $labwidth
+    }
 
     Widget::create PasswdDlg $path 0
 
@@ -159,22 +160,14 @@ proc PasswdDlg::cget { path option } {
 #  Command PasswdDlg::_verifonlogin
 # -----------------------------------------------------------------------------
 proc PasswdDlg::_verifonlogin { path labpass } {
-    if { [$labpass.e cget -text] == "" } {
-        focus $labpass
-    } else {
-        Dialog::setfocus $path default
-    }
+    focus $labpass
 }
 
 # -----------------------------------------------------------------------------
 #  Command PasswdDlg::_verifonpasswd
 # -----------------------------------------------------------------------------
 proc PasswdDlg::_verifonpasswd { path lablog } {
-    if { [$lablog.e cget -text] == "" } {
-        focus $lablog
-    } else {
-        Dialog::setfocus $path default
-    }
+    Dialog::enddialog $path
 }
 
 # -----------------------------------------------------------------------------
