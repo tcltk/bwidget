@@ -1,5 +1,15 @@
 2006-09-26  J. Tang  <tang@jtang.org>
 
+	* passwd.tcl: don't ignore -labelwidth when calculating label
+	widths; return key moves through subwidgets like most login
+	managers [patch 922877, with slight change]
+
+	* font.tcl: add options to select font color and to disable font
+	sizes; updated man pages [patch 1531199]
+
+	* font.tcl: using arrow keys to browse font family / font size
+	will cause an update to the shown sample font [patch 947109]
+
 	* demo/basic.tcl: fixed Entry's enter command callback [bug
 	1400838]
 

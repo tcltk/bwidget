@@ -23,6 +23,10 @@
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-command">-command</A></TR>
+<TD>&nbsp;&nbsp;<A HREF="#-initialcolor">-initialcolor</A></TR>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-nosizes">-nosizes</A></TR>
 <TD>&nbsp;&nbsp;<A HREF="#-parent">-parent</A></TR>
 </TR>
 <TR>
@@ -66,6 +70,20 @@ option is <I>toolbar</I>.
 
 </DD>
 </DL>
+<DL><DT><A NAME="-initialcolor"><B>-initialcolor</B></A></DT>
+<DD>
+
+If specified, add an additional button that lets the user pick a
+color.  This option is ignored if <B>type</B> is <I>toolbar</I>.
+</DD>
+</DL>
+<DL><DT><A NAME="-nosizes"><B>-nosizes</B></A></DT>
+<DD>
+
+If true, don't show the listbox containing valid font sizes.  This
+option is ignored if <B>type</B> is <I>toolbar</I>.
+</DD>
+</DL>
 <DL><DT><A NAME="-parent"><B>-parent</B></A></DT>
 <DD>
 
@@ -92,8 +110,10 @@ Title of the Dialog toplevel.
 
 Specifies the type of the SelectFont widget. Must be <B>dialog</B> or <B>toolbar</B>.
 <BR>If <B>type</B> option is <I>dialog</I>, SelectFont::<B>create</B> directly creates the 
-dialog, displays it and return an empty string if cancel button is pressed or if dialog is
-destroyed, and the selected font if ok button is pressed. In all cases, dialog is destroyed.
+dialog, displays it and return an empty string if cancel button is
+pressed or if dialog is destroyed, and the selected font (and color
+if <B>initialcolor</B>) if ok button is pressed. In all cases, dialog
+is destroyed.
 <BR>If <B>type</B> option is <I>toolbar</I>, SelectFont::<B>create</B> returns the pathname
 of the widget created.
 

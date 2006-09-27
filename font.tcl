@@ -24,8 +24,10 @@ namespace eval SelectFont {
 
         {-type		Enum		dialog        0 {dialog toolbar}}
         {-font		TkResource	""            0 label}
+	{-initialcolor	String		""            0}
 	{-families	String		"all"         1}
 	{-querysystem	Boolean		1             0}
+	{-nosizes	Boolean		0             1}
 	{-styles	String		"bold italic underline overstrike" 1}
         {-command	String		""            0}
         {-sampletext	String		"Sample Text" 0}
@@ -154,6 +156,8 @@ proc SelectFont::create { path args } {
         bind $lbf <ButtonRelease-1> $script
         bind $lbf <space>           $script
 	bind $lbf <1>               [list focus %W]
+	bind $lbf <Up> $script
+	bind $lbf <Down> $script
         pack $sw -fill both -expand yes
 
         set labf2 [LabelFrame::create $topf.labf2 -text "Size" -name size \
@@ -170,6 +174,8 @@ proc SelectFont::create { path args } {
         bind $lbs <ButtonRelease-1> $script
         bind $lbs <space>           $script
 	bind $lbs <1>               [list focus %W]
+	bind $lbs <Up> $script
+	bind $lbs <Down> $script
         pack $sw -fill both -expand yes
 
         set labf3 [LabelFrame::create $topf.labf3 -text "Style" -name style \
@@ -190,7 +196,9 @@ proc SelectFont::create { path args } {
         LabelFrame::configure $labf3 -focus $subf.[lindex $_styles 0]
 
         pack $labf1 -side left -anchor n -fill both -expand yes
-        pack $labf2 -side left -anchor n -fill both -expand yes -padx 8
+	if { ![Widget::getoption "$path#SelectFont" -nosizes] } {
+	        pack $labf2 -side left -anchor n -fill both -expand yes -padx 8
+	}
         pack $labf3 -side left -anchor n -fill both -expand yes
 
         set botf [frame $frame.botf -width 100 -height 50 \
@@ -205,8 +213,38 @@ proc SelectFont::create { path args } {
                       -text [Widget::getoption "$path#SelectFont" -sampletext]]
         place $lab -relx 0.5 -rely 0.5 -anchor c
 
-        pack $topf -pady 4 -fill both -expand yes
-        pack $botf -pady 4 -fill x
+	pack $topf -pady 4 -fill both -expand yes
+
+	if { [Widget::getoption "$path#SelectFont" -initialcolor] != ""} {
+		set thecolor [Widget::getoption "$path#SelectFont" -initialcolor]
+		set colf [frame $frame.colf]
+			
+		set frc [frame $colf.frame -width 50 -height 20 -bg $thecolor -bd 0 -relief flat\
+			-highlightthickness 1 -takefocus 0 \
+			-highlightbackground black \
+			-highlightcolor black]
+			
+		set script "set [list SelectFont::${path}(fontcolor)] \[tk_chooseColor -parent $colf.button -initialcolor \[set [list SelectFont::${path}(fontcolor)]\]\];\
+			SelectFont::_update [list $path]"
+		
+		set but  [button $colf.button -command $script \
+			-text "Color..."]
+		
+		$lab configure -foreground $thecolor
+		$frc configure -bg $thecolor
+		
+		pack $but -side left
+		pack $frc -side left -padx 5
+		
+		set data(frc) $frc
+		set data(fontcolor) $thecolor
+
+		pack $colf -pady 4 -fill x -expand true        
+	
+	} else {
+		set data(fontcolor) -1
+	}
+	pack $botf -pady 4 -fill x
 
         Dialog::add $path -name ok
         Dialog::add $path -name cancel
@@ -386,13 +424,24 @@ proc SelectFont::_draw { path } {
 
     if { [Dialog::draw $path] == 0 } {
         set result [Widget::getoption "$path#SelectFont" -font]
+    	set color $data(fontcolor)
+	
+	if { $color == "" } {
+		set color #000000
+	}
+
     } else {
         set result ""
+	set color ""
     }
     unset data
     Widget::destroy "$path#SelectFont"
     destroy $path
-    return $result
+    if { $color != -1 } {
+    	return [list $result $color]
+    } else {
+    	return $result
+    }
 }
 
 
@@ -449,6 +498,14 @@ proc SelectFont::_update { path } {
     if { $type == "dialog" } {
         $data(label) configure -font $font
         $path:cmd configure -cursor $curs
+	if { ($data(fontcolor) != "") && ($data(fontcolor) != -1) } {
+		$data(label) configure -foreground $data(fontcolor)
+		$data(frc) configure -bg $data(fontcolor)
+	} elseif { $data(fontcolor) == "" }  {
+		#If no color is selected, restore previous one
+		set data(fontcolor) [$data(label) cget -foreground]
+
+	}
     } elseif { [set cmd [Widget::getoption "$path#SelectFont" -command]] != "" } {
         uplevel \#0 $cmd
     }
