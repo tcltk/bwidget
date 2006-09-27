@@ -42,7 +42,7 @@ proc DemoBasic::_label { parent } {
 
 proc DemoBasic::_entry { parent } {
     set ent  [Entry $parent.entry -text "Press enter" \
-                  -command  {set DemoBasic::var(entcmd) "-command called"; after 500 {set DemoBasic::var(entcmd) ""}} \
+                  -command  {set DemoBasic::var(entcmd) "-command called" ; after 500 {set DemoBasic::var(entcmd) ""}} \
                    -helptext "Entry widget"]
     set chk1 [checkbutton $parent.chk1 -text "Disabled" \
                   -variable DemoBasic::var($ent,state) \
