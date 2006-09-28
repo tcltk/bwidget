@@ -2,7 +2,7 @@
 #  passwddlg.tcl
 #  This file is part of Unifix BWidget Toolkit
 #   by Stephane Lavirotte (Stephane.Lavirotte@sophia.inria.fr)
-#  $Id: passwddlg.tcl,v 1.10 2006/09/27 03:26:47 dev_null42a Exp $
+#  $Id: passwddlg.tcl,v 1.11 2006/09/28 22:31:28 dev_null42a Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - PasswdDlg::create
@@ -160,14 +160,14 @@ proc PasswdDlg::cget { path option } {
 #  Command PasswdDlg::_verifonlogin
 # -----------------------------------------------------------------------------
 proc PasswdDlg::_verifonlogin { path labpass } {
-    focus $labpass
+    Dialog::enddialog $path 0
 }
 
 # -----------------------------------------------------------------------------
 #  Command PasswdDlg::_verifonpasswd
 # -----------------------------------------------------------------------------
 proc PasswdDlg::_verifonpasswd { path lablog } {
-    Dialog::enddialog $path
+    focus $lablog
 }
 
 # -----------------------------------------------------------------------------

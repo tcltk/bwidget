@@ -1,6 +1,12 @@
 2006-09-28  J. Tang  <tang@jtang.org>
 
 	**** BWIDGET 1.8.0 TAGGED ****
+	
+	* removed Makefile.in
+
+	* font.tcl: correctly handle code path when user cancels dialog
+
+	* passwd.tcl: fixed Dialog::enddialog error; fixed ordering error
 
 	* pkgIndex.tcl, README.txt: updated to BWidget 1.8
 
