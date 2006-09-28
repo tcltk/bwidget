@@ -432,7 +432,11 @@ proc SelectFont::_draw { path } {
 
     } else {
         set result ""
-	set color ""
+        if {$data(fontcolor) == -1} {
+            set color -1
+        } else {
+            set color ""
+        }
     }
     unset data
     Widget::destroy "$path#SelectFont"
