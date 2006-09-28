@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.53 2006/08/21 20:54:14 dev_null42a Exp $
+#  $Id: tree.tcl,v 1.54 2006/09/28 15:46:06 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -10,6 +10,7 @@
 #     - Tree::insert
 #     - Tree::itemconfigure
 #     - Tree::itemcget
+#     - Tree::bindArea
 #     - Tree::bindText
 #     - Tree::bindImage
 #     - Tree::delete
@@ -427,6 +428,12 @@ proc Tree::itemcget { path node option } {
     return [Widget::cget $path.$node $option]
 }
 
+# ----------------------------------------------------------------------------
+# Command Tree::bindArea
+# ----------------------------------------------------------------------------
+proc Tree::bindArea { path event script } {
+    bind $path.c $event $script
+}
 
 # ----------------------------------------------------------------------------
 #  Command Tree::bindText
@@ -825,7 +832,7 @@ proc Tree::find {path findInfo {confine ""}} {
     }
 
     if {$found} {
-        if {[string equal $confine "confine"]} {
+        if {![string equal $confine ""]} {
             # test if x stand inside node bbox
 	    set padx [_get_node_padx $path $node]
             set xi [expr {[lindex [$path.c coords n:$node] 0] - $padx}]
@@ -843,7 +850,7 @@ proc Tree::find {path findInfo {confine ""}} {
 
 # ----------------------------------------------------------------------------
 #  Command Tree::line
-#     Returns the line where is drawn a node.
+#     Returns the line where a node was drawn.
 # ----------------------------------------------------------------------------
 proc Tree::line {path node} {
     set node [_node_name $path $node]

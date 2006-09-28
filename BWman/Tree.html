@@ -101,6 +101,10 @@
 
 <DL>
 <DT><I><A HREF="#wc">WIDGET COMMAND</A></I></DT>
+<DD><I>pathName</I> <A HREF="#bindArea"><B>bindArea</B></A>
+ <I>event</I>
+ <I>script</I>
+</DD>
 <DD><I>pathName</I> <A HREF="#bindImage"><B>bindImage</B></A>
  <I>event</I>
  <I>script</I>
@@ -131,6 +135,10 @@
 <DD><I>pathName</I> <A HREF="#exists"><B>exists</B></A>
  <I>node</I>
 </DD>
+<DD><I>pathName</I> <A HREF="#find"><B>find</B></A>
+ <I>findinfo</I>
+ ?<I>confine</I>?
+</DD>
 <DD><I>pathName</I> <A HREF="#index"><B>index</B></A>
  <I>node</I>
 </DD>
@@ -147,6 +155,9 @@
 <DD><I>pathName</I> <A HREF="#itemconfigure"><B>itemconfigure</B></A>
  <I>node</I>
  ?<I>option</I>? ?<I>value</I> <I>option</I> <I>value</I> ...?
+</DD>
+<DD><I>pathName</I> <A HREF="#line"><B>line</B></A>
+ <I>node</I>
 </DD>
 <DD><I>pathName</I> <A HREF="#move"><B>move</B></A>
  <I>parent</I>
@@ -481,6 +492,20 @@ avoid errors because the characters are special to the tree widget.
 </p>
 
 <B><A NAME="wc">WIDGET COMMAND</A></B><BR>
+<DL><DT><A NAME="bindArea"><I>pathName</I> <B>bindArea</B></A>
+ <I>event</I>
+ <I>script</I>
+</DT><DD>
+
+This command associates a command to execute whenever the event
+sequence given by <I>event</I> occurs anywhere within the Tree area.
+
+<p>
+Any occurrence of <b>%W</b> in script is substituted with the path of
+the tree.  <em><a href="#bug">(See note below about this behavior.)</a></em>
+</p>
+
+</DD></DL>
 <DL><DT><A NAME="bindImage"><I>pathName</I> <B>bindImage</B></A>
  <I>event</I>
  <I>script</I>
@@ -491,7 +516,8 @@ sequence given by <I>event</I> occurs on the image of a node.
 The node idenfier on which the event occurs is appended to the command.
 
 <p>
-Any occurrence of <b>%W</b> in script is substituted with the path of the tree.
+Any occurrence of <b>%W</b> in script is substituted with the path of
+the tree.  <em><a href="#bug">(See note below about this behavior.)</a></em>
 </p>
 
 </DD></DL>
@@ -505,7 +531,8 @@ sequence given by <I>event</I> occurs on the label of a node.
 The node idenfier on which the event occurs is appended to the command.
 
 <p>
-Any occurrence of <b>%W</b> in script is substituted with the path of the tree.
+Any occurrence of <b>%W</b> in script is substituted with the path of
+the tree.  <em><a href="#bug">(See note below about this behavior.)</a></em>
 </p>
 
 </DD></DL>
@@ -579,6 +606,26 @@ and continue edition.
 </DT><DD>
 
 Returns whether or not <I>node</I> exists in the tree.
+
+</DD></DL>
+<DL><DT><A NAME="find"><I>pathName</I> <B>find</B></A>
+ <I>findinfo</I>
+ ?<I>confine</I>?
+</DT><DD>
+
+<p>
+Returns the node given by the position <I>findinfo</I>.
+<I>findinfo</I> can take the form of a pixel position <I>@x,y</I> or
+of the line number of a currently visible Tree node.  The first line
+of the Tree has the value of zero.
+</p>
+
+<p>
+If <I>confine</I> is non-empty, then confine <I>findinfo</I> to only
+match pixel positions for the area consumed by Tree labels, not just
+anywhere on their lines.  (<I>confine</I> has no effect if
+<I>findinfo</I> is a line number.)
+</p>
 
 </DD></DL>
 <DL><DT><A NAME="index"><I>pathName</I> <B>index</B></A>
@@ -742,6 +789,17 @@ returns a list describing the current options for the item.
 Read-only options are not be modified.
 
 </DD></DL>
+<DL><DT><A NAME="line"><I>pathName</I> <B>line</B></A>
+ <I>node</I>
+</DT><DD>
+
+<p>
+Returns the line number where <I>node</I> was drawn.  If the node is
+not visible then return -1.  The first line of the tree has the value
+of 0.
+</p>
+
+</DD></DL>
 <DL><DT><A NAME="move"><I>pathName</I> <B>move</B></A>
  <I>parent</I>
  <I>node</I>
@@ -873,6 +931,17 @@ not be generated.
 
 <p>
 The tree has all the standard mouse wheel bindings when it has focus.
+</p>
+
+<B><A NAME="bug">CURRENT BUG WITH BINDS</A></B><BR>
+
+<p>
+There currently exists a bug with the Tree's <B>bindArea</B>,
+<B>bindImage</B>, and <B>bindText</B> commands.  Contrary to the given
+text, occurrences of <B>%W</B> within scripts do <em>not</em>
+substitute the Tree's path, but rather the Tree's underlying canvas.
+A future release of BWidget will fix this error.  For now it is
+recommended that you do not use <B>%W</B> within your scripts.
 </p>
 
 </BODY></HTML>
