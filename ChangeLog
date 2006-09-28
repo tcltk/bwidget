@@ -1,3 +1,17 @@
+2006-09-28  J. Tang  <tang@jtang.org>
+
+	* messagedlg.tcl: explicitly marked the 'Abort' button upon -type
+	abortretryignore to be the default button [bug 970199]
+
+	* Tree.html: documented [find] and [line] commands [bug 626819];
+	noted bug with %W binding [bug 1224203]
+
+	* tree.tcl: added [bindArea] procedure; updated man page [patch
+	839066]
+
+	* combobox.tcl: added [clearvalue] proc to explicitly clear a
+	ComboBox value, updated man page [patch 780704]
+
 2006-09-26  J. Tang  <tang@jtang.org>
 
 	* passwd.tcl: don't ignore -labelwidth when calculating label

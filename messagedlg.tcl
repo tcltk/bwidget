@@ -54,7 +54,7 @@ proc MessageDlg::create { path args } {
     set defb  -1
     set canb  -1
     switch -- $type {
-        abortretryignore {set lbut {abort retry ignore}}
+        abortretryignore {set lbut {abort retry ignore}; set defb 0}
         ok               {set lbut {ok}; set defb 0 }
         okcancel         {set lbut {ok cancel}; set defb 0; set canb 1}
         retrycancel      {set lbut {retry cancel}; set defb 0; set canb 1}

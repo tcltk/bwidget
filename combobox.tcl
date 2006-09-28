@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.33 2006/08/21 20:54:14 dev_null42a Exp $
+#  $Id: combobox.tcl,v 1.34 2006/09/28 15:46:06 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -9,6 +9,7 @@
 #     - ComboBox::cget
 #     - ComboBox::setvalue
 #     - ComboBox::getvalue
+#     - ComboBox::clearvalue
 #     - ComboBox::_create_popup
 #     - ComboBox::_mapliste
 #     - ComboBox::_unmapliste
@@ -368,6 +369,13 @@ proc ComboBox::insert { path idx args } {
     } else {
         set values [eval [list linsert $values $idx] $args]
     }
+}
+
+# ----------------------------------------------------------------------------
+#  Command ComboBox::clearvalue
+# ----------------------------------------------------------------------------
+proc ComboBox::clearvalue { path } {
+    Entry::configure $path.e -text ""
 }
 
 # ----------------------------------------------------------------------------
