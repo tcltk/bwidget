@@ -1,5 +1,11 @@
 2006-09-28  J. Tang  <tang@jtang.org>
 
+	**** BWIDGET 1.8.0 TAGGED ****
+
+	* pkgIndex.tcl, README.txt: updated to BWidget 1.8
+
+	* removed configure.in and aclocal.m4
+
 	* messagedlg.tcl: explicitly marked the 'Abort' button upon -type
 	abortretryignore to be the default button [bug 970199]
 
