@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.12 2004/09/24 23:57:13 hobbs Exp $
+#  $Id: utils.tcl,v 1.13 2006/10/20 17:40:44 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -636,10 +636,21 @@ proc BWidget::write { filename {mode w} } {
 # Results:
 #	None.
 proc BWidget::bindMouseWheel { widget } {
-    bind $widget <MouseWheel>         {%W yview scroll [expr {-%D/24}]  units}
-    bind $widget <Shift-MouseWheel>   {%W yview scroll [expr {-%D/120}] pages}
-    bind $widget <Control-MouseWheel> {%W yview scroll [expr {-%D/120}] units}
+    if {[bind all <MouseWheel>] eq ""} {
+	# style::as and Tk 8.5 have global bindings
+	# Only enable these if no global binding for MouseWheel exists
+	bind $widget <MouseWheel> \
+	    {%W yview scroll [expr {-%D/24}]  units}
+	bind $widget <Shift-MouseWheel> \
+	    {%W yview scroll [expr {-%D/120}] pages}
+	bind $widget <Control-MouseWheel> \
+	    {%W yview scroll [expr {-%D/120}] units}
+    }
 
-    bind $widget <Button-4> {event generate %W <MouseWheel> -delta  120}
-    bind $widget <Button-5> {event generate %W <MouseWheel> -delta -120}
+    if {[bind all <Button-4>] eq ""} {
+	# style::as and Tk 8.5 have global bindings
+	# Only enable these if no global binding for them exists
+	bind $widget <Button-4> {event generate %W <MouseWheel> -delta  120}
+	bind $widget <Button-5> {event generate %W <MouseWheel> -delta -120}
+    }
 }
