@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.54 2006/09/28 15:46:06 dev_null42a Exp $
+#  $Id: tree.tcl,v 1.55 2006/11/10 20:39:15 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1849,14 +1849,15 @@ proc Tree::_auto_scroll { path x y } {
 # ----------------------------------------------------------------------------
 #  Command Tree::_scroll
 # ----------------------------------------------------------------------------
-proc Tree::_scroll { path cmd dir } {
+proc Tree::_scroll { path scroll } {
     variable $path
     upvar 0  $path data
-
+    set cmd [lindex $scroll 0]
+    set dir [lindex $scroll 1]
     if { ($dir == -1 && [lindex [$path.c $cmd] 0] > 0) ||
          ($dir == 1  && [lindex [$path.c $cmd] 1] < 1) } {
         $path.c $cmd scroll $dir units
-        set data(dnd,afterid) [after 100 [list Tree::_scroll $path $cmd $dir]]
+        set data(dnd,afterid) [after 50 [list Tree::_scroll $path $scroll]]
     } else {
         set data(dnd,afterid) ""
         DropSite::setcursor dot

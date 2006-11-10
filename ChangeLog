@@ -1,5 +1,11 @@
 2006-11-10  J. Tang  <tang@jtang.org>
 
+	* tree.tcl: fixed error with drag & drop's autoscroll [bug
+	1408494]
+	
+	* listbox.tcl: fixed error with drag & drop's autoscroll; fixed
+	error when dropping at the end of the list
+
 	* Added dynamic help to text tags (man page updated); fixed resize
 	bug with scrollframes.  Thanks to Jos Decoster for these patches.
 
