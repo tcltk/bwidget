@@ -1,5 +1,15 @@
 2006-11-10  J. Tang  <tang@jtang.org>
 
+	* DragSite.html: noted that -draginitcmd can return an empty
+	string to prevent a drag [bug 740499]
+	
+	* DropSite.html: fixed documentation with DropSite::register
+	command [bug 740474]
+
+	* combobox.tcl: allow autocomplete and autopost be
+	enabled/disabled after the widget was created [bug 1588808]; fixed
+	keysym in autopost binding [bug 1589111]
+
 	* tree.tcl: fixed error with drag & drop's autoscroll [bug
 	1408494]
 	

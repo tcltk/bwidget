@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.34 2006/09/28 15:46:06 dev_null42a Exp $
+#  $Id: combobox.tcl,v 1.35 2006/11/10 21:55:32 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -181,8 +181,8 @@ proc ComboBox::configure { path args } {
     set entry $path.e
 
 
-    set list [list -images -values -bwlistbox -hottrack]
-    foreach {ci cv cb ch} [eval [linsert $list 0 Widget::hasChangedX $path]] { break }
+    set list [list -images -values -bwlistbox -hottrack -autocomplete -autopost]
+    foreach {ci cv cb ch cac cap} [eval [linsert $list 0 Widget::hasChangedX $path]] { break }
 
     if { $ci } {
         set images [Widget::cget $path -images]
@@ -190,6 +190,40 @@ proc ComboBox::configure { path args } {
             Widget::configure $path [list -bwlistbox 1]
         } else {
             Widget::configure $path [list -bwlistbox 0]
+        }
+    }
+
+    ## If autocomplete toggled, turn bindings on/off
+    if { $cac } {
+        if {[Widget::cget $path -autocomplete]} {
+            ::bind $entry <KeyRelease> +[list $path _auto_complete %K]
+        } else {
+            set bindings [split [::bind $entry <KeyRelease>] \n]
+            if {[set idx [lsearch $bindings [list $path _auto_complete %K]]] != -1} {
+                ::bind $entry <KeyRelease> [join [lreplace $bindings $idx $idx] \n]
+            }
+        }
+    }
+
+    ## If autopost toggled, turn bindings on/off
+    if { $cap } {
+        if {[Widget::cget $path -autopost]} {
+            ::bind $entry <KeyRelease> +[list $path _auto_post %K]
+            set bindings [split [::bind $entry <Key-Up>] \n]
+            if {[set idx [lsearch $bindings [list ComboBox::_unmapliste $path]]] != -1} {
+                ::bind $entry <Key-Up> [join [lreplace $bindings $idx $idx] \n]
+            }
+            set bindings [split [::bind $entry <Key-Down>] \n]
+            if {[set idx [lsearch $bindings [list ComboBox::_mapliste $path]]] != -1} {
+                ::bind $entry <Key-Down> [join [lreplace $bindings $idx $idx] \n]
+            }
+        } else {
+            set bindings [split [::bind $entry <KeyRelease>] \n]
+            if {[set idx [lsearch $bindings [list $path _auto_post %K]]] != -1} {
+                ::bind $entry <KeyRelease> [join [lreplace $bindings $idx $idx] \n]
+            }
+            ::bind $entry <Key-Up> +[list ComboBox::_unmapliste $path]
+            ::bind $entry <Key-Down> +[list ComboBox::_mapliste $path]
         }
     }
 
@@ -758,7 +792,7 @@ proc ComboBox::_auto_post { path key } {
         set x -1
     }
     if {([string length $key] > 1 && [string tolower $key] != $key) && \
-            [string equal $key "Backspace"] != 0 && \
+            [string equal $key "BackSpace"] != 0 && \
             [string equal $key "Up"] != 0 && \
             [string equal $key "Down"] != 0} {
         return
