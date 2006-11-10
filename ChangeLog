@@ -1,5 +1,9 @@
 2006-11-10  J. Tang  <tang@jtang.org>
 
+	* widget.tcl: remove relative namespace resolution of variables,
+	in anticipation of TIP 278.  Widget should have been doing this
+	anyways.  [bug 1579744]
+
 	* DragSite.html: noted that -draginitcmd can return an empty
 	string to prevent a drag [bug 740499]
 	
