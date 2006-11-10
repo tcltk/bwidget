@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.23 2006/03/23 23:32:12 dev_null42a Exp $
+#  $Id: listbox.tcl,v 1.24 2006/11/10 20:39:15 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -1493,15 +1493,16 @@ proc ListBox::_multiple_select { path mode x y idx } {
 # ----------------------------------------------------------------------------
 #  Command ListBox::_scroll
 # ----------------------------------------------------------------------------
-proc ListBox::_scroll { path cmd dir } {
+proc ListBox::_scroll { path scroll} {
     variable $path
     upvar 0  $path data
-
+    set cmd [lindex $scroll 0]
+    set dir [lindex $scroll 1]
     if { ($dir == -1 && [lindex [$path.c $cmd] 0] > 0) ||
          ($dir == 1  && [lindex [$path.c $cmd] 1] < 1) } {
         $path $cmd scroll $dir units
         set data(dnd,afterid) \
-	    [after 100 [list ListBox::_scroll $path $cmd $dir]]
+	    [after 50 [list ListBox::_scroll $path $scroll]]
     } else {
         set data(dnd,afterid) ""
         DropSite::setcursor dot
@@ -1603,9 +1604,11 @@ proc ListBox::_drag_and_drop { path from endItem operation type startItem } {
         "position" {
             set idx $i
         } 
-
         "item" {
             set idx [$path index $i]
+        }
+        "widget" {
+            set idx [llength $items]
         }
     }
 
