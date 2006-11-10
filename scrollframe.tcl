@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.7 2005/07/28 00:40:42 hobbs Exp $
+#  $Id: scrollframe.tcl,v 1.8 2006/11/10 19:58:49 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -68,8 +68,13 @@ proc ScrollableFrame::create { path args } {
         -width  [Widget::cget $path -areawidth] \
         -height [Widget::cget $path -areaheight]
 
+    # Koen Danckaert: scollregion must also be reset when canvas size changes!
+    bind $path <Configure> \
+	    [list ScrollableFrame::_frameConfigure $canvas $frame]
     bind $frame <Configure> \
-	    [list ScrollableFrame::_frameConfigure $canvas $frame %w %h]
+	    [list ScrollableFrame::_frameConfigure $canvas $frame]
+    bind $frame <Expose> \
+ 	    [list ScrollableFrame::_frameConfigure $canvas $frame]
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
     return [Widget::create ScrollableFrame $path]
@@ -213,14 +218,11 @@ proc ScrollableFrame::_resize { path } {
 # ----------------------------------------------------------------------------
 #  Command ScrollableFrame::_frameConfigure
 # ----------------------------------------------------------------------------
-proc ScrollableFrame::_frameConfigure {canvas frame width height} {
+proc ScrollableFrame::_max {a b} {return [expr {$a <= $b ? $b : $a}]}
+proc ScrollableFrame::_frameConfigure {canvas frame} {
     # This ensures that we don't get funny scrollability in the frame
     # when it is smaller than the canvas space
-    if {[winfo height $frame] < [winfo height $canvas]} {
-	set height [winfo height $canvas]
-    }
-    if {[winfo width $frame] < [winfo width $canvas]} {
-	set width [winfo width $canvas]
-    }
+    set height [_max [winfo reqheight $frame] [winfo height $canvas]]
+    set width [_max [winfo reqwidth $frame] [winfo width $canvas]]
     $canvas:cmd configure -scrollregion [list 0 0 $width $height]
 }
