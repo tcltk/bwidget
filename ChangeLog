@@ -1,3 +1,9 @@
+2006-11-13  J. Tang  <tang@jtang.org>
+
+	* panedw.tcl: if activator is set to line then its width is set to
+	3.  --activator was an undocumented option; updated man page to
+	make it documented.  Thanks to Jos Decoster for pointing this out.
+
 2006-11-10  J. Tang  <tang@jtang.org>
 
 	* widget.tcl: remove relative namespace resolution of variables,
