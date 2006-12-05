@@ -1,3 +1,10 @@
+2006-12-05  Andreas Kupries <andreask@activestate.com>
+
+	* demo/demo.tcl (Demo::main): Removed the 'inscope' qualifier from
+	  the 'package require Bwidget'. The package system already forces
+	  loading and sourcing of package code in the global namespace, so
+	  this is bogus.
+
 2006-11-13  J. Tang  <tang@jtang.org>
 
 	* panedw.tcl: if activator is set to line then its width is set to
