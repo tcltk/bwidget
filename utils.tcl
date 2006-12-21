@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.13 2006/10/20 17:40:44 hobbs Exp $
+#  $Id: utils.tcl,v 1.14 2006/12/21 00:00:43 dev_null42a Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -567,7 +567,9 @@ proc BWidget::classes { class } {
     set classes [list $class]
     if {![info exists use($class)]} { return }
     foreach class $use($class) {
-	eval lappend classes [classes $class]
+        if {![string equal $class "-classonly"]} {
+            eval lappend classes [classes $class]
+        }
     }
     return [lsort -unique $classes]
 }
