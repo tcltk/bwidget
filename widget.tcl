@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.30 2006/11/10 22:45:51 dev_null42a Exp $
+#  $Id: widget.tcl,v 1.31 2007/05/11 17:55:09 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1575,7 +1575,8 @@ proc Widget::theme {{bool {}}} {
     variable _theme
     if {[llength [info level 0]] == 2} {
 	# set theme-ability
-	if {[catch {package require tile 0.6}]
+	if {[catch {package require Tk 8.5a6}]
+	    && [catch {package require tile 0.6}]
 	    && [catch {package require tile 1}]} {
 	    return -code error "BWidget's theming requires tile 0.6+"
 	} else {
