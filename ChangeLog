@@ -1,3 +1,8 @@
+2007-05-11  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* widget.tcl (Widget::theme): make sure Tk 8.5a6 is recognized as
+	having the themed widgets
+
 2006-12-20  J. Tang  <tang@jtang.org>
 
 	* util.tcl: fixed BWidget::write for widgets that require
