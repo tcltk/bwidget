@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.55 2006/11/10 20:39:15 dev_null42a Exp $
+#  $Id: tree.tcl,v 1.56 2007/10/31 18:54:28 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -327,6 +327,7 @@ proc Tree::insert { path index parent node args } {
     if { [info exists data($node)] } {
         return -code error "node \"$node\" already exists"
     }
+    set parent [_node_name $path $parent]
     if { ![info exists data($parent)] } {
         return -code error "node \"$parent\" does not exist"
     }
