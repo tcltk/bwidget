@@ -1,5 +1,7 @@
 2007-10-31  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* lang/hu.rc (new): Hungarian translation [Bug 1821842]
+
 	* tree.tcl (Tree::insert): do node_name on parent arg [Bug 1046955]
 
 	* listbox.tcl: speed up ListBox insertion significantly. [Bug 1472443]
