@@ -1,5 +1,7 @@
 2007-10-31  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* tree.tcl (Tree::insert): do node_name on parent arg [Bug 1046955]
+
 	* listbox.tcl: speed up ListBox insertion significantly. [Bug 1472443]
 
 2007-05-11  Jeff Hobbs  <jeffh@ActiveState.com>
