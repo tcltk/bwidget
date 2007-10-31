@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.24 2006/11/10 20:39:15 dev_null42a Exp $
+#  $Id: listbox.tcl,v 1.25 2007/10/31 18:13:47 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -264,13 +264,14 @@ proc ListBox::insert { path index item args } {
 
     set item [Widget::nextIndex $path $item]
 
-    if { [lsearch -exact $data(items) $item] != -1 } {
+    if {[info exists data(exists,$item)]} {
         return -code error "item \"$item\" already exists"
     }
 
     Widget::init ListBox::Item $path.$item $args
 
     set data(items) [linsert $data(items) $index $item]
+    set data(exists,$item) 1
     set data(upd,create,$item) $item
 
     _redraw_idle $path 2
@@ -306,10 +307,10 @@ proc ListBox::multipleinsert { path index args } {
 
     set count 0
     foreach {item iargs} $args {
-	if { [lsearch -exact $data(items) $item] != -1 } {
+	if {[info exists data(exists,$item)]} {
 	    return -code error "item \"$item\" already exists"
 	}
-	
+
 	if {$count==0} {
 	    Widget::init ListBox::Item $path.$item $iargs
 	    set firstpath $path.$item
@@ -318,6 +319,7 @@ proc ListBox::multipleinsert { path index args } {
 	}
 
 	set data(items) [linsert $data(items) $index $item]
+	set data(exists,$item) 1
 	set data(upd,create,$item) $item
 
 	incr count
@@ -462,6 +464,9 @@ proc ListBox::delete { path args } {
                 set data(items) [lreplace $data(items) $idx $idx]
                 array unset help $item
                 Widget::destroy $path.$item
+		if { [info exists data(exists,$item)] } {
+		    unset data(exists,$item)
+		}
                 if { [info exists data(upd,create,$item)] } {
                     unset data(upd,create,$item)
                 } else {
@@ -996,6 +1001,7 @@ proc ListBox::_redraw_items { path } {
     set x0   4
     set x1   [expr {$x0+$padx}]
     set nitem 0
+    set width 0
     set drawn {}
     set data(xlist) {}
     if { [Widget::cget $path -multicolumn] } {
@@ -1021,22 +1027,26 @@ proc ListBox::_redraw_items { path } {
             $path.c coords n:$item [expr {$x1+$indent}] $y0
             $path.c coords i:$item [expr {$x0+$indent}] $y0
         }
+	set font [_getoption $path $item -font]
+	set text [Widget::getoption $path.$item -text]
+	set tw [font measure $font $text]
+	if {$tw > $width} { set width $tw }
         incr y0 $dy
         incr nitem
         lappend drawn n:$item
         if { $nitem == $nrows } {
+	    set x2    [expr {$x1 + $width}]
             set y0    [expr {$dy/2}]
-            set bbox  [eval [linsert $drawn 0 $path.c bbox]]
             set drawn {}
-            set x0    [expr {[lindex $bbox 2]+$dx}]
+            set x0    [expr {$x2+$dx}]
             set x1    [expr {$x0+$padx}]
             set nitem 0
-            lappend data(xlist) [lindex $bbox 2]
+            lappend data(xlist) $x2
+	    set width 0
         }
     }
     if { $nitem && $nitem < $nrows } {
-        set bbox  [eval [linsert $drawn 0 $path.c bbox]]
-        lappend data(xlist) [lindex $bbox 2]
+        lappend data(xlist) [expr {$x1 + $width}]
     }
     set data(upd,delete) {}
     $path.c configure -cursor $cursor
