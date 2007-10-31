@@ -1,3 +1,7 @@
+2007-10-31  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* listbox.tcl: speed up ListBox insertion significantly. [Bug 1472443]
+
 2007-05-11  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* widget.tcl (Widget::theme): make sure Tk 8.5a6 is recognized as
