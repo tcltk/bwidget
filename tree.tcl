@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.56 2007/10/31 18:54:28 hobbs Exp $
+#  $Id: tree.tcl,v 1.57 2008/05/26 07:06:49 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1529,7 +1529,10 @@ proc Tree::_redraw_selection { path } {
             }
             set id [$path.c create rectangle $bbox -tags [list sel s:$node] \
 			-fill $selbg -outline $selbg]
-            $path.c itemconfigure "n:$node" -fill $selfg
+	    if {$selfg != ""} {
+		# Don't allow an empty fill - that would be transparent
+		$path.c itemconfigure "n:$node" -fill $selfg
+	    }
             $path.c lower $id
         }
     }
