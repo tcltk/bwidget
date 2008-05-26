@@ -1,3 +1,11 @@
+2008-05-26  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tree.tcl (Tree::_redraw_selection):       do not allow empty
+	* listbox.tcl (ListBox::_redraw_selection): fill color as that
+	creates a transparent item that doesn't return a bbox.  This
+	showed up on OS X/Aqua, where the listbox selectforeground
+	defaults to empty. [AS Bug 77186 74923]
+
 2007-10-31  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* lang/nl.rc (new): Dutch translation [Bug 1804469]

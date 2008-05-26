@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.25 2007/10/31 18:13:47 hobbs Exp $
+#  $Id: listbox.tcl,v 1.26 2008/05/26 07:06:49 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -1084,7 +1084,10 @@ proc ListBox::_redraw_selection { path } {
             set tags [list sel s:$item click]
             set id [$path.c create rectangle $bbox \
                 -fill $selbg -outline $selbg -tags $tags]
-            $path.c itemconfigure "n:$item" -fill $selfg
+	    if {$selfg != ""} {
+		# Don't allow an empty fill - that would be transparent
+		$path.c itemconfigure "n:$item" -fill $selfg
+	    }
             $path.c lower $id
             $path.c lower b:$item
         }
