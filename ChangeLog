@@ -1,3 +1,10 @@
+2008-10-30  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tree.tcl (Tree::_node_name_rev): Return node names as they are
+	input, and properly handle :: in node names.  This changes
+	internal node name reps, but should be transparent to the user,
+	except for the result of [insert].
+
 2008-05-26  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tree.tcl (Tree::_redraw_selection):       do not allow empty
