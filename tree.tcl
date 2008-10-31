@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.57 2008/05/26 07:06:49 hobbs Exp $
+#  $Id: tree.tcl,v 1.58 2008/10/31 00:49:33 hobbs Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -441,7 +441,7 @@ proc Tree::bindArea { path event script } {
 # ----------------------------------------------------------------------------
 proc Tree::bindText { path event script } {
     if {[string length $script]} {
-	append script " \[Tree::_get_node_name [list $path] current 2\]"
+	append script " \[Tree::_get_node_name [list $path] current 2 1\]"
     }
     $path.c bind "node" $event $script
     if {[Widget::getoption $path -selectfill]} {
@@ -457,7 +457,7 @@ proc Tree::bindText { path event script } {
 # ----------------------------------------------------------------------------
 proc Tree::bindImage { path event script } {
     if {[string length $script]} {
-	append script " \[Tree::_get_node_name [list $path] current 2\]"
+	append script " \[Tree::_get_node_name [list $path] current 2 1\]"
     }
     $path.c bind "img" $event $script
     if {[Widget::getoption $path -selectfill]} {
@@ -705,7 +705,11 @@ proc Tree::selection { path cmd args } {
 		return -code error \
 			"wrong#args: Expected $path selection get"
 	    }
-            return $data(selnodes)
+            set nodes [list]
+	    foreach node $data(selnodes) {
+		lappend nodes [_node_name_rev $path $node]
+	    }
+	    return $nodes
         }
         includes {
 	    if {[llength $args] != 1} {
@@ -839,10 +843,10 @@ proc Tree::find {path findInfo {confine ""}} {
             set xi [expr {[lindex [$path.c coords n:$node] 0] - $padx}]
             set xs [lindex [$path.c bbox n:$node] 2]
             if {$x >= $xi && $x <= $xs} {
-                return $node
+                return [_node_name_rev $path $node]
             }
         } else {
-            return $node
+            return [_node_name_rev $path $node]
         }
     }
     return ""
@@ -2091,8 +2095,12 @@ proc Tree::_set_current_node {win node} {
 # Results:
 #	node	name of the tree node.
 
-proc Tree::_get_node_name {path {item current} {tagindex end-1}} {
-    return [string range [lindex [$path.c gettags $item] $tagindex] 2 end]
+proc Tree::_get_node_name {path {item current} {tagindex end-1} {truename 0}} {
+    set node [string range [lindex [$path.c gettags $item] $tagindex] 2 end]
+    if {$truename} {
+	return [_node_name_rev $path $node]
+    }
+    return $node
 }
 
 # Tree::_get_node_padx --
@@ -2207,9 +2215,15 @@ proc Tree::_mouse_select { path cmd args } {
     }
 }
 
-
 proc Tree::_node_name { path node } {
-    set map [list & _ | _ ^ _ ! _]
+    # Make sure node names are safe as tags and variable names
+    set map [list & \1 | \2 ^ \3 ! \4 :: \5]
+    return  [string map $map $node]
+}
+
+proc Tree::_node_name_rev { path node } {
+    # Allow reverse interpretation of node names
+    set map [list \1 & \2 | \3 ^ \4 ! \5 ::]
     return  [string map $map $node]
 }
 
