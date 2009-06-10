@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.14 2006/12/21 00:00:43 dev_null42a Exp $
+#  $Id: utils.tcl,v 1.15 2009/06/10 08:48:06 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -331,7 +331,7 @@ proc BWidget::place { path w h args } {
                     if { $idx == 2 } {
                         # try left, then right if out, then 0 if out
                         if { $x0 >= $w } {
-                            set x [expr {$x0-$sw}]
+                            set x [expr {$x0-$w}]
                         } elseif { $x1+$w <= $sw } {
                             set x "+$x1"
                         } else {
@@ -342,7 +342,7 @@ proc BWidget::place { path w h args } {
                         if { $x1+$w <= $sw } {
                             set x "+$x1"
                         } elseif { $x0 >= $w } {
-                            set x [expr {$x0-$sw}]
+                            set x [expr {$x0-$w}]
                         } else {
                             set x "-0"
                         }
@@ -356,7 +356,7 @@ proc BWidget::place { path w h args } {
                     if { $idx == 4 } {
                         # try top, then bottom, then 0
                         if { $h <= $y0 } {
-                            set y [expr {$y0-$sh}]
+                            set y [expr {$y0-$h}]
                         } elseif { $y1+$h <= $sh } {
                             set y "+$y1"
                         } else {
@@ -367,7 +367,7 @@ proc BWidget::place { path w h args } {
                         if { $y1+$h <= $sh } {
                             set y "+$y1"
                         } elseif { $h <= $y0 } {
-                            set y [expr {$y0-$sh}]
+                            set y [expr {$y0-$h}]
                         } else {
                             set y "-0"
                         }
@@ -656,3 +656,5 @@ proc BWidget::bindMouseWheel { widget } {
 	bind $widget <Button-5> {event generate %W <MouseWheel> -delta -120}
     }
 }
+
+ 	  	 

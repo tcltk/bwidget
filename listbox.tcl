@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.26 2008/05/26 07:06:49 hobbs Exp $
+#  $Id: listbox.tcl,v 1.27 2009/06/10 08:48:06 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -1066,8 +1066,10 @@ proc ListBox::_redraw_selection { path } {
     set multi   [Widget::getoption $path -multicolumn]
     foreach id [$path.c find withtag sel] {
         set item [string range [lindex [$path.c gettags $id] 1] 2 end]
-        $path.c itemconfigure "n:$item" \
-            -fill [_getoption $path $item -foreground]
+        if {-1 == [lsearch -exact $data(upd,delete) $item]} {
+            $path.c itemconfigure "n:$item" \
+                -fill [_getoption $path $item -foreground]
+        }
     }
     $path.c delete sel
     if {$selfill && !$multi} {
