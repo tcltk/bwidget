@@ -1,3 +1,21 @@
+2009-06-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* arrow.tcl initialised set _grab(oldstate) to "normal" to avoid
+	error when there is a ArrowButton::_leave without corresponding
+	ArrowButton::_enter [Bug 2762361]
+	
+	* entry.tcl (Entry::_path_command) Add "invoke" to the list of
+	internally handled commands
+	[Bug 2340320] (patch by relaxmike@users.sourceforge.net)
+	
+	* uitils.tcl (BWidget::place) BWidget::place used screen width
+	instead window width.
+	[Bug 1842346] (patch by Niels Gollesch ngoelles@users.sourceforge.net)
+	
+	* listbox.tcl (ListBox::_redraw_selection) Added check if redrawn
+	item is on the to-delete list and thus does not exist any more as
+	BWidget. [Bug 1752755] (legolas_a20@users.sourceforge.net]
+
 2008-10-30  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tree.tcl (Tree::_node_name_rev): Return node names as they are

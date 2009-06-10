@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.21 2004/04/21 22:26:30 hobbs Exp $
+#  $Id: entry.tcl,v 1.22 2009/06/10 08:48:06 oehhar Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -262,10 +262,13 @@ proc Entry::invoke { path } {
 #  Command Entry::_path_command
 # ------------------------------------------------------------------------------
 proc Entry::_path_command { path cmd larg } {
-    if {[string equal $cmd "configure"] || [string equal $cmd "cget"]} {
-        return [eval [linsert $larg 0 Entry::$cmd $path]]
-    } else {
-        return [eval [linsert $larg 0 $path:cmd $cmd]]
+    switch -exact -- $cmd {
+        configure - cget - invoke {
+            return [eval [linsert $larg 0 Entry::$cmd $path]]
+        }
+        default {
+            return [eval [linsert $larg 0 $path:cmd $cmd]]
+        }
     }
 }
 
