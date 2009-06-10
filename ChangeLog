@@ -1,5 +1,11 @@
 2009-06-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
+	* dialog.html Added documentation for option -buttonwidth
+	of Dialog
+	[Bug 1668587] (Eric Leunissen)
+
+2009-06-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
 	* arrow.tcl initialised set _grab(oldstate) to "normal" to avoid
 	error when there is a ArrowButton::_leave without corresponding
 	ArrowButton::_enter [Bug 2762361]
