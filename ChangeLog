@@ -1,5 +1,18 @@
 2009-06-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
+	* no.rc added norwegian translation file
+	[Feature Request 2797153] provided by Lars Martin Hambro
+	
+	* passwddlg.tcl (PasswdDlg::_verifonpasswd) check for
+	disabled password field and confirm directly.
+	[Bug 1642050] (Calvin Bascom) Enter key did not confirm
+	dialog when -passwdstate disabled.
+	
+	* combobox.tcl (ComboBox::_select) included [Patch 981545],
+	but commented out - it works for me without it.
+
+2009-06-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
 	* dialog.html Added documentation for option -buttonwidth
 	of Dialog
 	[Bug 1668587] (Eric Leunissen)
