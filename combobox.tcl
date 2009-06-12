@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.36 2009/06/11 15:42:51 oehhar Exp $
+#  $Id: combobox.tcl,v 1.37 2009/06/12 15:31:38 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -25,7 +25,7 @@ namespace eval ComboBox {
 
     Widget::tkinclude ComboBox frame :cmd \
 	include {-relief -borderwidth -bd -background} \
-	initialize {-relief sunken -borderwidth 2} \
+	initialize {-relief sunken -borderwidth 2}
 
     Widget::bwinclude ComboBox Entry .e \
 	remove {-relief -bd -borderwidth -bg} \

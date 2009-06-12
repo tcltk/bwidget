@@ -1,3 +1,11 @@
+2009-06-11 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* combobox.tcl removed \ before empty line (potential
+	trap) [Bug 2804961] Andreas Kupries
+	
+	* dialog.html Documented -geometry option.
+	[Bug 1634416] Erik Leunissen
+
 2009-06-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* no.rc added norwegian translation file
