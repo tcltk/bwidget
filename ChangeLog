@@ -1,3 +1,10 @@
+2009-06-16 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* combobox.tcl (ComboBox::_create_popup) In dropdown list,
+	a vertical scrollbar was always shown if horizantal is used.
+	ScrolledWindow is now called with "-managed 1".
+	[Patch 2807160] by Koen Danckaert
+
 2009-06-11 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* combobox.tcl removed \ before empty line (potential

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.37 2009/06/12 15:31:38 oehhar Exp $
+#  $Id: combobox.tcl,v 1.38 2009/06/16 15:43:43 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -448,7 +448,7 @@ proc ComboBox::_create_popup { path } {
     wm transient        $shell [winfo toplevel $path]
     catch { wm attributes $shell -topmost 1 }
 
-    set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
+    set sw [ScrolledWindow $shell.sw -managed 1 -size $sbwidth -ipad 0]
 
     if {$bw} {
         set listb  [ListBox $shell.listb \
@@ -536,7 +536,7 @@ proc ComboBox::_recreate_popup { path } {
 
     set listb $shell.listb
     destroy $shell.sw
-    set sw [ScrolledWindow $shell.sw -managed 0 -size $sbwidth -ipad 0]
+    set sw [ScrolledWindow $shell.sw -managed 1 -size $sbwidth -ipad 0]
     $listb configure \
             -height $h \
             -font   [Widget::cget $path -font] \
