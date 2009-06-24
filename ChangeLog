@@ -1,3 +1,18 @@
+2009-06-24 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* scrollframe.tcl (ScrollableFrame::create, ScrollableFrame::_resize,
+	ScrollableFrame::_frameConfigure) fixed two issues:
+	- Scrollbar activated even if not necessary
+	  Fix: update scrolling reagion on configure event of the frame
+	- Disfunction if the frame got to small to be on the current view
+	  Fix: update scrolling reagion on map or unmap events
+	[Patch 2807227] by Koen Danckaert
+	
+	* buttonbox.tcl (ButtonBox::_redraw) Bug: homogeneous button width
+	not honored if button size changes after creation.
+	-uniform gridding option is used if tcl version >= 8.3.
+	[Patch 2807147] by Koen Danckaert
+	
 2009-06-16 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* combobox.tcl (ComboBox::_create_popup) In dropdown list,
