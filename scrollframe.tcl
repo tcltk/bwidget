@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.8 2006/11/10 19:58:49 dev_null42a Exp $
+#  $Id: scrollframe.tcl,v 1.9 2009/06/24 12:13:04 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -68,13 +68,21 @@ proc ScrollableFrame::create { path args } {
         -width  [Widget::cget $path -areawidth] \
         -height [Widget::cget $path -areaheight]
 
-    # Koen Danckaert: scollregion must also be reset when canvas size changes!
-    bind $path <Configure> \
-	    [list ScrollableFrame::_frameConfigure $canvas $frame]
+    # scollregion must also be reset when canvas size changes!
+    bind $canvas <Configure> \
+        [list ScrollableFrame::_frameConfigure $canvas]
     bind $frame <Configure> \
-	    [list ScrollableFrame::_frameConfigure $canvas $frame]
+        [list ScrollableFrame::_frameConfigure $canvas]
     bind $frame <Expose> \
- 	    [list ScrollableFrame::_frameConfigure $canvas $frame]
+        [list ScrollableFrame::_frameConfigure $canvas]
+    # add <unmap> binding: <configure> is not called when frame
+    # becomes so small that it suddenly falls outside of currently visible area.
+    # but now we need to add a <map> binding too
+    bind $frame <Map> \
+        [list ScrollableFrame::_frameConfigure $canvas]
+    bind $frame <Unmap> \
+        [list ScrollableFrame::_frameConfigure $canvas 1]
+
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
     return [Widget::create ScrollableFrame $path]
@@ -212,6 +220,8 @@ proc ScrollableFrame::_resize { path } {
     if { [Widget::getoption $path -constrainedheight] } {
         $path:cmd itemconfigure win -height [winfo height $path]
     }
+    # scollregion must also be reset when canvas size changes
+    _frameConfigure $path
 }
 
 
@@ -219,10 +229,18 @@ proc ScrollableFrame::_resize { path } {
 #  Command ScrollableFrame::_frameConfigure
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::_max {a b} {return [expr {$a <= $b ? $b : $a}]}
-proc ScrollableFrame::_frameConfigure {canvas frame} {
+proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
     # This ensures that we don't get funny scrollability in the frame
     # when it is smaller than the canvas space
-    set height [_max [winfo reqheight $frame] [winfo height $canvas]]
-    set width [_max [winfo reqwidth $frame] [winfo width $canvas]]
+    # when it is smaller than the canvas space.
+    # use [winfo] to get height & width of frame
+
+    # [winfo] doesn't work for unmapped frame
+    set frameh [expr {$unmap ? 0 : [winfo height $canvas.frame]}]
+    set framew [expr {$unmap ? 0 : [winfo width $canvas.frame]}]
+
+    set height [_max $frameh [winfo height $canvas]]
+    set width [_max $framew [winfo width $canvas]]
+
     $canvas:cmd configure -scrollregion [list 0 0 $width $height]
 }
