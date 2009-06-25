@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.38 2009/06/16 15:43:43 oehhar Exp $
+#  $Id: combobox.tcl,v 1.39 2009/06/25 16:48:52 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -53,13 +53,15 @@ namespace eval ComboBox {
     Widget::syncoptions ComboBox Entry .e {-text {}}
 
     ::bind BwComboBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
-    ::bind BwComboBox <Destroy> [list Widget::destroy %W]
+    ::bind BwComboBox <Destroy> [list ComboBox::_destroy %W]
 
     ::bind ListBoxHotTrack <Motion> {
         %W selection clear 0 end
         %W activate @%x,%y
         %W selection set @%x,%y
     }
+
+    variable _index
 }
 
 
@@ -154,6 +156,8 @@ proc ComboBox::create { path args } {
     } else {
         Widget::configure $path [list -bwlistbox $bw]
     }
+
+    set ComboBox::_index($path) -1
 
     return [Widget::create ComboBox $path]
 }
@@ -295,6 +299,8 @@ proc ComboBox::cget { path option } {
 #  Command ComboBox::setvalue
 # ----------------------------------------------------------------------------
 proc ComboBox::setvalue { path index } {
+    variable _index
+
     set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
     switch -- $index {
@@ -331,6 +337,7 @@ proc ComboBox::setvalue { path index } {
     }
     if { $idx >= 0 && $idx < [llength $values] } {
         set newval [lindex $values $idx]
+        set _index($path) $idx
 	Entry::configure $path.e -text $newval
         return 1
     }
@@ -352,8 +359,17 @@ proc ComboBox::get { path } {
 #  Command ComboBox::getvalue
 # ----------------------------------------------------------------------------
 proc ComboBox::getvalue { path } {
+    variable _index
     set values [Widget::getMegawidgetOption $path -values]
     set value  [Entry::cget $path.e -text]
+    # Check if an index was saved by the last setvalue operation
+    # If this index still matches it is returned
+    # This is necessary for the case when values is not unique
+    if { $_index($path) >= 0 \
+        && $_index($path) < [llength $values] \
+        && $value eq [lindex $values $_index($path)]} {
+        return $_index($path)
+    }
 
     return [lsearch -exact $values $value]
 }
@@ -843,4 +859,12 @@ proc ComboBox::_auto_post { path key } {
         $path.shell.listb selection set $x
         $path.shell.listb see $x
     }
+}
+# ------------------------------------------------------------------------------
+#  Command ComboBox::_destroy
+# ------------------------------------------------------------------------------
+proc ComboBox::_destroy { path } {
+    variable _index
+    Widget::destroy $path
+    unset _index($path)
 }
