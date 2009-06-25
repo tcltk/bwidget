@@ -1,3 +1,10 @@
+2009-06-25 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* combobox.tcl (ComboBox::getvalue et al) fixed bug: getvalue returned
+	first apearence of current data instead of clicked index, which may not
+	be the same if values is not unique. Additional variable _index(path)
+	added to hold click index [Bug 1610965] reported by Martin Lemburg
+
 2009-06-24 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* scrollframe.tcl (ScrollableFrame::create, ScrollableFrame::_resize,
