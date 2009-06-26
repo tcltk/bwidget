@@ -1,3 +1,16 @@
+2009-06-26 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* listbox.tcl (ListBox::create et al) new feature: listbox option
+	-listbox now read/write [Bug 1501874] reported by Stephen Huntley
+	
+	* dynhelp.tcl (DynamicHelp::_show_help) fixed issue (as far as possible):
+	Dynamic help baloon was on the main screen, if it touched the border on
+	a windows multi screen configuration.
+	The fix assumes, that all screens have same dimensions and no gaps in-
+	between. This is necessary, because multi-screen configuration paramters
+	may not be interrogated by tk (despite of coordinates out of the screen)
+	[Bug 1499135] reported by Gregor
+
 2009-06-25 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* combobox.tcl (ComboBox::getvalue et al) fixed bug: getvalue returned
