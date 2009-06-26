@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.16 2006/11/10 19:58:49 dev_null42a Exp $
+#  $Id: dynhelp.tcl,v 1.17 2009/06/26 14:46:05 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -684,14 +684,27 @@ proc DynamicHelp::_show_help { path w x y } {
         set  scrheight [winfo vrootheight .]
         set  width     [winfo reqwidth  $_top]
         set  height    [winfo reqheight $_top]
-        incr y 12
-        incr x 8
 
-        if { $x+$width > $scrwidth } {
-            set x [expr {$scrwidth - $width}]
+        # On windows multi screen configurations, coordinates may get outside
+        # the main screen. We suppose that all screens have the same size
+        # because it is not possible to query the size of the other screens.
+        
+        set screenx [expr {$x % $scrwidth} ]
+        set screeny [expr {$y % $scrheight} ]
+        
+        # Increment the required size by the deplacement from the passed point
+        incr width 8
+        incr height 12
+        
+        if { $screenx+$width > $scrwidth } {
+            set x [expr {$x + ($scrwidth - $screenx) - ($width - 8)}]
+        } else {
+            incr x 8
         }
-        if { $y+$height > $scrheight } {
-            set y [expr {$y - 12 - $height}]
+        if { $screeny+$height > $scrheight } {
+            set y [expr {$y - $height}]
+        } else {
+            incr y 12
         }
 
         wm geometry  $_top "+$x+$y"

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.27 2009/06/10 08:48:06 oehhar Exp $
+#  $Id: listbox.tcl,v 1.28 2009/06/26 14:46:05 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -91,7 +91,7 @@ namespace eval ListBox {
         {-redraw           Boolean 1  0}
         {-multicolumn      Boolean 0  0}
         {-dropovermode     Flag    "wpi" 0 "wpi"}
-	{-selectmode       Enum none 1 {none single multiple}}
+        {-selectmode       Enum none 0 {none single multiple}}
         {-fg               Synonym -foreground}
         {-bg               Synonym -background}
         {-dropcmd          String  "ListBox::_drag_and_drop" 0}
@@ -176,32 +176,69 @@ proc ListBox::create { path args } {
     bind $path.c <Key-Up> {ListBox::_keyboard_navigation [winfo parent %W] -1}
     bind $path.c <Key-Down> {ListBox::_keyboard_navigation [winfo parent %W] 1}
 
-    switch -exact -- [Widget::getoption $path -selectmode] {
-	single {
-	    $path bindText  <Button-1> [list ListBox::_mouse_select $path set]
-	    $path bindImage <Button-1> [list ListBox::_mouse_select $path set]
-	}
-	multiple {
-	    set cmd ListBox::_multiple_select
-	    $path bindText <Button-1>          [list $cmd $path n %x %y]
-	    $path bindText <Shift-Button-1>    [list $cmd $path s %x %y]
-	    $path bindText <Control-Button-1>  [list $cmd $path c %x %y]
-
-	    $path bindImage <Button-1>         [list $cmd $path n %x %y]
-	    $path bindImage <Shift-Button-1>   [list $cmd $path s %x %y]
-	    $path bindImage <Control-Button-1> [list $cmd $path c %x %y]
-	}
-    }
+    _configureSelectmode $path [Widget::getoption $path -selectmode]
 
     return $path
 }
 
 
 # ----------------------------------------------------------------------------
+#  Command ListBox::_configureSelectmode
+# ----------------------------------------------------------------------------
+# Configure the selectmode
+proc ListBox::_configureSelectmode { path selectmode {previous none} } {
+    # clear current binding
+    switch -exact -- $previous {
+        single {
+            $path bindText  <Button-1> ""
+            $path bindImage <Button-1> ""
+        }
+        multiple {
+            $path bindText <Button-1>          ""
+            $path bindText <Shift-Button-1>    ""
+            $path bindText <Control-Button-1>  ""
+
+            $path bindImage <Button-1>         ""
+            $path bindImage <Shift-Button-1>   ""
+            $path bindImage <Control-Button-1> ""
+        }
+    }
+    # set new bindings
+    switch -exact -- $selectmode {
+        single {
+            $path bindText  <Button-1> [list ListBox::_mouse_select $path set]
+            $path bindImage <Button-1> [list ListBox::_mouse_select $path set]
+            if {1 < [llength [ListBox::selection $path get]]} {
+                ListBox::selection $path clear
+            }
+        }
+        multiple {
+            set cmd ListBox::_multiple_select
+            $path bindText <Button-1>          [list $cmd $path n %x %y]
+            $path bindText <Shift-Button-1>    [list $cmd $path s %x %y]
+            $path bindText <Control-Button-1>  [list $cmd $path c %x %y]
+
+            $path bindImage <Button-1>         [list $cmd $path n %x %y]
+            $path bindImage <Shift-Button-1>   [list $cmd $path s %x %y]
+            $path bindImage <Control-Button-1> [list $cmd $path c %x %y]
+        }
+        default {
+            if {0 < [llength [ListBox::selection $path get]]} {
+                ListBox::selection $path clear
+            }
+        }
+    }
+}
+# ----------------------------------------------------------------------------
 #  Command ListBox::configure
 # ----------------------------------------------------------------------------
 proc ListBox::configure { path args } {
+    set selectmodePrevious [Widget::getoption $path -selectmode]
     set res [Widget::configure $path $args]
+
+    if { [Widget::hasChanged $path -selectmode selectmode] } {
+        _configureSelectmode $path $selectmode $selectmodePrevious
+    }
 
     set ch1 [expr {[Widget::hasChanged $path -deltay dy]  |
                    [Widget::hasChanged $path -padx val]   |
