@@ -11,6 +11,9 @@
 	may not be interrogated by tk (despite of coordinates out of the screen)
 	[Bug 1499135] reported by Gregor
 
+	* notebook.tcl (NoteBook::delete) Deleted also state variables
+	[Bug 1445219] reported by Eric Kemp-Benedict
+
 2009-06-25 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* combobox.tcl (ComboBox::getvalue et al) fixed bug: getvalue returned
