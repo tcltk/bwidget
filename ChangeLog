@@ -12,6 +12,12 @@
 	Bug corrected: enless loop when both scrollbars where automatically
 	mapped and the window size was changed by this action (on linux).
 	Scrollbar unmapping and mapping secured by a locked update [Bug 2783019]
+
+	* widget.tcl (Widget::tkinclude) : option data base entry name keeps the
+	original name and not the renamed name.
+	The only resulting modification is to rename the option key for
+	"MessageDlg -text" from "*MessageDlg.frame.msg.message" to
+	"*MessageDlg.frame.msg.text". [Bug 1266792]
 	
 2009-06-26 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
