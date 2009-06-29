@@ -19,6 +19,9 @@
 	"MessageDlg -text" from "*MessageDlg.frame.msg.message" to
 	"*MessageDlg.frame.msg.text". [Bug 1266792]
 	
+	* widget.tcl (Widget::init) : fixed a memory leak on wrong option value.
+	[Bug 1230737] 
+	
 2009-06-26 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* listbox.tcl (ListBox::create et al) new feature: listbox option
