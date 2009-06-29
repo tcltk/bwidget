@@ -1,3 +1,18 @@
+2009-06-29 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* ScrolledWindow.html ScrolledWindow documentation changed:
+	Documented options: -ipad, -sides, -size, -managed
+	[Patch 2807160] Text by Koen Danckaert
+	Removed (read only) remark of option -scrollbar.
+	
+	* scrollframe.tcl (ScrollableFrame::create) changed bindings
+	[Patch 2807227] by Koen Danckaert (comment)
+	
+	* scrollw.tcl (ScrolledWindow::_set_hscroll, ScrolledWindow::_set_vscroll)
+	Bug corrected: enless loop when both scrollbars where automatically
+	mapped and the window size was changed by this action (on linux).
+	Scrollbar unmapping and mapping secured by a locked update [Bug 2783019]
+	
 2009-06-26 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* listbox.tcl (ListBox::create et al) new feature: listbox option
