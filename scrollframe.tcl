@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.9 2009/06/24 12:13:04 oehhar Exp $
+#  $Id: scrollframe.tcl,v 1.10 2009/06/29 13:28:24 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -68,12 +68,7 @@ proc ScrollableFrame::create { path args } {
         -width  [Widget::cget $path -areawidth] \
         -height [Widget::cget $path -areaheight]
 
-    # scollregion must also be reset when canvas size changes!
-    bind $canvas <Configure> \
-        [list ScrollableFrame::_frameConfigure $canvas]
     bind $frame <Configure> \
-        [list ScrollableFrame::_frameConfigure $canvas]
-    bind $frame <Expose> \
         [list ScrollableFrame::_frameConfigure $canvas]
     # add <unmap> binding: <configure> is not called when frame
     # becomes so small that it suddenly falls outside of currently visible area.
@@ -237,10 +232,10 @@ proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
 
     # [winfo] doesn't work for unmapped frame
     set frameh [expr {$unmap ? 0 : [winfo height $canvas.frame]}]
-    set framew [expr {$unmap ? 0 : [winfo width $canvas.frame]}]
+    set framew [expr {$unmap ? 0 : [winfo width  $canvas.frame]}]
 
     set height [_max $frameh [winfo height $canvas]]
-    set width [_max $framew [winfo width $canvas]]
+    set width  [_max $framew [winfo width  $canvas]]
 
     $canvas:cmd configure -scrollregion [list 0 0 $width $height]
 }
