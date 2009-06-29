@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.32 2009/06/29 15:53:18 oehhar Exp $
+#  $Id: widget.tcl,v 1.33 2009/06/29 16:34:19 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -548,7 +548,17 @@ proc Widget::init { class path options } {
             set optdesc $classopt($option)
             set type    [lindex $optdesc 0]
         }
-        set pathopt($option) [$_optiontype($type) $option $value [lindex $optdesc 3]]
+        # this may fail if a wrong enum element was used
+        if {[catch {
+             $_optiontype($type) $option $value [lindex $optdesc 3]
+        } msg]} {
+            if {[info exists pathopt]} {
+                unset pathopt
+            }
+            unset pathmod
+            return -code error $msg
+        }
+        set pathopt($option) $msg
 	set pathinit($option) $pathopt($option)
     }
 }
