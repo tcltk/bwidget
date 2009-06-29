@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.31 2007/05/11 17:55:09 hobbs Exp $
+#  $Id: widget.tcl,v 1.32 2009/06/29 15:53:18 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -175,7 +175,7 @@ proc Widget::tkinclude { class tkwidget subpath args } {
 			[list TkResource $value $ro [list $tkwidget $realopt]]
 
 		# Add an option database entry for this option
-		set optionDbName ".[lindex [_configure_option $option ""] 0]"
+		set optionDbName ".[lindex [_configure_option $realopt ""] 0]"
 		if { ![string equal $subpath ":cmd"] } {
 		    set optionDbName "$subpath$optionDbName"
 		}
