@@ -335,10 +335,10 @@ proc ButtonBox::_redraw { path } {
     upvar 0  $path data
     Widget::getVariable $path buttons
 
-    # For tk >= 8.3, -uniform gridding option is used.
+    # For tk >= 8.4, -uniform gridding option is used.
     # Otherwise, there is the constraint, that button size may not change after
     # creation.
-    set uniformAvailable [expr {0 <= [package vcompare [info patchlevel] 8.3.0]}]
+    set uniformAvailable [expr {0 <= [package vcompare [info patchlevel] 8.4.0]}]
 
     ## We re-grid the buttons from left-to-right.  As we go through
     ## each button, we check its spacing and which direction the

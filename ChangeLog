@@ -1,3 +1,33 @@
+2009-06-30 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* buttonbox.tcl (ButtonBox::_redraw) Bug corrected:
+	-uniform gridding option is used if tcl version >= 8.4 (not 8.3).
+	[Patch 2807147] by Koen Danckaert
+
+	* tree.tcl (Tree::_drop_cmd) If there is no node, drop didn't work.
+	[Bug 1042613] reported by Rolf Ade
+	
+	* Tree.html Bind commands: removed promise that %W would work in future.
+	The underlying widgets should only be manipulated using the node id.
+	[Bug 1224203] by Jasper Taylor, remarks by J. Tang 
+
+	* Tree.html Bind commands: with -selectfill, the given command is
+	overwritten for the background box. [Bug 1003962] by Torsten Berg
+	
+	* dropsite.tcl (DropSite::register) Bug fixed: fails on multiple drop
+	targets [Bug 1213123] by T.Neil
+
+	* combobox.tcl (ComboBox::_create_popup) Bug fixed: Return key in drop
+	down list when -bwlistbox true [Bug 1205536] patch by Steve Landers
+	
+	* combobox.tcl (ComboBox::_create_popup, ComboBox::_unmapliste)
+	Mac aqua and x11 fixes, multi screen issue still open.
+	[Bug 1451784] report by Jasper Taylor, fix by Kevin Walzer
+
+	* listbox.tcl (ListBox::_multiple_select) Selected item not deselected
+	on control-click [Bug 1029144] reported by Konrad Rosenbaum
+	
+
 2009-06-29 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* ScrolledWindow.html ScrolledWindow documentation changed:
