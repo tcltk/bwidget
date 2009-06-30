@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.28 2009/06/26 14:46:05 oehhar Exp $
+#  $Id: listbox.tcl,v 1.29 2009/06/30 16:17:37 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -1506,7 +1506,7 @@ proc ListBox::_multiple_select { path mode x y idx } {
 	    set data(sel_anchor) {}
 	}
 	c {
-	    set l [_mouse_select $path get]
+	    set l [$path selection get]
 	    if { [lsearch -exact $l $idx] >= 0 } {
 		_mouse_select $path remove $idx
 	    } else {

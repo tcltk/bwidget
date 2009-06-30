@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.39 2009/06/25 16:48:52 oehhar Exp $
+#  $Id: combobox.tcl,v 1.40 2009/06/30 16:17:37 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -103,7 +103,7 @@ proc ComboBox::create { path args } {
         ::bind $entry <Key-Down>  [list ComboBox::_mapliste $path]
     }
 
-    if {[string equal $::tcl_platform(platform) "unix"]} {
+    if {[string equal [tk windowingsystem] "x11"]} {
 	set ipadx 0
 	set width 11
     } else {
@@ -451,7 +451,7 @@ proc ComboBox::_create_popup { path } {
 	}
     }
 
-    if { $::tcl_platform(platform) == "unix" } {
+    if {[string equal [tk windowingsystem] "x11"]} {
 	set sbwidth 11
     } else {
 	set sbwidth 15
@@ -459,10 +459,13 @@ proc ComboBox::_create_popup { path } {
 
     toplevel            $shell -relief solid -bd 1
     wm withdraw         $shell
-    update idle
     wm overrideredirect $shell 1
-    wm transient        $shell [winfo toplevel $path]
-    catch { wm attributes $shell -topmost 1 }
+    # these commands cause the combobox to behave strangely on OS X
+    if {![string equal [tk windowingsystem] "aqua"]} {
+        update idle
+        wm transient    $shell [winfo toplevel $path]
+        catch { wm attributes $shell -topmost 1 }
+    }
 
     set sw [ScrolledWindow $shell.sw -managed 1 -size $sbwidth -ipad 0]
 
@@ -507,7 +510,7 @@ proc ComboBox::_create_popup { path } {
     pack $sw -fill both -expand yes
     $sw setwidget $listb
 
-    ::bind $listb <Return> "ComboBox::_select [list $path] \[%W curselection\]"
+    ::bind $listb <Return> "ComboBox::_select [list $path] \[$listb curselection\]"
     ::bind $listb <Escape>   [list ComboBox::_unmapliste $path]
     ::bind $listb <FocusOut> [list ComboBox::_focus_out $path]
 }
@@ -533,7 +536,7 @@ proc ComboBox::_recreate_popup { path } {
 	}
     }
 
-    if { $::tcl_platform(platform) == "unix" } {
+    if { [string equal [tk windowingsystem] "x11"] } {
 	set sbwidth 11
     } else {
 	set sbwidth 15
@@ -623,7 +626,9 @@ proc ComboBox::_mapliste { path } {
     wm deiconify $path.shell
     raise $path.shell
     BWidget::focus set $listb
-    BWidget::grab global $path
+    if { ! [string equal [tk windowingsystem] "aqua"] } {
+        BWidget::grab global $path
+    }
 }
 
 
@@ -631,15 +636,19 @@ proc ComboBox::_mapliste { path } {
 #  Command ComboBox::_unmapliste
 # ----------------------------------------------------------------------------
 proc ComboBox::_unmapliste { path {refocus 1} } {
+    # On aqua, state is zoomed, otherwise normal
     if {[winfo exists $path.shell] && \
-	    [string equal [wm state $path.shell] "normal"]} {
-        BWidget::grab release $path
-        BWidget::focus release $path.shell.listb $refocus
-	# Update now because otherwise [focus -force...] makes the app hang!
-	if {$refocus} {
-	    update
-	    focus -force $path.e
-	}
+      ( [string equal [wm state $path.shell] "normal"] ||
+	[string equal [wm state $path.shell] "zoomed"] ) } {
+        if {![string equal [tk windowingsystem] "aqua"]} {
+            BWidget::grab release $path
+            BWidget::focus release $path.shell.listb $refocus
+            # Update now because otherwise [focus -force...] makes the app hang!
+            if {$refocus} {
+                update
+                focus -force $path.e
+            }
+        }
         wm withdraw $path.shell
         ArrowButton::configure $path.a -relief raised
     }

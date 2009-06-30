@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.58 2008/10/31 00:49:33 hobbs Exp $
+#  $Id: tree.tcl,v 1.59 2009/06/30 16:17:37 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1600,8 +1600,7 @@ proc Tree::_drop_cmd { path source X Y op type dnddata } {
         set data(dnd,afterid) ""
     }
     set data(dnd,scroll) ""
-    if {[llength $data(dnd,node)]
-	&& [llength [set cmd [Widget::getoption $path -dropcmd]]]} {
+    if {[llength [set cmd [Widget::getoption $path -dropcmd]]]} {
 	return [uplevel \#0 $cmd \
 		    [list $path $source $data(dnd,node) $op $type $dnddata]]
     }
