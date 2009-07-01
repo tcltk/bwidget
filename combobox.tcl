@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.40 2009/06/30 16:17:37 oehhar Exp $
+#  $Id: combobox.tcl,v 1.41 2009/07/01 14:41:30 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -270,6 +270,13 @@ proc ComboBox::configure { path args } {
 		#::bind $entry <Key> "[list ComboBox::_expand $path]; break"
 	    }
 	}
+    }
+
+    # if state changed to normal and -editable false, the edit must take focus
+    if {    [Widget::hasChangedX $path -state] \
+        && ![string equal [Widget::cget $path -state] "disabled"] \
+        && ![Widget::cget $path -editable] } {
+        Entry::configure $entry -takefocus 1
     }
 
     # if the dropdown listbox is shown, simply force the actual entry

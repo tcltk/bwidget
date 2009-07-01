@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.23 2006/03/24 22:19:57 dev_null42a Exp $
+#  $Id: mainframe.tcl,v 1.24 2009/07/01 14:41:30 oehhar Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -395,18 +395,7 @@ proc MainFrame::getmenu { path menuid } {
 proc MainFrame::setmenustate { path tag state } {
     variable _widget
 
-    #    if { [info exists _widget($path,tags,$tag)] } {
-    #        foreach {menu entry} $_widget($path,tags,$tag) {
-    #            $menu entryconfigure $entry -state $state
-    #        }
-    #    }
-
-    # We need a more sophisticated state system.
-    # The original model was this:  each menu item has a list of tags;
-    # whenever any one of those tags changed state, the menu item did too.
-    # This makes it hard to have items that are enabled only when both tagA and
-    # tagB are.  The new model therefore only sets the menustate to enabled
-    # when ALL of its tags are enabled.
+    # Set menustate to enabled when ALL of its tags are enabled.
 
     # First see if this is a real tag
     if { [info exists _widget($path,tagstate,$tag)] } {
@@ -431,6 +420,18 @@ proc MainFrame::setmenustate { path tag state } {
     return
 }
 
+# -----------------------------------------------------------------------------
+#  Command MainFrame::getmenustate
+# -----------------------------------------------------------------------------
+proc MainFrame::getmenustate { path tag } {
+    variable _widget
+
+    if {$_widget($path,tagstate,$tag)} {
+        return normal
+    } else {
+        return disabled
+    }
+}
 
 # -----------------------------------------------------------------------------
 #  Command MainFrame::menuonly
