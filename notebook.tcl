@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.24 2009/06/26 15:22:09 oehhar Exp $
+#  $Id: notebook.tcl,v 1.25 2009/07/01 14:41:30 oehhar Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -504,6 +504,7 @@ proc NoteBook::_itemconfigure { path page lres } {
          $state == "disabled" && $data(select) == $page } {
         set data(select) ""
     }
+    _set_help $path $page
     return $res
 }
 

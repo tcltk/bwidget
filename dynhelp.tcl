@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.17 2009/06/26 14:46:05 oehhar Exp $
+#  $Id: dynhelp.tcl,v 1.18 2009/07/01 14:41:30 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -538,6 +538,8 @@ proc DynamicHelp::_motion_balloon { type path x y {isCanvasItem 0} {isTextItem 0
                 set cmd [list DynamicHelp::_show_help $path $w $x $y]
                 set _id [after $_delay $cmd]
             }
+            # Bug 923942 proposes to destroy on motion to remove dynhelp on motion.
+            # this might be an optional behaviour in future versions
         } else {
             destroy $_top
             set _current_balloon ""

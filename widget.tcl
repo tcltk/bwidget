@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.33 2009/06/29 16:34:19 oehhar Exp $
+#  $Id: widget.tcl,v 1.34 2009/07/01 14:41:30 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -816,11 +816,18 @@ proc Widget::configure { path options } {
             if { [info exists classmap($option)] } {
 		set window [_get_window $class $window]
                 foreach {subpath subclass realopt} $classmap($option) {
-                    if { [string length $subclass] } {
-			set curval [${subclass}::cget $window$subpath $realopt]
+                    # Interpretation of special pointers:
+                    # * subclass == ":cmd" : call window.subpath
+                    # * subclass == ""     : call window.subpath
+                    # * subpath  == ":cmd" : call one widget up: window:cmd
+                    # * else               : call in subclass: window.subpath
+                    if {         [string length $subclass] \
+                            && ! [string equal  $subclass ":cmd"] \
+                            && ! [string equal  $subpath  ":cmd"] } {
+                        set curval [${subclass}::cget $window$subpath $realopt]
                         ${subclass}::configure $window$subpath $realopt $newval
                     } else {
-			set curval [$window$subpath cget $realopt]
+                        set curval [$window$subpath cget $realopt]
                         $window$subpath configure $realopt $newval
                     }
                 }

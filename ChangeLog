@@ -1,3 +1,20 @@
+2009-07-01 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* mainframe.tcl, MainFrame.html (MainFrame::getmenustate)
+	Added method getmenustate to return menu tag state
+	[Bug 948063] reported by Rolf Ade
+
+	* combobox.tcl (ComboBox::configure) Bug fixed: Widget did not take
+	focus, when -editable false and "configure -state normal" called.
+	[Bug 756334] reported by Rolf Ade
+	
+	* widget.tcl (Widget::configure) Bug: ProgressDlg option -bg not
+	setable. The special handling of subwidgets with special class or
+	path ":cmd" was improved. [Bug 611477]
+	
+	* notebook.tcl (NoteBook::_itemconfigure) Not honored option:
+	itemconfigure ... -helptext [Patch 2814050] by Koen Danckaert
+	
 2009-06-30 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* buttonbox.tcl (ButtonBox::_redraw) Bug corrected:
