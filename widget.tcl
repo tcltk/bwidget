@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.34 2009/07/01 14:41:30 oehhar Exp $
+#  $Id: widget.tcl,v 1.35 2009/07/02 16:22:18 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -817,13 +817,18 @@ proc Widget::configure { path options } {
 		set window [_get_window $class $window]
                 foreach {subpath subclass realopt} $classmap($option) {
                     # Interpretation of special pointers:
-                    # * subclass == ":cmd" : call window.subpath
-                    # * subclass == ""     : call window.subpath
-                    # * subpath  == ":cmd" : call one widget up: window:cmd
-                    # * else               : call in subclass: window.subpath
-                    if {         [string length $subclass] \
-                            && ! [string equal  $subclass ":cmd"] \
-                            && ! [string equal  $subpath  ":cmd"] } {
+                    # | subclass | subpath | widget           | path           | class   |
+                    # +----------+---------+------------------+----------------+-context-+
+                    # | :cmd     | :cmd    | herited widget   | window:cmd     |window   |
+                    # | :cmd     | *       | subwidget        | window.subpath | window  |
+                    # | ""       | :cmd    | herited widget   | window:cmd     | window  |
+                    # | ""       | *       | own              | window         | window  |
+                    # | *        | :cmd    | own              | window         | current |
+                    # | *        | *       | subwidget        | window.subpath | current |
+                    if { [string length $subclass] && ! [string equal $subclass ":cmd"] } {
+                        if { [string equal $subpath ":cmd"] } {
+                            set subpath ""
+                        }
                         set curval [${subclass}::cget $window$subpath $realopt]
                         ${subclass}::configure $window$subpath $realopt $newval
                     } else {

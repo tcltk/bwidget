@@ -1,3 +1,10 @@
+2009-07-02 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* widget.tcl (Widget::configure) Bug: ProgressDlg option -geometry
+	not setable. The former patch was improved.
+	Koen Danckaert and myself argued, that we modify symptoms without
+	basic understandings. Anyway, better now than before.
+
 2009-07-01 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* mainframe.tcl, MainFrame.html (MainFrame::getmenustate)
