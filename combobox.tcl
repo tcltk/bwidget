@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.41 2009/07/01 14:41:30 oehhar Exp $
+#  $Id: combobox.tcl,v 1.42 2009/07/07 17:28:14 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -677,10 +677,9 @@ proc ComboBox::_select { path index } {
         }
     }
     $path.e selection clear
-    # Changes proposed in tcllib patch 981545 - not activated - works for me
-    #if {[$path.e cget -exportselection]} {
+    if {[$path.e cget -exportselection]} {
         $path.e selection range 0 end
-    #}
+    }
 }
 
 

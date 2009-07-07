@@ -1,3 +1,8 @@
+2009-07-07 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* combobox.tcl (ComboBox::_select) Do not export selection if
+	-exportselection 0 [Patch 981545] by Jeffrey Hobbs
+
 2009-07-02 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* widget.tcl (Widget::configure) Bug: ProgressDlg option -geometry
