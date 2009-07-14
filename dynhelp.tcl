@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.18 2009/07/01 14:41:30 oehhar Exp $
+#  $Id: dynhelp.tcl,v 1.19 2009/07/14 15:24:14 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -52,7 +52,6 @@ namespace eval DynamicHelp {
     Widget::init DynamicHelp $_top {}
 
     bind BwHelpBalloon <Enter>   {DynamicHelp::_motion_balloon enter  %W %X %Y}
-    bind BwHelpBalloon <Motion>  {DynamicHelp::_motion_balloon motion %W %X %Y}
     bind BwHelpBalloon <Leave>   {DynamicHelp::_motion_balloon leave  %W %X %Y}
     bind BwHelpBalloon <Button>  {DynamicHelp::_motion_balloon button %W %X %Y}
     bind BwHelpBalloon <Destroy> {DynamicHelp::_unset_help %W}
@@ -91,6 +90,7 @@ proc DynamicHelp::include { class type } {
     set helpoptions [list \
 	    [list -helptext String "" 0] \
 	    [list -helpvar  String "" 0] \
+	    [list -helpcmd  String "" 0] \
 	    [list -helptype Enum $type 0 [list balloon variable]] \
 	    ]
     Widget::declare $class $helpoptions
@@ -254,7 +254,7 @@ proc DynamicHelp::register { path type args } {
             set text  [lindex $args 1]
             set index [lindex $args 0]
 	    if {$text == "" || $index == ""} {
-		set idx [lsearch $_registed($path) [list $index *]]
+		set idx [lsearch $_registered($path) [list $index *]]
 		set _registered($path) [lreplace $_registered($path) $idx $idx]
 		return 0
 	    }
@@ -569,7 +569,7 @@ proc DynamicHelp::_motion_info { path {isCanvasItem 0} {isTextItem 0} } {
         if {![info exists _saved]} { set _saved [GlobalVar::getvar $varName] }
         set string [lindex $_registered($path,variable) 1]
         if {[info exists _registered($path,command)]} {
-            set string [eval $_registered($path,command)]
+            set string [uplevel #0 $_registered($path,command)]
         }
         GlobalVar::setvar $varName $string
         set _current_variable $path
@@ -579,6 +579,7 @@ proc DynamicHelp::_motion_info { path {isCanvasItem 0} {isTextItem 0} } {
 
 # ----------------------------------------------------------------------------
 #  Command DynamicHelp::_leave_info
+#    Leave event may be called twice (in case of pointer grab)
 # ----------------------------------------------------------------------------
 proc DynamicHelp::_leave_info { path {isCanvasItem 0} {isTextItem 0} } {
     variable _saved
@@ -591,31 +592,34 @@ proc DynamicHelp::_leave_info { path {isCanvasItem 0} {isTextItem 0} } {
 	set path [_get_text_path $path variable] 
     }
 
-    if { [info exists _registered($path,variable)] } {
+    if { [string equal $_current_variable $path] \
+         && [info exists _registered($path,variable)] } {
         set varName [lindex $_registered($path,variable) 0]
         GlobalVar::setvar $varName $_saved
+        unset _saved
+        set _current_variable ""
     }
-    catch {unset _saved}
-    set _current_variable ""
 }
 
 
 # ----------------------------------------------------------------------------
 #  Command DynamicHelp::_menu_info
-#    Version of R1v1 restored, due to lack of [winfo ismapped] and <Unmap>
-#    under windows for menu.
 # ----------------------------------------------------------------------------
+# We have to check for unmap event on Unix. On Windows, unmap
+# is not delivered, but <<MenuSelect>> is triggered appropriately when menu
+# is unmapped.
 proc DynamicHelp::_menu_info { event path } {
     variable _registered
 
     if { [info exists _registered($path)] } {
         set index   [$path index active]
         set varName [lindex $_registered($path) 0]
-        if { ![string equal $index "none"] &&
+        if { ![string equal $event "unmap"] &&
+             ![string equal $index "none"] &&
              [set idx [lsearch $_registered($path) [list $index *]]] != -1 } {
 	    set string [lindex [lindex $_registered($path) $idx] 1]
 	    if {[info exists _registered($path,$index,command)]} {
-		set string [eval $_registered($path,$index,command)]
+		set string [uplevel #0 $_registered($path,$index,command)]
 	    }
             GlobalVar::setvar $varName $string
         } else {
@@ -647,7 +651,7 @@ proc DynamicHelp::_show_help { path w x y } {
 	}
 
         if {[info exists _registered($path,command)]} {
-            set string [eval $_registered($path,command)]
+            set string [uplevel #0 $_registered($path,command)]
         }
 
 	if {$string == ""} { return }
@@ -726,6 +730,7 @@ proc DynamicHelp::_unset_help { path } {
     variable _texts
     variable _registered
     variable _top
+    variable _current_balloon
 
     if {[info exists _registered($path)]} { unset _registered($path) }
     if {[winfo exists $path]} {
@@ -735,7 +740,7 @@ proc DynamicHelp::_unset_help { path } {
     array unset _canvases   $path,*
     array unset _texts      $path,*
     array unset _registered $path,*
-    destroy $_top
+    if {[string equal $path $_current_balloon]} {destroy $_top}
 }
 
 # ----------------------------------------------------------------------------
