@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.19 2009/07/14 15:24:14 oehhar Exp $
+#  $Id: dynhelp.tcl,v 1.20 2009/07/15 16:50:16 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -52,12 +52,12 @@ namespace eval DynamicHelp {
     Widget::init DynamicHelp $_top {}
 
     bind BwHelpBalloon <Enter>   {DynamicHelp::_motion_balloon enter  %W %X %Y}
+    bind BwHelpBalloon <Motion>  {DynamicHelp::_motion_balloon motion %W %X %Y}
     bind BwHelpBalloon <Leave>   {DynamicHelp::_motion_balloon leave  %W %X %Y}
     bind BwHelpBalloon <Button>  {DynamicHelp::_motion_balloon button %W %X %Y}
     bind BwHelpBalloon <Destroy> {DynamicHelp::_unset_help %W}
 
     bind BwHelpVariable <Enter>   {DynamicHelp::_motion_info %W}
-    bind BwHelpVariable <Motion>  {DynamicHelp::_motion_info %W}
     bind BwHelpVariable <Leave>   {DynamicHelp::_leave_info  %W}
     bind BwHelpVariable <Destroy> {DynamicHelp::_unset_help  %W}
 

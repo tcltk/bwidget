@@ -1,3 +1,8 @@
+2009-07-15 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* dynhelp.tcl (DynamicHelp) Typo from yesterday corrected
+	[Patch 2820851] by Koen Danckaert
+
 2009-07-14 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* dynhelp.tcl (DynamicHelp::_leave_info et al) issues:
