@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.10 2009/06/29 13:28:24 oehhar Exp $
+#  $Id: scrollframe.tcl,v 1.11 2009/07/17 15:29:51 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -17,27 +17,45 @@
 namespace eval ScrollableFrame {
     Widget::define ScrollableFrame scrollframe
 
-    Widget::declare ScrollableFrame {
-        {-background        TkResource "" 0 frame}
-        {-width             Int        0  0 {}}
-        {-height            Int        0  0 {}}
-        {-areawidth         Int        0  0 {}}
-        {-areaheight        Int        0  0 {}}
-        {-constrainedwidth  Boolean    0 0}
-        {-constrainedheight Boolean    0 0}
-        {-xscrollcommand    TkResource "" 0 canvas}
-        {-yscrollcommand    TkResource "" 0 canvas}
-        {-xscrollincrement  TkResource "" 0 canvas}
-        {-yscrollincrement  TkResource "" 0 canvas}
-        {-bg                Synonym    -background}
+    # If themed, there is no background and -bg option
+    if {[Widget::theme]} {
+        Widget::declare ScrollableFrame {
+            {-width             Int        0  0 {}}
+            {-height            Int        0  0 {}}
+            {-areawidth         Int        0  0 {}}
+            {-areaheight        Int        0  0 {}}
+            {-constrainedwidth  Boolean    0 0}
+            {-constrainedheight Boolean    0 0}
+            {-xscrollcommand    TkResource "" 0 canvas}
+            {-yscrollcommand    TkResource "" 0 canvas}
+            {-xscrollincrement  TkResource "" 0 canvas}
+            {-yscrollincrement  TkResource "" 0 canvas}
+        }
+    } else {
+        Widget::declare ScrollableFrame {
+            {-background        TkResource "" 0 frame}
+            {-width             Int        0  0 {}}
+            {-height            Int        0  0 {}}
+            {-areawidth         Int        0  0 {}}
+            {-areaheight        Int        0  0 {}}
+            {-constrainedwidth  Boolean    0 0}
+            {-constrainedheight Boolean    0 0}
+            {-xscrollcommand    TkResource "" 0 canvas}
+            {-yscrollcommand    TkResource "" 0 canvas}
+            {-xscrollincrement  TkResource "" 0 canvas}
+            {-yscrollincrement  TkResource "" 0 canvas}
+            {-bg                Synonym    -background}
+        }
     }
 
     Widget::addmap ScrollableFrame "" :cmd {
-        -background {} -width {} -height {} 
+        -width {} -height {} 
         -xscrollcommand {} -yscrollcommand {}
         -xscrollincrement {} -yscrollincrement {}
     }
-    Widget::addmap ScrollableFrame "" .frame {-background {}}
+    if { ! [Widget::theme]} {
+        Widget::addmap ScrollableFrame "" .frame {-background {}}
+    }
 
     variable _widget
 
@@ -58,11 +76,15 @@ proc ScrollableFrame::create { path args } {
     if {[Widget::theme]} {
 	set frame [eval [list ttk::frame $path.frame] \
 		       [Widget::subcget $path .frame]]
+	set bg [ttk::style lookup TFrame -background]
     } else {
 	set frame [eval [list frame $path.frame] \
 		       [Widget::subcget $path .frame] \
 		       -highlightthickness 0 -borderwidth 0 -relief flat]
+	set bg [$frame cget -background]
     }
+    # Give canvas frame (or theme) background
+    $canvas configure -background $bg
 
     $canvas create window 0 0 -anchor nw -window $frame -tags win \
         -width  [Widget::cget $path -areawidth] \
@@ -227,7 +249,6 @@ proc ScrollableFrame::_max {a b} {return [expr {$a <= $b ? $b : $a}]}
 proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
     # This ensures that we don't get funny scrollability in the frame
     # when it is smaller than the canvas space
-    # when it is smaller than the canvas space.
     # use [winfo] to get height & width of frame
 
     # [winfo] doesn't work for unmapped frame

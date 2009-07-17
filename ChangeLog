@@ -1,3 +1,11 @@
+2009-07-17 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* scrollframe.tcl (ScrollableFrame::create et al) ScrollableFrame.html
+	Background color of canvas takes the color of the scrolled frame.
+	If themed, canvas takes the themed color of the scrolled themed frame.
+	If themed, parameters -background and -bg are not available(doc + code).
+	[Patch 2822970] by Koen Danckaert
+
 2009-07-15 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* dynhelp.tcl (DynamicHelp) Typo from yesterday corrected
