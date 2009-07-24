@@ -1,3 +1,12 @@
+2009-07-23 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* tree.tcl (Tree::_set_help), Tree.html DynamicHelp -helpcmd added to
+	tree node help
+	* tree.tcl (Tree::_draw_subnodes) a vertical line to a virtual root node
+	above the widget is only drawn when there are multiple child nodes.
+	This reverts the modification dated 2004-04-21 for this case.
+	[Patch 2825354] by Koen Danckaert
+
 2009-07-17 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* scrollframe.tcl (ScrollableFrame::create et al) ScrollableFrame.html
