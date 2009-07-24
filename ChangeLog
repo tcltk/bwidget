@@ -1,3 +1,9 @@
+2009-07-24 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.0 tagged ****
+
+	* pkgIndex.tcl, README.txt: updated to BWidget 1.9
+
 2009-07-23 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* tree.tcl (Tree::_set_help), Tree.html DynamicHelp -helpcmd added to
