@@ -1,7 +1,7 @@
 if {[catch {package require Tcl}]} return
-package ifneeded BWidget 1.8 "\
+package ifneeded BWidget 1.9 "\
     package require Tk 8.1.1;\
-    [list tclPkgSetup $dir BWidget 1.8 {
+    [list tclPkgSetup $dir BWidget 1.9 {
 {arrow.tcl source {ArrowButton ArrowButton::create ArrowButton::use}}
 {labelframe.tcl source {LabelFrame LabelFrame::create LabelFrame::use}}
 {labelentry.tcl source {LabelEntry LabelEntry::create LabelEntry::use}}
