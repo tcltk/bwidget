@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.59 2009/06/30 16:17:37 oehhar Exp $
+#  $Id: tree.tcl,v 1.60 2009/07/24 16:01:55 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1369,12 +1369,10 @@ proc Tree::_draw_subnodes { path nodes x0 y0 deltax deltay padx showlines } {
         set yp $y1
         set y1 [_draw_node $path $node $x0 [expr {$y1+$deltay}] $deltax $deltay $padx $showlines]
     }
-    if { $showlines && [llength $nodes] } {
-	if {$y0 < 0} {
-	    # Adjust the drawing of the line to the first root node
-	    # to start at the vertical point (not go up).
-	    incr y0 $deltay
-	}
+    # Only draw a line to the invisible root node above the tree widget when
+    # there are multiple top nodes.
+    set len [llength $nodes]
+    if { $showlines && $len && !($y0 < 0 && $len < 2) } {
         set id [$path.c create line $x0 $y0 $x0 [expr {$yp+$deltay}] \
                     -fill    [Widget::getoption $path -linesfill]   \
                     -stipple [Widget::getoption $path -linestipple] \
@@ -2151,7 +2149,8 @@ proc Tree::_get_node_deltax {path node} {
 #	list		The list of tags to apply to the canvas item
 proc Tree::_get_node_tags {path node {tags ""}} {
     eval [linsert $tags 0 lappend list TreeItemSentinal]
-    if {[Widget::getoption $path.$node -helptext] == ""} { return $list }
+    if {[Widget::getoption $path.$node -helptext] == "" &&
+        [Widget::getoption $path.$node -helpcmd]  == ""} { return $list }
 
     switch -- [Widget::getoption $path.$node -helptype] {
 	balloon {
@@ -2179,29 +2178,22 @@ proc Tree::_set_help { path node } {
     Widget::getVariable $path help
 
     set item $path.$node
-    set opts [list -helptype -helptext -helpvar]
-    foreach {cty ctx cv} [eval [linsert $opts 0 Widget::hasChangedX $item]] break
+    set opts [list -helptype -helptext -helpvar -helpcmd]
+    foreach {cty ctx cv cc} [eval [linsert $opts 0 Widget::hasChangedX $item]] break
     set text [Widget::getoption $item -helptext]
+    set cmd  [Widget::getoption $item -helpcmd]
 
-    ## If we've never set help for this item before, and text is not blank,
-    ## we need to setup help.  We also need to reset help if any of the
+    ## If we've never set help for this item before, and text or cmd is not
+    ## blank, we need to setup help. We also need to reset help if any of the
     ## options have changed.
-    if { (![info exists help($node)] && $text != "") || $cty || $ctx || $cv } {
+    if { (![info exists help($node)] && ($text != "" || $cmd != ""))
+         || $cty || $ctx || $cv } {
 	set help($node) 1
 	set type [Widget::getoption $item -helptype]
-        switch $type {
-            balloon {
-		DynamicHelp::register $path.c balloon n:$node $text
-		DynamicHelp::register $path.c balloon i:$node $text
-		DynamicHelp::register $path.c balloon b:$node $text
-            }
-            variable {
-		set var [Widget::getoption $item -helpvar]
-		DynamicHelp::register $path.c variable n:$node $var $text
-		DynamicHelp::register $path.c variable i:$node $var $text
-		DynamicHelp::register $path.c variable b:$node $var $text
-            }
-        }
+        set var [Widget::getoption $item -helpvar]
+        DynamicHelp::add $path.c -item n:$node -type $type -text $text -variable $var -command $cmd
+        DynamicHelp::add $path.c -item i:$node -type $type -text $text -variable $var -command $cmd
+        DynamicHelp::add $path.c -item b:$node -type $type -text $text -variable $var -command $cmd
     }
 }
 
