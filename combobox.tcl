@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.42 2009/07/07 17:28:14 oehhar Exp $
+#  $Id: combobox.tcl,v 1.43 2009/08/04 16:39:06 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -468,7 +468,7 @@ proc ComboBox::_create_popup { path } {
     wm withdraw         $shell
     wm overrideredirect $shell 1
     # these commands cause the combobox to behave strangely on OS X
-    if {![string equal [tk windowingsystem] "aqua"]} {
+    if {! $Widget::_aqua } {
         update idle
         wm transient    $shell [winfo toplevel $path]
         catch { wm attributes $shell -topmost 1 }
@@ -633,7 +633,7 @@ proc ComboBox::_mapliste { path } {
     wm deiconify $path.shell
     raise $path.shell
     BWidget::focus set $listb
-    if { ! [string equal [tk windowingsystem] "aqua"] } {
+    if {! $Widget::_aqua } {
         BWidget::grab global $path
     }
 }
@@ -647,7 +647,7 @@ proc ComboBox::_unmapliste { path {refocus 1} } {
     if {[winfo exists $path.shell] && \
       ( [string equal [wm state $path.shell] "normal"] ||
 	[string equal [wm state $path.shell] "zoomed"] ) } {
-        if {![string equal [tk windowingsystem] "aqua"]} {
+        if {! $Widget::_aqua } {
             BWidget::grab release $path
             BWidget::focus release $path.shell.listb $refocus
             # Update now because otherwise [focus -force...] makes the app hang!

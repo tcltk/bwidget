@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.25 2009/07/01 14:41:30 oehhar Exp $
+#  $Id: notebook.tcl,v 1.26 2009/08/04 16:39:06 oehhar Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -302,9 +302,9 @@ proc NoteBook::delete { path page {destroyframe 1} } {
     }
     if { $destroyframe } {
         destroy $path.f$page
+        unset data($page,width) data($page,realized)
     }
     _redraw $path
-    unset data($page,width) data($page,realized)
 }
 
 
