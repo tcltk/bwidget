@@ -1,5 +1,14 @@
 2009-08-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
+	* notebook.tcl (NoteBook::delete) Method delete destroyframe=1 and
+	reinsertion -> raise failed - state variables were deleted.
+	[Bug 2831785] by kjnash
+	* tree.tcl (Tree::_keynav) Fire virtual event <<TreeSelect>> also on
+	keyboard navigation [Patch 2828086] by Kevin Walzer
+	* combobox.tcl Replaced aqua conditional code check by $Widget::_aqua
+
+2009-08-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
 	**** Branched to bwidget ****
 
 	This is the bwidget branch of module bwidget of tcllib
