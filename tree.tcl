@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.60 2009/07/24 16:01:55 oehhar Exp $
+#  $Id: tree.tcl,v 1.60.2.1 2009/08/10 11:28:50 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1923,6 +1923,7 @@ proc Tree::_keynav {which win} {
 		$win selection set [lindex $nodes $index]
 		_set_current_node $win [lindex $nodes $index]
 		$win see [lindex $nodes $index]
+		event generate $win <<TreeSelect>>
 		return
 	    }
 	}
@@ -1932,6 +1933,7 @@ proc Tree::_keynav {which win} {
 		$win selection set [lindex $nodes 0]
 		_set_current_node $win [lindex $nodes 0]
 		$win see [lindex $nodes 0]
+		event generate $win <<TreeSelect>>
 		return
 	    }
 
@@ -1941,6 +1943,7 @@ proc Tree::_keynav {which win} {
 		$win selection set [lindex $nodes $index]
 		_set_current_node $win [lindex $nodes $index]
 		$win see [lindex $nodes $index]
+		event generate $win <<TreeSelect>>
 		return
 	    }
 	}
@@ -1959,6 +1962,7 @@ proc Tree::_keynav {which win} {
 			$win selection set [lindex $nodes $index]
 			_set_current_node $win [lindex $nodes $index]
 			$win see [lindex $nodes $index]
+			event generate $win <<TreeSelect>>
 			return
 		    }
                 }
@@ -1999,6 +2003,7 @@ proc Tree::_keynav {which win} {
 		$win selection set $parent
 		_set_current_node $win $parent
 		$win see $parent
+		event generate $win <<TreeSelect>>
 		return
 	    }
 	}
