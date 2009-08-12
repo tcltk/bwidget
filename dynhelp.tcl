@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.20 2009/07/15 16:50:16 oehhar Exp $
+#  $Id: dynhelp.tcl,v 1.21 2009/08/12 07:22:35 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -25,7 +25,7 @@ namespace eval DynamicHelp {
         {-background     TkResource "#FFFFC0"     0 label}
         {-borderwidth    TkResource 1             0 label}
         {-justify        TkResource left          0 label}
-        {-font           TkResource "helvetica 8" 0 label}
+        {-font           TkResource TkTooltipFont 0 label}
         {-delay          Int        600           0 "%d >= 100 & %d <= 2000"}
 	{-state          Enum       "normal"      0 {normal disabled}}
         {-padx           TkResource 1             0 label}
@@ -662,8 +662,7 @@ proc DynamicHelp::_show_help { path w x y } {
             -screen [winfo screen $w]
 
         wm withdraw $_top
-	if {$::tk_version >= 8.4
-	    && [string equal [tk windowingsystem] "aqua"]} {
+	if { $Widget::_aqua } {
 	    ::tk::unsupported::MacWindowStyle style $_top help none
 	} else {
 	    wm overrideredirect $_top 1
