@@ -1,3 +1,10 @@
+2009-08-12 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* dynhelp.tcl Use balloon help font TkTooltipFont
+	[Patch 2835180] for Kevin Walzer
+	* dynhelp.tcl(DynamicHelp::_show_help)Replaced aqua conditional code
+	check by $Widget::_aqua
+
 2009-08-04 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* notebook.tcl (NoteBook::delete) Method delete destroyframe=1 and
