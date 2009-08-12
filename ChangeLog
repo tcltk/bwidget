@@ -1,3 +1,10 @@
+2009-08-12 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* dynhelp.tcl Use balloon help font TkTooltipFont if tk <= 8.5.
+	Otherwise use helvetica 11 on Aqua [Patch 2835180] for Kevin Walzer
+	* dynhelp.tcl(DynamicHelp::_show_help)Replaced aqua conditional code
+	check by $Widget::_aqua
+
 2009-08-10 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* notebook.tcl (NoteBook::delete) Method delete destroyframe=1 and
@@ -13,7 +20,8 @@
 
 	This is the bwidget branch of module bwidget of tcllib
 	Use "-r bwidget" for all cvs operations
-	Scope: Package BWidget compatible to tcl/tk 8.1 and tk (e.g. no tile/ttk).
+	Scope: Package BWidget compatible to tcl/tk 8.1 and tk
+	(e.g. no tile/ttk).
 
 2009-07-24 Harald Oehlmann  <oehhar@users.sourceforge.net>
 

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.20 2009/07/15 16:50:16 oehhar Exp $
+#  $Id: dynhelp.tcl,v 1.20.2.1 2009/08/12 07:20:21 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -19,22 +19,30 @@
 namespace eval DynamicHelp {
     Widget::define DynamicHelp dynhelp -classonly
 
-    Widget::declare DynamicHelp {
-        {-foreground     TkResource black         0 label}
-        {-topbackground  TkResource black         0 {label -foreground}}
-        {-background     TkResource "#FFFFC0"     0 label}
-        {-borderwidth    TkResource 1             0 label}
-        {-justify        TkResource left          0 label}
-        {-font           TkResource "helvetica 8" 0 label}
-        {-delay          Int        600           0 "%d >= 100 & %d <= 2000"}
-	{-state          Enum       "normal"      0 {normal disabled}}
-        {-padx           TkResource 1             0 label}
-        {-pady           TkResource 1             0 label}
-        {-bd             Synonym    -borderwidth}
-        {-bg             Synonym    -background}
-        {-fg             Synonym    -foreground}
-        {-topbg          Synonym    -topbackground}
+    if {$::tcl_version >= 8.5} {
+        set fontdefault TkTooltipFont
+    } elseif {$Widget::_aqua} {
+        set fontdefault {helvetica 11}
+    } else {
+        set fontdefault {helvetica 8}
     }
+
+    Widget::declare DynamicHelp [list\
+        {-foreground     TkResource black         0 label}\
+        {-topbackground  TkResource black         0 {label -foreground}}\
+        {-background     TkResource "#FFFFC0"     0 label}\
+        {-borderwidth    TkResource 1             0 label}\
+        {-justify        TkResource left          0 label}\
+        [list -font      TkResource $fontdefault  0 label]\
+        {-delay          Int        600           0 "%d >= 100 & %d <= 2000"}\
+	{-state          Enum       "normal"      0 {normal disabled}}\
+        {-padx           TkResource 1             0 label}\
+        {-pady           TkResource 1             0 label}\
+        {-bd             Synonym    -borderwidth}\
+        {-bg             Synonym    -background}\
+        {-fg             Synonym    -foreground}\
+        {-topbg          Synonym    -topbackground}\
+    ]
 
     proc use {} {}
 
@@ -662,8 +670,7 @@ proc DynamicHelp::_show_help { path w x y } {
             -screen [winfo screen $w]
 
         wm withdraw $_top
-	if {$::tk_version >= 8.4
-	    && [string equal [tk windowingsystem] "aqua"]} {
+	if { $Widget::_aqua } {
 	    ::tk::unsupported::MacWindowStyle style $_top help none
 	} else {
 	    wm overrideredirect $_top 1
