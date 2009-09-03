@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.15 2009/06/10 08:48:06 oehhar Exp $
+#  $Id: utils.tcl,v 1.16 2009/09/03 17:23:30 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -246,10 +246,30 @@ proc BWidget::place { path w h args } {
     variable _top
 
     update idletasks
-    set reqw [winfo reqwidth  $path]
-    set reqh [winfo reqheight $path]
-    if { $w == 0 } {set w $reqw}
-    if { $h == 0 } {set h $reqh}
+
+    # If the window is not mapped, it may have any current size.
+    # Then use required size, but bound it to the screen width.
+    # This is mostly inexact, because any toolbars will still be removed
+    # which may reduce size.
+    if { $w == 0 && [winfo ismapped $path] } {
+        set w [winfo width $path]
+    } else {
+        if { $w == 0 } {
+            set w [winfo reqwidth $path]
+        }
+        set vsw [winfo vrootwidth  $path]
+        if { $w > $vsw } { set w $vsw }
+    }
+
+    if { $h == 0 && [winfo ismapped $path] } {
+        set h [winfo height $path]
+    } else {
+        if { $h == 0 } {
+            set h [winfo reqheight $path]
+        }
+        set vsh [winfo vrootheight $path]
+        if { $h > $vsh } { set h $vsh }
+    }
 
     set arglen [llength $args]
     if { $arglen > 3 } {
@@ -306,8 +326,8 @@ proc BWidget::place { path w h args } {
                     set y0 [expr {[winfo rooty $widget] + ([winfo height $widget] - $h)/2}]
                 } else {
                     # center to screen
-                    set x0 [expr {([winfo screenwidth  $path] - $w)/2 - [winfo vrootx $path]}]
-                    set y0 [expr {([winfo screenheight $path] - $h)/2 - [winfo vrooty $path]}]
+                    set x0 [expr {($sw - $w)/2 - [winfo vrootx $path]}]
+                    set y0 [expr {($sh - $h)/2 - [winfo vrooty $path]}]
                 }
                 set x "+$x0"
                 set y "+$y0"
