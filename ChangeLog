@@ -1,3 +1,12 @@
+2009-09-03 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* util.tcl(BWidget::place), BWidget.html Widget placed incorrectly,
+	when bigger than current screen [Bug 2850031] by Thomas Grausgruber
+	Possible incompatibility: BWidget::place w h -> w,h are reduced to
+	screen width.
+	* dynhelp.tcl Added part of last patch, for pre 8.5 tcl from BWidget
+    branch [Patch 2835180].
+
 2009-08-12 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* dynhelp.tcl Use balloon help font TkTooltipFont

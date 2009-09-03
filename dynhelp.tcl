@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dynhelp.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dynhelp.tcl,v 1.21 2009/08/12 07:22:35 oehhar Exp $
+#  $Id: dynhelp.tcl,v 1.22 2009/09/03 17:23:30 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - DynamicHelp::configure
@@ -19,22 +19,30 @@
 namespace eval DynamicHelp {
     Widget::define DynamicHelp dynhelp -classonly
 
-    Widget::declare DynamicHelp {
-        {-foreground     TkResource black         0 label}
-        {-topbackground  TkResource black         0 {label -foreground}}
-        {-background     TkResource "#FFFFC0"     0 label}
-        {-borderwidth    TkResource 1             0 label}
-        {-justify        TkResource left          0 label}
-        {-font           TkResource TkTooltipFont 0 label}
-        {-delay          Int        600           0 "%d >= 100 & %d <= 2000"}
-	{-state          Enum       "normal"      0 {normal disabled}}
-        {-padx           TkResource 1             0 label}
-        {-pady           TkResource 1             0 label}
-        {-bd             Synonym    -borderwidth}
-        {-bg             Synonym    -background}
-        {-fg             Synonym    -foreground}
-        {-topbg          Synonym    -topbackground}
+    if {$::tcl_version >= 8.5} {
+        set fontdefault TkTooltipFont
+    } elseif {$Widget::_aqua} {
+        set fontdefault {helvetica 11}
+    } else {
+        set fontdefault {helvetica 8}
     }
+
+    Widget::declare DynamicHelp [list\
+        {-foreground     TkResource black         0 label}\
+        {-topbackground  TkResource black         0 {label -foreground}}\
+        {-background     TkResource "#FFFFC0"     0 label}\
+        {-borderwidth    TkResource 1             0 label}\
+        {-justify        TkResource left          0 label}\
+        [list -font      TkResource $fontdefault  0 label]\
+        {-delay          Int        600           0 "%d >= 100 & %d <= 2000"}\
+	{-state          Enum       "normal"      0 {normal disabled}}\
+        {-padx           TkResource 1             0 label}\
+        {-pady           TkResource 1             0 label}\
+        {-bd             Synonym    -borderwidth}\
+        {-bg             Synonym    -background}\
+        {-fg             Synonym    -foreground}\
+        {-topbg          Synonym    -topbackground}\
+    ]
 
     proc use {} {}
 
