@@ -1,3 +1,9 @@
+2009-09-05 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
+
+	**** BWidget 1.9.1 tagged ****
+	BWidget revitalization to make usage of tile...
+        ... updates to follow, pls. be patient for the moment ...
+
 2009-09-03 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* util.tcl(BWidget::place), BWidget.html Widget placed incorrectly,
