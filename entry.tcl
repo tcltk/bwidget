@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.22 2009/06/10 08:48:06 oehhar Exp $
+#  $Id: entry.tcl,v 1.23 2009/09/06 21:13:55 oberdorfer Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -27,8 +27,11 @@ namespace eval Entry {
     		 -disabledforeground -disabledbackground }
 
     set declare [list \
-	    [list -background   TkResource  ""	   0  entry] \
-	    [list -foreground   TkResource  ""	   0  entry] \
+	    [list -background   Color       "SystemWindow"       0] \
+	    [list -foreground   Color       "SystemWindowText"   0] \
+            [list -disabledbackground Color "SystemButtonFace"   0] \
+            [list -disabledforeground Color "SystemDisabledText" 0] \
+	    [list -highlightcolor     Color "SystemHighlight"    0] \
 	    [list -state        Enum        normal 0  [list normal disabled]] \
 	    [list -text         String      ""	   0] \
 	    [list -textvariable String      ""     0] \
@@ -40,17 +43,6 @@ namespace eval Entry {
 	    [list -bg           Synonym     -background] \
 	    [list -bd           Synonym     -borderwidth] \
 	]
-
-    if {![package vsatisfies [package provide Tk] 8.4]} {
-	## If we're not running version 8.4 or higher, get our
-	## disabled resources from the button widget.
-	lappend declare [list -disabledforeground TkResource "" 0 button]
-	lappend declare [list -disabledbackground TkResource "" 0 \
-							{button -background}]
-    } else {
-	lappend declare [list -disabledforeground TkResource "" 0 entry]
-	lappend declare [list -disabledbackground TkResource "" 0 entry]
-    }
 
     Widget::declare Entry $declare
     Widget::addmap Entry "" :cmd { -textvariable {} }
@@ -78,6 +70,10 @@ namespace eval Entry {
     bind BwEntry <Return>          [list Entry::invoke %W]
     bind BwEntry <Destroy>         [list Entry::_destroy %W]
     bind BwDisabledEntry <Destroy> [list Entry::_destroy %W]
+
+    if {[lsearch [bindtags .] EntryThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 EntryThemeChanged]
+    }
 }
 
 
@@ -133,6 +129,9 @@ proc Entry::create { path args } {
     DragSite::setdrag $path $path Entry::_init_drag_cmd Entry::_end_drag_cmd 1
     DropSite::setdrop $path $path Entry::_over_cmd Entry::_drop_cmd 1
     DynamicHelp::sethelp $path $path 1
+
+    bind EntryThemeChanged <<ThemeChanged>> \
+	   "+ [namespace current]::_themechanged $path"
 
     Widget::create Entry $path
     proc ::$path { cmd args } \
@@ -469,4 +468,21 @@ proc Entry::_destroy { path } {
     upvar 0 $path data
     Widget::destroy $path
     unset data
+}
+
+# ----------------------------------------------------------------------------
+#  Command ListBox::_themechanged
+# ----------------------------------------------------------------------------
+proc Entry::_themechanged { path } {
+
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+       $path configure \
+           -foreground         $BWidget::colors(SystemWindowText) \
+           -background         $BWidget::colors(SystemWindow) \
+	   -selectforeground   $BWidget::colors(SystemHighlightText) \
+	   -selectbackground   $BWidget::colors(SystemHighlight) \
+           -disabledbackground $BWidget::colors(SystemButtonFace) \
+	   -disabledforeground $BWidget::colors(SystemDisabledText) \
+	   -highlightcolor     $BWidget::colors(SystemHighlight)
 }

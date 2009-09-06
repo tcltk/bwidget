@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.29 2009/06/30 16:17:37 oehhar Exp $
+#  $Id: listbox.tcl,v 1.30 2009/09/06 21:21:35 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -39,6 +39,7 @@
 #     - ListBox::_over_cmd
 #     - ListBox::_auto_scroll
 #     - ListBox::_scroll
+#     - ListBox::_themechanged
 # ----------------------------------------------------------------------------
 
 namespace eval ListBox {
@@ -49,7 +50,7 @@ namespace eval ListBox {
             {-indent     Int        0   0 "%d >= 0"}
             {-text       String     ""  0}
             {-font       String     ""  0}
-            {-foreground String     ""  0}
+            {-foreground Color      "SystemWindowText"  0}
             {-image      TkResource ""  0 label}
             {-window     String     ""  0}
             {-data       String     ""  0}
@@ -81,11 +82,11 @@ namespace eval ListBox {
         {-deltax           Int 10 0 "%d >= 0"}
         {-deltay           Int 15 0 "%d >= 0"}
         {-padx             Int 20 0 "%d >= 0"}
-        {-foreground       TkResource "" 0 listbox}
-        {-background       TkResource "" 0 listbox}
-        {-selectbackground TkResource "" 0 listbox}
-        {-selectforeground TkResource "" 0 listbox}
-        {-font             TkResource "" 0 listbox}
+        {-foreground       Color      "SystemWindowText"    0}
+        {-background       Color      "SystemWindow"        0}
+        {-selectbackground Color      "SystemHighlight"     0}
+        {-selectforeground Color      "SystemHighlightText" 0}
+        {-font             String     "TkTextFont"          0}
         {-width            TkResource "" 0 listbox}
         {-height           TkResource "" 0 listbox}
         {-redraw           Boolean 1  0}
@@ -107,6 +108,10 @@ namespace eval ListBox {
     bind ListBoxFocus <1>    [list focus %W]
     bind ListBox <Key-Up>    [list ListBox::_keyboard_navigation %W -1]
     bind ListBox <Key-Down>  [list ListBox::_keyboard_navigation %W  1]
+
+    if {[lsearch [bindtags .] ListBoxThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 ListBoxThemeChanged]
+    }
 
     variable _edit
 }
@@ -168,13 +173,18 @@ proc ListBox::create { path args } {
     if {[Widget::cget $path -autofocus]} {
 	lappend bindtags ListBoxFocus
 	BWidget::bindMouseWheel $path.c
+        BWidget::bindMiddleMouseMovement $path.c
     }
+
     bindtags $path.c $bindtags
 
     # Add slightly modified up/down bindings to the canvas, in case
     # it gets the focus (like with -autofocus).
     bind $path.c <Key-Up> {ListBox::_keyboard_navigation [winfo parent %W] -1}
     bind $path.c <Key-Down> {ListBox::_keyboard_navigation [winfo parent %W] 1}
+
+    bind ListBoxThemeChanged <<ThemeChanged>> \
+	   "+ [namespace current]::_themechanged $path"
 
     _configureSelectmode $path [Widget::getoption $path -selectmode]
 
@@ -229,6 +239,8 @@ proc ListBox::_configureSelectmode { path selectmode {previous none} } {
         }
     }
 }
+
+
 # ----------------------------------------------------------------------------
 #  Command ListBox::configure
 # ----------------------------------------------------------------------------
@@ -1691,3 +1703,27 @@ proc ListBox::_keyboard_navigation { path dir } {
     $path see $item
     _mouse_select $path set $item
 }
+
+
+# ----------------------------------------------------------------------------
+#  Command ListBox::_themechanged
+# ----------------------------------------------------------------------------
+proc ListBox::_themechanged { path } {
+
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+    
+    $path configure \
+           -background $BWidget::colors(SystemWindow) \
+           -foreground $BWidget::colors(SystemWindowText) \
+           -selectbackground $BWidget::colors(SystemHighlight) \
+           -selectforeground $BWidget::colors(SystemHighlightText)
+
+    # make sure, existing items appear in the same color as well:	     
+    foreach item [$path items] {
+        $path itemconfigure $item \
+	         -foreground $BWidget::colors(SystemWindowText)
+    }
+    _redraw_idle $path 2
+}
+
