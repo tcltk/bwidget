@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.35 2009/07/02 16:22:18 oehhar Exp $
+#  $Id: widget.tcl,v 1.36 2009/09/06 20:45:43 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -16,6 +16,8 @@
 #     - Widget::subcget
 #     - Widget::hasChanged
 #     - Widget::options
+#     - Widget::getArgument
+#     - Widget::getallwidgets
 #     - Widget::_get_tkwidget_options
 #     - Widget::_test_tkresource
 #     - Widget::_test_bwresource
@@ -393,6 +395,12 @@ proc Widget::declare { class optlist } {
 	    set optionClass($option) [lindex [$foo configure $realopt] 1]
 	    ::destroy $foo
             continue
+        }
+
+        if {[string equal $type "Color"]} {
+            if {[info exists ::BWidget::colors($value)]} {
+                set value $::BWidget::colors($value)
+            }
         }
 
 	set optionDbName ".[lindex [_configure_option $option ""] 0]"
@@ -871,7 +879,21 @@ proc Widget::cget { path option } {
     if { [info exists ${class}::map($option)] } {
 	foreach {subpath subclass realopt} [set ${class}::map($option)] {break}
 	set path "[_get_window $class $path]$subpath"
-	return [$path cget $realopt]
+	
+	set optval ""
+        if { [BWidget::using ttk] } {
+	    # ttk
+            foreach {opt val} [::ttk::style configure .] {
+              if {$realopt eq $opt} {
+                set optval $val
+		break
+	      }
+	    }
+        }
+	# if ttk option doesn't exists, take tk option instead
+	if { [string length $optval] != 0 } {
+                 return $optval
+	} else { return [$path cget $realopt] } 
     }
     upvar 0 ${class}::$path:opt pathopt
     set pathopt($option)
@@ -1602,9 +1624,38 @@ proc Widget::theme {{bool {}}} {
 	    && [catch {package require tile 1}]} {
 	    return -code error "BWidget's theming requires tile 0.6+"
 	} else {
-	    catch {style default BWSlim.Toolbutton -padding 0}
+	    catch {
+	      ttk::style configure BWSlimCB.Toolbutton -relief flat -bd 2
+              ttk::style map BWSlimCB.Toolbutton \
+	                 -relief [list {selected !disabled} sunken]
+	    }
 	}
 	set _theme [string is true -strict $bool]
     }
     return $_theme
+}
+
+#------------------------------------------------------------------------------
+# remove {keystr value} sub list from args
+# arg contains the associated value of keystr, or an empty string
+# while loop ensures to remove all matches of keystr 
+#------------------------------------------------------------------------------
+proc Widget::getArgument {args keystr arg} {
+  upvar $arg cvalue
+  set cvalue ""
+  while {[set i [lsearch -exact $args $keystr]] >= 0} {
+     set j [expr $i + 1]
+     set cvalue [lindex $args $j]
+     set args [lreplace $args $i $j]
+  }
+  return $args
+}
+
+
+proc Widget::getallwidgets {{w .}} {
+    set rlist [list $w]
+    foreach c [winfo children $w] {
+        set rlist [concat $rlist [getallwidgets $c]]
+    }
+    return $rlist
 }
