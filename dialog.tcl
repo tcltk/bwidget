@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.15 2004/09/24 23:56:59 hobbs Exp $
+#  $Id: dialog.tcl,v 1.16 2009/09/06 21:09:39 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -29,6 +29,7 @@ namespace eval Dialog {
 	initialize {-spacing 10 -padx 10}
 
     Widget::declare Dialog {
+        {-background  Color     "SystemWindowFrame" 0}
 	{-title	      String	 ""	  0}
 	{-geometry    String	 ""	  0}
 	{-modal	      Enum	 local	  0 {none local global}}
@@ -44,8 +45,10 @@ namespace eval Dialog {
 	{-place	      Enum	 center	  0 {none center left right above below}}
     }
 
-    Widget::addmap Dialog "" :cmd   {-background {}}
-    Widget::addmap Dialog "" .frame {-background {}}
+    if { ![BWidget::using ttk] } {
+       Widget::addmap Dialog "" :cmd   {-background {}}
+       Widget::addmap Dialog "" .frame {-background {}}
+    }
 
     bind BwDialog <Destroy> [list Dialog::_destroy %W]
 
@@ -77,12 +80,15 @@ proc Dialog::create { path args } {
 	set re flat
 	set bd 0
     }
-    toplevel $path -relief $re -borderwidth $bd -class $dialogClass
+    toplevel $path \
+      -relief $re -borderwidth $bd -class $dialogClass \
+      -background $::BWidget::colors(SystemWindowFrame)
     wm withdraw $path
 
     Widget::initFromODB Dialog $path $maps(Dialog)
 
     bindtags $path [list $path BwDialog all]
+ 
     wm overrideredirect $path 1
     wm title $path [Widget::cget $path -title]
     set parent [Widget::cget $path -parent]
@@ -103,12 +109,22 @@ proc Dialog::create { path args } {
 
     set bbox  [eval [list ButtonBox::create $path.bbox] $maps(.bbox) \
 		   -orient $orient]
-    set frame [frame $path.frame -relief flat -borderwidth 0]
+
     set bg [Widget::cget $path -background]
     $path configure -background $bg
-    $frame configure -background $bg
+
+    if { [BWidget::using ttk] } {
+         set frame [ttk::frame $path.frame -relief flat]
+    } else {
+         set frame [frame $path.frame -relief flat -borderwidth 0 -background $bg]
+    }
+
     if { [set bitmap [Widget::getoption $path -image]] != "" } {
-        set label [label $path.label -image $bitmap -background $bg]
+        if { [BWidget::using ttk] } {
+            set label [ttk::label $path.label -image $bitmap]
+        } else {
+            set label [label $path.label -image $bitmap -background $bg]
+        }
     } elseif { [set bitmap [Widget::getoption $path -bitmap]] != "" } {
         set label [label $path.label -bitmap $bitmap -background $bg]
     }
@@ -176,7 +192,14 @@ proc Dialog::add { path args } {
     }
     set cmd [list ButtonBox::add $path.bbox -width $width \
 		 -command [list Dialog::enddialog $path $_widget($path,nbut)]]
+
     set res [eval $cmd $args]
+
+    # a button box button - by default - is flat!
+    if { [BWidget::using ttk] } {
+        $res configure -style "TButton"
+    }
+
     incr _widget($path,nbut)
     return $res
 }

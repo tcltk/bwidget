@@ -1,6 +1,7 @@
 # ----------------------------------------------------------------------------
 #  buttonbox.tcl
 #  This file is part of Unifix BWidget Toolkit
+#  $Id: buttonbox.tcl,v 1.14 2009/09/06 21:03:48 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ButtonBox::create
@@ -13,13 +14,14 @@
 #     - ButtonBox::invoke
 #     - ButtonBox::index
 #     - ButtonBox::_destroy
+#     - ButtonBox::_themechanged
 # ----------------------------------------------------------------------------
 
 namespace eval ButtonBox {
     Widget::define ButtonBox buttonbox Button
 
     Widget::declare ButtonBox {
-	{-background  TkResource ""	    0 frame}
+        {-background  Color     "SystemWindowFrame" 0}
 	{-orient      Enum	 horizontal 1 {horizontal vertical}}
 	{-state	      Enum	 "normal"   0 {normal disabled}}
 	{-homogeneous Boolean	 1	    1}
@@ -28,11 +30,23 @@ namespace eval ButtonBox {
 	{-pady	      TkResource ""	    0 button}
 	{-default     Int	 -1	    0 "%d >= -1"}
 	{-bg	      Synonym	 -background}
+        {-style       String "" 0}
+    }
+
+    if { ![BWidget::using ttk] } {
+        Widget::addmap ButtonBox "" :cmd {-background {}}
+    }
+    if { [BWidget::using ttk] } {
+        Widget::addmap Button "" :cmd {-style {}}
     }
 
     Widget::addmap ButtonBox "" :cmd {-background {}}
 
     bind ButtonBox <Destroy> [list ButtonBox::_destroy %W]
+
+    if {[lsearch [bindtags .] ButtonBoxThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 ButtonBoxThemeChanged]
+    }
 }
 
 
@@ -46,7 +60,8 @@ proc ButtonBox::create { path args } {
     upvar 0  $path data
 
     eval [list frame $path] [Widget::subcget $path :cmd] \
-	[list -class ButtonBox -takefocus 0 -highlightthickness 0]
+	 [list -class ButtonBox -takefocus 0 -highlightthickness 0]
+
     # For 8.4+ we don't want to inherit the padding
     catch {$path configure -padx 0 -pady 0}
 
@@ -54,6 +69,9 @@ proc ButtonBox::create { path args } {
     set data(nbuttons) 0
     set data(buttons)  [list]
     set data(default)  [Widget::getoption $path -default]
+
+    bind ButtonBoxThemeChanged <<ThemeChanged>> \
+	   "+ [namespace current]::_themechanged $path"
 
     return [Widget::create ButtonBox $path]
 }
@@ -150,6 +168,11 @@ proc ButtonBox::insert { path idx args } {
 	      -padx       [Widget::getoption $path -padx] \
 	      -pady       [Widget::getoption $path -pady]] \
         $args [list -default $style]
+
+    # a button box button - by default - is flat!
+    if { [BWidget::using ttk] } {
+       $but configure -style "BWSlim.Toolbutton"
+    }
 
     # ericm@scriptics.com:  set up tags, just like the menu items
     foreach tag $tags {
@@ -411,4 +434,15 @@ proc ButtonBox::_destroy { path } {
     upvar 0  $path data
     Widget::destroy $path
     unset data
+}
+
+# ----------------------------------------------------------------------------
+#  Command ButtonBox::_themechanged
+# ----------------------------------------------------------------------------
+proc ButtonBox::_themechanged { path } {
+
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+    
+    $path configure -background $BWidget::colors(SystemWindowFrame)
 }
