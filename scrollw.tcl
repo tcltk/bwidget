@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.13 2009/06/29 13:28:24 oehhar Exp $
+#  $Id: scrollw.tcl,v 1.14 2009/09/06 21:40:13 oberdorfer Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -9,18 +9,18 @@
 #     - ScrolledWindow::setwidget
 #     - ScrolledWindow::configure
 #     - ScrolledWindow::cget
-#     - ScrolledWindow::_set_hframe
+#     - ScrolledWindow::_set_hscroll
 #     - ScrolledWindow::_set_vscroll
 #     - ScrolledWindow::_setData
-#     - ScrolledWindow::_setSBSize
 #     - ScrolledWindow::_realize
+#     - ScrolledWindow::_themechanged
 # -----------------------------------------------------------------------------
 
 namespace eval ScrolledWindow {
     Widget::define ScrolledWindow scrollw
 
     Widget::declare ScrolledWindow {
-	{-background  TkResource ""   0 button}
+        {-background  Color      "SystemWindowFrame" 0}
 	{-scrollbar   Enum	 both 0 {none both vertical horizontal}}
 	{-auto	      Enum	 both 0 {none both vertical horizontal}}
 	{-sides	      Enum	 se   0 {ne en nw wn se es sw ws}}
@@ -34,6 +34,10 @@ namespace eval ScrolledWindow {
     }
 
     Widget::addmap ScrolledWindow "" :cmd {-relief {} -borderwidth {}}
+
+    if {[lsearch [bindtags .] ScrolledWindowThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 ScrolledWindowThemeChanged]
+    }
 }
 
 
@@ -50,18 +54,27 @@ proc ScrolledWindow::create { path args } {
     set sw     [eval [list frame $path \
 			  -relief flat -borderwidth 0 -background $bg \
 			  -highlightthickness 0 -takefocus 0] \
-		    [Widget::subcget $path :cmd]]
+		     [Widget::subcget $path :cmd]]
 
-    scrollbar $path.hscroll \
+    if { [BWidget::using ttk] &&
+        ![string equal [tk windowingsystem] "aqua"]} {
+
+        ttk::scrollbar $path.vscroll -orient vertical
+        ttk::scrollbar $path.hscroll -orient horizontal
+
+    } else {
+
+        scrollbar $path.hscroll \
 	    -highlightthickness 0 -takefocus 0 \
 	    -orient	 horiz	\
 	    -relief	 sunken	\
 	    -bg	 $bg
-    scrollbar $path.vscroll \
+        scrollbar $path.vscroll \
 	    -highlightthickness 0 -takefocus 0 \
 	    -orient	 vert	\
 	    -relief	 sunken	\
 	    -bg	 $bg
+    }
 
     set data(realized) 0
 
@@ -77,11 +90,12 @@ proc ScrolledWindow::create { path args } {
 	set data(hsb,packed) 0
 	set data(vsb,packed) 0
     }
-    if {$sbsize} {
-	$path.vscroll configure -width $sbsize
-	$path.hscroll configure -width $sbsize
-    } else {
-	set sbsize [$path.vscroll cget -width]
+    
+    if { ![BWidget::using ttk] } {
+        if {$sbsize} {
+	    $path.vscroll configure -width $sbsize
+	    $path.hscroll configure -width $sbsize
+        }
     }
     set data(ipad) [Widget::cget $path -ipad]
 
@@ -99,6 +113,9 @@ proc ScrolledWindow::create { path args } {
 
     bind $path <Configure> [list ScrolledWindow::_realize $path]
     bind $path <Destroy>   [list ScrolledWindow::_destroy $path]
+
+    bind ScrolledWindowThemeChanged <<ThemeChanged>> \
+	   "+ [namespace current]::_themechanged $path"
 
     return [Widget::create ScrolledWindow $path]
 }
@@ -142,9 +159,9 @@ proc ScrolledWindow::configure { path args } {
 
     set res [Widget::configure $path $args]
     if { [Widget::hasChanged $path -background bg] } {
-	$path configure -background $bg
-	catch {$path.hscroll configure -background $bg}
-	catch {$path.vscroll configure -background $bg}
+	$path:cmd configure -background $bg
+	catch { $path.hscroll configure -background $bg }
+	catch { $path.vscroll configure -background $bg }
     }
 
     if {[Widget::hasChanged $path -scrollbar scrollbar] | \
@@ -279,4 +296,14 @@ proc ScrolledWindow::_realize { path } {
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::_destroy { path } {
     Widget::destroy $path
+}
+
+# ----------------------------------------------------------------------------
+#  Command ScrolledWindow::_themechanged
+# ----------------------------------------------------------------------------
+proc ScrolledWindow::_themechanged { path } {
+
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+    $path configure -background $BWidget::colors(SystemWindowFrame)
 }
