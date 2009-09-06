@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.11 2009/07/17 15:29:51 oehhar Exp $
+#  $Id: scrollframe.tcl,v 1.12 2009/09/06 21:38:51 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -12,40 +12,25 @@
 #     - ScrollableFrame::xview
 #     - ScrollableFrame::yview
 #     - ScrollableFrame::_resize
+#     - ScrollableFrame::_themechanged
 # ----------------------------------------------------------------------------
 
 namespace eval ScrollableFrame {
     Widget::define ScrollableFrame scrollframe
 
-    # If themed, there is no background and -bg option
-    if {[Widget::theme]} {
-        Widget::declare ScrollableFrame {
-            {-width             Int        0  0 {}}
-            {-height            Int        0  0 {}}
-            {-areawidth         Int        0  0 {}}
-            {-areaheight        Int        0  0 {}}
-            {-constrainedwidth  Boolean    0 0}
-            {-constrainedheight Boolean    0 0}
-            {-xscrollcommand    TkResource "" 0 canvas}
-            {-yscrollcommand    TkResource "" 0 canvas}
-            {-xscrollincrement  TkResource "" 0 canvas}
-            {-yscrollincrement  TkResource "" 0 canvas}
-        }
-    } else {
-        Widget::declare ScrollableFrame {
-            {-background        TkResource "" 0 frame}
-            {-width             Int        0  0 {}}
-            {-height            Int        0  0 {}}
-            {-areawidth         Int        0  0 {}}
-            {-areaheight        Int        0  0 {}}
-            {-constrainedwidth  Boolean    0 0}
-            {-constrainedheight Boolean    0 0}
-            {-xscrollcommand    TkResource "" 0 canvas}
-            {-yscrollcommand    TkResource "" 0 canvas}
-            {-xscrollincrement  TkResource "" 0 canvas}
-            {-yscrollincrement  TkResource "" 0 canvas}
-            {-bg                Synonym    -background}
-        }
+    Widget::declare ScrollableFrame {
+        {-background	    Color      "SystemWindow"  0}
+        {-width             Int        0  0 {}}
+        {-height            Int        0  0 {}}
+        {-areawidth         Int        0  0 {}}
+        {-areaheight        Int        0  0 {}}
+        {-constrainedwidth  Boolean    0 0}
+        {-constrainedheight Boolean    0 0}
+        {-xscrollcommand    TkResource "" 0 canvas}
+        {-yscrollcommand    TkResource "" 0 canvas}
+        {-xscrollincrement  TkResource "" 0 canvas}
+        {-yscrollincrement  TkResource "" 0 canvas}
+        {-bg                Synonym    -background}
     }
 
     Widget::addmap ScrollableFrame "" :cmd {
@@ -53,14 +38,15 @@ namespace eval ScrollableFrame {
         -xscrollcommand {} -yscrollcommand {}
         -xscrollincrement {} -yscrollincrement {}
     }
-    if { ! [Widget::theme]} {
-        Widget::addmap ScrollableFrame "" .frame {-background {}}
-    }
 
     variable _widget
 
     bind BwScrollableFrame <Configure> [list ScrollableFrame::_resize %W]
     bind BwScrollableFrame <Destroy>   [list Widget::destroy %W]
+
+    if {[lsearch [bindtags .] ScrollableFrameThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 ScrollableFrameThemeChanged]
+    }
 }
 
 
@@ -70,21 +56,15 @@ namespace eval ScrollableFrame {
 proc ScrollableFrame::create { path args } {
     Widget::init ScrollableFrame $path $args
 
-    set canvas [eval [list canvas $path] [Widget::subcget $path :cmd] \
-                    -highlightthickness 0 -borderwidth 0 -relief flat]
+    set bg [Widget::cget $path -background]
 
-    if {[Widget::theme]} {
-	set frame [eval [list ttk::frame $path.frame] \
-		       [Widget::subcget $path .frame]]
-	set bg [ttk::style lookup TFrame -background]
-    } else {
-	set frame [eval [list frame $path.frame] \
-		       [Widget::subcget $path .frame] \
-		       -highlightthickness 0 -borderwidth 0 -relief flat]
-	set bg [$frame cget -background]
-    }
-    # Give canvas frame (or theme) background
-    $canvas configure -background $bg
+    set canvas [eval [list canvas $path] [Widget::subcget $path :cmd] \
+                    -highlightthickness 0 -borderwidth 0 -relief flat \
+		    -bg $bg]
+
+    set frame [eval [list frame $path.frame] \
+		       -highlightthickness 0 -borderwidth 0 -relief flat \
+		       -background $bg]
 
     $canvas create window 0 0 -anchor nw -window $frame -tags win \
         -width  [Widget::cget $path -areawidth] \
@@ -102,6 +82,9 @@ proc ScrollableFrame::create { path args } {
 
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
+    bind ScrollableFrameThemeChanged <<ThemeChanged>> \
+	   "+ [namespace current]::_themechanged $path"
+
     return [Widget::create ScrollableFrame $path]
 }
 
@@ -112,6 +95,11 @@ proc ScrollableFrame::create { path args } {
 proc ScrollableFrame::configure { path args } {
     set res [Widget::configure $path $args]
     set upd 0
+
+    if { [Widget::hasChanged $path -background bg] } {
+        $path:cmd configure -background $bg
+	$path.frame configure -background $bg
+    }
 
     set modcw [Widget::hasChanged $path -constrainedwidth cw]
     set modw  [Widget::hasChanged $path -areawidth w]
@@ -259,4 +247,14 @@ proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
     set width  [_max $framew [winfo width  $canvas]]
 
     $canvas:cmd configure -scrollregion [list 0 0 $width $height]
+}
+
+# ----------------------------------------------------------------------------
+#  Command ScrollableFrame::_themechanged
+# ----------------------------------------------------------------------------
+proc ScrollableFrame::_themechanged { path } {
+
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+    $path configure -background $BWidget::colors(SystemWindow)
 }
