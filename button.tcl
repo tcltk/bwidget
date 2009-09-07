@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  button.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: button.tcl,v 1.11 2009/09/06 21:03:27 oberdorfer Exp $
+#  $Id: button.tcl,v 1.12 2009/09/07 20:11:39 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #   Public commands
@@ -26,10 +26,7 @@ namespace eval Button {
     if {[info tclversion] > 8.3} {
 	lappend remove -repeatdelay -repeatinterval
     }
-
-    if { [BWidget::using ttk] } {
-        lappend remove -anchor
-    }
+    # if { [BWidget::using ttk] } { lappend remove -borderwidth }
 
     Widget::tkinclude Button button :cmd remove $remove
 
