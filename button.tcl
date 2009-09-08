@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  button.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: button.tcl,v 1.12 2009/09/07 20:11:39 oberdorfer Exp $
+#  $Id: button.tcl,v 1.13 2009/09/08 19:55:45 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #   Public commands
@@ -26,6 +26,7 @@ namespace eval Button {
     if {[info tclversion] > 8.3} {
 	lappend remove -repeatdelay -repeatinterval
     }
+    
     # if { [BWidget::using ttk] } { lappend remove -borderwidth }
 
     Widget::tkinclude Button button :cmd remove $remove
@@ -63,6 +64,12 @@ namespace eval Button {
     bind BwButton <Key-space>       {Button::invoke %W; break}
     bind BwButton <Return>          {Button::invoke %W; break}
     bind BwButton <Destroy>         {Widget::destroy %W}
+    
+    variable _ttkunsupported
+    set _ttkunsupported_opt \
+           { -font -fg -foreground -background
+	     -highlightthickness -bd -borderwidth
+	     -padx -pady -anchor }
 }
 
 
@@ -74,14 +81,25 @@ proc Button::createButtonStyles {} {
     } 
     if { ![BWidget::using ttk] } { return }
 
-    # emulate tk behavior, referenced later on such like:
-    #    -style "${relief}BW.TButton"
-    ::ttk::style configure raisedBW.TButton -relief raised
-    ::ttk::style configure sunkenBW.TButton -relief sunken
-    ::ttk::style configure flatBW.TButton   -relief flat
-    ::ttk::style configure solidBW.TButton  -relief solid
-    ::ttk::style configure grooveBW.TButton -relief groove
-    ::ttk::style configure linkBW.TButton   -relief flat -bd 2
+    # create a new element for each available theme...
+    foreach themeName [ttk::style theme names] {
+
+       # temporarily sets the current theme to themeName,
+       # evaluate script, then restore the previous theme.
+
+        ttk::style theme settings $themeName {
+  
+            # emulate tk behavior, referenced later on such like:
+            #    -style "${relief}BW.TButton"
+
+            ::ttk::style configure raisedBW.TButton -relief raised
+            ::ttk::style configure sunkenBW.TButton -relief sunken
+            ::ttk::style configure flatBW.TButton   -relief flat
+            ::ttk::style configure solidBW.TButton  -relief solid
+            ::ttk::style configure grooveBW.TButton -relief groove
+            ::ttk::style configure linkBW.TButton   -relief flat -bd 2
+        }
+    }
 
     set _styles_created 1
 }
@@ -92,15 +110,14 @@ proc Button::createButtonStyles {} {
 #  Command Button::create
 # ----------------------------------------------------------------------------
 proc Button::create { path args } {
+    variable _ttkunsupported_opt
 
     if { [BWidget::using ttk] } {
         createButtonStyles
 
         # remove unsupported tk options
 	# (hope that's all we need to take care about)
-	foreach opt {-font -fg -foreground -background
-	             -highlightthickness -bd -borderwidth
-		     -padx -pady -anchor} {
+	foreach opt $_ttkunsupported_opt {
             set args [Widget::getArgument $args $opt tmp]
 	}
         set args [Widget::getArgument $args "-relief" relief]
@@ -174,6 +191,16 @@ proc Button::create { path args } {
 #  Command Button::configure
 # ----------------------------------------------------------------------------
 proc Button::configure { path args } {
+    variable _ttkunsupported_opt
+
+    # remove unsupported tk options 1st...
+
+    if { [BWidget::using ttk] } {
+	foreach opt $_ttkunsupported_opt {
+            set args [Widget::getArgument $args $opt tmp]
+	}
+    }
+
     set oldunder [$path:cmd cget -underline]
     if { $oldunder != -1 } {
         set oldaccel1 [string tolower [string index [$path:cmd cget -text] $oldunder]]
