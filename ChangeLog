@@ -1,34 +1,3 @@
-2009-09-05 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
-
-	**** BWidget 1.9.1 tagged ****
-	BWidget revitalization to make usage of tile...
-        ... updates to follow, pls. be patient for the moment ...
-
-2009-09-03 Harald Oehlmann  <oehhar@users.sourceforge.net>
-
-	* util.tcl(BWidget::place), BWidget.html Widget placed incorrectly,
-	when bigger than current screen [Bug 2850031] by Thomas Grausgruber
-	Possible incompatibility: BWidget::place w h -> w,h are reduced to
-	screen width.
-	* dynhelp.tcl Added part of last patch, for pre 8.5 tcl from BWidget
-    branch [Patch 2835180].
-
-2009-08-12 Harald Oehlmann  <oehhar@users.sourceforge.net>
-
-	* dynhelp.tcl Use balloon help font TkTooltipFont
-	[Patch 2835180] for Kevin Walzer
-	* dynhelp.tcl(DynamicHelp::_show_help)Replaced aqua conditional code
-	check by $Widget::_aqua
-
-2009-08-04 Harald Oehlmann  <oehhar@users.sourceforge.net>
-
-	* notebook.tcl (NoteBook::delete) Method delete destroyframe=1 and
-	reinsertion -> raise failed - state variables were deleted.
-	[Bug 2831785] by kjnash
-	* tree.tcl (Tree::_keynav) Fire virtual event <<TreeSelect>> also on
-	keyboard navigation [Patch 2828086] by Kevin Walzer
-	* combobox.tcl Replaced aqua conditional code check by $Widget::_aqua
-
 2009-07-24 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.0 tagged ****
