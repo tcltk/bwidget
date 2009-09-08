@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.16 2009/09/03 17:23:30 oehhar Exp $
+#  $Id: utils.tcl,v 1.17 2009/09/08 20:28:07 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -14,6 +14,7 @@
 #     - BWidget::place
 #     - BWidget::grab
 #     - BWidget::focus
+#     - BWidget::bindMiddleMouseMovement
 # ----------------------------------------------------------------------------
 
 namespace eval GlobalVar {
@@ -176,6 +177,8 @@ proc BWidget::parsetext { text } {
 #  Command BWidget::get3dcolor
 # ----------------------------------------------------------------------------
 proc BWidget::get3dcolor { path bgcolor } {
+    set fmt "#%04x%04x%04x"
+
     foreach val [winfo rgb $path $bgcolor] {
         lappend dark [expr {60*$val/100}]
         set tmp1 [expr {14*$val/10}]
@@ -185,7 +188,7 @@ proc BWidget::get3dcolor { path bgcolor } {
         set tmp2 [expr {(65535+$val)/2}]
         lappend light [expr {($tmp1 > $tmp2) ? $tmp1:$tmp2}]
     }
-    return [list [eval format "#%04x%04x%04x" $dark] [eval format "#%04x%04x%04x" $light]]
+    return [list [eval format $fmt $dark] [eval format $fmt $light]]
 }
 
 
@@ -223,7 +226,6 @@ proc BWidget::XLFDfont { cmd args } {
     }
     return [join $lfont "-"]
 }
-
 
 
 # ----------------------------------------------------------------------------
@@ -677,4 +679,30 @@ proc BWidget::bindMouseWheel { widget } {
     }
 }
 
- 	  	 
+
+# ----------------------------------------------------------------------------
+# support for middle mouse button movement
+# ----------------------------------------------------------------------------
+
+proc BWidget::bindMiddleMouseMovement { widget } {
+  variable __private
+
+  bind $widget <2> {
+     set BWidget::__private(x) %x
+     set BWidget::__private(y) %y
+     %W configure -cursor fleur
+  }
+  bind $widget <B2-ButtonRelease> {
+     %W configure -cursor ""
+  }
+
+  bind $widget <B2-Motion> {
+      set scrollspeed 2
+      set xdir 1
+      set ydir 1
+      if { %x > $BWidget::__private(x) } {set xdir -1}
+      if { %y > $BWidget::__private(y) } {set ydir -1}
+      catch {%W xview scroll [expr $xdir * $scrollspeed] units}
+      catch {%W yview scroll [expr $ydir * $scrollspeed] units}
+  }
+}
