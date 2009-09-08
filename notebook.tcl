@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.26 2009/08/04 16:39:06 oehhar Exp $
+#  $Id: notebook.tcl,v 1.27 2009/09/08 20:50:46 oberdorfer Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -31,6 +31,7 @@
 #     - NoteBook::_draw_arrows
 #     - NoteBook::_draw_area
 #     - NoteBook::_resize
+#     - NoteBook::_themechanged
 # ---------------------------------------------------------------------------
 
 namespace eval NoteBook {
@@ -44,11 +45,11 @@ namespace eval NoteBook {
             {-leavecmd   String     ""     0}
             {-image      TkResource ""     0 label}
             {-text       String     ""     0}
-            {-foreground         String     ""     0}
-            {-background         String     ""     0}
-            {-activeforeground   String     ""     0}
-            {-activebackground   String     ""     0}
-            {-disabledforeground String     ""     0}
+            {-foreground          Color  "SystemWindowText"    0}
+            {-background          Color  "SystemWindowFrame"   0}
+            {-activebackground    Color  "SystemHighlight"     0}
+            {-activeforeground    Color  "SystemHighlightText" 0}
+            {-disabledforeground  Color  "SystemDisabledText"  0}
         }
     }
 
@@ -65,13 +66,14 @@ namespace eval NoteBook {
 		-repeatdelay -borderwidth} \
 	    initialize {-borderwidth 1}
 
-    Widget::declare NoteBook {
-	{-foreground		TkResource "" 0 button}
-        {-background		TkResource "" 0 button}
-        {-activebackground	TkResource "" 0 button}
-        {-activeforeground	TkResource "" 0 button}
-        {-disabledforeground	TkResource "" 0 button}
-        {-font			TkResource "" 0 button}
+   Widget::declare NoteBook {
+        {-foreground		Color      "SystemWindowText"     0}
+        {-background		Color      "SystemWindowFrame"    0}
+        {-activebackground	Color      "SystemHighlight"      0}
+        {-activeforeground	Color      "SystemHighlightText"  0}
+        {-disabledforeground	Color      "SystemDisabledText"   0}
+        {-font			String     "TkTextFont"           0}
+
         {-side			Enum       top 0 {top bottom}}
         {-homogeneous		Boolean 0   0}
         {-borderwidth		Int 1   0 "%d >= 1 && %d <= 2"}
@@ -98,6 +100,10 @@ namespace eval NoteBook {
 
     bind NoteBook <Configure> [list NoteBook::_resize  %W]
     bind NoteBook <Destroy>   [list NoteBook::_destroy %W]
+
+    if {[lsearch [bindtags .] NBThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 NBThemeChanged]
+    }
 }
 
 
@@ -112,7 +118,6 @@ proc NoteBook::create { path args } {
 
     set data(base)     0
     set data(select)   ""
-    set data(pages)    {}
     set data(pages)    {}
     set data(cpt)      0
     set data(realized) 0
@@ -141,6 +146,9 @@ proc NoteBook::create { path args } {
 	set bindings [lreplace $bindings $pos $pos]
     }
     bindtags $path.c $bindings
+
+    bind NBThemeChanged <<ThemeChanged>> \
+	     "+ [namespace current]::_themechanged $path"
 
     # Create the arrow button
     eval [list ArrowButton::create $path.c.fg] [Widget::subcget $path .c.fg] \
@@ -1163,4 +1171,30 @@ proc NoteBook::_set_help { path page } {
 
 proc NoteBook::_get_page_name { path {item current} {tagindex end-1} } {
     return [string range [lindex [$path.c gettags $item] $tagindex] 2 end]
+}
+
+# ----------------------------------------------------------------------------
+#  Command NoteBook::_themechanged
+# ----------------------------------------------------------------------------
+proc NoteBook::_themechanged { path } {
+
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+    
+    $path configure \
+           -foreground $BWidget::colors(SystemWindowText) \
+           -background $BWidget::colors(SystemWindowFrame) \
+           -activebackground $BWidget::colors(SystemHighlight) \
+           -activeforeground $BWidget::colors(SystemHighlightText) \
+	   -disabledforeground $BWidget::colors(SystemDisabledText)
+
+    # make sure, existing items appear in the same color as well:	     
+    foreach page [$path pages] {
+        $path itemconfigure $page \
+	         -foreground $BWidget::colors(SystemWindowText) \
+	         -background $BWidget::colors(SystemWindowFrame) \
+		 -activebackground $BWidget::colors(SystemHighlight) \
+                 -activeforeground $BWidget::colors(SystemHighlightText) \
+	         -disabledforeground $BWidget::colors(SystemDisabledText)
+    }
 }
