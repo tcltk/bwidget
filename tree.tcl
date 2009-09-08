@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.61 2009/08/04 16:39:06 oehhar Exp $
+#  $Id: tree.tcl,v 1.62 2009/09/08 20:46:40 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -46,6 +46,7 @@
 #     - Tree::_over_cmd
 #     - Tree::_auto_scroll
 #     - Tree::_scroll
+#     - Tree::_themechanged
 # ----------------------------------------------------------------------------
 
 namespace eval Tree {
@@ -54,10 +55,10 @@ namespace eval Tree {
     namespace eval Node {
         Widget::declare Tree::Node {
             {-text       String     ""      0}
-            {-font       TkResource ""      0 listbox}
+ 	    {-font       String     "TkTextFont" 0}
             {-image      TkResource ""      0 label}
             {-window     String     ""      0}
-            {-fill       TkResource black   0 {listbox -foreground}}
+            {-fill       Color      "SystemWindowText" 0}
             {-data       String     ""      0}
             {-open       Boolean    0       0}
 	    {-selectable Boolean    1       0}
@@ -85,17 +86,17 @@ namespace eval Tree {
         {-deltax           Int 10 0 "%d >= 0"}
         {-deltay           Int 15 0 "%d >= 0"}
         {-padx             Int 20 0 "%d >= 0"}
-        {-background       TkResource "" 0 listbox}
-        {-selectbackground TkResource "" 0 listbox}
-        {-selectforeground TkResource "" 0 listbox}
+        {-background       Color      "SystemWindow"  0}
+        {-selectbackground Color      "SystemHighlight"  0}
+        {-selectforeground Color      "SystemHighlightText" 0}
 	{-selectcommand    String     "" 0}
         {-width            TkResource "" 0 listbox}
         {-height           TkResource "" 0 listbox}
         {-selectfill       Boolean 0  0}
         {-showlines        Boolean 1  0}
-        {-linesfill        TkResource black  0 {listbox -foreground}}
+        {-linesfill        Color      "SystemWindowText"  0}
         {-linestipple      TkResource ""     0 {label -bitmap}}
-	{-crossfill        TkResource black  0 {listbox -foreground}}
+	{-crossfill        Color      "SystemWindowText"  0} 
         {-redraw           Boolean 1  0}
         {-opencmd          String  "" 0}
         {-closecmd         String  "" 0}
@@ -138,6 +139,10 @@ namespace eval Tree {
     }
 
     bind TreeFocus <Button-1> [list focus %W]
+
+    if {[lsearch [bindtags .] TreeThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 TreeThemeChanged]
+    }
 
     variable _edit
 }
@@ -198,6 +203,7 @@ proc Tree::create { path args } {
     # ericm@scriptics.com
 
     BWidget::bindMouseWheel $path.c
+    BWidget::bindMiddleMouseMovement $path.c
 
     DragSite::setdrag $path $path.c Tree::_init_drag_cmd \
 	    [Widget::cget $path -dragendcmd] 1
@@ -234,6 +240,9 @@ proc Tree::create { path args } {
     $path.c bind TreeItemSentinal <Double-Button-1> \
 	[list set ::Tree::sentinal($path.c) 1]
     # ericm
+
+    bind TreeThemeChanged <<ThemeChanged>> \
+	   "+ [namespace current]::_themechanged $path"
 
     return $path
 }
@@ -2240,4 +2249,52 @@ proc Tree::_destroy { path } {
     _subdelete $path [lrange $data(root) 1 end]
     Widget::destroy $path
     unset data
+}
+
+
+proc Tree::_getnodes {path {node "root"}} {
+    set nodes [$path nodes $node]
+    foreach node $nodes {
+        set nodes [concat $nodes [_getnodes $path $node]]
+    }
+    return $nodes
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command Tree::_themechanged
+# ----------------------------------------------------------------------------
+proc Tree::_themechanged { path } {
+
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+    
+    $path configure \
+           -background $BWidget::colors(SystemWindow) \
+           -selectbackground $BWidget::colors(SystemHighlight) \
+           -selectforeground $BWidget::colors(SystemHighlightText) \
+           -linesfill $BWidget::colors(SystemWindowText) \
+           -crossfill $BWidget::colors(SystemWindowText)
+
+    # make sure, existing items appear in the same color as well:
+    set res [$path nodes "root"]
+
+    # res(ult) might be either a string or a list...
+    if {[llength $res] == 0 && [string length $res] > 0} {
+
+        foreach node [_getnodes $path $res] {
+            $path itemconfigure $node \
+	             -fill $BWidget::colors(SystemWindowText)
+        }
+    } elseif { [llength $res] > 0 } {
+
+        foreach n $res {
+            foreach node [_getnodes $path $n] {
+                $path itemconfigure $node \
+	                 -fill $BWidget::colors(SystemWindowText)
+            }
+	}
+    }
+    
+    _redraw_idle $path 3
 }
