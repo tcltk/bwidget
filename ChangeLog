@@ -1,3 +1,71 @@
+<<<<<<< ChangeLog
+# ------------------------------------------------------------------------------
+#  ChangeLog
+#  This file is part of Unifix BWidget Toolkit
+#  $Id: ChangeLog,v 1.211 2009/09/08 21:19:07 oberdorfer Exp $
+# ------------------------------------------------------------------------------
+
+2009-09-05 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
+
+	**** BWidget 1.9.1 tagged ****
+	BWidget revitalization to make usage of tile...
+        * pkgIndex.tcl,   updated to 1.9.1, themeutils.tcl added, requ.
+	                  initialization sequence
+	* themeutils.tcl, theme support file added
+	* widget.tcl,     various changes related to ttk added
+	* init,tcl,       BWidget::set_themedefaults "initialize" added
+	* --
+	  arrow.tcl, button.tcl, buttonbox.tcl, color.tcl, dialog.tcl,
+	  entry.tcl, font.tcl, label.tcl, labelframe.tcl, 
+	  listbox.tcl, mainframe.tcl, messagedlg.tcl, pagesmgr.tcl,
+	  panedw.tcl, panelframe.tcl, passwddlg.tcl, progressbar.tcl,
+	  scrollframe.tcl, scrollview.tcl, scrollw.tcl, separator.tcl,
+	  spinbox.tcl, statusbar.tcl, titleframe.tcl, combobox.tcl,
+	  notebook.tcl
+  	  -- theme related mod's done
+	* utils.tcl, BWidget::bindMiddleMouseMovement added,
+	* tree.tcl,  BWidget::bindMiddleMouseMovement added),
+		    
+          -- open issues:
+	       Tk*Font as default font (like in dynhelp.tcl),
+	       tree.tcl _themechanged proc' not perfect for existing
+	       tree item colorization (expanding a branch after changing
+	       the style still shows the previous fill color !)
+
+          -- attention --
+	  !!! package is not updated completely due to cvs
+	      version conflicts - and is therfore incomplete,
+	      so pls. be patient until this note disappears !!!
+
+
+
+
+2009-09-03 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* util.tcl(BWidget::place), BWidget.html Widget placed incorrectly,
+	when bigger than current screen [Bug 2850031] by Thomas Grausgruber
+	Possible incompatibility: BWidget::place w h -> w,h are reduced to
+	screen width.
+	* dynhelp.tcl Added part of last patch, for pre 8.5 tcl from BWidget
+    branch [Patch 2835180].
+
+2009-08-12 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* dynhelp.tcl Use balloon help font TkTooltipFont
+	[Patch 2835180] for Kevin Walzer
+	* dynhelp.tcl(DynamicHelp::_show_help)Replaced aqua conditional code
+	check by $Widget::_aqua
+
+2009-08-04 Harald Oehlmann  <oehhar@users.sourceforge.net>
+
+	* notebook.tcl (NoteBook::delete) Method delete destroyframe=1 and
+	reinsertion -> raise failed - state variables were deleted.
+	[Bug 2831785] by kjnash
+	* tree.tcl (Tree::_keynav) Fire virtual event <<TreeSelect>> also on
+	keyboard navigation [Patch 2828086] by Kevin Walzer
+	* combobox.tcl Replaced aqua conditional code check by $Widget::_aqua
+
+=======
 2009-09-05 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
 
 	**** BWidget 1.9.1 tagged ****
@@ -29,6 +97,7 @@
 	keyboard navigation [Patch 2828086] by Kevin Walzer
 	* combobox.tcl Replaced aqua conditional code check by $Widget::_aqua
 
+>>>>>>> 1.210
 2009-07-24 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.0 tagged ****
