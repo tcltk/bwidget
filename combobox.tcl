@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.44 2009/08/12 07:22:35 oehhar Exp $
+#  $Id: combobox.tcl,v 1.45 2009/09/08 20:33:36 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -15,6 +15,7 @@
 #     - ComboBox::_unmapliste
 #     - ComboBox::_select
 #     - ComboBox::_modify_value
+#     - ComboBox::_themechanged
 # ----------------------------------------------------------------------------
 
 # ComboBox uses the 8.3 -listvariable listbox option
@@ -32,6 +33,7 @@ namespace eval ComboBox {
 	rename {-background -entrybg}
 
     Widget::declare ComboBox {
+        {-background   Color      "SystemWindow"  0}
 	{-height       TkResource 0    0 listbox}
 	{-values       String	  ""   0}
 	{-images       String	  ""   0}
@@ -61,6 +63,10 @@ namespace eval ComboBox {
         %W selection set @%x,%y
     }
 
+    if {[lsearch [bindtags .] ComboBoxThemeChanged] < 0} {
+        bindtags . [linsert [bindtags .] 1 ComboBoxThemeChanged]
+    }
+
     variable _index
 }
 
@@ -81,13 +87,13 @@ proc ComboBox::create { path args } {
     array set maps [Widget::parseArgs ComboBox $args]
 
     eval [list frame $path] $maps(:cmd) \
-	[list -highlightthickness 0 -takefocus 0 -class ComboBox]
+	 [list -highlightthickness 0 -takefocus 0 -class ComboBox]
     Widget::initFromODB ComboBox $path $maps(ComboBox)
 
     bindtags $path [list $path BwComboBox [winfo toplevel $path] all]
 
     set entry [eval [list Entry::create $path.e] $maps(.e) \
-		   [list -relief flat -borderwidth 0 -takefocus 1]]
+		    [list -relief flat -borderwidth 0 -takefocus 1]]
 
     ::bind $path.e <FocusOut>      [list $path _focus_out]
     ::bind $path   <<TraverseIn>>  [list $path _traverse_in]
@@ -138,6 +144,9 @@ proc ComboBox::create { path args } {
     ::bind $entry <Control-Prior> [list ComboBox::_modify_value $path first]
     ::bind $entry <Control-Next>  [list ComboBox::_modify_value $path last]
 
+    ::bind ComboBoxThemeChanged <<ThemeChanged>> \
+	       "+ [namespace current]::_themechanged $path"
+
     if {$editable} {
 	set expand [Widget::cget $path -expand]
 	if {[string equal "tab" $expand]} {
@@ -184,6 +193,9 @@ proc ComboBox::configure { path args } {
     set res [Widget::configure $path $args]
     set entry $path.e
 
+    if { [Widget::hasChanged $path -background bg] } {
+        $path:cmd configure -background $bg
+    }
 
     set list [list -images -values -bwlistbox -hottrack -autocomplete -autopost]
     foreach {ci cv cb ch cac cap} [eval [linsert $list 0 Widget::hasChangedX $path]] { break }
@@ -882,4 +894,14 @@ proc ComboBox::_destroy { path } {
     variable _index
     Widget::destroy $path
     unset _index($path)
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command ComboBox::_themechanged
+# ----------------------------------------------------------------------------
+proc ComboBox::_themechanged { path } {
+    if { ![winfo exists $path] } { return }
+    BWidget::set_themedefaults
+    $path configure -background $BWidget::colors(SystemWindow)
 }
