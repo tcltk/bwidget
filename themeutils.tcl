@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  themeutils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: themeutils.tcl,v 1.0 2009/09/05 21:01:07 oberdorfer Exp $
+#  $Id: themeutils.tcl,v 1.1 2009/09/09 19:35:04 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - BWidget::usepackage
@@ -72,7 +72,18 @@ proc BWidget::usepackage { package } {
                         "color declarations for $ctheme missing!"
 		}
                 set_themedefaults
-		Widget::theme 1
+
+                # create a new element for each available theme...
+                foreach themeName [ttk::style theme names] {
+                    # temporarily sets the current theme to themeName,
+                    # evaluate script, then restore the previous theme.
+                    ttk::style theme settings $themeName {
+                        ttk::style configure BWSlimCB.Toolbutton -relief flat -bd 2
+                        ttk::style map BWSlimCB.Toolbutton \
+	                               -relief [list {selected !disabled} sunken]
+		    }
+		}
+  		Widget::theme 1
             }
 	    default {
 	        return -code error \
@@ -321,22 +332,25 @@ proc BWidget::default_Color { } {
     variable colors
     set colors(style) "default"
 
-    if {[string equal $::tcl_platform(platform) "windows"]} {
-         array set colors {
-            SystemWindow        SystemWindow
-            SystemWindowFrame   SystemWindowFrame
-            SystemWindowText    SystemWindowText
-            SystemButtonFace    SystemButtonFace
-            SystemButtonText    SystemButtonText
-            SystemDisabledText  SystemDisabledText
-            SystemHighlight     SystemHighlight
-            SystemHighlightText SystemHighlightText
-            SystemMenu          SystemMenu
-            SystemMenuText      SystemMenuText
-            SystemScrollbar     SystemScrollbar
-         }
-      } else {
-         array set colors {
+    # !!! doesn't work on winxp64
+    #     + starpacked executable from equi4
+    # if {[string equal $::tcl_platform(platform) "---windows---"]} {
+    #    array set colors {
+    #      SystemWindow        SystemWindow
+    #      SystemWindowFrame   SystemWindowFrame
+    #      SystemWindowText    SystemWindowText
+    #      SystemButtonFace    SystemButtonFace
+    #      SystemButtonText    SystemButtonText
+    #      SystemDisabledText  SystemDisabledText
+    #      SystemHighlight     SystemHighlight
+    #      SystemHighlightText SystemHighlightText
+    #      SystemMenu          SystemMenu
+    #      SystemMenuText      SystemMenuText
+    #      SystemScrollbar     SystemScrollbar
+    #    }
+    # }
+
+    array set colors {
             SystemWindow        "White"
             SystemWindowFrame   "#d9d9d9"
             SystemWindowText    "Black"
@@ -348,8 +362,7 @@ proc BWidget::default_Color { } {
             SystemMenu          "#d9d9d9"
             SystemMenuText      "Black"
             SystemScrollbar     "#d9d9d9"
-         }
-    }
+   }
 }
 
 
