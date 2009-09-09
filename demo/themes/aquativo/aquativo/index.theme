@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Aquativo-2.0
+Type=X-GNOME-Metatheme
+Comment=
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Aquativo-2.0
+MetacityTheme=Aquativo-2.0
+IconTheme=gnome
