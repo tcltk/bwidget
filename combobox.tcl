@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.45 2009/09/08 20:33:36 oberdorfer Exp $
+#  $Id: combobox.tcl,v 1.46 2009/09/10 19:23:15 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -10,6 +10,7 @@
 #     - ComboBox::setvalue
 #     - ComboBox::getvalue
 #     - ComboBox::clearvalue
+#     - ComboBox::hottrackMotion
 #     - ComboBox::_create_popup
 #     - ComboBox::_mapliste
 #     - ComboBox::_unmapliste
@@ -57,17 +58,26 @@ namespace eval ComboBox {
     ::bind BwComboBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
     ::bind BwComboBox <Destroy> [list ComboBox::_destroy %W]
 
-    ::bind ListBoxHotTrack <Motion> {
-        %W selection clear 0 end
-        %W activate @%x,%y
-        %W selection set @%x,%y
-    }
+    ::bind ListBoxHotTrack <Motion> \
+             [list after idle {ComboBox::hottrackMotion %W %x %y}]
 
     if {[lsearch [bindtags .] ComboBoxThemeChanged] < 0} {
         bindtags . [linsert [bindtags .] 1 ComboBoxThemeChanged]
     }
 
     variable _index
+}
+
+
+# johann: -bug fixed-
+# after idle should fix the problem with very long listbox text items
+# which causes under certain circumstances the hole desktop to crash
+# happens under AIX5.3 and CDE, running under tcl/Tk 8.4.7,
+
+proc ComboBox::hottrackMotion { w x y } {
+    $w selection clear 0 end
+    $w activate @$x,$y
+    $w selection set @$x,$y
 }
 
 
