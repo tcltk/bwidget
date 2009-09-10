@@ -1,8 +1,15 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.212 2009/09/10 19:00:51 oberdorfer Exp $
+#  $Id: ChangeLog,v 1.213 2009/09/10 19:23:35 oberdorfer Exp $
 # ------------------------------------------------------------------------------
+
+2009-09-10 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
+
+        * combobox hottrack motion bug fixed:
+          "after idle" should fix the problem with very long listbox text items
+          which caused under certain circumstances a complete crash (CDE freeze)
+          this happened under AIX5.3 and CDE, running under tcl/Tk 8.4.7,
 
 2009-09-05 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
 
