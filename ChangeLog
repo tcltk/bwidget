@@ -1,8 +1,13 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.213 2009/09/10 19:23:35 oberdorfer Exp $
+#  $Id: ChangeLog,v 1.214 2009/09/11 16:04:49 oberdorfer Exp $
 # ------------------------------------------------------------------------------
+
+2009-09-11 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
+
+        * button.tcl, "BWSlim.Toolbutton" style related change to ensure that
+	  a button created with "-style BWSlim.Toolbutton" keeps it's layout	  
 
 2009-09-10 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
 

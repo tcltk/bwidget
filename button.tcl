@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  button.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: button.tcl,v 1.13 2009/09/08 19:55:45 oberdorfer Exp $
+#  $Id: button.tcl,v 1.14 2009/09/11 16:04:14 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #   Public commands
@@ -144,7 +144,7 @@ proc Button::create { path args } {
         set relief "flat"
     }
     set var [Widget::getMegawidgetOption $path -textvariable]
-    set st [Widget::getMegawidgetOption $path -state]
+    set st  [Widget::getMegawidgetOption $path -state]
     if {  ![string length $var] } {
         set desc [BWidget::getname [Widget::getMegawidgetOption $path -name]]
         if { [llength $desc] } {
@@ -165,8 +165,11 @@ proc Button::create { path args } {
 
     if { [BWidget::using ttk] } {
          $path configure -text $text -underline $under \
-	       -textvariable $var -state $st \
-	       -style "${relief}BW.TButton"
+                         -textvariable $var -state $st
+
+	 if { [$path cget -style] != "BWSlim.Toolbutton" } {
+             $path configure -style "${relief}BW.TButton"
+	 }
     } else {
          $path configure -relief $relief -text $text -underline $under \
 	       -textvariable $var -state $st
@@ -227,7 +230,10 @@ proc Button::configure { path args } {
         }
 
         if { [BWidget::using ttk] } {
-            $path:cmd configure -style "${relief}BW.TButton" -state $state
+            $path:cmd configure -state $state
+            if { [string compare [$path:cmd cget -style] "BWSlim.Toolbutton"] != 0 } {
+ 	        $path:cmd configure -style "${relief}BW.TButton"
+	    }
         } else {
             $path:cmd configure -relief $relief -state $state
         }
