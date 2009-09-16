@@ -5,17 +5,47 @@
 #  Copyright (c) 2004 Googie
 #  Copyright (c) 2005 Pat Thoyts <patthoyts@users.sourceforge.net>
 #
-# $Id: plastik.tcl,v 1.1 2009/09/09 19:23:17 oberdorfer Exp $
+# $Id: plastik.tcl,v 1.2 2009/09/16 20:44:15 oberdorfer Exp $
 
-package require Tk 8.4
-package require tile 0.8.0
+package require Tk 8.4;                 # minimum version for Tile
+package require tile 0.8;               # depends upon tile
+
 
 namespace eval ttk::theme::plastik {
 
-    variable version 0.5.2
-    package provide ttk::theme::plastik $version
+  variable version 0.5.2
+  package provide ttk::theme::plastik $version
 
-    variable colors
+  variable I
+
+  set thisDir  [file dirname [info script]]
+  set imageDir [file join $thisDir "images"]
+  set imageLib [file join $thisDir "ImageLib.tcl"] \
+
+  # try to load image library file...
+  if { [file exists $imageLib] } {
+
+      source $imageLib
+      array set I [array get images]
+
+  } else {
+
+      proc LoadImages {imgdir {patterns {*.gif}}} {
+        foreach pattern $patterns {
+          foreach file [glob -directory $imgdir $pattern] {
+            set img [file tail [file rootname $file]]
+            if {![info exists images($img)]} {
+              set images($img) [image create photo -file $file]
+            }
+        }}
+        return [array get images]
+      }
+
+      array set I [LoadImages $imageDir "*.gif"]
+  }
+
+
+  variable colors
     array set colors {
     	-frame 		"#efefef"
 	-disabledfg	"#aaaaaa"
@@ -23,17 +53,8 @@ namespace eval ttk::theme::plastik {
 	-selectfg	"#ffffff"
     }
 
-    proc LoadImages {imgdir} {
-        variable I
-        foreach file [glob -directory $imgdir *.gif] {
-            set img [file tail [file rootname $file]]
-            set I($img) [image create photo -file $file -format gif89]
-        }
-    }
 
-    LoadImages [file join [file dirname [info script]] plastik]
-
-ttk::style theme create plastik -parent default -settings {
+  ttk::style theme create plastik -parent default -settings {
     ttk::style configure . \
 	-foreground "Black" \
     	-background $colors(-frame) \
@@ -204,4 +225,5 @@ ttk::style theme create plastik -parent default -settings {
     ttk::style configure TNotebook.Tab -padding {6 2 6 2} -expand {0 0 2}
     ttk::style map TNotebook.Tab -expand [list selected {1 2 4 2}]
     ttk::style configure Treeview -padding 0
-} }
+  }
+}
