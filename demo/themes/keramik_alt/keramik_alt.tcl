@@ -5,7 +5,7 @@
 #  Copyright (c) 2004 Googie
 #  Copyright (c) 2004 Pat Thoyts <patthoyts@users.sourceforge.net>
 #
-# $Id: keramik_alt.tcl,v 1.1 2009/09/09 19:21:14 oberdorfer Exp $
+# $Id: keramik_alt.tcl,v 1.2 2009/09/16 20:43:49 oberdorfer Exp $
 
 package require Tk 8.4;                 # minimum version for Tile
 package require tile 0.8.0;             # depends upon tile 0.8.0
@@ -14,12 +14,40 @@ package require ttk::theme::keramik;    # the parent theme
 namespace eval ttk {
     namespace eval theme {
         namespace eval keramik_alt {
-	    variable version 0.5.1
+	    variable version 0.5.2
 	}
     }
 }
 
 namespace eval ttk::theme::keramik_alt {
+
+    variable I
+    
+    set thisDir  [file dirname [info script]]
+    set imageDir [file join $thisDir "images"]
+    set imageLib [file join $thisDir "ImageLib.tcl"] \
+            
+    # try to load image library file...
+    if { [file exists $imageLib] } {
+        
+        source $imageLib
+        array set I [array get images]
+        
+    } else {
+        
+        proc LoadImages {imgdir {patterns {*.gif}}} {
+            foreach pattern $patterns {
+                foreach file [glob -directory $imgdir $pattern] {
+                    set img [file tail [file rootname $file]]
+                    if {![info exists images($img)]} {
+                        set images($img) [image create photo -file $file]
+                    }
+                }}
+            return [array get images]
+        }
+        
+        array set I [LoadImages $imageDir "*.gif"]
+    }
 
     variable colors
     array set colors {
@@ -30,16 +58,6 @@ namespace eval ttk::theme::keramik_alt {
         -selectfg   "#000000"
         -disabledfg "#aaaaaa"
     }
-
-    proc LoadImages {imgdir} {
-        variable I
-        foreach file [glob -directory $imgdir *.gif] {
-            set img [file tail [file rootname $file]]
-            set I($img) [image create photo -file $file -format gif89]
-        }
-    }
-
-    LoadImages [file join [file dirname [info script]] keramik_alt]
 
     ttk::style theme create keramik_alt -parent keramik -settings {
 
