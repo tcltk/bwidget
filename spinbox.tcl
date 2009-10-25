@@ -6,7 +6,7 @@
 # Copyright (c) 2000 by Ajuba Solutions
 # All rights reserved.
 # 
-# RCS: @(#) $Id: spinbox.tcl,v 1.13 2009/09/06 21:41:25 oberdorfer Exp $
+# RCS: @(#) $Id: spinbox.tcl,v 1.14 2009/10/25 20:55:36 oberdorfer Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - SpinBox::create
@@ -35,7 +35,7 @@ namespace eval SpinBox {
         {-modifycmd      String ""  0}
         {-repeatdelay    Int    400 0 {%d >= 0}}
         {-repeatinterval Int    100 0 {%d >= 0}}
-        {-foreground     Color  "SystemWindow" 0}
+        {-foreground     Color  "SystemWindowText" 0}
     }
 
     Widget::addmap SpinBox "" :cmd {-background {}}

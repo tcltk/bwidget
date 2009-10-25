@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  dialog.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: dialog.tcl,v 1.16 2009/09/06 21:09:39 oberdorfer Exp $
+#  $Id: dialog.tcl,v 1.17 2009/10/25 20:54:54 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Dialog::create
@@ -120,11 +120,7 @@ proc Dialog::create { path args } {
     }
 
     if { [set bitmap [Widget::getoption $path -image]] != "" } {
-        if { [BWidget::using ttk] } {
-            set label [ttk::label $path.label -image $bitmap]
-        } else {
-            set label [label $path.label -image $bitmap -background $bg]
-        }
+        set label [label $path.label -image $bitmap -background $bg]
     } elseif { [set bitmap [Widget::getoption $path -bitmap]] != "" } {
         set label [label $path.label -bitmap $bitmap -background $bg]
     }
@@ -195,7 +191,10 @@ proc Dialog::add { path args } {
 
     set res [eval $cmd $args]
 
-    # a button box button - by default - is flat!
+    # a button box button by default is flat, this isn't what we want
+    # here for normal dialog box action buttons, so we need to
+    # override the default:
+
     if { [BWidget::using ttk] } {
         $res configure -style "TButton"
     }

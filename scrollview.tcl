@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  scrollview.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollview.tcl,v 1.71 2009/09/06 21:39:24 oberdorfer Exp $
+#  $Id: scrollview.tcl,v 1.72 2009/10/25 20:55:36 oberdorfer Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -25,7 +25,7 @@ namespace eval ScrollView {
     Widget::declare ScrollView {
         {-width       TkResource 30        0 canvas}
         {-height      TkResource 30        0 canvas}
-        {-foreground		Color      "SystemWindow"      0}
+        {-foreground		Color      "SystemWindowText"  0}
         {-background		Color      "SystemWindowFrame" 0}
         {-fill        String     ""        0}
         {-relief      TkResource flat      0 canvas}

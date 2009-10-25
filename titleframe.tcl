@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  titleframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: titleframe.tcl,v 1.51 2009/09/06 21:44:21 oberdorfer Exp $
+#  $Id: titleframe.tcl,v 1.52 2009/10/25 20:55:36 oberdorfer Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - TitleFrame::create
@@ -18,7 +18,7 @@ namespace eval TitleFrame {
         {-relief      TkResource groove 0 frame}
         {-borderwidth TkResource 2      0 frame}
         {-font        TkResource ""     0 label}
-        {-foreground  Color      "SystemWindow"      0}
+        {-foreground  Color      "SystemWindowText"  0}
         {-background  Color      "SystemWindowFrame" 0}
         {-state       TkResource ""     0 label}
         {-background  TkResource ""     0 frame}
