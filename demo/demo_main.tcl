@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  manager.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: demo_main.tcl,v 1.1 2009/09/08 21:22:09 oberdorfer Exp $
+#  $Id: demo_main.tcl,v 1.2 2009/10/25 20:53:58 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #
 
@@ -32,55 +32,26 @@ namespace eval Demo {
     }
 
     variable THEME_DIR [file join $appDir "themes"]
-    variable CTHEME "default"
-}
+    variable ctheme
 
-
-proc Demo::_get_available_themes { } {
-  variable THEME_DIR
-  set themes [list default]
-  
-  if { [BWidget::using ttk] } {
-      foreach dir [glob -nocomplain [file join $THEME_DIR "*"]] {
-        if { [file isdirectory $dir] } {
-           lappend themes [file tail $dir]
-      }}
-  } else {
-      foreach dcls [BWidget::get_colordcls] {
-          if { [lsearch $themes $dcls] == -1 } {
-              lappend themes $dcls
-      }}
-  }
-
-  return $themes
+    set ctheme $::BWidget::colors(style)
 }
 
 
 proc Demo::setTheme { {newtheme ""} } {
-  variable CTHEME
-
-  if { ![llength [set themes [_get_available_themes]]] } {
-      return
-  }
+  variable ctheme
 
   if { ![string length $newtheme] } {
-      set newtheme $CTHEME
+      set newtheme $ctheme
   }
 
-  if { [lsearch $themes $newtheme] == -1} {
-      set newtheme [lindex $themes 0]
+  # just in case - (maybe usefull during developement) ...
+  if { ![llength [set themes [BWidget::getAvailableThemes]]] ||
+        [lsearch $themes $newtheme] == -1} {
+      return -code error "color/style declaration is incomplete!"
   }
 
-  if { [BWidget::using ttk] } {
-
-      namespace inscope :: package require ttk::theme::${newtheme}
-      ttk::setTheme $newtheme
-
-  } else {
-
-      set BWidget::colors(style) $newtheme
-      event generate . <<ThemeChanged>>
-  }  
+  BWidget::set_themedefaults $newtheme
 }
 
 
@@ -92,7 +63,7 @@ proc Demo::create { } {
     variable font
     variable prgtext
     variable prgindic
-    variable CTHEME
+    variable ctheme
 
     set prgtext "Please wait while loading font..."
     set prgindic -1
@@ -169,8 +140,8 @@ proc Demo::create { } {
 
     BWidget::wrap label $tb2.l -text "Theme: "
     ComboBox $tb2.cb \
-           -values "[[namespace current]::_get_available_themes]" \
-	   -text $CTHEME \
+           -values [BWidget::getAvailableThemes] \
+	   -text $ctheme \
 	   -modifycmd "[namespace current]::setTheme \[$tb2.cb cget -text\]" \
            -editable 0 \
 	   -hottrack 1

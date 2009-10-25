@@ -16,8 +16,7 @@ buttonPressed
 checkbox_checked
 checkbox_unchecked
 horizontal_trough
-hseparator-a
-hseparator-n
+hseparator
 menubar_option
 menubar_option_arrow
 menubar_option_arrow_insensitive
@@ -29,6 +28,6 @@ progressbar
 scrollbar_horizontal
 scrollbar_horizontal_inactive
 scrollbar_vertical
+scrollbar_vertical_inactive
 vertical_trough
-vseparator-a
-vseparator-n
+vseparator
