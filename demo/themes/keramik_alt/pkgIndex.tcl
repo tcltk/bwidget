@@ -6,7 +6,7 @@
 # To use this automatically within tile, the tile-using application should
 # use tile::availableThemes and tile::setTheme 
 #
-# $Id: pkgIndex.tcl,v 1.2 2009/09/16 20:43:49 oberdorfer Exp $
+# $Id: pkgIndex.tcl,v 1.3 2009/10/25 19:24:03 oberdorfer Exp $
 
 if {![package vsatisfies [package provide Tcl] 8.4]} { return }
 

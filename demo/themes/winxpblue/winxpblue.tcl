@@ -6,7 +6,7 @@
 #   URL: http://art.gnome.org/download/themes/gtk2/474/GTK2-WinXP-Blue.tar.gz
 # ------------------------------------------------------------------------------
 # Revision change history:
-#   $Id: winxpblue.tcl,v 1.2 2009/09/16 20:44:42 oberdorfer Exp $
+#   $Id: winxpblue.tcl,v 1.3 2009/10/25 19:25:35 oberdorfer Exp $
 #
 #   Aug.'08: code refractured/adopted slightly for the use with >= tk8.5,
 #            johann.oberdorfer@gmail.com
@@ -55,7 +55,7 @@ namespace eval ::ttk::theme::winxpblue {
       array set I [LoadImages $imageDir "*.gif"]
   }
   
-  ::ttk::style theme create winxpblue -settings {
+  ::ttk::style theme create winxpblue -parent clam -settings {
     
     # defaults:
     
@@ -84,7 +84,7 @@ namespace eval ::ttk::theme::winxpblue {
     
     ::ttk::style element create Button.button image \
         [list $I(buttonNorm) pressed $I(buttonPressed) active $I(button)] \
-        -border {4 9} -padding 3 -sticky nsew
+        -border {4 9} -padding 5 -sticky nsew
 
     ::ttk::style element create Checkbutton.indicator image \
         [list $I(checkbox_unchecked) selected $I(checkbox_checked)] \
@@ -110,6 +110,15 @@ namespace eval ::ttk::theme::winxpblue {
         image $I(vertical_trough) -sticky ns -border {2 0}
     ::ttk::style element create Progress.bar image $I(progressbar)
     ::ttk::style element create Progress.trough image $I(through) -border 4
+
+    ## Panedwindow parts.
+    #
+    ::ttk::style element create hsash image \
+            [list $I(hsb-n) {active !disabled} $I(hsb-a)] \
+            -border {2 0}
+    ::ttk::style element create vsash image \
+            [list $I(vsb-n) {active !disabled} $I(vsb-a)] \
+            -border {0 2}
     
     # Notebook parts:
     
@@ -132,10 +141,10 @@ namespace eval ::ttk::theme::winxpblue {
     # maybe a nice effect
     # (although the image was not intended to be used like this):
 
-    ::ttk::style element create Sash.hsash \
-        image $I(horizontal_trough) -border 1 -width 0 -height 6 -sticky nsew
-    ::ttk::style element create Sash.vsash \
-        image $I(vertical_trough) -border 1 -width 0 -height 6 -sticky nsew
+    #::ttk::style element create Sash.hsash \
+    #    image $I(hsb-n) -border 1 -width 0 -height 7 -sticky nsew
+    #::ttk::style element create Sash.vsash \
+    #    image $I(vsb-n) -border 1 -width 0 -width 7 -sticky nsew
   }
 }
 
