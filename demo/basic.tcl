@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  basic.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: basic.tcl,v 1.3 2009/09/08 21:22:29 oberdorfer Exp $
+#  $Id: basic.tcl,v 1.4 2009/10/25 20:53:58 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #
 
@@ -72,7 +72,7 @@ proc DemoBasic::_button { parent } {
     set but   [Button $frame.but -text "Press me!" \
                    -repeatdelay 300 \
                    -command  "DemoBasic::_butcmd command" \
-                   -helptext "This is a Button widget"]
+                   -helptext "This is a Button widget" -relief link]
     set sep1  [Separator $frame.sep1 -orient vertical]
     set arr1  [ArrowButton $frame.arr1 -type button \
                    -width 25 -height 25 \

@@ -7,7 +7,7 @@
 #   Link: http://art.gnome.org/themes/gtk2/432.php
 # ------------------------------------------------------------------------------
 # Revision change history:
-#   $Id: aquativo.tcl,v 1.3 2009/10/25 19:10:41 oberdorfer Exp $
+#   $Id: aquativo.tcl,v 1.4 2009/10/25 20:53:27 oberdorfer Exp $
 #
 #   Aug.'08: code refractured for the use with >= tk8.5,
 #            johann.oberdorfer@gmail.com
@@ -75,47 +75,28 @@ namespace eval ttk::theme::aquativo {
     # I really like the mapping options!
     ::ttk::style map "." \
         -foreground { disabled "#565248" } \
-        -background { disabled "#e3e1dd"
-          pressed  "#bab5ab"
-          active   "#c1d2ee" }
-    
-    # ::ttk::style layout TButton {
-    #  Button.button -children { Button.focus -children { Button.label } }
-    # }
-    
-    ::ttk::style configure TButton -padding {1 1} -width -11
-    
+        -background { \
+	    disabled "#e3e1dd"
+            pressed  "#bab5ab"
+            active   "#c1d2ee" }
+        
     # Troughs
 
-    # ttk::style layout Horizontal.TScrollbar:
-    # Horizontal.Scrollbar.trough -sticky we -children {
-    #   Horizontal.Scrollbar.leftarrow -side left -sticky {}
-    #   Horizontal.Scrollbar.rightarrow -side right -sticky {}
-    #   Horizontal.Scrollbar.thumb -expand 1 -sticky nswe
-    # }
-
-    # ::ttk::style element create trough image $I(horizontal_trough) \
-    #    -border 3
-
-    ::ttk::style element create Horizontal.Scrollbar.trough \
-        image $I(horizontal_trough) -border 0 -sticky ew
-
-    ::ttk::style element create Vertical.Scrollbar.trough \
-        image $I(vertical_trough) -border 0
+    ::ttk::style element create Horizontal.Scale.trough \
+        image $I(horizontal_trough) -border 0
 
     ::ttk::style element create Vertical.Scale.trough \
-        image $I(vertical_trough) -border 2
-    ::ttk::style element create Progress.trough \
-        image $I(vertical_trough) -border 2
+        image $I(vertical_trough) -border 0
 
-    ## Panedwindow parts.
-    #
-    ::ttk::style element create hsash image \
-            [list $I(hseparator-n) {active !disabled} $I(hseparator-a)] \
-            -border {2 0}
-    ::ttk::style element create vsash image \
-            [list $I(vseparator-n) {active !disabled} $I(vseparator-a)] \
-            -border {0 2}
+    ::ttk::style element create Progress.trough \
+        image $I(vertical_trough) -border 0
+
+    # Panedwindow parts
+
+    ::ttk::style element create hsash \
+            image $I(hseparator) -border {2 0}
+    ::ttk::style element create vsash \
+            image $I(vseparator) -border {0 2}
 
     # Buttons, Checkbuttons and Radiobuttons
     
@@ -129,7 +110,8 @@ namespace eval ttk::theme::aquativo {
     }
     
     ::ttk::style element create Button.button image \
-        [list $I(buttonNorm) pressed $I(buttonPressed) active $I(button)] \
+        [list $I(buttonNorm) \
+	      pressed $I(buttonPressed) active $I(buttonPressed)] \
         -border {4 4} -padding 3 -sticky nsew
     
     ::ttk::style element create Checkbutton.indicator image \
@@ -139,28 +121,36 @@ namespace eval ttk::theme::aquativo {
         [list $I(option_out) selected $I(option_in)] \
         -width 20 -sticky w
     
-    # Menubuttons:
+    # Menubuttons
     
     ::ttk::style element create Menubutton.button image \
         [list $I(menubar_option) ] \
         -border {7 10 29 15} -padding {7 4 29 4} -sticky news
     
     ::ttk::style element create Menubutton.indicator image \
-        [list $I(menubar_option_arrow) disabled $I(menubar_option_arrow_insensitive)] \
+        [list $I(menubar_option_arrow) \
+	      disabled $I(menubar_option_arrow_insensitive)] \
         -width 11 -sticky w -padding {0 0 18 0}
     
     # Scrollbar
 
-    ::ttk::style element create Horizontal.Scrollbar.thumb \
-        image $I(scrollbar_horizontal) -border 7 -width 15 -height 0 -sticky nsew
+    ::ttk::style element create Horizontal.Scrollbar.trough \
+        image $I(horizontal_trough) -width 16 -border 0 -sticky ew
 
-    #::ttk::style element create Horizontal.Scrollbar.thumb \
-    #    image [list $I(scrollbar_horizontal) \
-	#       !selected $I(scrollbar_horizontal_inactive) \
-	#       pressed  $I(scrollbar_horizontal)] -border 7 -width 15 -height 0 -sticky nsew
+    ::ttk::style element create Vertical.Scrollbar.trough \
+        image $I(vertical_trough) -height 16 -border 0 -sticky ns
+
+    ::ttk::style element create Horizontal.Scrollbar.thumb \
+        image [list $I(scrollbar_horizontal) \
+	            {active !disabled} $I(scrollbar_horizontal) \
+		    disabled  $I(horizontal_trough)] \
+        -border 7 -width 16 -height 0 -sticky nsew
 
     ::ttk::style element create Vertical.Scrollbar.thumb \
-        image $I(scrollbar_vertical) -border 7 -width 0 -height 15 -sticky nsew
+        image [list $I(scrollbar_vertical) \
+	            {active !disabled}  $I(scrollbar_vertical) \
+		    disabled $I(vertical_trough)] \
+ 	-border 7 -width 0 -height 16 -sticky nsew
     
     # Scale
     
@@ -180,25 +170,27 @@ namespace eval ttk::theme::aquativo {
     
     ::ttk::style element create uparrow image \
         [list $I(arrow_up_normal) \
-        pressed $I(arrow_up_active) \
-        disabled $I(arrow_up_insensitive)]
+              pressed $I(arrow_up_active) \
+              disabled $I(arrow_up_insensitive)] -width 12
     ::ttk::style element create downarrow image \
         [list $I(arrow_down_normal) \
-        pressed $I(arrow_down_active) \
-        disabled $I(arrow_down_insensitive)]
+              pressed $I(arrow_down_active) \
+              disabled $I(arrow_down_insensitive)] -width 12
     ::ttk::style element create leftarrow image \
         [list $I(arrow_left_normal) \
-        pressed $I(arrow_left_active) \
-        disabled $I(arrow_left_insensitive)]
+              pressed $I(arrow_left_active) \
+              disabled $I(arrow_left_insensitive)] -height 12
     ::ttk::style element create rightarrow image \
         [list $I(arrow_right_normal) \
-        pressed $I(arrow_right_active) \
-        disabled $I(arrow_right_insensitive)]
+              pressed $I(arrow_right_active) \
+              disabled $I(arrow_right_insensitive)] -height 12
     
     # Notebook parts
     
     ::ttk::style element create tab image \
-        [list $I(notebook) selected  $I(notebook_active)] \
+        [list $I(notebook) selected $I(notebook_active) \
+                           active   $I(notebook_inactive) \
+                           disabled $I(notebook_inactive)] \
         -sticky news \
         -border {10 2 10 2} -height 10
     

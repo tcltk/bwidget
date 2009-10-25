@@ -5,7 +5,7 @@ exec wish "$0" ${1+"$@"}
 # ----------------------------------------------------------------------------
 #  demo.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: demo.tcl,v 1.6 2009/09/08 21:22:09 oberdorfer Exp $
+#  $Id: demo.tcl,v 1.7 2009/10/25 20:53:58 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #
 
@@ -13,6 +13,10 @@ set appDir [file dirname [info script]]
 lappend auto_path [file join $appDir ".."]
 
 package require BWidget 1.9.1
+
+::BWidget::use \
+    -setoptdb  yes
+
 
 source [file join $appDir "demo_main.tcl"]
 
