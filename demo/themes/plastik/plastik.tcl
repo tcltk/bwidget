@@ -5,16 +5,22 @@
 #  Copyright (c) 2004 Googie
 #  Copyright (c) 2005 Pat Thoyts <patthoyts@users.sourceforge.net>
 #
-# $Id: plastik.tcl,v 1.2 2009/09/16 20:44:15 oberdorfer Exp $
+# $Id: plastik.tcl,v 1.3 2009/10/25 19:24:34 oberdorfer Exp $
 
 package require Tk 8.4;                 # minimum version for Tile
 package require tile 0.8;               # depends upon tile
 
+namespace eval ttk {
+  namespace eval theme {
+    namespace eval plastik {
+      variable version 0.5.2
+    }
+  }
+}
+
+
 
 namespace eval ttk::theme::plastik {
-
-  variable version 0.5.2
-  package provide ttk::theme::plastik $version
 
   variable I
 
@@ -54,7 +60,7 @@ namespace eval ttk::theme::plastik {
     }
 
 
-  ttk::style theme create plastik -parent default -settings {
+  ttk::style theme create plastik -parent clam -settings {
     ttk::style configure . \
 	-foreground "Black" \
     	-background $colors(-frame) \
@@ -153,10 +159,12 @@ namespace eval ttk::theme::plastik {
 	-border 3 -sticky ew
     ttk::style element create Horizontal.Scrollbar.grip image $I(hsb-g)
     ttk::style element create Horizontal.Scrollbar.trough image $I(hsb-t)
+
     ttk::style element create Vertical.Scrollbar.thumb image $I(vsb-n) \
 	-border 3 -sticky ns
     ttk::style element create Vertical.Scrollbar.grip image $I(vsb-g)
     ttk::style element create Vertical.Scrollbar.trough image $I(vsb-t)
+
     ttk::style element create Scrollbar.uparrow image \
 	[list $I(arrowup-n) pressed $I(arrowup-p)] -sticky {}
     ttk::style element create Scrollbar.downarrow \
@@ -212,6 +220,16 @@ namespace eval ttk::theme::plastik {
     ttk::style element create Vertical.Progressbar.pbar \
 	image $I(vprogress-b) -border {9 2}
 
+    ## Panedwindow parts.
+    #
+    ::ttk::style element create hsash image \
+            [list $I(hsb-n) {active !disabled} $I(hsb-n)] \
+            -height 7 -border {2 0}
+    ::ttk::style element create vsash image \
+            [list $I(vsb-n) {active !disabled} $I(vsb-n)] \
+            -width 7 -border {0 2}
+
+
     ttk::style element create Treeheading.cell \
 	image [list $I(tree-n) pressed $I(tree-p)] \
 	-border {4 10} -padding 4 -sticky ewns
@@ -227,3 +245,5 @@ namespace eval ttk::theme::plastik {
     ttk::style configure Treeview -padding 0
   }
 }
+
+package provide ttk::theme::plastik $::ttk::theme::plastik::version

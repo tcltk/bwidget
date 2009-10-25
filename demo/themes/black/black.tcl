@@ -4,9 +4,11 @@
 #
 #  Copyright (c) 2007-2008 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.1 2009/09/09 19:21:38 oberdorfer Exp $
+# $Id: black.tcl,v 1.2 2009/10/25 19:21:30 oberdorfer Exp $
 
 package require Tk 8.4;                 # minimum version for Tile
+package require tile 0.8;               # depends upon tile
+
 
 namespace eval ttk {
   namespace eval theme {
