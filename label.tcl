@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.11 2009/09/06 21:15:25 oberdorfer Exp $
+#  $Id: label.tcl,v 1.12 2009/10/25 20:55:36 oberdorfer Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Label::create
@@ -25,7 +25,7 @@ namespace eval Label {
         {-textvariable       String     ""     0}
         {-underline          Int        -1     0 "%d >= -1"}
         {-focus              String     ""     0}
-	{-foreground         Color      "SystemWindow"       0}
+	{-foreground         Color      "SystemWindowText"   0}
         {-background         Color      "SystemWindowFrame"  0}
         {-disabledforeground Color      "SystemDisabledText" 0}
         {-state              Enum       normal 0  {normal disabled}}

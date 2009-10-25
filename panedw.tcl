@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  panedw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: panedw.tcl,v 1.15 2009/09/06 21:29:34 oberdorfer Exp $
+#  $Id: panedw.tcl,v 1.16 2009/10/25 20:55:36 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - PanedWindow::create
@@ -61,7 +61,8 @@ proc PanedWindow::create { path args } {
 
     Widget::init PanedWindow $path $args
     frame $path -background [Widget::cget $path -background] \
-                -class PanedWindow
+                -class PanedWindow \
+		-highlightthickness 0
 
     set _panedw($path,nbpanes) 0
     set _panedw($path,weights) ""

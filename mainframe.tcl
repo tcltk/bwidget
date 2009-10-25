@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.25 2009/09/06 21:22:36 oberdorfer Exp $
+#  $Id: mainframe.tcl,v 1.26 2009/10/25 20:55:36 oberdorfer Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -300,7 +300,7 @@ proc MainFrame::addtoolbar { path } {
     set bg        [Widget::getoption $path -background]
     if { $tcl_platform(platform) == "unix" } {
 	if { [BWidget::using ttk] } {
-	    ttk::frame $toolframe -padding 1
+	    ttk::frame $toolframe -padding 1 -relief raised -borderwidth 1
 	} else {
 	    frame $toolframe -relief raised -borderwidth 1 \
 		-takefocus 0 -highlightthickness 0 -background $bg

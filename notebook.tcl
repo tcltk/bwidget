@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.27 2009/09/08 20:50:46 oberdorfer Exp $
+#  $Id: notebook.tcl,v 1.28 2009/10/25 20:55:36 oberdorfer Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -274,12 +274,14 @@ proc NoteBook::insert { path index page args } {
         frame $f \
 	    -relief      flat \
 	    -background  [Widget::cget $path -background] \
-	    -borderwidth [Widget::cget $path -internalborderwidth]
+	    -borderwidth [Widget::cget $path -internalborderwidth] \
+	    -highlightthickness 0
         set data($page,realized) 0
     } else {
 	$f configure \
 	    -background  [Widget::cget $path -background] \
-	    -borderwidth [Widget::cget $path -internalborderwidth]
+	    -borderwidth [Widget::cget $path -internalborderwidth] \
+	    -highlightthickness 0
     }
     _compute_height $path
     _compute_width  $path

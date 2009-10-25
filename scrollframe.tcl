@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.12 2009/09/06 21:38:51 oberdorfer Exp $
+#  $Id: scrollframe.tcl,v 1.13 2009/10/25 20:55:36 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -19,7 +19,7 @@ namespace eval ScrollableFrame {
     Widget::define ScrollableFrame scrollframe
 
     Widget::declare ScrollableFrame {
-        {-background	    Color      "SystemWindow"  0}
+        {-background	    Color      "SystemWindowFrame"  0}
         {-width             Int        0  0 {}}
         {-height            Int        0  0 {}}
         {-areawidth         Int        0  0 {}}

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  utils.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: utils.tcl,v 1.17 2009/09/08 20:28:07 oberdorfer Exp $
+#  $Id: utils.tcl,v 1.18 2009/10/25 20:55:36 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - GlobalVar::exists
@@ -15,6 +15,8 @@
 #     - BWidget::grab
 #     - BWidget::focus
 #     - BWidget::bindMiddleMouseMovement
+#     - BWidget::getSystemFontProperties
+#     - BWidget::createSystemFonts
 # ----------------------------------------------------------------------------
 
 namespace eval GlobalVar {
@@ -706,3 +708,99 @@ proc BWidget::bindMiddleMouseMovement { widget } {
       catch {%W yview scroll [expr $ydir * $scrollspeed] units}
   }
 }
+
+
+# ----------------------------------------------------------------------------
+# utility function for font support
+# ----------------------------------------------------------------------------
+
+proc ::BWidget::getSystemFontProperties {} {
+
+    array set fp {
+        family   "Courier New"
+        stdsize  12
+        headingsize 10
+	captionsize 12
+        tooltipsize 10
+        wheading normal
+        wcaption normal
+    }
+
+    if {$::tcl_version >= 8.4} {
+             set plat [tk windowingsystem]
+    } else { set plat $::tcl_platform(platform) }
+
+
+    switch -exact -- [string tolower $plat] {
+        "win32" - "windows" {
+            if {$::tcl_platform(osVersion) >= 5.0} {
+                     set fp(family) "Tahoma"
+            } else { set fp(family) "MS Sans Serif" }
+            set fp(stdsize) 8
+	    set fp(headingsize) 8
+	    set fp(captionsize) 8
+	    set fp(tooltipsize) 8
+            set fp(wcaption) bold
+	}
+        "classic" - "aqua" {
+            set fp(family) "Lucida Grande"
+            set fp(stdsize) 13
+	    set fp(headingsize) 11
+	    set fp(captionsize) 13
+            set fp(tooltipsize) 12
+	    set fp(wcaption) bold
+        }
+        "x11" {
+            if { ![catch {tk::pkgconfig get fontsystem} fs] &&
+                  [string equal $fs "xft"] } {
+                     set fp(family) "sans-serif"
+            } else { set fp(family) "Helvetica" }
+            set fp(stdsize) -12
+            set fp(headingsize) -12
+            set fp(captionsize) -14
+            set fp(tooltipsize) -10
+	    set fp(wheading) bold
+            set fp(wcaption) bold
+        }
+    }
+    return [array get fp]
+}
+
+
+# under tk >= 8.5 / tile 0.8,
+# the following predefined fonts are available:
+#    TkCaptionFont TkDefaultFont TkFixedFont TkHeadingFont
+#    TkIconFont TkMenuFont TkSmallCaptionFont TkTextFont TkTooltipFont
+# to be compatible with older versions and to make sure,
+# those fonts are available at runtime, we need to ensure that they exist:
+
+proc ::BWidget::createSystemFonts {} {
+  variable vars
+
+    array set fp [getSystemFontProperties]
+    set fnames [font names]
+
+    foreach fname { TkCaptionFont TkDefaultFont TkFixedFont TkHeadingFont
+                    TkIconFont TkMenuFont TkSmallCaptionFont TkTextFont
+		    TkTooltipFont } {
+
+        if {[lsearch $fnames $fname] == -1} {
+            font create $fname -family $fp(family) -size $fp(stdsize)
+	  
+	    switch -- $fname {
+	      TkCaptionFont {
+	          font configure $fname \
+	              -size $fp(captionsize) -weight $fp(wcaption)
+	      }
+	      TkHeadingFont {
+	          font configure $fname \
+	              -size $fp(headingsize) -weight $fp(wheading)
+	      }
+	      TkTooltipFont {
+	          font configure $fname -size $fp(tooltipsize)
+	      }	      
+	    }
+        }
+    }
+}
+
