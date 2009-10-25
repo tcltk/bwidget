@@ -7,7 +7,7 @@
 #   Link: http://art.gnome.org/themes/gtk2/432.php
 # ------------------------------------------------------------------------------
 # Revision change history:
-#   $Id: aquativo.tcl,v 1.2 2009/09/16 20:41:02 oberdorfer Exp $
+#   $Id: aquativo.tcl,v 1.3 2009/10/25 19:10:41 oberdorfer Exp $
 #
 #   Aug.'08: code refractured for the use with >= tk8.5,
 #            johann.oberdorfer@gmail.com
@@ -107,7 +107,16 @@ namespace eval ttk::theme::aquativo {
         image $I(vertical_trough) -border 2
     ::ttk::style element create Progress.trough \
         image $I(vertical_trough) -border 2
-    
+
+    ## Panedwindow parts.
+    #
+    ::ttk::style element create hsash image \
+            [list $I(hseparator-n) {active !disabled} $I(hseparator-a)] \
+            -border {2 0}
+    ::ttk::style element create vsash image \
+            [list $I(vseparator-n) {active !disabled} $I(vseparator-a)] \
+            -border {0 2}
+
     # Buttons, Checkbuttons and Radiobuttons
     
     ::ttk::style layout TButton {
@@ -191,7 +200,7 @@ namespace eval ttk::theme::aquativo {
     ::ttk::style element create tab image \
         [list $I(notebook) selected  $I(notebook_active)] \
         -sticky news \
-        -border {10 6 10 6} -height 10
+        -border {10 2 10 2} -height 10
     
     ::ttk::style configure TNotebook.Tab -padding {2 2}
     ::ttk::style configure TNotebook -expandtab {2 2}
