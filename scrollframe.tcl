@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  scrollframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollframe.tcl,v 1.13 2009/10/25 20:55:36 oberdorfer Exp $
+#  $Id: scrollframe.tcl,v 1.14 2009/10/27 22:15:09 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrollableFrame::create
@@ -256,5 +256,5 @@ proc ScrollableFrame::_themechanged { path } {
 
     if { ![winfo exists $path] } { return }
     BWidget::set_themedefaults
-    $path configure -background $BWidget::colors(SystemWindow)
+    $path configure -background $BWidget::colors(SystemWindowFrame)
 }

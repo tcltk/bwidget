@@ -5,7 +5,7 @@
 #      An approach to re-vitalize the package and to take advantage of tile!
 #      Author: Johann dot Oberdorfer at Googlemail dot com
 #
-#  $Id: themeutils.tcl,v 1.2 2009/10/25 20:57:26 oberdorfer Exp $
+#  $Id: themeutils.tcl,v 1.3 2009/10/27 22:15:09 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - BWidget::use
@@ -670,18 +670,22 @@ proc ::BWidget::grey_Color { } {
     set colors(style) "grey"
 
     array set colors {
-            SystemWindow        "White"
-            SystemWindowFrame   "#d9d9d9"
-            SystemWindowText    "Black"
-            SystemButtonFace    "#d9d9d9"
-            SystemButtonText    "Black"
-            SystemDisabledText  "#a3a3a3"
-            SystemHighlight     "#c3c3c3"
-            SystemHighlightText "White"
-            SystemMenu          "#d9d9d9"
-            SystemMenuText      "Black"
-            SystemScrollbar     "#d9d9d9"
-   }
+           SystemWindow        "#6e7c94"
+           SystemWindowFrame   "#788c9c"
+           SystemWindowText    "White"
+           SystemButtonFace    "#6e7c94"
+           SystemButtonText    "Black"
+           SystemDisabledText  "#aaaaaa"
+           SystemHighlight     "DarkGrey"
+           SystemHighlightText "White"
+           SystemMenu          "#6e7c94"
+           SystemMenuText      "White"
+           SystemScrollbar     "#788c9c"
+    }
+    
+    option add *highlightThickness  1
+    option add *HighlightColor      $colors(SystemHighlight)
+    option add *highlightBackground $colors(SystemWindowFrame)
 }
 
 
