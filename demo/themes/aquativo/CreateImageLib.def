@@ -22,6 +22,7 @@ menubar_option_arrow
 menubar_option_arrow_insensitive
 notebook
 notebook_active
+notebook_inactive
 option_in
 option_out
 progressbar
