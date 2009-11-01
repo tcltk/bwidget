@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  button.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: button.tcl,v 1.15 2009/11/01 20:20:50 oberdorfer Exp $
+#  $Id: button.tcl,v 1.16 2009/11/01 20:46:50 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #   Public commands
@@ -238,6 +238,13 @@ proc Button::configure { path args } {
     DynamicHelp::sethelp $path $path
 
     set res
+}
+
+
+# without this dummy function, an error occures
+# when operating under tile control
+proc Button::instate { path args } {
+  return [expr { [$path cget -state] == "normal" ? 1 : 0}]
 }
 
 
