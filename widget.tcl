@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.36 2009/09/06 20:45:43 oberdorfer Exp $
+#  $Id: widget.tcl,v 1.37 2009/11/01 20:20:16 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1614,26 +1614,21 @@ proc Widget::exists { path } {
     return [info exists _class($path)]
 }
 
+# deprecated, use "BWidget::use" instead!
 proc Widget::theme {{bool {}}} {
     # Private, *experimental* API that may change at any time - JH
     variable _theme
     if {[llength [info level 0]] == 2} {
 	# set theme-ability
-	if {[catch {package require Tk 8.5a6}]
-	    && [catch {package require tile 0.6}]
-	    && [catch {package require tile 1}]} {
-	    return -code error "BWidget's theming requires tile 0.6+"
-	} else {
-	    catch {
-	      ttk::style configure BWSlimCB.Toolbutton -relief flat -bd 2
-              ttk::style map BWSlimCB.Toolbutton \
-	                 -relief [list {selected !disabled} sunken]
-	    }
+	if {   [catch {package require Tk 8.4.7}]
+	    && [catch {package require tile 0.8}] } {
+	    return -code error "BWidget's theming requires tile 0.8+"
 	}
 	set _theme [string is true -strict $bool]
     }
     return $_theme
 }
+
 
 #------------------------------------------------------------------------------
 # remove {keystr value} sub list from args

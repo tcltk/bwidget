@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  buttonbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: buttonbox.tcl,v 1.14 2009/09/06 21:03:48 oberdorfer Exp $
+#  $Id: buttonbox.tcl,v 1.15 2009/11/01 20:20:50 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ButtonBox::create
@@ -171,7 +171,7 @@ proc ButtonBox::insert { path idx args } {
 
     # a button box button - by default - is flat!
     if { [BWidget::using ttk] } {
-       $but configure -style "BWSlim.Toolbutton"
+       $but configure -style [Button::getSlimButtonStyle]
     }
 
     # ericm@scriptics.com:  set up tags, just like the menu items

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  font.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: font.tcl,v 1.17 2009/09/06 21:14:46 oberdorfer Exp $
+#  $Id: font.tcl,v 1.18 2009/11/01 20:20:50 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - SelectFont::create
@@ -344,7 +344,7 @@ proc SelectFont::create { path args } {
 		    -image [Bitmap::get $st] \
 		    -variable SelectFont::${path}($st) \
 		    -command [list SelectFont::_update $path] \
-		    -style "BWSlimCB.Toolbutton"
+		    -style [Button::getSlimButtonStyle]
 	    } else {
 		button $path.$st \
 		    -highlightthickness 0 -takefocus 0 -padx 0 -pady 0 \

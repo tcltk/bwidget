@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  button.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: button.tcl,v 1.14 2009/09/11 16:04:14 oberdorfer Exp $
+#  $Id: button.tcl,v 1.15 2009/11/01 20:20:50 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #   Public commands
@@ -9,6 +9,7 @@
 #     - Button::configure
 #     - Button::cget
 #     - Button::invoke
+#     - Button::getSlimButtonStyle
 #   Private commands (event bindings)
 #     - Button::_destroy
 #     - Button::_enter
@@ -16,6 +17,7 @@
 #     - Button::_press
 #     - Button::_release
 #     - Button::_repeat
+#     - Button::_styleconfigure
 # ----------------------------------------------------------------------------
 
 namespace eval Button {
@@ -27,7 +29,7 @@ namespace eval Button {
 	lappend remove -repeatdelay -repeatinterval
     }
     
-    # if { [BWidget::using ttk] } { lappend remove -borderwidth }
+    if { [BWidget::using ttk] } { lappend remove -borderwidth }
 
     Widget::tkinclude Button button :cmd remove $remove
 
@@ -73,39 +75,6 @@ namespace eval Button {
 }
 
 
-proc Button::createButtonStyles {} {
-    variable _styles_created
- 
-    if { [info exists _styles_created] && $_styles_created != 0 } {
-        return
-    } 
-    if { ![BWidget::using ttk] } { return }
-
-    # create a new element for each available theme...
-    foreach themeName [ttk::style theme names] {
-
-       # temporarily sets the current theme to themeName,
-       # evaluate script, then restore the previous theme.
-
-        ttk::style theme settings $themeName {
-  
-            # emulate tk behavior, referenced later on such like:
-            #    -style "${relief}BW.TButton"
-
-            ::ttk::style configure raisedBW.TButton -relief raised
-            ::ttk::style configure sunkenBW.TButton -relief sunken
-            ::ttk::style configure flatBW.TButton   -relief flat
-            ::ttk::style configure solidBW.TButton  -relief solid
-            ::ttk::style configure grooveBW.TButton -relief groove
-            ::ttk::style configure linkBW.TButton   -relief flat -bd 2
-        }
-    }
-
-    set _styles_created 1
-}
-
-
-
 # ----------------------------------------------------------------------------
 #  Command Button::create
 # ----------------------------------------------------------------------------
@@ -113,7 +82,6 @@ proc Button::create { path args } {
     variable _ttkunsupported_opt
 
     if { [BWidget::using ttk] } {
-        createButtonStyles
 
         # remove unsupported tk options
 	# (hope that's all we need to take care about)
@@ -129,18 +97,16 @@ proc Button::create { path args } {
     array set maps [list Button {} :cmd {}]
     array set maps [Widget::parseArgs Button $args]
 
-    if {[BWidget::using ttk]} {
-         eval [concat [list ttk::button $path] $maps(:cmd)]
-    } else {
-         eval [concat [list button $path] $maps(:cmd)]
-    }  
+    if { [BWidget::using ttk] } {
+             eval [concat [list ttk::button $path] $maps(:cmd)]
+    } else { eval [concat [list      button $path] $maps(:cmd)] }  
 
     Widget::initFromODB Button $path $maps(Button)
 
-    # Do some extra configuration on the button
+    # do some extra configuration on the button
     set relief [Widget::getMegawidgetOption $path -relief]
 
-    if { [string equal $relief "link"] } {
+    if { ![BWidget::using ttk] && [string equal $relief "link"] } {
         set relief "flat"
     }
     set var [Widget::getMegawidgetOption $path -textvariable]
@@ -162,13 +128,17 @@ proc Button::create { path args } {
         Widget::configure $path [list -underline $under]
     }
 
-
     if { [BWidget::using ttk] } {
          $path configure -text $text -underline $under \
                          -textvariable $var -state $st
 
-	 if { [$path cget -style] != "BWSlim.Toolbutton" } {
-             $path configure -style "${relief}BW.TButton"
+         # distinguish between a standard button (raised) which sould appear
+	 # as declared in the celated style and button with user defined arg's
+	 # where the style 'll be overwritten to emulate existing behavior   
+	 
+	 if { $relief != "raised" &&
+	      [$path cget -style] != "BWSlim.Toolbutton" } {
+             $path configure -style "BW${relief}.Toolbutton"
 	 }
     } else {
          $path configure -relief $relief -text $text -underline $under \
@@ -221,18 +191,17 @@ proc Button::configure { path args } {
     if { $cr || $cs } {
 	set relief [Widget::cget $path -relief]
 	set state  [Widget::cget $path -state]
-        if { [string equal $relief "link"] } {
+	
+        if { ![BWidget::using ttk] && [string equal $relief "link"] } {
             if { [string equal $state "active"] } {
-                set relief "raised"
-            } else {
-                set relief "flat"
-            }
+                     set relief "raised"
+            } else { set relief "flat" }
         }
 
         if { [BWidget::using ttk] } {
             $path:cmd configure -state $state
             if { [string compare [$path:cmd cget -style] "BWSlim.Toolbutton"] != 0 } {
- 	        $path:cmd configure -style "${relief}BW.TButton"
+ 	        $path:cmd configure -style "BW${relief}.Toolbutton"
 	    }
         } else {
             $path:cmd configure -relief $relief -state $state
@@ -240,9 +209,9 @@ proc Button::configure { path args } {
     }
 
     if { $cv || $cn || $ct || $cu } {
-	set var		[Widget::cget $path -textvariable]
-	set text	[Widget::cget $path -text]
-	set under	[Widget::cget $path -underline]
+	set var	  [Widget::cget $path -textvariable]
+	set text  [Widget::cget $path -text]
+	set under [Widget::cget $path -underline]
         if {  ![string length $var] } {
             set desc [BWidget::getname [Widget::cget $path -name]]
             if { [llength $desc] } {
@@ -280,6 +249,13 @@ proc Button::cget { path option } {
 }
 
 
+proc Button::getSlimButtonStyle {} {
+    if { [BWidget::using ttk] } {
+       return "BWSlim.Toolbutton"
+    }
+    return ""
+}
+
 # ----------------------------------------------------------------------------
 #  Command Button::invoke
 # ----------------------------------------------------------------------------
@@ -295,7 +271,7 @@ proc Button::invoke { path } {
         }
 	after 100
         set relief [Widget::getMegawidgetOption $path -relief]
-        if { [string equal $relief "link"] } {
+        if { ![BWidget::using ttk] && [string equal $relief "link"] } {
             set relief flat
         }
 
@@ -326,11 +302,8 @@ proc Button::_enter { path } {
     if { ![string equal [$path:cmd cget -state] "disabled"] } {
         $path:cmd configure -state active
         if { $_pressed == $path } {
-
             _styleconfigure $path sunken
-
         } elseif { [string equal [Widget::cget $path -relief] "link"] } {
-
             _styleconfigure $path raised
         }
     }
@@ -342,7 +315,7 @@ proc Button::_styleconfigure { path relief_or_style } {
     if { [BWidget::using ttk] } {
         # do not override the toolbutton style:
         if { [$path:cmd cget -style] != "BWSlim.Toolbutton" } {
-            $path:cmd configure -style "${relief_or_style}BW.TButton"
+            $path:cmd configure -style "BW${relief_or_style}.Toolbutton"
 	}
     } else {
         $path:cmd configure -relief $relief_or_style
@@ -382,7 +355,7 @@ proc Button::_press { path } {
     if { ![string equal [$path:cmd cget -state] "disabled"] } {
         set _pressed $path
 
-        _styleconfigure $path sunken
+        if { ![BWidget::using ttk] } { _styleconfigure $path sunken }
 	
 	set cmd [Widget::getMegawidgetOption $path -armcommand]
         if { $cmd != "" } {
@@ -410,11 +383,12 @@ proc Button::_release { path } {
         set _pressed ""
         set relief [Widget::getMegawidgetOption $path -relief]
 	after cancel "Button::_repeat $path"
+
         if { [string equal $relief "link"] } {
             set relief raised
         }
 
-        _styleconfigure $path $relief
+        if { ![BWidget::using ttk] } { _styleconfigure $path $relief }
 
 	set cmd [Widget::getMegawidgetOption $path -disarmcommand]
         if { $cmd != "" } {

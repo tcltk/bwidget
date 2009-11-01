@@ -5,7 +5,7 @@
 #      An approach to re-vitalize the package and to take advantage of tile!
 #      Author: Johann dot Oberdorfer at Googlemail dot com
 #
-#  $Id: themeutils.tcl,v 1.3 2009/10/27 22:15:09 oberdorfer Exp $
+#  $Id: themeutils.tcl,v 1.4 2009/11/01 20:20:50 oberdorfer Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - BWidget::use
@@ -157,21 +157,8 @@ proc ::BWidget::use { args } {
 		#   }
 
                 if { [catch {uplevel "#0" package require tile 0.8}] != 0 } {
-                    set _properties($package) 0
-		} else {
-
-                    # create a new element for each available theme...
-                    foreach themeName [ttk::style theme names] {
-                        # temporarily sets the current theme to themeName,
-                        # evaluate script, then restore the previous theme.
-                        ttk::style theme settings $themeName {
-                            ttk::style configure BWSlimCB.Toolbutton -relief flat -bd 2
-                            ttk::style map BWSlimCB.Toolbutton \
-	                               -relief [list {selected !disabled} sunken]
-		        }
-		    }
-                    set _properties($package) 1
-		}
+                         set _properties($package) 0
+		} else { set _properties($package) 1 }
             }
 	    default {
 	        return -code error \
@@ -239,9 +226,15 @@ proc ::BWidget::using { optName } {
 # a simple wrapper to distinguish between tk and ttk
 proc ::BWidget::wrap {wtype wpath args} {
 
+    set _ttkunsupported_opt \
+           { -font -fg -foreground -background
+	     -highlightthickness -bd -borderwidth
+	     -padx -pady -anchor
+             -relief -selectforeground -selectbackground }
+
     if { [using ttk] } {
         # filter out (ttk-)unsupported (tk-)options:
-	foreach opt {-background -bd -borderwith -highlightthickness} {
+	foreach opt $$_ttkunsupported_opt {
             set args [Widget::getArgument $args $opt tmp]
 	}
 
@@ -403,6 +396,39 @@ proc ::BWidget::_read_ttkstylecolors {} {
 }
 
 
+proc ::BWidget::_createOrUpdateButtonStyles {} {
+
+    if { ![using ttk] } { return }
+
+    # create a new element for each available theme...
+    foreach themeName [ttk::style theme names] {
+
+       # temporarily sets the current theme to themeName,
+       # evaluate script, then restore the previous theme.
+
+        ttk::style theme settings $themeName {
+  
+            # emulate tk behavior, referenced later on such like:
+            #    -style "${relief}BW.Toolbutton"
+
+            ::ttk::style configure BWraised.Toolbutton -relief raised
+            ::ttk::style configure BWsunken.Toolbutton -relief sunken
+            ::ttk::style configure BWflat.Toolbutton   -relief flat
+            ::ttk::style configure BWsolid.Toolbutton  -relief solid
+            ::ttk::style configure BWgroove.Toolbutton -relief groove
+            ::ttk::style configure BWlink.Toolbutton   -relief flat -bd 2
+	    
+	    ::ttk::style map BWlink.Toolbutton \
+	        -relief [list {selected !disabled} sunken]
+
+	    ::ttk::style configure BWSlim.Toolbutton -relief flat -bd 2
+            ::ttk::style map BWSlim.Toolbutton \
+	        -relief [list {selected !disabled} sunken]
+        }
+    }
+}
+
+
 # Purpose:
 #   Sets the current style + default ttk (tyled) theme,
 #   ensure, color related array: "BWidget::colors" is updated as well
@@ -474,6 +500,8 @@ proc ::BWidget::set_themedefaults { {styleName ""} } {
           "-troughcolor" { set colors(SystemScrollbar)   $val }
       }
     }
+    
+    _createOrUpdateButtonStyles
 }
 
 
