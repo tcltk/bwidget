@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.29 2009/06/30 16:17:37 oehhar Exp $
+#  $Id: listbox.tcl,v 1.29.2.1 2010/05/12 07:59:34 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -194,13 +194,13 @@ proc ListBox::_configureSelectmode { path selectmode {previous none} } {
             $path bindImage <Button-1> ""
         }
         multiple {
-            $path bindText <Button-1>          ""
-            $path bindText <Shift-Button-1>    ""
-            $path bindText <Control-Button-1>  ""
+            $path bindText <ButtonRelease-1>          ""
+            $path bindText <Shift-ButtonRelease-1>    ""
+            $path bindText <Control-ButtonRelease-1>  ""
 
-            $path bindImage <Button-1>         ""
-            $path bindImage <Shift-Button-1>   ""
-            $path bindImage <Control-Button-1> ""
+            $path bindImage <ButtonRelease-1>         ""
+            $path bindImage <Shift-ButtonRelease-1>   ""
+            $path bindImage <Control-ButtonRelease-1> ""
         }
     }
     # set new bindings
@@ -214,13 +214,13 @@ proc ListBox::_configureSelectmode { path selectmode {previous none} } {
         }
         multiple {
             set cmd ListBox::_multiple_select
-            $path bindText <Button-1>          [list $cmd $path n %x %y]
-            $path bindText <Shift-Button-1>    [list $cmd $path s %x %y]
-            $path bindText <Control-Button-1>  [list $cmd $path c %x %y]
+            $path bindText <ButtonRelease-1>          [list $cmd $path n %x %y]
+            $path bindText <Shift-ButtonRelease-1>    [list $cmd $path s %x %y]
+            $path bindText <Control-ButtonRelease-1>  [list $cmd $path c %x %y]
 
-            $path bindImage <Button-1>         [list $cmd $path n %x %y]
-            $path bindImage <Shift-Button-1>   [list $cmd $path s %x %y]
-            $path bindImage <Control-Button-1> [list $cmd $path c %x %y]
+            $path bindImage <ButtonRelease-1>         [list $cmd $path n %x %y]
+            $path bindImage <Shift-ButtonRelease-1>   [list $cmd $path s %x %y]
+            $path bindImage <Control-ButtonRelease-1> [list $cmd $path c %x %y]
         }
         default {
             if {0 < [llength [ListBox::selection $path get]]} {
@@ -1664,13 +1664,32 @@ proc ListBox::_drag_and_drop { path from endItem operation type startItem } {
         }
     }
 
-    if {$idx > [$path index $startItem]} { incr idx -1 }
-
-    if {[string equal $operation "copy"]} {
-        set options [Widget::options $path.$startItem]
-        eval [linsert $options 0 $path insert $idx $startItem\#auto]
+    # Check if startItem is part of the current selection and process the
+    # whole selection if so
+    set selItems [selection $path get]
+    if {-1 != [lsearch -exact $selItems $startItem]} {
+        set dragItems $selItems
     } else {
-        $path move $startItem $idx
+        set dragItems [list $startItem]
+    }
+
+    # get drag indexes (to sort them)
+	foreach dragItem $dragItems {
+        lappend dragIdx [$path index $dragItem]
+    }
+    foreach pos [lsort -integer -indices $dragIdx] {
+        set dragItem [lindex $dragItems $pos]
+        set dragIdx [$path index $dragItem]
+        if {$idx > $dragIdx} { incr idx -1 }
+        if {[string equal $operation "copy"]} {
+            set options [Widget::options $path.$dragItem]
+            eval [linsert $options 0 $path insert $idx $dragItem\#auto]
+            incr idx
+        } else {
+            $path move $dragItem $idx
+            set idx [$path index $dragItem]
+            incr idx
+        }
     }
 }
 
