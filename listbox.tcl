@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.32 2010/05/12 08:24:53 oehhar Exp $
+#  $Id: listbox.tcl,v 1.33 2010/05/12 08:28:56 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -200,37 +200,37 @@ proc ListBox::_configureSelectmode { path selectmode {previous none} } {
     # clear current binding
     switch -exact -- $previous {
         single {
-            $path bindText  <Button-1> ""
-            $path bindImage <Button-1> ""
+            $path _bindText  <Button-1> ""
+            $path _bindImage <Button-1> ""
         }
         multiple {
-            $path bindText <ButtonRelease-1>          ""
-            $path bindText <Shift-ButtonRelease-1>    ""
-            $path bindText <Control-ButtonRelease-1>  ""
+            $path _bindText <ButtonRelease-1>          ""
+            $path _bindText <Shift-ButtonRelease-1>    ""
+            $path _bindText <Control-ButtonRelease-1>  ""
 
-            $path bindImage <ButtonRelease-1>         ""
-            $path bindImage <Shift-ButtonRelease-1>   ""
-            $path bindImage <Control-ButtonRelease-1> ""
+            $path _bindImage <ButtonRelease-1>         ""
+            $path _bindImage <Shift-ButtonRelease-1>   ""
+            $path _bindImage <Control-ButtonRelease-1> ""
         }
     }
     # set new bindings
     switch -exact -- $selectmode {
         single {
-            $path bindText  <Button-1> [list ListBox::_mouse_select $path set]
-            $path bindImage <Button-1> [list ListBox::_mouse_select $path set]
+            $path _bindText  <Button-1> [list ListBox::_mouse_select $path set]
+            $path _bindImage <Button-1> [list ListBox::_mouse_select $path set]
             if {1 < [llength [ListBox::selection $path get]]} {
                 ListBox::selection $path clear
             }
         }
         multiple {
             set cmd ListBox::_multiple_select
-            $path bindText <ButtonRelease-1>          [list $cmd $path n %x %y]
-            $path bindText <Shift-ButtonRelease-1>    [list $cmd $path s %x %y]
-            $path bindText <Control-ButtonRelease-1>  [list $cmd $path c %x %y]
+            $path _bindText <ButtonRelease-1>          [list $cmd $path n %x %y]
+            $path _bindText <Shift-ButtonRelease-1>    [list $cmd $path s %x %y]
+            $path _bindText <Control-ButtonRelease-1>  [list $cmd $path c %x %y]
 
-            $path bindImage <ButtonRelease-1>         [list $cmd $path n %x %y]
-            $path bindImage <Shift-ButtonRelease-1>   [list $cmd $path s %x %y]
-            $path bindImage <Control-ButtonRelease-1> [list $cmd $path c %x %y]
+            $path _bindImage <ButtonRelease-1>         [list $cmd $path n %x %y]
+            $path _bindImage <Shift-ButtonRelease-1>   [list $cmd $path s %x %y]
+            $path _bindImage <Control-ButtonRelease-1> [list $cmd $path c %x %y]
         }
         default {
             if {0 < [llength [ListBox::selection $path get]]} {
@@ -431,7 +431,7 @@ proc ListBox::itemconfigure { path item args } {
             } else {
                 $path.c delete $idi
                 $path.c create image $x0 $y0 -image $img -anchor w \
-		    -tags [list img i:$item]
+		    -tags [list img imgbind i:$item]
             }
         } else {
             $path.c delete $idi
@@ -473,30 +473,42 @@ proc ListBox::itemcget { path item option } {
 
 
 # ----------------------------------------------------------------------------
-#  Command ListBox::bindText
+#  Command ListBox::_bindText
 # ----------------------------------------------------------------------------
-proc ListBox::bindText { path event script } {
+proc ListBox::_bindText { path event script {tag click} } {
     if { $script != "" } {
         set map [list %W $path]
         set script [string map $map $script]
 	append script " \[ListBox::_get_current [list $path]\]"
     }
-    $path.c bind "click" $event $script
+    $path.c bind $tag $event $script
 }
 
+# ----------------------------------------------------------------------------
+#  Command ListBox::bindText
+# ----------------------------------------------------------------------------
+proc ListBox::bindText { path event script } {
+    _bindText $path $event $script clickbind
+}
+
+# ----------------------------------------------------------------------------
+#  Command ListBox::_bindImage
+# ----------------------------------------------------------------------------
+proc ListBox::_bindImage { path event script {tag img} } {
+    if { $script != "" } {
+        set map [list %W $path]
+        set script [string map $map $script]
+	append script " \[ListBox::_get_current [list $path]\]"
+    }
+    $path.c bind $tag $event $script
+}
 
 # ----------------------------------------------------------------------------
 #  Command ListBox::bindImage
 # ----------------------------------------------------------------------------
 proc ListBox::bindImage { path event script } {
-    if { $script != "" } {
-        set map [list %W $path]
-        set script [string map $map $script]
-	append script " \[ListBox::_get_current [list $path]\]"
-    }
-    $path.c bind "img" $event $script
+    _bindImage $path $event $script imgbind
 }
-
 
 # ----------------------------------------------------------------------------
 #  Command ListBox::delete
@@ -1013,12 +1025,12 @@ proc ListBox::_draw_item {path item x0 x1 y bg selfill multi ww} {
         -fill   [_getoption        $path $item -foreground] \
         -font   [_getoption        $path $item -font] \
         -anchor w \
-        -tags   [list item n:$item click]]
+        -tags   [list item n:$item click clickbind]]
 
     if { $selfill && !$multi } {
         set bbox  [$path.c bbox n:$item]
         set bbox  [list 0 [lindex $bbox 1] $ww [lindex $bbox 3]]
-        set tags  [list box b:$item click]
+        set tags  [list box b:$item click clickbind]
         $path.c create rect $bbox -fill $bg -width 0 -tags $tags
         $path.c raise $i
     }
@@ -1028,7 +1040,7 @@ proc ListBox::_draw_item {path item x0 x1 y bg selfill multi ww} {
             -window $win -anchor w -tags [list win i:$item]
     } elseif { [set img [Widget::getoption $path.$item -image]] != "" } {
         $path.c create image [expr {$x0+$indent}] $y \
-            -image $img -anchor w -tags [list img i:$item]
+            -image $img -anchor w -tags [list img imgbind i:$item]
     }
 
     _set_help $path $item
@@ -1134,7 +1146,7 @@ proc ListBox::_redraw_selection { path } {
 		# With -selectfill, make box occupy full width of widget
 		set bbox [list 0 [lindex $bbox 1] $width [lindex $bbox 3]]
 	    }
-            set tags [list sel s:$item click]
+            set tags [list sel s:$item click clickbind]
             set id [$path.c create rectangle $bbox \
                 -fill $selbg -outline $selbg -tags $tags]
 	    if {$selfg != ""} {
