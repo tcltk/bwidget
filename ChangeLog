@@ -1,3 +1,9 @@
+2010-05-12 Harald Oehlmann < oehhar@users.sourceforge.net>
+
+	* listbox.tcl(ListBox::bindText and ListBox::bindImage)
+	Method bindText and bindImage overwrote internal selection
+	bindings [Bug 3000293] reported by Robert Karen.
+
 2010-05-11 Harald Oehlmann < oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::see) Method see shifts image out of
