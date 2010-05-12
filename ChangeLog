@@ -1,8 +1,18 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.214 2009/09/11 16:04:49 oberdorfer Exp $
+#  $Id: ChangeLog,v 1.215 2010/05/12 08:22:19 oehhar Exp $
 # ------------------------------------------------------------------------------
+
+2010-05-05 Harald Oehlmann < oehhar@users.sourceforge.net>
+
+	* listbox.tcl(ListBox::_configureSelectmode) Drag modifies
+	multiple selection [Bug 2995969] reported by Robert Karen.
+	Bound events on ButtonRelease-1 instead Button-1 for multiple
+	selections to avoid bug.
+	* listbox.tcl(ListBox::_drag_and_drop) The default drag and drop
+	routine only handled single drag and drop.
+	It was extended to handle also drag and drop of multiple entries.
 
 2009-09-11 Johann Oberdorfer  <oberdorfer@users.sourceforge.net>
 
