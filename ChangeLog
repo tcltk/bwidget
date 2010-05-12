@@ -1,8 +1,14 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.216 2010/05/12 08:24:53 oehhar Exp $
+#  $Id: ChangeLog,v 1.217 2010/05/12 08:28:56 oehhar Exp $
 # ------------------------------------------------------------------------------
+
+2010-05-12 Harald Oehlmann < oehhar@users.sourceforge.net>
+
+	* listbox.tcl(ListBox::bindText and ListBox::bindImage)
+	Method bindText and bindImage overwrote internal selection
+	bindings [Bug 3000293] reported by Robert Karen.
 
 2010-05-11 Harald Oehlmann < oehhar@users.sourceforge.net>
 
