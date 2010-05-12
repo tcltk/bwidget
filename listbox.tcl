@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.31 2010/05/12 08:22:19 oehhar Exp $
+#  $Id: listbox.tcl,v 1.32 2010/05/12 08:24:53 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -740,8 +740,10 @@ proc ListBox::see { path item } {
     }
     set idn [$path.c find withtag n:$item]
     if { $idn != "" } {
+        set idi [$path.c find withtag i:$item]
+        if { $idi == "" } { set idi $idn }
         ListBox::_see $path $idn right
-        ListBox::_see $path $idn left
+        ListBox::_see $path $idi left
     }
 }
 
