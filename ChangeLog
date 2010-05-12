@@ -1,4 +1,10 @@
-2010-05-13 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-11 Harald Oehlmann < oehhar@users.sourceforge.net>
+
+	* listbox.tcl(ListBox::see) Method see shifts image out of
+	view. Showed up, by a selection click on a long item with icon
+	[Bug 2999764] reported by Robert Karen.
+
+2010-05-05 Harald Oehlmann < oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::_configureSelectmode) Drag modifies
 	multiple selection [Bug 2995969] reported by Robert Karen.
