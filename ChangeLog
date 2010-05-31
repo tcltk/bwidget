@@ -1,3 +1,8 @@
+2010-05-31 Harald Oehlmann < oehhar@users.sourceforge.net>
+
+	* listbox.html Reflected patch 2010-05-12 in documentation.
+	The selection may not be disabled any more by binding button 1.
+
 2010-05-12 Harald Oehlmann < oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::bindText and ListBox::bindImage)
