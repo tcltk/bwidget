@@ -1,8 +1,13 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.217 2010/05/12 08:28:56 oehhar Exp $
+#  $Id: ChangeLog,v 1.218 2010/05/31 14:56:44 oehhar Exp $
 # ------------------------------------------------------------------------------
+
+2010-05-31 Harald Oehlmann < oehhar@users.sourceforge.net>
+
+	* listbox.html Reflected patch 2010-05-12 in documentation.
+	The selection may not be disabled any more by binding button 1.
 
 2010-05-12 Harald Oehlmann < oehhar@users.sourceforge.net>
 
