@@ -1,3 +1,10 @@
+2010-06-07 Harald Oehlmann < oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.2 tagged ****
+	Version 1.9.1 was skipped.
+	This was released in ActiveTCL and thus may exist on many
+	installations.
+
 2010-05-31 Harald Oehlmann < oehhar@users.sourceforge.net>
 
 	* listbox.html Reflected patch 2010-05-12 in documentation.
