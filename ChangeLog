@@ -1,28 +1,32 @@
-2010-06-07 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-06-09 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* Included lang/pl.rc from HEAD.
+
+2010-06-07 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.2 tagged ****
 	Version 1.9.1 was skipped.
 	This was released in ActiveTCL and thus may exist on many
 	installations.
 
-2010-05-31 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-31 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.html Reflected patch 2010-05-12 in documentation.
 	The selection may not be disabled any more by binding button 1.
 
-2010-05-12 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-12 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::bindText and ListBox::bindImage)
 	Method bindText and bindImage overwrote internal selection
 	bindings [Bug 3000293] reported by Robert Karen.
 
-2010-05-11 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-11 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::see) Method see shifts image out of
 	view. Showed up, by a selection click on a long item with icon
 	[Bug 2999764] reported by Robert Karen.
 
-2010-05-05 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-05 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::_configureSelectmode) Drag modifies
 	multiple selection [Bug 2995969] reported by Robert Karen.
