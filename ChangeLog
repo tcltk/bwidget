@@ -2,8 +2,11 @@
 
 	* dialog.tcl Changed behaviour of window close button.
 	If -cancel is given, this button is invoked.
-	The cancel option may now be changed the using configure
+	The cancel option may now be changed using the configure
 	method.
+
+	* init.tcl If msgcat is available use its locale to load
+	a lang/*.rc file instead always using en.rc.
 
 2010-06-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
