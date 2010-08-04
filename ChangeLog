@@ -1,3 +1,10 @@
+2010-08-04 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* dialog.tcl Changed behaviour of window close button.
+	If -cancel is given, this button is invoked.
+	The cancel option may now be changed the using configure
+	method.
+
 2010-06-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* Included lang/pl.rc from HEAD.

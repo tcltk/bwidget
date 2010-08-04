@@ -149,8 +149,10 @@ of the <B>button</b> widget.
 <DL><DT><A NAME="-cancel"><B>-cancel</B></A></DT>
 <DD>
 
-Specifies the number of the cancel button of the Dialog. When user press Esc in the Dialog,
-this button is invoked.
+Specifies the number of the cancel button of the Dialog. When user presses Esc or the windows close button,
+this button is invoked.<BR>
+If set to <B>-1</B>, Esc does not invoke anything.
+The window close button <I>destroys</I> the dialog in this case and returns <B>-1</B>.
 </DD>
 </DL>
 <DL><DT><A NAME="-default"><B>-default</B></A></DT>
