@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.10 2003/10/20 21:23:52 damonc Exp $
+#  $Id: label.tcl,v 1.10.2.1 2010/10/15 08:26:05 oehhar Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Label::create
@@ -56,7 +56,7 @@ namespace eval Label {
 proc Label::create { path args } {
     array set maps [list Label {} .l {}]
     array set maps [Widget::parseArgs Label $args]
-    frame $path -class Label -borderwidth 0 -highlightthickness 0 -relief flat
+    frame $path -class Label -borderwidth 0 -highlightthickness 0 -relief flat -padx 0 -pady 0
     Widget::initFromODB Label $path $maps(Label)
 
     eval [list label $path.l] $maps(.l)
