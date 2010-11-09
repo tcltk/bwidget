@@ -1,27 +1,32 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.218 2010/05/31 14:56:44 oehhar Exp $
+#  $Id: ChangeLog,v 1.219 2010/11/09 16:04:45 oehhar Exp $
 # ------------------------------------------------------------------------------
 
-2010-05-31 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-11-09 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* mainframe.tcl Menu text shows white on white on Mac aqua
+	[Bug 3105665] reported by Scott Smedley fixed by Kevin Walzer.
+
+2010-05-31 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.html Reflected patch 2010-05-12 in documentation.
 	The selection may not be disabled any more by binding button 1.
 
-2010-05-12 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-12 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::bindText and ListBox::bindImage)
 	Method bindText and bindImage overwrote internal selection
 	bindings [Bug 3000293] reported by Robert Karen.
 
-2010-05-11 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-11 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::see) Method see shifts image out of
 	view. Showed up, by a selection click on a long item with icon
 	[Bug 2999764] reported by Robert Karen.
 
-2010-05-05 Harald Oehlmann < oehhar@users.sourceforge.net>
+2010-05-05 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl(ListBox::_configureSelectmode) Drag modifies
 	multiple selection [Bug 2995969] reported by Robert Karen.
