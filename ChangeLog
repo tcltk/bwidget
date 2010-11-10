@@ -1,4 +1,13 @@
-2010-11-09 Harald Oehlmann <oehhar@users.sourceforge.net>
+2010-11-09  Andreas Kupries  <andreask@activestate.com>
+
+	* tree.tcl (Tree::itemconfigure): Fix intermingling of node names
+	and flag values which can cause an lsearch to fail, by mistaking a
+	flag value as the node searched for, and then treating a node name
+	as flags. As the upd,nodes value is a dictionary it should not be
+	search as a list. Now using a temporary array for quicker check
+	and append/replace [Bug 3106208].
+
+	2010-11-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* mainframe.tcl Menu text shows white on white on Mac aqua
 	[Bug 3105665] reported by Scott Smedley fixed by Kevin Walzer.
