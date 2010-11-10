@@ -1,8 +1,17 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.219 2010/11/09 16:04:45 oehhar Exp $
+#  $Id: ChangeLog,v 1.220 2010/11/10 07:57:58 oehhar Exp $
 # ------------------------------------------------------------------------------
+
+2010-11-09  Andreas Kupries  <andreask@activestate.com>
+
+	* tree.tcl (Tree::itemconfigure): Fix intermingling of node names
+	and flag values which can cause an lsearch to fail, by mistaking a
+	flag value as the node searched for, and then treating a node name
+	as flags. As the upd,nodes value is a dictionary it should not be
+	search as a list. Now using a temporary array for quicker check
+	and append/replace [Bug 3106208].
 
 2010-11-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
