@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.62 2009/09/08 20:46:40 oberdorfer Exp $
+#  $Id: tree.tcl,v 1.63 2010/11/10 07:57:58 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -409,12 +409,13 @@ proc Tree::itemconfigure { path node args } {
 	}
 
 	if { $data(upd,level) < 3 && $flag } {
-            if { [set idx [lsearch -exact $data(upd,nodes) $node]] == -1 } {
+            # data(upd,nodes) is a key-val list: emulate a dict by an array
+            array set n $data(upd,nodes)
+            if {![info exists n($node)]} {
                 lappend data(upd,nodes) $node $flag
             } else {
-                incr idx
-                set flag [expr {[lindex $data(upd,nodes) $idx] | $flag}]
-                set data(upd,nodes) [lreplace $data(upd,nodes) $idx $idx $flag]
+                set n($node) [expr {$n($node) | $flag}]
+                set data(upd,nodes) [array get n]
             }
             _redraw_idle $path 2
         }
