@@ -1,3 +1,8 @@
+2010-11-21 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* label.tcl Add theming support for Label widget.
+	* label.html Themed mode documented.
+
 2010-11-16 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* button.tcl Add theming support for Button widget.
