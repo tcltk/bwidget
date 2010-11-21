@@ -1,8 +1,12 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.220 2010/11/10 07:57:58 oehhar Exp $
+#  $Id: ChangeLog,v 1.221 2010/11/21 17:29:07 oehhar Exp $
 # ------------------------------------------------------------------------------
+
+2010-11-16 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* Dialog.html Removed documentation of unavailable option -buttonwidth.
 
 2010-11-09  Andreas Kupries  <andreask@activestate.com>
 
