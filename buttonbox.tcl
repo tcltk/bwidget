@@ -145,11 +145,16 @@ proc ButtonBox::insert { path idx args } {
 	set args [array get flags]
     }
 
-    eval [list Button::create $but \
-	      -background [Widget::getoption $path -background]\
-	      -padx       [Widget::getoption $path -padx] \
-	      -pady       [Widget::getoption $path -pady]] \
-        $args [list -default $style]
+    if { $::Widget::_theme} {
+        eval [list Button::create $but] \
+            $args [list -default $style]
+	} else {
+        eval [list Button::create $but \
+    	      -background [Widget::getoption $path -background]\
+	          -padx       [Widget::getoption $path -padx] \
+	          -pady       [Widget::getoption $path -pady]] \
+            $args [list -default $style]
+	}
 
     # ericm@scriptics.com:  set up tags, just like the menu items
     foreach tag $tags {
