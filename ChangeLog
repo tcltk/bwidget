@@ -1,3 +1,13 @@
+2010-11-16 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* button.tcl Add theming support for Button widget.
+	Option "-relief link" is mapped to "Toolbutton style.
+	Option -height is not available when themed.
+	Thanks to Kevin Walzer for the test on MacOS.
+	* buttonbox.tcl When themed, only set themed button options.
+	The widget itself is not jet themed.
+	* Dialog.html Removed documentation of unavailable option -buttonwidth.
+
 2010-11-09  Andreas Kupries  <andreask@activestate.com>
 
 	* tree.tcl (Tree::itemconfigure): Fix intermingling of node names
