@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.10.2.1 2010/10/15 08:26:05 oehhar Exp $
+#  $Id: label.tcl,v 1.10.2.2 2010/11/21 19:35:48 oehhar Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Label::create
@@ -16,8 +16,13 @@
 namespace eval Label {
     Widget::define Label label DragSite DropSite DynamicHelp
 
-    Widget::tkinclude Label label .l \
-        remove { -foreground -text -textvariable -underline }
+    if {$::Widget::_theme} {
+        Widget::tkinclude Label label .l \
+            remove { -foreground -text -textvariable -underline -state}
+	} else {
+        Widget::tkinclude Label label .l \
+            remove { -foreground -text -textvariable -underline }
+	}
 
     Widget::declare Label {
         {-name               String     ""     0}
@@ -59,18 +64,29 @@ proc Label::create { path args } {
     frame $path -class Label -borderwidth 0 -highlightthickness 0 -relief flat -padx 0 -pady 0
     Widget::initFromODB Label $path $maps(Label)
 
-    eval [list label $path.l] $maps(.l)
-
-    if { [Widget::cget $path -state] == "normal" } {
-        set fg [Widget::cget $path -foreground]
+    if {$::Widget::_theme} {
+        eval [list ttk::label $path.l] $maps(.l)
     } else {
-        set fg [Widget::cget $path -disabledforeground]
-    }
+        eval [list label $path.l] $maps(.l)
+	}
+
+    if {$::Widget::_theme} {
+        if { [Widget::cget $path -state] != "normal" } {
+            $path.l state disabled
+		}
+    } else {
+        if { [Widget::cget $path -state] == "normal" } {
+            set fg [Widget::cget $path -foreground]
+        } else {
+            set fg [Widget::cget $path -disabledforeground]
+        }
+        $path.l configure -foreground $fg
+	}
 
     set var [Widget::cget $path -textvariable]
     if {  $var == "" &&
           [Widget::cget $path -image] == "" &&
-          [Widget::cget $path -bitmap] == ""} {
+          ($::Widget::_theme || [Widget::cget $path -bitmap] == "")} {
         set desc [BWidget::getname [Widget::cget $path -name]]
         if { $desc != "" } {
             set text  [lindex $desc 0]
@@ -85,7 +101,7 @@ proc Label::create { path args } {
     }
 
     $path.l configure -text $text -textvariable $var \
-	    -underline $under -foreground $fg
+	    -underline $under
 
     set accel [string tolower [string index $text $under]]
     if { $accel != "" } {
@@ -118,20 +134,38 @@ proc Label::configure { path args } {
     set res [Widget::configure $path $args]
 
     set cfg  [Widget::hasChanged $path -foreground fg]
-    set cdfg [Widget::hasChanged $path -disabledforeground dfg]
     set cst  [Widget::hasChanged $path -state state]
 
-    if { $cst || $cfg || $cdfg } {
-        if { $state == "normal" } {
+    if {$::Widget::_theme} {
+        if { $cfg } {
             $path.l configure -fg $fg
-        } else {
-            $path.l configure -fg $dfg
         }
-    }
+        if { $cst } {
+            if { $state == "normal" } {
+                $path.l state !disabled
+            } else {
+                $path.l state disabled
+            }
+        }
+    } else {
+        set cdfg [Widget::hasChanged $path -disabledforeground dfg]
+        if { $cst || $cfg || $cdfg } {
+            if { $state == "normal" } {
+                $path.l configure -fg $fg
+            } else {
+                $path.l configure -fg $dfg
+            }
+        }
+	}
 
     set cv [Widget::hasChanged $path -textvariable var]
     set cb [Widget::hasChanged $path -image img]
-    set ci [Widget::hasChanged $path -bitmap bmp]
+    if {$::Widget::_theme} {
+        set ci 0
+        set bmp ""
+	} else {
+        set ci [Widget::hasChanged $path -bitmap bmp]
+	}
     set cn [Widget::hasChanged $path -name name]
     set ct [Widget::hasChanged $path -text text]
     set cu [Widget::hasChanged $path -underline under]
@@ -172,6 +206,30 @@ proc Label::configure { path args } {
 # ------------------------------------------------------------------------------
 proc Label::cget { path option } {
     return [Widget::cget $path $option]
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command Label::identify
+# ----------------------------------------------------------------------------
+proc Label::identify { path args } {
+    eval $path.l identify $args
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command Label::instate
+# ----------------------------------------------------------------------------
+proc Label::instate { path args } {
+    eval $path.l instate $args
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command Label::state
+# ----------------------------------------------------------------------------
+proc Label::state { path args } {
+    eval $path.l state $args
 }
 
 
