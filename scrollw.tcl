@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.13 2009/06/29 13:28:24 oehhar Exp $
+#  $Id: scrollw.tcl,v 1.13.2.1 2010/11/23 08:21:17 oehhar Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -47,21 +47,31 @@ proc ScrolledWindow::create { path args } {
 
     set bg     [Widget::cget $path -background]
     set sbsize [Widget::cget $path -size]
-    set sw     [eval [list frame $path \
-			  -relief flat -borderwidth 0 -background $bg \
-			  -highlightthickness 0 -takefocus 0] \
-		    [Widget::subcget $path :cmd]]
 
-    scrollbar $path.hscroll \
-	    -highlightthickness 0 -takefocus 0 \
-	    -orient	 horiz	\
-	    -relief	 sunken	\
-	    -bg	 $bg
-    scrollbar $path.vscroll \
-	    -highlightthickness 0 -takefocus 0 \
-	    -orient	 vert	\
-	    -relief	 sunken	\
-	    -bg	 $bg
+    if { $::Widget::_theme } {
+        set sw     [eval [list ttk::frame $path \
+                      -relief flat -borderwidth 0 -takefocus 0] \
+                        [Widget::subcget $path :cmd]]
+        ttk::scrollbar $path.hscroll \
+            -takefocus 0 -orient horiz
+        ttk::scrollbar $path.vscroll \
+            -takefocus 0 -orient vert
+    } else {
+        set sw     [eval [list frame $path \
+                      -relief flat -borderwidth 0 -background $bg \
+                      -highlightthickness 0 -takefocus 0] \
+                        [Widget::subcget $path :cmd]]
+        scrollbar $path.hscroll \
+            -highlightthickness 0 -takefocus 0 \
+            -orient	 horiz	\
+            -relief	 sunken	\
+            -bg	 $bg
+        scrollbar $path.vscroll \
+            -highlightthickness 0 -takefocus 0 \
+            -orient	 vert	\
+            -relief	 sunken	\
+            -bg	 $bg
+    }
 
     set data(realized) 0
 
@@ -77,11 +87,13 @@ proc ScrolledWindow::create { path args } {
 	set data(hsb,packed) 0
 	set data(vsb,packed) 0
     }
-    if {$sbsize} {
-	$path.vscroll configure -width $sbsize
-	$path.hscroll configure -width $sbsize
-    } else {
-	set sbsize [$path.vscroll cget -width]
+    if { ! $::Widget::_theme } {
+        if {$sbsize} {
+            $path.vscroll configure -width $sbsize
+            $path.hscroll configure -width $sbsize
+        } else {
+            set sbsize [$path.vscroll cget -width]
+        }
     }
     set data(ipad) [Widget::cget $path -ipad]
 
@@ -141,10 +153,10 @@ proc ScrolledWindow::configure { path args } {
     Widget::getVariable $path data
 
     set res [Widget::configure $path $args]
-    if { [Widget::hasChanged $path -background bg] } {
-	$path configure -background $bg
-	catch {$path.hscroll configure -background $bg}
-	catch {$path.vscroll configure -background $bg}
+    if { ! $::Widget::_theme && [Widget::hasChanged $path -background bg] } {
+        $path configure -background $bg
+        catch {$path.hscroll configure -background $bg}
+        catch {$path.vscroll configure -background $bg}
     }
 
     if {[Widget::hasChanged $path -scrollbar scrollbar] | \
