@@ -1,3 +1,7 @@
+2010-11-05 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.3 tagged ****
+
 2010-11-23 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* scrollw.tcl Add theming support for ScrolledWindow widget.
