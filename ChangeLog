@@ -1,3 +1,15 @@
+2010-12-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.4 tagged ****
+
+2010-12-14  Andreas Kupries  <andreask@activestate.com>
+
+	* tree.tcl [Bug 3106208]: Followup. Moved the fixed code of the
+	last entry I did (2010-11-09) into a new command Tree::MergeFlag
+	and call this from both Tree::itemconfigure and Tree::insert.
+	Missing the place in Tree::insert caused another problem, found by
+	Dustin Littau.
+
 2010-11-05 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.3 tagged ****
@@ -31,7 +43,7 @@
 	search as a list. Now using a temporary array for quicker check
 	and append/replace [Bug 3106208].
 
-	2010-11-09 Harald Oehlmann <oehhar@users.sourceforge.net>
+2010-11-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* mainframe.tcl Menu text shows white on white on Mac aqua
 	[Bug 3105665] reported by Scott Smedley fixed by Kevin Walzer.
