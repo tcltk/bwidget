@@ -1,11 +1,39 @@
 # ------------------------------------------------------------------------------
 #  ChangeLog
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: ChangeLog,v 1.221 2010/11/21 17:29:07 oehhar Exp $
+#  $Id: ChangeLog,v 1.222 2010/12/14 17:01:34 andreas_kupries Exp $
 # ------------------------------------------------------------------------------
+
+2010-12-14  Andreas Kupries  <andreask@activestate.com>
+
+	* tree.tcl [Bug 3106208]: Followup. Moved the fixed code of the
+	last entry I did (2010-11-09) into a new command Tree::MergeFlag
+	and call this from both Tree::itemconfigure and Tree::insert.
+	Missing the place in Tree::insert caused another problem, found by
+	Dustin Littau.
+
+2010-11-05 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.3 tagged ****
+
+2010-11-23 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* scrollw.tcl Add theming support for ScrolledWindow widget.
+	* ScrolledWindow.html Themed mode documented.
+
+2010-11-21 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* label.tcl Add theming support for Label widget.
+	* label.html Themed mode documented.
 
 2010-11-16 Harald Oehlmann <oehhar@users.sourceforge.net>
 
+	* button.tcl Add theming support for Button widget.
+	Option "-relief link" is mapped to "Toolbutton style.
+	Option -height is not available when themed.
+	Thanks to Kevin Walzer for the test on MacOS.
+	* buttonbox.tcl When themed, only set themed button options.
+	The widget itself is not jet themed.
 	* Dialog.html Removed documentation of unavailable option -buttonwidth.
 
 2010-11-09  Andreas Kupries  <andreask@activestate.com>

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.63 2010/11/10 07:57:58 oehhar Exp $
+#  $Id: tree.tcl,v 1.64 2010/12/14 17:01:34 andreas_kupries Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -359,7 +359,7 @@ proc Tree::insert { path index parent node args } {
             _redraw_idle $path 3
         } else {
             # ...and closed -> redraw cross
-            lappend data(upd,nodes) $parent 8
+	    MergeFlag $path $parent 8
             _redraw_idle $path 2
         }
     }
@@ -409,20 +409,27 @@ proc Tree::itemconfigure { path node args } {
 	}
 
 	if { $data(upd,level) < 3 && $flag } {
-            # data(upd,nodes) is a key-val list: emulate a dict by an array
-            array set n $data(upd,nodes)
-            if {![info exists n($node)]} {
-                lappend data(upd,nodes) $node $flag
-            } else {
-                set n($node) [expr {$n($node) | $flag}]
-                set data(upd,nodes) [array get n]
-            }
+	    MergeFlag $path $node $flag
             _redraw_idle $path 2
         }
     }
     return $result
 }
 
+proc Tree::MergeFlag { path node flag } {
+    variable $path
+    upvar 0  $path data
+
+    # data(upd,nodes) is a key-val list: emulate a dict by an array
+    array set n $data(upd,nodes)
+    if {![info exists n($node)]} {
+	lappend data(upd,nodes) $node $flag
+    } else {
+	set n($node) [expr {$n($node) | $flag}]
+	set data(upd,nodes) [array get n]
+    }
+    return
+}
 
 # ----------------------------------------------------------------------------
 #  Command Tree::itemcget
