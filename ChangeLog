@@ -1,3 +1,7 @@
+2010-01-17 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* pkgIndex.tcl: corrected package version in package provide
+
 2010-12-14 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.4 tagged ****
