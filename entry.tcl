@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  entry.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: entry.tcl,v 1.22 2009/06/10 08:48:06 oehhar Exp $
+#  $Id: entry.tcl,v 1.22.2.1 2011/02/14 16:56:09 oehhar Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Entry::create
@@ -64,9 +64,15 @@ namespace eval Entry {
         COLOR   {move {}}
     }
 
-    foreach event [bind Entry] {
-        bind BwEntry $event [bind Entry $event]
-    }
+    if {[Widget::theme]} {
+        foreach event [bind TEntry] {
+            bind BwEntry $event [bind TEntry $event]
+        }
+    }  else  {
+        foreach event [bind Entry] {
+            bind BwEntry $event [bind Entry $event]
+        }
+     }
 
     # Copy is kind of a special event.  It should be enabled when the
     # widget is editable but not disabled, and not when the widget is disabled.
@@ -92,17 +98,29 @@ proc Entry::create { path args } {
     array set maps [Widget::parseArgs Entry $args]
 
     set data(afterid) ""
-    eval [list entry $path] $maps(:cmd)
+    if {[Widget::theme]} {
+        eval [list ttk::entry $path] $maps(:cmd)
+    }  else  {
+        eval [list entry $path] $maps(:cmd)
+    }
     Widget::initFromODB Entry $path $maps(Entry)
     set state    [Widget::getMegawidgetOption $path -state]
     set editable [Widget::getMegawidgetOption $path -editable]
     set text     [Widget::getMegawidgetOption $path -text]
     if { $editable && [string equal $state "normal"] } {
         bindtags $path [list $path BwEntry [winfo toplevel $path] all]
-        $path configure -takefocus 1 -insertontime 600
+        if {[Widget::theme]} {
+            $path configure -takefocus 1
+        } else {
+            $path configure -takefocus 1 -insertontime 600
+        }
     } else {
         bindtags $path [list $path BwDisabledEntry [winfo toplevel $path] all]
-        $path configure -takefocus 0 -insertontime 0
+        if {[Widget::theme]} {
+            $path configure -takefocus 0
+        } else {
+            $path configure -takefocus 0 -insertontime 0
+        }
     }
     if { $editable == 0 } {
         $path configure -cursor left_ptr
@@ -166,20 +184,28 @@ proc Entry::configure { path args } {
             if { $idx != -1 } {
                 bindtags $path [lreplace $btags $idx $idx BwEntry]
             }
-            $path:cmd configure -takefocus 1 -insertontime 600
+            if {[Widget::theme]} {
+                $path:cmd configure -takefocus 1
+            } else {
+                $path:cmd configure -takefocus 1 -insertontime 600
+            }
         } else {
             set idx [lsearch $btags BwEntry]
             if { $idx != -1 } {
                 bindtags $path [lreplace $btags $idx $idx BwDisabledEntry]
             }
-            $path:cmd configure -takefocus 0 -insertontime 0
+            if {[Widget::theme]} {
+                $path:cmd configure -takefocus 0
+            } else {
+                 $path:cmd configure -takefocus 0 -insertontime 0
+            }
             if { [string equal [focus] $path] } {
                 focus .
             }
         }
     }
 
-    if { $chstate || $chfg || $chdfg || $chbg || $chdbg } {
+    if { ![Widget::theme] && ($chstate || $chfg || $chdfg || $chbg || $chdbg) } {
 	set state [Widget::getMegawidgetOption $path -state]
         if { [string equal $state "disabled"] } {
             $path:cmd configure \
@@ -267,7 +293,7 @@ proc Entry::_path_command { path cmd larg } {
             return [eval [linsert $larg 0 Entry::$cmd $path]]
         }
         default {
-            return [eval [linsert $larg 0 $path:cmd $cmd]]
+            return [uplevel 2 [linsert $larg 0 $path:cmd $cmd]]
         }
     }
 }

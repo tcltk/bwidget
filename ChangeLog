@@ -1,4 +1,16 @@
-2010-01-17 Harald Oehlmann <oehhar@users.sourceforge.net>
+2011-02-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+    * entry.tcl, labelentry.tcl, labelframe.tcl, mainframe.tcl,
+    pagesmgr.tcl, scrollw.tcl: [Bug 3168761]:
+    entry failes when themed support activated with:
+    unknown option "-highlightthickness" (reported by George
+    on clt 27 Jan., 16:55).
+    The patch by Wojciech Kocjan fixes this and enhances
+    labelentry, labelframe and pagesmgr to also use themed frames.
+    Within scrollw.tcl, a bug for empty background handling is fixed.
+    The scrollbar background is not set any more for not-themed widget.
+
+2011-01-17 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* pkgIndex.tcl: corrected package version in package provide
 

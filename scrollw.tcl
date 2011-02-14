@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 #  scrollw.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: scrollw.tcl,v 1.13.2.1 2010/11/23 08:21:17 oehhar Exp $
+#  $Id: scrollw.tcl,v 1.13.2.2 2011/02/14 16:56:09 oehhar Exp $
 # -----------------------------------------------------------------------------
 #  Index of commands:
 #     - ScrolledWindow::create
@@ -57,20 +57,21 @@ proc ScrolledWindow::create { path args } {
         ttk::scrollbar $path.vscroll \
             -takefocus 0 -orient vert
     } else {
+        if {$bg != ""} {
+            set bg [list -background $bg]
+        }
         set sw     [eval [list frame $path \
-                      -relief flat -borderwidth 0 -background $bg \
+                      -relief flat -borderwidth 0] $bg [list \
                       -highlightthickness 0 -takefocus 0] \
                         [Widget::subcget $path :cmd]]
         scrollbar $path.hscroll \
             -highlightthickness 0 -takefocus 0 \
             -orient	 horiz	\
-            -relief	 sunken	\
-            -bg	 $bg
+            -relief	 sunken
         scrollbar $path.vscroll \
             -highlightthickness 0 -takefocus 0 \
             -orient	 vert	\
-            -relief	 sunken	\
-            -bg	 $bg
+            -relief	 sunken
     }
 
     set data(realized) 0
