@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.42.2.1 2009/08/10 11:28:50 oehhar Exp $
+#  $Id: combobox.tcl,v 1.42.2.2 2011/03/02 13:11:12 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -86,8 +86,13 @@ proc ComboBox::create { path args } {
 
     bindtags $path [list $path BwComboBox [winfo toplevel $path] all]
 
-    set entry [eval [list Entry::create $path.e] $maps(.e) \
-		   [list -relief flat -borderwidth 0 -takefocus 1]]
+    if {[Widget::theme]} {
+        set entry [eval [list Entry::create $path.e] $maps(.e) \
+            [list -takefocus 1]]
+    } else {
+        set entry [eval [list Entry::create $path.e] $maps(.e) \
+            [list -relief flat -borderwidth 0 -takefocus 1]]
+    }
 
     ::bind $path.e <FocusOut>      [list $path _focus_out]
     ::bind $path   <<TraverseIn>>  [list $path _traverse_in]
@@ -477,14 +482,23 @@ proc ComboBox::_create_popup { path } {
     set sw [ScrolledWindow $shell.sw -managed 1 -size $sbwidth -ipad 0]
 
     if {$bw} {
-        set listb  [ListBox $shell.listb \
-                -relief flat -borderwidth 0 -highlightthickness 0 \
-                -selectmode single -selectfill 1 -autofocus 0 -height $h \
-                -font [Widget::cget $path -font]  \
-                -bg [Widget::cget $path -entrybg] \
-                -fg [Widget::cget $path -foreground] \
-                -selectbackground [Widget::cget $path -selectbackground] \
-                -selectforeground [Widget::cget $path -selectforeground]]
+        if {[Widget::theme]} {
+            set listb  [ListBox $shell.listb \
+                    -relief flat -borderwidth 0 -highlightthickness 0 \
+                    -selectmode single -selectfill 1 -autofocus 0 -height $h \
+                    -font [Widget::cget $path -font]  \
+                    -bg [Widget::cget $path -entrybg] \
+                    -fg [Widget::cget $path -foreground]]
+        } else {
+            set listb  [ListBox $shell.listb \
+                    -relief flat -borderwidth 0 -highlightthickness 0 \
+                    -selectmode single -selectfill 1 -autofocus 0 -height $h \
+                    -font [Widget::cget $path -font]  \
+                    -bg [Widget::cget $path -entrybg] \
+                    -fg [Widget::cget $path -foreground] \
+                    -selectbackground [Widget::cget $path -selectbackground] \
+                    -selectforeground [Widget::cget $path -selectforeground]]
+        }
 
         set values [Widget::cget $path -values]
         set images [Widget::cget $path -images]
@@ -498,16 +512,27 @@ proc ComboBox::_create_popup { path } {
             $listb bindImage <Enter> [list $listb selection set]
         }
     } else {
-        set listb  [listbox $shell.listb \
-                -relief flat -borderwidth 0 -highlightthickness 0 \
-                -exportselection false \
-                -font	[Widget::cget $path -font]  \
-                -height $h \
-                -bg [Widget::cget $path -entrybg] \
-                -fg [Widget::cget $path -foreground] \
-                -selectbackground [Widget::cget $path -selectbackground] \
-                -selectforeground [Widget::cget $path -selectforeground] \
-                -listvariable [Widget::varForOption $path -values]]
+        if {[Widget::theme]} {
+            set listb  [listbox $shell.listb \
+                    -relief flat -borderwidth 0 -highlightthickness 0 \
+                    -exportselection false \
+                    -font	[Widget::cget $path -font]  \
+                    -height $h \
+                    -bg [Widget::cget $path -entrybg] \
+                    -fg [Widget::cget $path -foreground] \
+                    -listvariable [Widget::varForOption $path -values]]
+        } else {
+            set listb  [listbox $shell.listb \
+                    -relief flat -borderwidth 0 -highlightthickness 0 \
+                    -exportselection false \
+                    -font	[Widget::cget $path -font]  \
+                    -height $h \
+                    -bg [Widget::cget $path -entrybg] \
+                    -fg [Widget::cget $path -foreground] \
+                    -selectbackground [Widget::cget $path -selectbackground] \
+                    -selectforeground [Widget::cget $path -selectforeground] \
+                    -listvariable [Widget::varForOption $path -values]]
+        }
         ::bind $listb <ButtonRelease-1> [list ComboBox::_select $path @%x,%y]
 
         if {[Widget::cget $path -hottrack]} {
@@ -567,9 +592,12 @@ proc ComboBox::_recreate_popup { path } {
             -height $h \
             -font   [Widget::cget $path -font] \
             -bg     [Widget::cget $path -entrybg] \
-            -fg     [Widget::cget $path -foreground] \
-            -selectbackground [Widget::cget $path -selectbackground] \
-            -selectforeground [Widget::cget $path -selectforeground]
+            -fg     [Widget::cget $path -foreground]
+    if {![Widget::theme]} {
+        $listb configure \
+                -selectbackground [Widget::cget $path -selectbackground] \
+                -selectforeground [Widget::cget $path -selectforeground]
+    }
     pack $sw -fill both -expand yes
     $sw setwidget $listb
     raise $listb
