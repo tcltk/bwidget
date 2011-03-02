@@ -1,5 +1,12 @@
 2011-02-14 Harald Oehlmann <oehhar@users.sourceforge.net>
 
+    * combobox.tcl: [Bug 3182287] : ComboBox failes in themed mode
+    due to the use of the themed entry widget. The following options
+    are not supported (and thus called) any more: -relief
+    -highlightbackground -highlightforeground
+
+2011-02-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+
     * entry.tcl, labelentry.tcl, labelframe.tcl, mainframe.tcl,
     pagesmgr.tcl, scrollw.tcl: [Bug 3168761]:
     entry failes when themed support activated with:
