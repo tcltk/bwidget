@@ -51,3 +51,7 @@
 
 *PasswdDlg.title:  Introduzca su nombre de usuario y contraseña
 
+! --- symbolic names of label of SelectColor dialog ----------------------------
+
+*baseColorsName: Base colors
+*userColorsName: User colors

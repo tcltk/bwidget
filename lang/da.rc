@@ -50,3 +50,8 @@
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
 *PasswdDlg.title:  Indtast brugernavn og password
+
+! --- symbolic names of label of SelectColor dialog ----------------------------
+
+*baseColorsName: Base colors
+*userColorsName: User colors

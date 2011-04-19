@@ -1,55 +1,107 @@
 ! ------------------------------------------------------------------------------
-!  fr.rc
+
+!  pl.rc
+
 !  This file is part of Unifix BWidget Toolkit
-!  Definition of french resources
+
+!  Definition of english resources
+
 ! ------------------------------------------------------------------------------
+
+
+
 
 
 ! --- symbolic names of buttons ------------------------------------------------
 
-*abortName:    A&bandonner
-*retryName:    &R�essayer
-*ignoreName:   &Ignorer
-*okName:       &OK
-*cancelName:   &Annuler
-*yesName:      &Oui
-*noName:       &Non
+
+
+*abortName:   &Porzuć
+
+*retryName:   P&onów
+
+*ignoreName:  &Ignoruj
+
+*okName:      &OK
+
+*cancelName:  &Anyluj
+
+*yesName:     &Tak
+
+*noName:      &Nie
+
+
+
+
 
 ! --- symbolic names of label of SelectFont dialog ----------------------------
 
-*boldName:       &Gras
-*italicName:     &Italique
-*underlineName:  &Soulign�
-*overstrikeName: &Barr�
-*fontName:       &Police
-*sizeName:       &Taille
-*styleName:      St&yle
+
+
+*boldName:       Pogrubiona
+
+*italicName:     Kursywa
+
+*underlineName:  Podkreślenie
+
+*overstrikeName: Przekreślenie
+
+*fontName:       &Czcionka:
+
+*sizeName:       &Rozmiar:
+
+*styleName:      St&yl czcionki:
+
+
+
 
 
 ! --- symbolic names of label of PasswdDlg dialog -----------------------------
 
-*loginName:    Nom de l'&utilisateur
-*passwordName: Mot de &passe
+
+
+*loginName:    &Login
+
+*passwordName: &Hasło
+
+
+
 
 
 ! --- resource for SelectFont dialog ------------------------------------------
 
-*SelectFont.title:        S�lection d'une police
-*SelectFont.sampletext:	  Texte d'exemple
+
+
+*SelectFont.title:	    Wybór czcionki
+
+*SelectFont.sampletext:	    Przykładowy tekst
+
+
+
 
 
 ! --- resource for MessageDlg dialog ------------------------------------------
 
-*MessageDlg.noneTitle:      Message
-*MessageDlg.infoTitle:      Information
-*MessageDlg.questionTitle:  Question
-*MessageDlg.warningTitle:   Attention
-*MessageDlg.errorTitle:     Erreur
+
+
+*MessageDlg.noneTitle:      Wiadomość
+
+*MessageDlg.infoTitle:      Informacja
+
+*MessageDlg.questionTitle:  Pytanie
+
+*MessageDlg.warningTitle:   Ostrzeżenie
+
+*MessageDlg.errorTitle:     Błąd
+
 
 
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
-*PasswdDlg.title:  Entrez le login et le mot de passe
+
+
+*PasswdDlg.title:  Wpisz login i hasło
+
 
 ! --- symbolic names of label of SelectColor dialog ----------------------------
 
