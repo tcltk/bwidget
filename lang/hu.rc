@@ -50,3 +50,9 @@
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
 *PasswdDlg.title:  Add meg a felhasználónevet és a jelszót
+
+
+! --- symbolic names of label of SelectColor dialog ----------------------------
+
+*baseColorsName: Base colors
+*userColorsName: User colors

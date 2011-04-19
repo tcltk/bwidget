@@ -1,3 +1,9 @@
+2011-04-19 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+    * lang/*.rc [Bug 3289573] : Add translation (templates) for the
+    Color picker widget text "Base colors" and "User colors".
+    Only german and english locals are provided so far.
+
 2011-02-14 Harald Oehlmann <oehhar@users.sourceforge.net>
 
     * combobox.tcl: [Bug 3182287] : ComboBox failes in themed mode
