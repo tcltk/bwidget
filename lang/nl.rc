@@ -18,13 +18,14 @@
 
 ! --- symbolic names of label of SelectFont dialog ----------------------------
 
-*boldName:       Vet
-*italicName:     Cursief
-*underlineName:  Onderstrepen
-*overstrikeName: Doorhalen
-*fontName:       &Lettertype
-*sizeName:       &Grootte
-*styleName:      &Stijl
+*boldName:          Vet
+*italicName:        Cursief
+*underlineName:     Onderstrepen
+*overstrikeName:    Doorhalen
+*fontName:          &Lettertype
+*sizeName:          &Grootte
+*styleName:         &Stijl
+*colorPickerName:   &Kleur...
 
 
 ! --- symbolic names of label of PasswdDlg dialog -----------------------------

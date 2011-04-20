@@ -18,13 +18,14 @@
 
 ! --- symbolic names of label of SelectFont dialog ----------------------------
 
-*boldName:       Félkövér
-*italicName:     Dőlt
-*underlineName:  Aláhúzott
-*overstrikeName: Felülírás
-*fontName:       &Betűtípus
-*sizeName:       &Méret
-*styleName:      S&tílus
+*boldName:          Félkövér
+*italicName:        Dőlt
+*underlineName:     Aláhúzott
+*overstrikeName:    Felülírás
+*fontName:          &Betűtípus
+*sizeName:          &Méret
+*styleName:         S&tílus
+*colorPickerName:   &Color...
 
 
 ! --- symbolic names of label of PasswdDlg dialog -----------------------------
