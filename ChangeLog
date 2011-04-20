@@ -1,4 +1,8 @@
-2011-04-19 Harald Oehlmann <oehhar@users.sourceforge.net>
+2011-04-20 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	lang/hu.rc by Rezso updated
+
+2011-04-20 Harald Oehlmann <oehhar@users.sourceforge.net>
 
     * font.tcl, lang/*.rc: Add translation possibility
     for color picker button of font dialog.
