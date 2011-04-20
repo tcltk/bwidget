@@ -18,13 +18,14 @@
 
 ! --- symbolic names of label of SelectFont dialog ----------------------------
 
-*boldName:       Bold
-*italicName:     Italic
-*underlineName:  Underline
-*overstrikeName: Overstrike
-*fontName:       &Font
-*sizeName:       &Size
-*styleName:      St&yle
+*boldName:          Bold
+*italicName:        Italic
+*underlineName:     Underline
+*overstrikeName:    Overstrike
+*fontName:          &Font
+*sizeName:          &Size
+*styleName:         St&yle
+*colorPickerName:   &Color...
 
 
 ! --- symbolic names of label of PasswdDlg dialog -----------------------------

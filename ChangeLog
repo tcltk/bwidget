@@ -1,5 +1,12 @@
 2011-04-19 Harald Oehlmann <oehhar@users.sourceforge.net>
 
+    * font.tcl, lang/*.rc: Add translation possibility
+    for color picker button of font dialog.
+    Used google translater to translate "Color" to all languages.
+    Please check if this is correct. [Bug 3289573] reported by Rezso
+
+2011-04-19 Harald Oehlmann <oehhar@users.sourceforge.net>
+
     * lang/*.rc [Bug 3289573] : Add translation (templates) for the
     Color picker widget text "Base colors" and "User colors".
     Only german and english locals are provided so far.
