@@ -1,5 +1,11 @@
 2011-04-26 Harald Oehlmann <oehhar@users.sourceforge.net>
 
+	*notebook.tcl The user frame of the notebook is now a themed
+	frame in themed mode. The set background color does not apply
+	to the user frame in this case.
+
+2011-04-26 Harald Oehlmann <oehhar@users.sourceforge.net>
+
 	label.tcl configuring foreground color caused error when
 	themed [Bug 3292977]
 

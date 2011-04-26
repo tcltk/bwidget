@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 #  notebook.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: notebook.tcl,v 1.25.2.1 2009/08/10 11:28:50 oehhar Exp $
+#  $Id: notebook.tcl,v 1.25.2.2 2011/04/26 14:13:24 oehhar Exp $
 # ---------------------------------------------------------------------------
 #  Index of commands:
 #     - NoteBook::create
@@ -182,8 +182,10 @@ proc NoteBook::configure { path args } {
     set chbg  [Widget::hasChanged $path -background bg]
     if {$chibd || $chbg} {
         foreach page $data(pages) {
-            $path.f$page configure \
-                -borderwidth $ibd -background $bg
+            if { ! $::Widget::_theme } {
+                $path.f$page configure -background $bg
+            }
+            $path.f$page configure -borderwidth $ibd
         }
     }
 
@@ -263,15 +265,20 @@ proc NoteBook::insert { path index page args } {
     set data(pages) [linsert $data(pages) $index $page]
     # If the page doesn't exist, create it; if it does reset its bg and ibd
     if { ![winfo exists $f] } {
-        frame $f \
-	    -relief      flat \
-	    -background  [Widget::cget $path -background] \
-	    -borderwidth [Widget::cget $path -internalborderwidth]
+        if {$::Widget::_theme} {
+            ttk::frame $f
+        } else {
+            frame $f \
+                -relief      flat \
+                -background  [Widget::cget $path -background] \
+                -borderwidth [Widget::cget $path -internalborderwidth]
+        }
         set data($page,realized) 0
     } else {
-	$f configure \
-	    -background  [Widget::cget $path -background] \
-	    -borderwidth [Widget::cget $path -internalborderwidth]
+        if { ! $::Widget::_theme} {
+            $f configure -background  [Widget::cget $path -background]
+        }
+        $f configure -borderwidth [Widget::cget $path -internalborderwidth]
     }
     _compute_height $path
     _compute_width  $path
