@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 #  label.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: label.tcl,v 1.10.2.2 2010/11/21 19:35:48 oehhar Exp $
+#  $Id: label.tcl,v 1.10.2.3 2011/04/26 08:24:28 oehhar Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - Label::create
@@ -138,7 +138,7 @@ proc Label::configure { path args } {
 
     if {$::Widget::_theme} {
         if { $cfg } {
-            $path.l configure -fg $fg
+            $path.l configure -foreground $fg
         }
         if { $cst } {
             if { $state == "normal" } {
