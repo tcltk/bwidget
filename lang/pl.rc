@@ -56,4 +56,5 @@
 ! --- symbolic names of label of SelectColor dialog ----------------------------
 
 *baseColorsName: Kolory podstawowe
-*userColorsName: Kolory podstawowe
+*userColorsName: Kolory niestandardowe
+
