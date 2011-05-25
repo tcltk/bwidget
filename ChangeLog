@@ -1,4 +1,9 @@
-2011-04-26 Harald Oehlmann <oehhar@users.sourceforge.net>
+2011-05-25 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+    *mainframe.tcl: Add a boolean readonly option -sizegrip
+    to show a sizegrip widget in themed mode.
+
+2011-05-24 Harald Oehlmann <oehhar@users.sourceforge.net>
 
     *lang/pl.rc updated by Wojciech Kocjan.
 

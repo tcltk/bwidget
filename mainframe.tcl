@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  mainframe.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: mainframe.tcl,v 1.24.2.2 2011/02/14 16:56:09 oehhar Exp $
+#  $Id: mainframe.tcl,v 1.24.2.3 2011/05/25 15:10:07 oehhar Exp $
 # ------------------------------------------------------------------------------
 #  Index of commands:
 #     - MainFrame::create
@@ -49,6 +49,7 @@ namespace eval MainFrame {
 	{-menubarfont   String     ""  0}
 	{-menuentryfont String     ""  0}
 	{-statusbarfont String     ""  0}
+	{-sizegrip      Boolean    0   1}
     }
 
     Widget::addmap MainFrame "" .frame  {-width {} -height {} -background {}}
@@ -166,6 +167,9 @@ proc MainFrame::create { path args } {
                       -height      [expr {[winfo reqheight $label]-2}] \
                       -borderwidth 1 \
                       -relief      sunken]
+    if {[Widget::theme] && [Widget::getoption $path -sizegrip]} {
+	pack [ttk::sizegrip $botframe.sg] -side right -anchor se
+    }
     pack $status    -in $botframe -fill x -pady 2
     pack $botframe  -side bottom -fill x
     pack $userframe -fill both -expand yes
