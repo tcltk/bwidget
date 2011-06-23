@@ -1,3 +1,10 @@
+2011-06-23 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* listbox.tcl, tree.tcl (_update_scrollregion) the linewise
+	scrolling did not always scroll up to the end on windows.
+	Report and patch by Wojciech Kocjan, review and modification
+	by Koen Danckaert [Bug 3317772]
+
 2011-05-25 Harald Oehlmann <oehhar@users.sourceforge.net>
 
     *mainframe.tcl: Add a boolean readonly option -sizegrip
