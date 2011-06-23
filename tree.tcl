@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  tree.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: tree.tcl,v 1.60.2.3 2010/12/14 21:24:15 oehhar Exp $
+#  $Id: tree.tcl,v 1.60.2.4 2011/06/23 08:28:04 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Tree::create
@@ -1229,16 +1229,10 @@ proc Tree::_update_scrollregion { path } {
         set ys [lindex $bbox 3]
 
         if { $w < $xs } {
-            set w [expr {int($xs)}]
-            if { [set r [expr {$w % $xinc}]] } {
-                set w [expr {$w+$xinc-$r}]
-            }
+            set w [expr {$xs + $w % $xinc}]
         }
         if { $h < $ys } {
-            set h [expr {int($ys)}]
-            if { [set r [expr {$h % $yinc}]] } {
-                set h [expr {$h+$yinc-$r}]
-            }
+            set h [expr {$ys + $h % $yinc}]
         }
     }
 
