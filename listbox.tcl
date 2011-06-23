@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.29.2.4 2011/06/23 08:28:03 oehhar Exp $
+#  $Id: listbox.tcl,v 1.29.2.5 2011/06/23 08:30:13 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -667,7 +667,7 @@ proc ListBox::find {path findInfo {confine ""}} {
                      [string equal $item "img"]  ||
                      [string equal $item "win"] } {
                     # item is the label or image/window of the node
-                    set item [string range [lindex $ltags 1] 2 end]
+                    set item [ListBox::_get_node_name $path $id]
                     set found 1
                     break
                 }
@@ -1110,7 +1110,7 @@ proc ListBox::_redraw_selection { path } {
     set selfill [Widget::getoption $path -selectfill]
     set multi   [Widget::getoption $path -multicolumn]
     foreach id [$path.c find withtag sel] {
-        set item [string range [lindex [$path.c gettags $id] 1] 2 end]
+        set item [ListBox::_get_node_name $path $id]
         if {-1 == [lsearch -exact $data(upd,delete) $item]} {
             $path.c itemconfigure "n:$item" \
                 -fill [_getoption $path $item -foreground]
@@ -1232,7 +1232,7 @@ proc ListBox::_init_drag_cmd { path X Y top } {
     if { [string equal $item "item"] ||
          [string equal $item "img"]  ||
          [string equal $item "win"] } {
-        set item [string range [lindex $ltags 1] 2 end]
+        set item [ListBox::_get_node_name $path $id]
         if {[llength [set cmd [Widget::getoption $path -draginitcmd]]]} {
             return [uplevel \#0 $cmd [list $path $item $top]]
         }
@@ -1631,9 +1631,31 @@ proc ListBox::_mouse_select { path cmd args } {
 }
 
 
+# ListBox::_get_node_name --
+#
+#	Given a listbox item, get the name of the node represented by that
+#	item.
+#
+# Arguments:
+#	path		listbox to query
+#	item		Optional item to examine; if omitted, 
+#			defaults to "current"
+#
+# Results:
+#	node	name of the listbox node.
+proc ListBox::_get_node_name {path {item current}} {
+    set tags [$path.c gettags $item]
+    if {[lindex $tags 0] == "img"} {
+        set node [string range [lindex $tags 2] 2 end]
+    } else {
+        set node [string range [lindex $tags 1] 2 end]
+    }
+    return $node
+}
+
+
 proc ListBox::_get_current { path } {
-    set t [$path.c gettags current]
-    return [string range [lindex $t 1] 2 end]
+    return [ListBox::_get_node_name $path]
 }
 
 
