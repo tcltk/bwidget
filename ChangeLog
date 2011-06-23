@@ -1,5 +1,10 @@
 2011-06-23 Harald Oehlmann <oehhar@users.sourceforge.net>
 
+	* listbox.tcl (listbox::generate_data) fixed last patch
+	by ryotakatsuki [Bug 3324610]
+
+	2011-06-23 Harald Oehlmann <oehhar@users.sourceforge.net>
+
 	* listbox.tcl Fix of Bug 3000293 broke listbox tags.
 	The bindImage subcommand did not report right tag.
 	Patch by ryotakatsuki [Bug 3324610]

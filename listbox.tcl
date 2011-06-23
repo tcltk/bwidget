@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.29.2.5 2011/06/23 08:30:13 oehhar Exp $
+#  $Id: listbox.tcl,v 1.29.2.6 2011/06/23 09:17:19 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -1232,7 +1232,7 @@ proc ListBox::_init_drag_cmd { path X Y top } {
     if { [string equal $item "item"] ||
          [string equal $item "img"]  ||
          [string equal $item "win"] } {
-        set item [ListBox::_get_node_name $path $id]
+        set item [ListBox::_get_node_name $path]
         if {[llength [set cmd [Widget::getoption $path -draginitcmd]]]} {
             return [uplevel \#0 $cmd [list $path $item $top]]
         }
