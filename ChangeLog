@@ -1,3 +1,7 @@
+2011-06-24 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.5 tagged ****
+
 2011-06-23 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl (listbox::generate_data) fixed last patch
