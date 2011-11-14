@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  widget.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: widget.tcl,v 1.35 2009/07/02 16:22:18 oehhar Exp $
+#  $Id: widget.tcl,v 1.35.2.1 2011/11/14 14:33:29 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - Widget::tkinclude
@@ -1435,7 +1435,7 @@ proc Widget::focusOK { w } {
 	} elseif {$value == 1} {
 	    return [winfo viewable $w]
 	} else {
-	    set value [uplevel \#0 $value $w]
+	    set value [uplevel \#0 [list $value $w]]
             if {$value != ""} {
 		return $value
 	    }
