@@ -1,3 +1,9 @@
+2012-03-06 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* BWMan/ListBox.html documented options -selectfill and
+	-autofocus as read-only. Reported by Wolfgang S. Kechel
+	[Bug 3497592]
+
 2011-11-14 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* widget.tcl (Widget::focusOK) fixed list with update.
