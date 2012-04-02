@@ -1,3 +1,14 @@
+2012-04-02 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* entry.tcl, BWMan/entry.tcl checkbox.tcl Themed mode:
+	Invoking "configure" without arguments results in errors
+	that non-ttk options are not present.
+	Removed Entry options: -background -foreground -relief
+	-borderwidth -fg -bg -bd. Reported by Wolfgang S. Kechel
+	[Bug 3513263]
+	* entry.tcl mapped entry option -state to ttk::entry
+	state in themed mode to make state change visible.
+
 2012-03-06 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* BWMan/ListBox.html documented options -selectfill and
