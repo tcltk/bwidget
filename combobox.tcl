@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  combobox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: combobox.tcl,v 1.42.2.2 2011/03/02 13:11:12 oehhar Exp $
+#  $Id: combobox.tcl,v 1.42.2.3 2012/04/02 09:53:41 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ComboBox::create
@@ -27,9 +27,13 @@ namespace eval ComboBox {
 	include {-relief -borderwidth -bd -background} \
 	initialize {-relief sunken -borderwidth 2}
 
-    Widget::bwinclude ComboBox Entry .e \
-	remove {-relief -bd -borderwidth -bg} \
-	rename {-background -entrybg}
+    if {[Widget::theme]} {
+	Widget::bwinclude ComboBox Entry .e
+    } else {
+	Widget::bwinclude ComboBox Entry .e \
+	    remove {-relief -bd -borderwidth -bg} \
+	    rename {-background -entrybg}
+    }
 
     Widget::declare ComboBox {
 	{-height       TkResource 0    0 listbox}
@@ -46,8 +50,14 @@ namespace eval ComboBox {
         {-hottrack     Boolean    0    0}
     }
 
-    Widget::addmap ComboBox ArrowButton .a {
-	-background {} -foreground {} -disabledforeground {} -state {}
+    if {[Widget::theme]} {
+	Widget::addmap ComboBox ArrowButton .a {
+	    -background {} -state {}
+	}
+    } else {
+	Widget::addmap ComboBox ArrowButton .a {
+	    -background {} -foreground {} -disabledforeground {} -state {}
+	}
     }
 
     Widget::syncoptions ComboBox Entry .e {-text {}}
