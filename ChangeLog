@@ -1,3 +1,8 @@
+2012-04-12 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* listbox.tcl ListBox::selection Only redraw if
+	selection changed. Patch by Wolfgang S. Kechel [Bug 3517145]
+
 2012-04-02 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* entry.tcl, BWMan/entry.tcl checkbox.tcl Themed mode:
