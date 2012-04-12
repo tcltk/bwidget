@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 #  listbox.tcl
 #  This file is part of Unifix BWidget Toolkit
-#  $Id: listbox.tcl,v 1.29.2.6 2011/06/23 09:17:19 oehhar Exp $
+#  $Id: listbox.tcl,v 1.29.2.7 2012/04/12 12:46:47 oehhar Exp $
 # ----------------------------------------------------------------------------
 #  Index of commands:
 #     - ListBox::create
@@ -568,6 +568,7 @@ proc ListBox::selection { path cmd args } {
     variable $path
     upvar 0  $path data
 
+    set oldsel $data(selitems);
     switch -- $cmd {
         set {
             set data(selitems) {}
@@ -608,8 +609,10 @@ proc ListBox::selection { path cmd args } {
             return
         }
     }
-
-    _redraw_idle $path 1
+    if {[string compare $oldsel $data(selitems)]} {
+        _redraw_idle $path 1
+    }
+    return;
 }
 
 
