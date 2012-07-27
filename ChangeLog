@@ -1,3 +1,7 @@
+2011-07-27 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.6 tagged ****
+
 2012-04-12 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* listbox.tcl ListBox::selection Only redraw if
