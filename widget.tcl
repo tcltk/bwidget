@@ -1100,6 +1100,19 @@ proc Widget::_configure_option { option altopt } {
     return [list $optdb $optclass]
 }
 
+# ----------------------------------------------------------------------------
+#  Command Widget::_make_tk_widget_name
+# ----------------------------------------------------------------------------
+# Before, the widget meta name was build as: ".#BWidget.#$tkwidget"
+# This does not work for ttk widgets, as they have an "::" in their name.
+# Thus replace any "::" by "__" will do the job.
+proc Widget::_make_tk_widget_name { tkwidget } {
+    set pos 0
+    for {set pos 0} {0 <= [set pos [string first "::" $tkwidget $pos]]} {incr pos} {
+	set tkwidget [string range $tkwidget 0 [expr {$pos-1}]]__[string range $tkwidget [expr {$pos+2}] end]
+    }
+    return ".#BWidget.#$tkwidget"
+}
 
 # ----------------------------------------------------------------------------
 #  Command Widget::_get_tkwidget_options
@@ -1109,7 +1122,7 @@ proc Widget::_get_tkwidget_options { tkwidget } {
     variable _optiondb
     variable _optionclass
 
-    set widget ".#BWidget.#$tkwidget"
+    set widget [_make_tk_widget_name $tkwidget]
     # encapsulation frame to not pollute '.' childspace
     if {![winfo exists ".#BWidget"]} { frame ".#BWidget" }
     if { ![winfo exists $widget] || ![info exists _tk_widget($tkwidget)] } {
@@ -1162,7 +1175,7 @@ proc Widget::_test_tkresource { option value arg } {
 #    set tkwidget [lindex $arg 0]
 #    set realopt  [lindex $arg 1]
     foreach {tkwidget realopt} $arg break
-    set path     ".#BWidget.#$tkwidget"
+    set path     [_make_tk_widget_name $tkwidget]
     set old      [$path cget $realopt]
     $path configure $realopt $value
     set res      [$path cget $realopt]
