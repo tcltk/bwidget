@@ -1,3 +1,13 @@
+2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* widget.tcl: Bug fixed:
+	Error 'invalid command name ".#BWidget.#ttk::entry"'
+	arises in themed mode when an Entry widget should get
+	focus by the tab key.
+	The temporary widget creation fails due to the "::" in
+	the command name of ttk widgets.
+	Any "::" is replaced by "__" [Bug 3599955].
+	
 2011-07-27 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.6 tagged ****
