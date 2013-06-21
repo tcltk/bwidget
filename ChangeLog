@@ -13,6 +13,10 @@
 	
 	* init.tcl: Make loadable in save interpreter.
 	Fix by K.J.Nash [Bug-4365a23bd3]
+
+	* combobox.tcl: Add method getentry to return entry
+	widget path for bind purposes.
+	Patch by Michael [Patch-2340355]
 	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
