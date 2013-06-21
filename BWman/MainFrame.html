@@ -161,9 +161,9 @@ is one of <B>Ctrl</B>, <B>Alt</B> or <B>CtrlAlt</B>, and the second as letter
 (see <A HREF="#-casesensitive">-casesensitive</A> option for interpretation),  digit or
 a special key name.
 An accelerator string is build and corresponding binding set on the toplevel to invoke the
-menu entry.
+menu entry.</LI>
 <LI><I>option value</I> specifies additionnal options for the entry (see <B>menu add</B>
-command).
+command).</LI>
 </UL>
 Each value enclosed by ? are optional and defaulted to empty string, but must be
 provided if one or more following options is not empty.
@@ -184,7 +184,7 @@ set descmenu {
         {command "E&xit" {} "Exit the application" {} -command Menu::exit}
     }
     "&Options" {} {} 0 {
-        {checkbutton "Toolbar" {} "Show/hide toolbar" {} 
+        {checkbutton "Toolbar" {} "Show/hide toolbar" {}
             -variable Menu::_drawtoolbar
             -command  {$Menu::_mainframe showtoolbar toolbar $Menu::_drawtoolbar}
         }
