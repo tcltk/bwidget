@@ -7,6 +7,17 @@
 	by new option -casesensitive.
 	Patch by cmard [Patch 1977644]
 	
+	* color.tcl: New option -variable allows to give a
+	traceable variable with current user color choice.
+	New option -background and command SelectColor for
+	window background.
+	TitleFrames, Dynamic help and Aqua native buttons used.
+	Show current choice by highlighting, not focus, to avoid
+	conflict with keyboard traversal.
+	Shows entry widget for numerical color input/output.
+	
+	Patch by K.J.Nash [Patch 75101]
+	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* widget.tcl: Bug fixed:

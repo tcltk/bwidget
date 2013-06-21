@@ -2,11 +2,13 @@ namespace eval SelectColor {
     Widget::define SelectColor color Dialog
 
     Widget::declare SelectColor {
-        {-title     String     "Select a color" 0}
-        {-parent    String     ""               0}
-        {-color     TkResource ""               0 {label -background}}
-	{-type      Enum       "dialog"         1 {dialog popup}}
-	{-placement String     "center"         1}
+        {-title      String     "Select a color" 0}
+        {-parent     String     ""               0}
+        {-variable   String     ""               1}
+        {-color      TkResource ""               0 {label -background}}
+	{-type       Enum       "dialog"         1 {dialog popup}}
+	{-placement  String     "center"         1}
+        {-background TkResource ""               0 {label -background}}
     }
 
     variable _baseColors {
@@ -31,6 +33,14 @@ namespace eval SelectColor {
     variable _wcolor
     variable _image
     variable _hsv
+
+    variable _varName
+    variable _unsavedSelection
+    variable _oldColor
+    variable _entryColor
+    variable _bgColor
+    variable _fgColor
+    variable _rounds
 }
 
 proc SelectColor::create { path args } {
@@ -70,6 +80,10 @@ proc SelectColor::menu {path placement args} {
     variable _wcolor
     variable _selectype
     variable _selection
+    variable _varName
+    variable _unsavedSelection
+    variable _bgColor
+    variable _rounds
 
     Widget::init SelectColor $path $args
     set top [toplevel $path]
@@ -78,6 +92,14 @@ proc SelectColor::menu {path placement args} {
     wm transient $top $parent
     wm overrideredirect $top 1
     catch { wm attributes $top -topmost 1 }
+
+    set _varName [Widget::cget $path -variable]
+    if {[string range $_varName 0 1] ne {::}} {
+        set _varName ::SelectColor::_unsavedSelection
+    }
+
+    set _bgColor  [Widget::cget $path -background]
+    set _rounds   {}
 
     set frame [frame $top.frame \
                    -highlightthickness 0 \
@@ -115,6 +137,14 @@ proc SelectColor::menu {path placement args} {
     bind $top <Escape> {set SelectColor::_selection -2}
     bind $top <FocusOut> [subst {if {"%W" == "$top"} \
 				     {set SelectColor::_selection -2}}]
+
+    # set background color for menu
+    $f     configure -bg $_bgColor
+    $frame configure -bg $_bgColor
+    foreach w [winfo children $frame] {
+        $w configure -highlightcolor $_bgColor -highlightbackground $_bgColor
+    }
+
     eval [list BWidget::place $top 0 0] $placement
 
     wm deiconify $top
@@ -145,12 +175,24 @@ proc SelectColor::menu {path placement args} {
 		lappend nativecmd $opts($key) $val
 	    }
 	    if {$native} {
+		# Call native dialog
 		return [eval $nativecmd]
 	    }
 	}
+	# Call BWidget dialog
 	return [eval [list dialog $path] $args]
     } else {
-        return [lindex $colors $_selection]
+	# The user has either selected one of the palette colors, or has
+	# cancelled.  The full BWidget/native dialog was not called.
+	# Unless the user has cancelled, record the selected
+	# color in $_varName which may be traced by the caller.
+	set tmpCol [lindex $colors $_selection]
+	if {$tmpCol eq {}} {
+	    # User has cancelled - no need to set $_varName
+	} else {
+	    set $_varName $tmpCol
+	}
+	return $tmpCol
     }
 }
 
@@ -162,6 +204,13 @@ proc SelectColor::dialog {path args} {
     variable _selection
     variable _image
     variable _hsv
+    variable _varName
+    variable _unsavedSelection
+    variable _oldColor
+    variable _entryColor
+    variable _bgColor
+    variable _fgColor
+    variable _rounds
 
     Widget::init SelectColor $path:SelectColor $args
     set top   [Dialog::create $path \
@@ -174,6 +223,19 @@ proc SelectColor::dialog {path args} {
     set desc  [list \
                    base _baseColors "Base colors" \
                    user _userColors "User colors"]
+
+    # Initialize _varName
+    # The initial value of [$w cget -variable] is ignored and is
+    # overwritten with [$w cget -color].
+    set _varName [Widget::cget $path:SelectColor -variable]
+    if {[string range $_varName 0 1] ne {::}} {
+        set _varName ::SelectColor::_unsavedSelection
+    }
+
+    # Initialize _bgColor and _rounds
+    set _bgColor [Widget::cget $path:SelectColor -background]
+    set _rounds  {}
+
     set count 0
     foreach {type varcol defTitle} $desc {
         set col   0
@@ -203,6 +265,9 @@ proc SelectColor::dialog {path args} {
 	    bind $fcolor <Double-1> \
 	    	"SelectColor::_select_rgb [list $count]; [list $top] invoke 0"
 
+	    # Record list of $fround values in _rounds
+	    lappend _rounds $fround
+
             incr count
             if {[incr col] == 6} {
                 incr lin
@@ -211,6 +276,42 @@ proc SelectColor::dialog {path args} {
         }
         pack $titf -anchor w -pady 2
     }
+
+    # Record these colors for use later
+    set _fgColor [$fg.round0 cget -highlightcolor]
+
+    # Add a TitleFrame $titf to wrap $fg.round and $fg.value
+    set titf  [TitleFrame $fg.choice -text {Your Selection}]
+    set subf  [$titf getframe]
+    pack $titf -anchor w -pady 2 -expand yes -fill both
+
+    # Add an entry widget $fg.value for the #RRGGBB value
+    if {$::tk_version > 8.4} {
+	set fixedFont TkFixedFont
+    } else {
+	set fixedFont Courier
+    }
+    set subf2 $fg.vround
+    frame $subf2 -highlightthickness 0 -relief sunken -borderwidth 2
+    entry $fg.value -width 8 -relief sunken -bd 0 -highlightthickness 0 \
+	-bg white -textvariable ::SelectColor::_entryColor -font $fixedFont
+    pack  $subf2    -in $subf  -anchor w -side left
+    pack  $fg.value -in $subf2 -anchor w -side left
+
+    # Remove focus from the entry widget by clicking anywhere...
+    bind $top <1> [list ::SelectColor::_CheckFocus %W]
+
+    # ... or by pressing Return/Escape.
+    bind $fg.value <Return> [list ::SelectColor::_CheckFocus .]
+    bind $fg.value <Escape> [list ::SelectColor::_CheckFocus .]
+    bind $fg.value <Return> {+break}
+    bind $fg.value <Escape> {+break}
+    # Break so that the bindings to these events on the toplevel are not
+    # executed.
+
+    # MODS - record the Tk window path for the entry widget.
+    set _widget(en) $fg.value
+
     set fround [frame $fg.round \
                     -highlightthickness 0 \
                     -relief sunken -borderwidth 2]
@@ -219,9 +320,12 @@ proc SelectColor::dialog {path args} {
                     -highlightthickness 0 \
                     -relief flat -borderwidth 0]
     pack $fcolor -in $fround -fill y -expand yes
-    pack $fround -anchor e -pady 2 -fill y -expand yes
+    pack $fround -in $subf -side right -anchor e -pady 2 -fill y -expand yes
 
-    set fd  [frame $dlgf.fd]
+    # Add a TitleFrame $dlgf.fd to wrap the canvas selectors.  The
+    # labels are referenced by the DynamicHelp tooltip.
+    set fd0 [TitleFrame $dlgf.fd -text {Color Selectors}]
+    set fd  [$fd0 getframe]
     set f1  [frame $fd.f1 -relief sunken -borderwidth 2]
     set f2  [frame $fd.f2 -relief sunken -borderwidth 2]
     set c1  [canvas $f1.c -width 200 -height 200 -bd 0 -highlightthickness 0]
@@ -235,7 +339,8 @@ proc SelectColor::dialog {path args} {
     pack $c1 $c2
     pack $f1 $f2 -side left -padx 10 -anchor n
 
-    pack $fg $fd -side left -anchor n -fill y
+    pack $fg $fd0 -side left -anchor n -fill y
+    pack configure $fd0 -pady 2 -padx {4 0}
 
     bind $c1 <ButtonPress-1> [list SelectColor::_select_hue_sat %x %y]
     bind $c1 <B1-Motion>     [list SelectColor::_select_hue_sat %x %y]
@@ -269,17 +374,116 @@ proc SelectColor::dialog {path args} {
     _set_hue_sat [lindex $_hsv 0] [lindex $_hsv 1]
     _set_value   [lindex $_hsv 2]
 
-    $top add -name ok
-    $top add -name cancel
+    # Initialize _oldColor which is used to reset the traced -variable
+    # if the user cancels.
+    set _oldColor [set $_varName]
+    set tmp24     [::SelectColor::_24BitRgb $_oldColor]
+    if {[_ValidateColorEntry forced $tmp24]} {
+        set ::SelectColor::_entryColor $tmp24
+    } else {
+        # Value $tmp24 does not pass entry widget validation and if used
+        # would disable validation.  Use this default instead.
+        set _entryColor #
+    }
+
+    # Validate input to the entry field.
+    # To avoid conflict with the entry -variable (_entryColor), do not set the
+    # latter directly (because a failed validation will switch off subsequent
+    # validations).  Either call _SetEntryValue, or set $_varName which triggers
+    # the trace.
+
+    $fg.value configure -validate all -validatecommand \
+            [list SelectColor::_ValidateColorEntry %V %P]
+
+    # Trace $_varName
+    # Subsequent modifications to $_varName will update the entry widget, if the
+    # value is valid.
+    # From now on, this is the only way that:
+    # (1) ::SelectColor::_SetEntryValue is called
+    # (2) ::SelectColor::_entryColor is modified (except by the user typing in
+    #     the entry widget)
+
+    trace add variable $_varName write ::SelectColor::_SetEntryValue
+
+    # Change case on button text
+    $top add -text OK
+    $top add -text Cancel
+
+    # Add labels to offer DynamicHelp
+    set blurb {Hover for help with color selection by:}
+    frame $top.help
+    label $top.help.0 -text $blurb       -relief flat   -bd 2
+    label $top.help.1 -text { Mouse }    -relief groove -bd 2
+    label $top.help.2 -text { Keyboard } -relief groove -bd 2
+    pack  $top.help.0 $top.help.1 $top.help.2 \
+            -anchor center -pady 4 -side left -padx 5
+    DynamicHelp::add $top.help.1 -text [string map {{        } {}} \
+        {Click or drag the mouse in the Color Selectors to choose a color.
+        If the selected color remains black, regardless of what you
+        do in the left-hand Color Selector (for hue and saturation), check
+        the position of the pointer in the right-hand Color Selector
+        (for brightness).
+
+        Click one of the "Base colors" to read a value from this palette.
+
+        Click one of the "User colors" to read a value from this palette,
+        or to write to the palette if the color is blank.  If you then
+        use the Color Selectors to change the color, your choice will be
+        written to this (User) palette color until you select another
+        (Base or User) palette color.}]
+    DynamicHelp::add $top.help.2 -text [string map {{        } {}} \
+        {Click in the text entry window in the left of the "Your
+        Selection" area.
+
+        Type the color that you want in hexadecimal RGB format.
+        Whenever the number of hexadecimal digits is a multiple
+        of 3, the color value is valid and will be copied to the
+        other parts of the Color Selector.
+
+        Leave the text entry window by clicking anywhere else,
+        or by pressing the "Escape" or "Return" key.  The text
+        entry window will then display the color in 24-bit RGB
+        format, although internally the Color Selector uses
+        48-bit colors.
+
+        When the text entry widget does not have keyboard focus
+        (i.e. does not show a cursor), the "Return" and "Escape"
+        keys do the same as the "OK" and "Cancel" buttons,
+        respectively.}]
+    after idle [list pack $top.help]
+
+    # Override background color
+    ReColor $path $_bgColor
+
     set res [$top draw]
     if {$res == 0} {
         set color [$fg.color cget -background]
     } else {
+        # User has cancelled - reset $_varName in case it is being traced
+        set $_varName $_oldColor
         set color ""
     }
+
+    trace remove variable $_varName write ::SelectColor::_SetEntryValue
+
     destroy $top
     return $color
 }
+
+
+# ----------------------------------------------------------------------------
+# Command SelectColor::setbasecolor
+# ----------------------------------------------------------------------------
+# Exported command, to allow the caller to set the base colors of the palette.
+
+proc SelectColor::setbasecolor { idx color } {
+    variable _baseColors
+    set _baseColors [lreplace $_baseColors $idx $idx $color]
+}
+
+# ----------------------------------------------------------------------------
+# Command SelectColor::setcolor
+# ----------------------------------------------------------------------------
 
 proc SelectColor::setcolor { idx color } {
     variable _userColors
@@ -292,15 +496,22 @@ proc SelectColor::_select_rgb {count} {
     variable _selection
     variable _widget
     variable _hsv
+    variable _varName
+    variable _bgColor
+    variable _fgColor
 
     set frame $_widget(fcolor)
+
+    # Use highlight color instead of focus to identify the selected
+    # palette color. Tab traversal of focus now works correctly.
     if {$_selection >= 0} {
         $frame.round$_selection configure \
-            -relief sunken -highlightthickness 1 -borderwidth 2
+            -relief sunken -highlightthickness 1 -borderwidth 2 \
+            -highlightbackground $_bgColor
     }
     $frame.round$count configure \
-        -relief flat -highlightthickness 2 -borderwidth 1
-    focus $frame.round$count
+        -relief flat -highlightthickness 2 -borderwidth 1 \
+        -highlightbackground $_fgColor
     set _selection $count
     set bg   [$frame.color$count cget -background]
     set user [expr {$_selection-[llength $_baseColors]}]
@@ -316,6 +527,10 @@ proc SelectColor::_select_rgb {count} {
         _set_hue_sat [lindex $_hsv 0] [lindex $_hsv 1]
         _set_value   [lindex $_hsv 2]
         $frame.color configure -background $bg
+
+        # Display selected color in entry widget, and notify
+        # caller (if the variable is being traced).
+        set $_varName $bg
     }
 }
 
@@ -325,9 +540,14 @@ proc SelectColor::_set_rgb {rgb} {
     variable _baseColors
     variable _userColors
     variable _widget
+    variable _varName
 
     set frame $_widget(fcolor)
     $frame.color configure -background $rgb
+
+    # Display selected color in entry widget, and notify
+    # aller (if the variable is being traced).
+    set $_varName $rgb
     set user [expr {$_selection-[llength $_baseColors]}]
     if {$user >= 0} {
         $frame.color$_selection configure -background $rgb
@@ -491,3 +711,224 @@ proc SelectColor::rgbToHsv {red green blue} {
     return [list $hue $sat [expr {$max/65535}]]
 }
 
+# ------------------------------------------------------------------------------
+#  Command SelectColor::ReColor
+# ------------------------------------------------------------------------------
+# Command to change the background color for the dialog.
+#
+# FIXME Ideally this would be called by "$w configure -background $value".
+# Currently a "configure -background" command is passed to Dialog and Widget
+# but does not change SelectColor.
+# ------------------------------------------------------------------------------
+
+proc SelectColor::ReColor {path newColor} {
+    variable _bgColor
+    variable _rounds
+
+    set _bgColor $newColor
+
+    $path:cmd configure -bg $_bgColor
+
+    foreach child {
+        .sep           .help           .frame          .bbox
+        .help.0        .help.1         .help.2
+        .frame.fd      .frame.fd.f.f1  .frame.fd.f.f2
+        .frame.fg      .frame.fg.base  .frame.fg.choice
+        .frame.fg.user .frame.fg.round .frame.fg.vround
+    } {
+        $path$child configure -bg $_bgColor
+    }
+
+    # Special treatment for Aqua native buttons.
+    # FIXME implement a general fix for BWidget Button/ButtonBox/Dialog
+    if {[tk windowingsystem] eq "aqua"} {
+        foreach child {
+            .bbox.b0
+            .bbox.b1
+        } {
+            $path$child configure \
+                    -highlightbackground $_bgColor \
+                    -highlightthickness  0
+        }
+    }
+
+    foreach fround $_rounds {
+        $fround configure -highlightbackground $_bgColor -bg $_bgColor
+    }
+    
+    return
+}
+
+
+# ------------------------------------------------------------------------------
+# Command SelectColor::_24BitRgb
+# ------------------------------------------------------------------------------
+# Command to convert a hex 12n-bit RGB color to 24-bit, n > 0.
+# Convert anything else to {}.
+# Used to process the display in the entry widget.
+# ------------------------------------------------------------------------------
+
+proc SelectColor::_24BitRgb {col} {
+    set  lenny [string length $col]
+    incr lenny -1
+
+    if {    ($lenny % 3)
+         || ($lenny == 0)
+         || (![regexp {^#[a-fA-F0-9]*$} $col])
+    } {
+        # Not a multiple of 3, or not leading #, or nothing after #,
+        # or non-HEX digits.
+        return {}
+    } elseif {$lenny == 3} {
+        # 12-bit, pad to 24-bit
+        set val $col
+        set val [string replace $val 3 3 "[string index $val 3]0"]
+        set val [string replace $val 2 2 "[string index $val 2]0"]
+        set val [string replace $val 1 1 "[string index $val 1]0"]
+        return $val
+    } elseif {$lenny == 6} {
+        # 24-bit, return unchanged
+        return $col
+    } else {
+        # Truncate to 24-bit
+        set delta  [expr {$lenny / 3}]
+        set delta2 [expr {$delta * 2}]
+        set result #
+        append result [string range $col 1 2]
+        append result [string range $col $delta+1  $delta+2]
+        append result [string range $col $delta2+1 $delta2+2]
+        return $result
+    }
+}
+
+
+# ------------------------------------------------------------------------------
+# Command SelectColor::_SetEntryValue
+# ------------------------------------------------------------------------------
+# Command to update the (hexadecimal color displayed in the) entry widget
+# when there is a change in the color currently selected in the GUI, which is
+# stored in $::SelectColor::_varName.
+#
+# This command is called by a write trace on $::SelectColor::_varName; if the
+# value of this variable is a valid color (i.e. "#" followed by 3N hex digits),
+# this command converts the value to 24 bits and sets ::SelectColor::_entryColor
+# to the result, thereby displaying it in the entry widget.  Therefore,
+# when the user chooses a color by means other than the entry widget, this
+# command updates the entry widget.
+#
+# This command does not update the GUI when the user changes the value in the
+# entry widget: that is done instead by the -vcmd of the entry widget, which
+# is SelectColor::_ValidateColorEntry.  When the user chooses a color by typing
+# in the entry widget, the command _ValidateColorEntry copies the value to
+# $_varName if a keystroke in the widget makes its contents 3N hex digits long.
+# ------------------------------------------------------------------------------
+
+proc SelectColor::_SetEntryValue {argVarName var2 op} {
+    variable _entryColor
+    variable _varName
+
+    if {0} {
+    } elseif {$argVarName eq $_varName && $var2 eq {} && $op eq "write"} {
+        # OK
+    } else {
+        # Unexpected call
+        return -code error "Unexpected trace of variable\
+                \"$argVarName\", \"$var2\", \"$op\""
+    }
+
+    set col24bit [::SelectColor::_24BitRgb [set $argVarName]]
+
+    if {[_ValidateColorEntry forced $col24bit]} {
+        set ::SelectColor::_entryColor $col24bit
+    } else {
+        # Value is invalid, and if written to _entryColor this would disable
+        # validation.
+    }
+
+    return
+}
+
+
+# ------------------------------------------------------------------------------
+# Command SelectColor::_CheckFocus
+# ------------------------------------------------------------------------------
+# This command is called with argument %W as a binding to <1> on the toplevel.
+# It is also called with argument {.}, by bindings on the entry widget to
+# <Escape>, <Return>.
+#
+# The command does something only if the entry widget has focus, and the
+# argument (the clicked window) is the Tk window path of somewhere else.  Then,
+# the command removes focus from the entry widget to the default button.
+# ------------------------------------------------------------------------------
+
+proc SelectColor::_CheckFocus {w} {
+    variable _widget
+
+    if {($w ne $_widget(en)) && ([focus] eq $_widget(en))} {
+        set top [winfo toplevel $_widget(en)]
+        $top setfocus default
+    }
+
+    return
+}
+
+
+# ------------------------------------------------------------------------------
+# Command SelectColor::_ValidateColorEntry
+# ------------------------------------------------------------------------------
+# This command is the "-validate all -vcmd" of the entry widget.
+# It is also called by SelectColor::dialog and SelectColor::_SetEntryValue to
+# check values assigned to _entryColor.
+#
+# When the user chooses a color by typing in the entry widget, this command
+# copies the value to $_varName if a keystroke in the widget makes its contents
+# 3N hex digits long.
+# ------------------------------------------------------------------------------
+
+proc SelectColor::_ValidateColorEntry {percentV percentP} {
+    variable _varName
+
+    set result [regexp -- {^#[0-9a-fA-F]*$} $percentP]
+    set lenny  [string length $percentP]
+
+    if {$result} {
+        if {$percentV eq "forced"} {
+            # Validation only.  Don't want a loop.
+        } elseif {($percentV eq "key")} {
+            # Copy to GUI if a valid color.
+            if {($lenny - 1) % 3 || $lenny == 1} {
+                # Not a valid color, which needs 3n+1 characters, n > 0
+            } else {
+                after idle [list SelectColor::_SetWithoutTrace $percentP]
+            }
+        } elseif {($percentV eq "focusout")} {
+            # If the color is valid it will already have been copied to the GUI
+            # by the "key" validation above.
+            #
+            # The code below only needs to reset the value in the entry widget.
+            # Remove an invalid value, convert a valid one to 24-bit.
+            # Ignore $percentP, just fire the trace on $_varName.
+            after idle [list set $_varName [set $_varName]]
+        }
+    }
+
+    return $result
+}
+
+
+# ------------------------------------------------------------------------------
+# Command SelectColor::_SetWithoutTrace
+# ------------------------------------------------------------------------------
+# This command sets $_varName (using _set_rgb) without firing the trace that
+# copies the value to _entryColor.
+# The command is called by SelectColor::_ValidateColorEntry to avoid a loop.
+# ------------------------------------------------------------------------------
+
+proc SelectColor::_SetWithoutTrace {value} {
+    variable _varName
+
+    trace remove variable $_varName write ::SelectColor::_SetEntryValue
+    _set_rgb $value
+    trace add variable $_varName write ::SelectColor::_SetEntryValue
+    return
+}
