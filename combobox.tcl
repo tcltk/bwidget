@@ -10,6 +10,7 @@
 #     - ComboBox::setvalue
 #     - ComboBox::getvalue
 #     - ComboBox::clearvalue
+#     - ComboBox::getentrypath
 #     - ComboBox::_create_popup
 #     - ComboBox::_mapliste
 #     - ComboBox::_unmapliste
@@ -448,6 +449,13 @@ proc ComboBox::insert { path idx args } {
 # ----------------------------------------------------------------------------
 proc ComboBox::clearvalue { path } {
     Entry::configure $path.e -text ""
+}
+
+# ----------------------------------------------------------------------------
+#  Command ComboBox::getentry
+# ----------------------------------------------------------------------------
+proc ComboBox::getentry { path } {
+    return $path.e
 }
 
 # ----------------------------------------------------------------------------
