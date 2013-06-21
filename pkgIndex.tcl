@@ -36,6 +36,7 @@ package ifneeded BWidget 1.9.6 "\
 {messagedlg.tcl source {MessageDlg MessageDlg::create MessageDlg::use}}
 {font.tcl source {SelectFont SelectFont::create SelectFont::use SelectFont::loadfont}}
 {wizard.tcl source {Wizard Wizard::create Wizard::use SimpleWizard ClassicWizard}}
+{mscrollw.tcl source {MultipleScrollableWidgets MultipleScrollableWidgets::create MultipleScrollableWidgets::use}}
 {xpm2image.tcl source {xpm-to-image}}
 }]; \
 	[list namespace eval ::BWIDGET {}]; \
