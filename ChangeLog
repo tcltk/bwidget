@@ -3,6 +3,10 @@
 	* labelentry.tcl: Bug fixed:
 	Methods from Tk entry widget restored [Bug 1002844].
 	
+	* mainframe.tcl: Allow case sensitive accelerators
+	by new option -casesensitive.
+	Patch by cmard [Patch 1977644]
+	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* widget.tcl: Bug fixed:
