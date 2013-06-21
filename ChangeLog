@@ -11,6 +11,9 @@
 	not change menu colors on Aqua.
 	Fix by K.J.Nash [Bug-a81b7afc1e]
 	
+	* init.tcl: Make loadable in save interpreter.
+	Fix by K.J.Nash [Bug-4365a23bd3]
+	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* widget.tcl: Bug fixed:
