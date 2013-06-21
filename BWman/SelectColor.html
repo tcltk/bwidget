@@ -13,15 +13,19 @@
 <DT><I><A HREF="#wso">WIDGET-SPECIFIC OPTIONS</A></I></DT>
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-background">-background</A></td>
 <TD>&nbsp;&nbsp;<A HREF="#-color">-color</A></td>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-parent">-parent</A></td>
-</TR>
-<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-placement">-placement</A></td>
-<TD>&nbsp;&nbsp;<A HREF="#-title">-title</A></td>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-title">-title</A></td>
 <TD>&nbsp;&nbsp;<A HREF="#-type">-type</A></td>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-variable">-variable</A></td>
 </TR>
 </TABLE></DD>
 </DL>
@@ -42,6 +46,10 @@
  <I>placement</I>
  <I>?option value ...?</I>
 </DD>
+<DD>SelectColor::<A HREF="#setbasecolor"><B>setbasecolor</B></A>
+ <I>index</I>
+ <I>color</I>
+</DD>
 <DD>SelectColor::<A HREF="#setcolor"><B>setcolor</B></A>
  <I>index</I>
  <I>color</I>
@@ -57,6 +65,13 @@ as a dialog box or as a menubutton.
 </P>
 <BR><HR WIDTH="50%"><BR>
 <B><A NAME="wso">WIDGET-SPECIFIC OPTIONS</A></B><BR>
+<DL><DT><A NAME="-background"><B>-background</B></A></DT>
+<DD>
+
+Specifies the background color of the widget. 
+ 
+</DD>
+</DL>
 <DL><DT><A NAME="-color"><B>-color</B></A></DT>
 <DD>
 
@@ -98,6 +113,13 @@ and the selected color if ok button is pressed. In all cases, dialog is
 destroyed.  <BR>If <B>type</B> option is <I>popup</I>,
 SelectColor::<B>create</B> creates a small, popup dialog with a small set of
 predefined colors and a button to activate a full color dialog.
+
+</DD>
+</DL>
+<DL><DT><A NAME="-variable"><B>-variable</B></A></DT>
+<DD>
+
+This is the name of a variable that the caller can trace, to follow the color that the user selects in the dialog (typically to modify a color in the calling GUI).
 
 </DD>
 </DL>
@@ -150,6 +172,15 @@ placement will be in relation to the parent widget.
 </p>
 
 </DD></DL>
+
+</DD></DL>
+<DL><DT><A NAME="setbasecolor">SelectColor::<B>setbasecolor</B></A>
+ <I>index</I>
+ <I>color</I>
+</DT><DD>
+
+Set the value of user predefined base color at index <I>index</I> to <I>color</I>.
+<I>index</I> must be between 0 and 10.
 
 </DD></DL>
 <DL><DT><A NAME="setcolor">SelectColor::<B>setcolor</B></A>
