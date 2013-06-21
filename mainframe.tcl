@@ -670,7 +670,8 @@ proc MainFrame::_parse_name { menuname } {
 # Arguments:
 #	desc		a list with the following format:
 #				?sequence? key
-#			sequence may be None, Ctrl, Alt, or CtrlAlt
+#			sequence may be None, Ctrl, Alt, CtrlAlt, Shift, Cmd or
+#			ShiftCmd
 #			key may be any key
 #	casesensitive	Boolean if accelerator is case sensitive
 #
@@ -678,12 +679,14 @@ proc MainFrame::_parse_name { menuname } {
 #	{accel event}	a list containing the accelerator string and the event
 
 proc MainFrame::_parse_accelerator { desc casesensitive} {
+    set fKey 0
     if { [llength $desc] == 1 } {
 	set seq None
 	set key [lindex $desc 0]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
 	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} [string tolower $key]]} {
 	    set key [string toupper $key]
+	    set fKey 1
 	}
     } elseif { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
@@ -691,10 +694,17 @@ proc MainFrame::_parse_accelerator { desc casesensitive} {
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
 	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} [string tolower $key]]} {
 	    set key [string toupper $key]
+	    set fKey 1
 	}
     } else {
 	return {}
     }
+
+    # Plain "Shift" can be used only with F keys, but "ShiftCmd" is allowed.
+    if {$seq eq "Shift" && (!$fkey)} {
+        return -code error {Shift accelerator can be used only with F keys}
+    }
+
     if {! $casesensitive} {
  	set akey [string toupper $key]
  	set ekey [string tolower $key]
@@ -707,7 +717,28 @@ proc MainFrame::_parse_accelerator { desc casesensitive} {
 	    set accel $akey
 	    set event "<Key-$ekey>"
 	}
-	Ctrl {
+	Shift {
+	# Used only with Function keys.
+	    set accel "Shift+$akey"
+	    set event "<Shift-Key-$ekey>"
+	}
+	Cmd {
+	    set accel "Cmd+$akey"
+	    set event "<Command-Key-$ekey>"
+	}
+	ShiftCmd {
+	    if {    ([tk windowingsystem] eq "aqua")
+		 && ([string first AppKit [winfo server .]] == -1)
+	    } {
+		# Carbon
+		set accel "Shift+Cmd+$akey"
+		set event "<Shift-Command-Key-$akey>"
+	    } else {
+		# Cocoa and anything else that uses Cmd
+		set accel "Shift+Cmd+$akey"
+		set event "<Shift-Command-Key-$ekey>"
+	    }
+	}	Ctrl {
 	    set accel "Ctrl+$akey"
 	    set event "<Control-Key-$ekey>"
 	}
