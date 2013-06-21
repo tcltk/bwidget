@@ -18,6 +18,9 @@
 	widget path for bind purposes.
 	Patch by Michael [Patch-2340355]
 	
+	* mscrollw.tcl: New MultipleScrollableWidgets
+	Patch by Georgios Petasis [Patch-1053086]
+	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* widget.tcl: Bug fixed:
