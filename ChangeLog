@@ -7,6 +7,10 @@
 	by new option -casesensitive.
 	Patch by cmard [Patch 1977644]
 	
+	* mainframe.tcl: When changing MainFrame -background, do
+	not change menu colors on Aqua.
+	Fix by K.J.Nash [Bug-a81b7afc1e]
+	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* widget.tcl: Bug fixed:

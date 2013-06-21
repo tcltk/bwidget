@@ -204,7 +204,8 @@ proc MainFrame::configure { path args } {
 
     # The ttk frame has no -background
     if {![Widget::theme] && [Widget::hasChanged $path -background bg] } {
-	if {$::tcl_platform(platform) == "unix"} {
+	if {$::tcl_platform(platform) == "unix"
+	        && 0 != [string compare [tk windowingsystem] "aqua"]} {
 	    set listmenu [$_widget($path,top) cget -menu]
 	    while { [llength $listmenu] } {
 		set newlist {}
