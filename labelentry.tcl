@@ -58,7 +58,10 @@ proc LabelEntry::create { path args } {
 
     bindtags $path [list $path BwLabelEntry [winfo toplevel $path] all]
 
-    return [Widget::create LabelEntry $path]
+    Widget::create LabelEntry $path
+    proc ::$path { cmd args } \
+    	"return \[LabelEntry::_path_command [list $path] \$cmd \$args\]"
+    return $path
 }
 
 
