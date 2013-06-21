@@ -35,7 +35,6 @@ package ifneeded BWidget 1.9.6 "\
 {dialog.tcl source {Dialog Dialog::create Dialog::use}}
 {messagedlg.tcl source {MessageDlg MessageDlg::create MessageDlg::use}}
 {font.tcl source {SelectFont SelectFont::create SelectFont::use SelectFont::loadfont}}
-{widgetdoc.tcl source {Widget::generate-doc Widget::generate-widget-doc}}
 {wizard.tcl source {Wizard Wizard::create Wizard::use SimpleWizard ClassicWizard}}
 {xpm2image.tcl source {xpm-to-image}}
 }]; \
