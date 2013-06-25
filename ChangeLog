@@ -15,8 +15,7 @@
 	Show current choice by highlighting, not focus, to avoid
 	conflict with keyboard traversal.
 	Shows entry widget for numerical color input/output.
-	
-	Patch by K.J.Nash [Patch 75101]
+	Patch by Keith J. Nash [Patch 75101]
 	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 

@@ -5,6 +5,7 @@ namespace eval SelectColor {
         {-title      String     "Select a color" 0}
         {-parent     String     ""               0}
         {-variable   String     ""               1}
+        {-help       Boolean    0                1}
         {-color      TkResource ""               0 {label -background}}
 	{-type       Enum       "dialog"         1 {dialog popup}}
 	{-placement  String     "center"         1}
@@ -41,6 +42,7 @@ namespace eval SelectColor {
     variable _bgColor
     variable _fgColor
     variable _rounds
+    variable _help
 }
 
 proc SelectColor::create { path args } {
@@ -94,7 +96,7 @@ proc SelectColor::menu {path placement args} {
     catch { wm attributes $top -topmost 1 }
 
     set _varName [Widget::cget $path -variable]
-    if {[string range $_varName 0 1] ne {::}} {
+    if {! [string equal [string range $_varName 0 1] {::}]} {
         set _varName ::SelectColor::_unsavedSelection
     }
 
@@ -187,7 +189,7 @@ proc SelectColor::menu {path placement args} {
 	# Unless the user has cancelled, record the selected
 	# color in $_varName which may be traced by the caller.
 	set tmpCol [lindex $colors $_selection]
-	if {$tmpCol eq {}} {
+	if {[string equal $tmpCol ""]} {
 	    # User has cancelled - no need to set $_varName
 	} else {
 	    set $_varName $tmpCol
@@ -211,6 +213,7 @@ proc SelectColor::dialog {path args} {
     variable _bgColor
     variable _fgColor
     variable _rounds
+    variable _help
 
     Widget::init SelectColor $path:SelectColor $args
     set top   [Dialog::create $path \
@@ -224,11 +227,13 @@ proc SelectColor::dialog {path args} {
                    base _baseColors "Base colors" \
                    user _userColors "User colors"]
 
+    set _help [Widget::cget $path:SelectColor -help]
+
     # Initialize _varName
     # The initial value of [$w cget -variable] is ignored and is
     # overwritten with [$w cget -color].
     set _varName [Widget::cget $path:SelectColor -variable]
-    if {[string range $_varName 0 1] ne {::}} {
+    if {! [string equal [string range $_varName 0 1] {::}]} {
         set _varName ::SelectColor::_unsavedSelection
     }
 
@@ -277,12 +282,13 @@ proc SelectColor::dialog {path args} {
         pack $titf -anchor w -pady 2
     }
 
-    # Record these colors for use later
+    # Record these colors for later use
     set _fgColor [$fg.round0 cget -highlightcolor]
 
     # Add a TitleFrame $titf to wrap $fg.round and $fg.value
-    set titf  [TitleFrame $fg.choice -text {Your Selection}]
-    set subf  [$titf getframe]
+    set name [lindex [BWidget::getname yourSelection] 0]
+    set titf [TitleFrame $fg.choice -text $name]
+    set subf [$titf getframe]
     pack $titf -anchor w -pady 2 -expand yes -fill both
 
     # Add an entry widget $fg.value for the #RRGGBB value
@@ -324,7 +330,8 @@ proc SelectColor::dialog {path args} {
 
     # Add a TitleFrame $dlgf.fd to wrap the canvas selectors.  The
     # labels are referenced by the DynamicHelp tooltip.
-    set fd0 [TitleFrame $dlgf.fd -text {Color Selectors}]
+    set name [lindex [BWidget::getname colorSelectors] 0]
+    set fd0 [TitleFrame $dlgf.fd -text $name]
     set fd  [$fd0 getframe]
     set f1  [frame $fd.f1 -relief sunken -borderwidth 2]
     set f2  [frame $fd.f2 -relief sunken -borderwidth 2]
@@ -405,52 +412,28 @@ proc SelectColor::dialog {path args} {
 
     trace add variable $_varName write ::SelectColor::_SetEntryValue
 
-    # Change case on button text
-    $top add -text OK
-    $top add -text Cancel
+    $top add -text [lindex [BWidget::getname ok] 0]
+    $top add -text [lindex [BWidget::getname cancel] 0]
 
-    # Add labels to offer DynamicHelp
-    set blurb {Hover for help with color selection by:}
-    frame $top.help
-    label $top.help.0 -text $blurb       -relief flat   -bd 2
-    label $top.help.1 -text { Mouse }    -relief groove -bd 2
-    label $top.help.2 -text { Keyboard } -relief groove -bd 2
-    pack  $top.help.0 $top.help.1 $top.help.2 \
-            -anchor center -pady 4 -side left -padx 5
-    DynamicHelp::add $top.help.1 -text [string map {{        } {}} \
-        {Click or drag the mouse in the Color Selectors to choose a color.
-        If the selected color remains black, regardless of what you
-        do in the left-hand Color Selector (for hue and saturation), check
-        the position of the pointer in the right-hand Color Selector
-        (for brightness).
-
-        Click one of the "Base colors" to read a value from this palette.
-
-        Click one of the "User colors" to read a value from this palette,
-        or to write to the palette if the color is blank.  If you then
-        use the Color Selectors to change the color, your choice will be
-        written to this (User) palette color until you select another
-        (Base or User) palette color.}]
-    DynamicHelp::add $top.help.2 -text [string map {{        } {}} \
-        {Click in the text entry window in the left of the "Your
-        Selection" area.
-
-        Type the color that you want in hexadecimal RGB format.
-        Whenever the number of hexadecimal digits is a multiple
-        of 3, the color value is valid and will be copied to the
-        other parts of the Color Selector.
-
-        Leave the text entry window by clicking anywhere else,
-        or by pressing the "Escape" or "Return" key.  The text
-        entry window will then display the color in 24-bit RGB
-        format, although internally the Color Selector uses
-        48-bit colors.
-
-        When the text entry widget does not have keyboard focus
-        (i.e. does not show a cursor), the "Return" and "Escape"
-        keys do the same as the "OK" and "Cancel" buttons,
-        respectively.}]
-    after idle [list pack $top.help]
+    if {$_help} {
+        # Add labels to offer DynamicHelp
+        set helpWords         [lindex [BWidget::getname hoverHelp] 0]
+        set mouseWord       " [lindex [BWidget::getname mouseHelp] 0] "
+        set keyboardWord    " [lindex [BWidget::getname keyboardHelp] 0] "
+        set mouseHelpText     [lindex [BWidget::getname mouseHelpText] 0]
+        set keyboardHelpText  [lindex [BWidget::getname keyboardHelpText] 0]
+        set mouseHelpText     [subst -nocommands -novariables $mouseHelpText]
+        set keyboardHelpText  [subst -nocommands -novariables $keyboardHelpText]
+        frame $top.help
+        label $top.help.0 -text $helpWords    -relief flat   -bd 2
+        label $top.help.1 -text $mouseWord    -relief groove -bd 2
+        label $top.help.2 -text $keyboardWord -relief groove -bd 2
+        pack  $top.help.0 $top.help.1 $top.help.2 \
+                -anchor center -pady 4 -side left -padx 5
+        DynamicHelp::add $top.help.1 -text $mouseHelpText
+        DynamicHelp::add $top.help.2 -text $keyboardHelpText
+        after idle [list pack $top.help]
+    }
 
     # Override background color
     ReColor $path $_bgColor
@@ -724,14 +707,14 @@ proc SelectColor::rgbToHsv {red green blue} {
 proc SelectColor::ReColor {path newColor} {
     variable _bgColor
     variable _rounds
+    variable _help
 
     set _bgColor $newColor
 
     $path:cmd configure -bg $_bgColor
 
     foreach child {
-        .sep           .help           .frame          .bbox
-        .help.0        .help.1         .help.2
+        .sep           .frame          .bbox
         .frame.fd      .frame.fd.f.f1  .frame.fd.f.f2
         .frame.fg      .frame.fg.base  .frame.fg.choice
         .frame.fg.user .frame.fg.round .frame.fg.vround
@@ -739,17 +722,26 @@ proc SelectColor::ReColor {path newColor} {
         $path$child configure -bg $_bgColor
     }
 
+    if {$_help} {
+        foreach child {
+            .help    .help.0    .help.1    .help.2
+        } {
+            $path$child configure -bg $_bgColor
+        }
+    }
+
     # Special treatment for Aqua native buttons.
     # FIXME implement a general fix for BWidget Button/ButtonBox/Dialog
-    if {[tk windowingsystem] eq "aqua"} {
-        foreach child {
-            .bbox.b0
-            .bbox.b1
-        } {
-            $path$child configure \
-                    -highlightbackground $_bgColor \
-                    -highlightthickness  0
-        }
+    if {[string equal [tk windowingsystem] "aqua"]} {
+        $path.bbox.b0 configure -highlightbackground $_bgColor \
+                -highlightthickness 0
+        $path.bbox.b1 configure -highlightbackground $_bgColor \
+                -highlightthickness 0
+    } else {
+        $path.bbox.b0 configure -bg $_bgColor -activebackground $_bgColor \
+                -highlightbackground $_bgColor
+        $path.bbox.b1 configure -bg $_bgColor -activebackground $_bgColor \
+                -highlightbackground $_bgColor
     }
 
     foreach fround $_rounds {
@@ -828,7 +820,8 @@ proc SelectColor::_SetEntryValue {argVarName var2 op} {
     variable _varName
 
     if {0} {
-    } elseif {$argVarName eq $_varName && $var2 eq {} && $op eq "write"} {
+    } elseif {[string equal $argVarName $_varName] &&
+            [string equal $var2 {}] && [string equal $op "write"]} {
         # OK
     } else {
         # Unexpected call
@@ -864,7 +857,8 @@ proc SelectColor::_SetEntryValue {argVarName var2 op} {
 proc SelectColor::_CheckFocus {w} {
     variable _widget
 
-    if {($w ne $_widget(en)) && ([focus] eq $_widget(en))} {
+    if {    ! [string equal $w $_widget(en)] &&
+            [string equal [focus]  $_widget(en)]} {
         set top [winfo toplevel $_widget(en)]
         $top setfocus default
     }
@@ -892,16 +886,16 @@ proc SelectColor::_ValidateColorEntry {percentV percentP} {
     set lenny  [string length $percentP]
 
     if {$result} {
-        if {$percentV eq "forced"} {
+        if {[string equal $percentV "forced"]} {
             # Validation only.  Don't want a loop.
-        } elseif {($percentV eq "key")} {
+        } elseif {[string equal $percentV "key"]} {
             # Copy to GUI if a valid color.
             if {($lenny - 1) % 3 || $lenny == 1} {
                 # Not a valid color, which needs 3n+1 characters, n > 0
             } else {
                 after idle [list SelectColor::_SetWithoutTrace $percentP]
             }
-        } elseif {($percentV eq "focusout")} {
+        } elseif {[string equal $percentV "focusout"]} {
             # If the color is valid it will already have been copied to the GUI
             # by the "key" validation above.
             #
