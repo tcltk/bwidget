@@ -42,7 +42,6 @@ namespace eval MainFrame {
 	{-height        TkResource 0      0 frame}
 	{-background    TkResource ""     0 frame}
 	{-textvariable  String     ""     0}
-	{-casesensitive Boolean    0      0}
 	{-menu          String     {}     1}
 	{-separator     Enum       both   1 {none top bottom both}}
 	{-bg            Synonym    -background}
@@ -181,7 +180,7 @@ proc MainFrame::create { path args } {
 
     set menu [Widget::getoption $path -menu]
     if { [llength $menu] } {
-        _create_menubar $path $menu [Widget::getoption $path -casesensitive]
+        _create_menubar $path $menu
     }
 
     bind $path <Destroy> [list MainFrame::_destroy %W]
@@ -511,7 +510,7 @@ proc MainFrame::_destroy { path } {
 # ----------------------------------------------------------------------------
 #  Command MainFrame::_create_menubar
 # ----------------------------------------------------------------------------
-proc MainFrame::_create_menubar { path descmenu casesensitive } {
+proc MainFrame::_create_menubar { path descmenu } {
     variable _widget
     global    tcl_platform
 
@@ -563,7 +562,7 @@ proc MainFrame::_create_menubar { path descmenu casesensitive } {
             # menu has identifier
             set _widget($path,menuid,$menuid) $menu
         }
-        _create_entries $path $menu $menuopts $entries $casesensitive
+        _create_entries $path $menu $menuopts $entries
         incr count
     }
 }
@@ -572,7 +571,7 @@ proc MainFrame::_create_menubar { path descmenu casesensitive } {
 # ----------------------------------------------------------------------------
 #  Command MainFrame::_create_entries
 # ----------------------------------------------------------------------------
-proc MainFrame::_create_entries { path menu menuopts entries casesensitive } {
+proc MainFrame::_create_entries { path menu menuopts entries } {
     variable _widget
 
     set count      [$menu cget -tearoff]
@@ -610,7 +609,7 @@ proc MainFrame::_create_entries { path menu menuopts entries casesensitive } {
                 # menu has identifier
                 set _widget($path,menuid,$menuid) $submenu
             }
-            _create_entries $path $submenu $menuopts [lindex $entry 5] $casesensitive
+            _create_entries $path $submenu $menuopts [lindex $entry 5]
             incr count
             continue
         }
@@ -626,7 +625,7 @@ proc MainFrame::_create_entries { path menu menuopts entries casesensitive } {
         }
 
         # entry accelerator
-        set accel [_parse_accelerator [lindex $entry 4] $casesensitive]
+        set accel [_parse_accelerator [lindex $entry 4]]
         if { [llength $accel] } {
             lappend opt -accelerator [lindex $accel 0]
             bind $_widget($path,top) [lindex $accel 1] [list $menu invoke $count]
@@ -669,31 +668,30 @@ proc MainFrame::_parse_name { menuname } {
 #	bind event.
 #
 # Arguments:
-#	desc		a list with the following format:
-#				?sequence? key
-#			sequence may be None, Ctrl, Alt, CtrlAlt, Shift, Cmd or
+#	desc	a list with the following format:
+#			?sequence? key
+#		sequence may be None, Ctrl, Alt, CtrlAlt, Shift, Cmd or
 #			ShiftCmd
-#			key may be any key
-#	casesensitive	Boolean if accelerator is case sensitive
+#		key may be any key
 #
 # Results:
 #	{accel event}	a list containing the accelerator string and the event
 
-proc MainFrame::_parse_accelerator { desc casesensitive} {
+proc MainFrame::_parse_accelerator { desc } {
     set fKey 0
     if { [llength $desc] == 1 } {
 	set seq None
-	set key [lindex $desc 0]
+	set key [string tolower [lindex $desc 0]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} [string tolower $key]]} {
+	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} $key]} {
 	    set key [string toupper $key]
 	    set fKey 1
 	}
     } elseif { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
-        set key [lindex $desc 1]
+        set key [string tolower [lindex $desc 1]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} [string tolower $key]]} {
+	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} $key]} {
 	    set key [string toupper $key]
 	    set fKey 1
 	}
@@ -702,54 +700,48 @@ proc MainFrame::_parse_accelerator { desc casesensitive} {
     }
 
     # Plain "Shift" can be used only with F keys, but "ShiftCmd" is allowed.
-    if {$seq eq "Shift" && (!$fkey)} {
+    if {[string equal $seq "Shift"] && !$fKey} {
         return -code error {Shift accelerator can be used only with F keys}
     }
 
-    if {! $casesensitive} {
- 	set akey [string toupper $key]
- 	set ekey [string tolower $key]
-    } else {
-	set akey $key
-	set ekey $key
-    }
     switch -- $seq {
 	None {
-	    set accel $akey
-	    set event "<Key-$ekey>"
+	    set accel "[string toupper $key]"
+	    set event "<Key-$key>"
 	}
 	Shift {
-	# Used only with Function keys.
-	    set accel "Shift+$akey"
-	    set event "<Shift-Key-$ekey>"
+	    # Used only with Function keys.
+	    set accel "Shift+[string toupper $key]"
+	    set event "<Shift-Key-$key>"
 	}
 	Cmd {
-	    set accel "Cmd+$akey"
-	    set event "<Command-Key-$ekey>"
+	    set accel "Cmd+[string toupper $key]"
+	    set event "<Command-Key-$key>"
 	}
 	ShiftCmd {
-	    if {    ([tk windowingsystem] eq "aqua")
-		 && ([string first AppKit [winfo server .]] == -1)
+	    if {    [string equal [tk windowingsystem] "aqua"] &&
+		    [string first AppKit [winfo server .]] == -1
 	    } {
 		# Carbon
-		set accel "Shift+Cmd+$akey"
-		set event "<Shift-Command-Key-$akey>"
+		set accel "Shift+Cmd+[string toupper $key]"
+		set event "<Shift-Command-Key-[string toupper $key]>"
 	    } else {
 		# Cocoa and anything else that uses Cmd
-		set accel "Shift+Cmd+$akey"
-		set event "<Shift-Command-Key-$ekey>"
+		set accel "Shift+Cmd+[string toupper $key]"
+		set event "<Shift-Command-Key-$key>"
 	    }
-	}	Ctrl {
-	    set accel "Ctrl+$akey"
-	    set event "<Control-Key-$ekey>"
+	}
+	Ctrl {
+	    set accel "Ctrl+[string toupper $key]"
+	    set event "<Control-Key-$key>"
 	}
 	Alt {
-	    set accel "Alt+$akey"
-	    set event "<Alt-Key-$ekey>"
+	    set accel "Alt+[string toupper $key]"
+	    set event "<Alt-Key-$key>"
 	}
 	CtrlAlt {
-	    set accel "Ctrl+Alt+$akey"
-	    set event "<Control-Alt-Key-$ekey>"
+	    set accel "Ctrl+Alt+[string toupper $key]"
+	    set event "<Control-Alt-Key-$key>"
 	}
 	default {
 	    return -code error "invalid accelerator code $seq"
