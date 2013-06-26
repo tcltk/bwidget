@@ -7,6 +7,9 @@
 	by new option -casesensitive.
 	Patch by cmard [Patch 1977644]
 	
+	* mainframe.tcl: Allow new modifiers Shift, Cmd and ShiftCmd
+	for accelerators. Patch by K.J.Nash [Patch-83ce3e84e7]
+
 	* mainframe.tcl: When changing MainFrame -background, do
 	not change menu colors on Aqua.
 	Fix by K.J.Nash [Bug-a81b7afc1e]
