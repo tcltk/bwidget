@@ -1,3 +1,9 @@
+2013-08-26 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* mainframe.tcl: Reverted Patch [1977644]
+	(-casesensitive for accellerators). It has
+	issues with shift-lock.
+
 2013-08-21 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* labelentry.tcl: Bug fixed:
@@ -12,10 +18,10 @@
 
 	* mainframe.tcl: When changing MainFrame -background, do
 	not change menu colors on Aqua.
-	Fix by K.J.Nash [Bug-a81b7afc1e]
+	Fix by Keith J.Nash [Bug-a81b7afc1e]
 	
 	* init.tcl: Make loadable in save interpreter.
-	Fix by K.J.Nash [Bug-4365a23bd3]
+	Fix by Keith J.Nash [Bug-4365a23bd3]
 
 	* combobox.tcl: Add method getentry to return entry
 	widget path for bind purposes.

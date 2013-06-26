@@ -29,8 +29,6 @@
 <DT><I><A HREF="#wso">WIDGET-SPECIFIC OPTIONS</A></I></DT>
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
-<TD>&nbsp;&nbsp;<A HREF="#-casesensitive">-casesensitive</A></TD></TR>
-<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TD></TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-menu">-menu</A></TD>
@@ -96,28 +94,6 @@ MainFrame manage toplevel to have:<BR>
 </P>
 <BR><HR WIDTH="50%"><BR>
 <B><A NAME="wso">WIDGET-SPECIFIC OPTIONS</A></B><BR>
-
-<DL><DT><A NAME="-casesensitive"><B>-casesensitive</B></A></DT>
-<DD>
-Controlls the interpretation of <I>accelerator</I> definition by the <B>-menu</B>
-option. If this option is <B>false</B> or not given, the accelerator binding is done
-for lowercase letters (no Shift Key pressed) and the accelerator text of the menu entry
-is shown in uppercase letters. If it is set to <B>true</B> the accelerator binding
-and the menu entry is done as given.
-<P>
-Example:<BR>
-Both accelerators are identically if <B>-casesensitive</B> is specified as false. See
-<A HREF="#-menu">-menu</A> for the syntax of the menu discription list.
-</P>
-<PRE>
-...
-{command "&Save" {} {Save the document} {<B>Ctrl s</B>} -command Menu::save}
-{command "&Save As" {} {Save with different name} {<B>Ctrl S</B>} -command Menu::saveAs}
-...
-</PRE>
-</DD>
-</DL>
-
 <DL><DT><A NAME="-height"><B>-height</B></A></DT>
 <DD>
 
