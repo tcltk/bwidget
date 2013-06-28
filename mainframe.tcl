@@ -203,8 +203,8 @@ proc MainFrame::configure { path args } {
 
     # The ttk frame has no -background
     if {![Widget::theme] && [Widget::hasChanged $path -background bg] } {
-	if {$::tcl_platform(platform) == "unix"
-	        && 0 != [string compare [tk windowingsystem] "aqua"]} {
+	if {($::tcl_platform(platform) == "unix")
+	        && (0 != [string compare [tk windowingsystem] "aqua"])} {
 	    set listmenu [$_widget($path,top) cget -menu]
 	    while { [llength $listmenu] } {
 		set newlist {}
@@ -628,7 +628,16 @@ proc MainFrame::_create_entries { path menu menuopts entries } {
         set accel [_parse_accelerator [lindex $entry 4]]
         if { [llength $accel] } {
             lappend opt -accelerator [lindex $accel 0]
-            bind $_widget($path,top) [lindex $accel 1] [list $menu invoke $count]
+            foreach event [lindex $accel 1] {
+                bind $_widget($path,top) $event [list $menu invoke $count]
+            }
+            foreach event [lindex $accel 2] {
+                if {[bind $_widget($path,top) $event] == {}} {
+                    bind $_widget($path,top) $event { # do nothing }
+                } else {
+                    # The existing binding will intercept these events.
+                }
+            }
         }
 
         # user options
@@ -664,8 +673,16 @@ proc MainFrame::_parse_name { menuname } {
 # MainFrame::_parse_accelerator --
 #
 #	Given a key combo description, construct an appropriate human readable
-#	string (for display on as a menu accelerator) and the corresponding
-#	bind event.
+#	string (for display on as a menu accelerator), a list of the
+#	corresponding bind events, and a separate list of bind events that need
+#	to be blocked.
+#
+# 	When argument $desc does not include "Shift", the bindings to $events
+# 	will in some cases also intercept events that have the modifier "Shift",
+# 	unless more specific bindings $blockEvents exist to the latter.  This
+# 	situation occurs, for example, when a Cmd binding exists without a
+# 	corresponding ShiftCmd binding.  The list of events that need to be
+#       blocked is returned as the third element of the result.
 #
 # Arguments:
 #	desc	a list with the following format:
@@ -675,9 +692,12 @@ proc MainFrame::_parse_name { menuname } {
 #		key may be any key
 #
 # Results:
-#	{accel event}	a list containing the accelerator string and the event
+#	{accel events blockEvents}  a list containing the accelerator string and
+#	                            two lists of events
 
 proc MainFrame::_parse_accelerator { desc } {
+    variable _widget
+
     set fKey 0
     if { [llength $desc] == 1 } {
 	set seq None
@@ -700,52 +720,87 @@ proc MainFrame::_parse_accelerator { desc } {
     }
 
     # Plain "Shift" can be used only with F keys, but "ShiftCmd" is allowed.
-    if {[string equal $seq "Shift"] && !$fKey} {
+    if {[string equal $seq "Shift"] && (!$fKey)} {
         return -code error {Shift accelerator can be used only with F keys}
     }
 
+    set blockEvents {}
+    set upc [string toupper $key]
+
     switch -- $seq {
 	None {
-	    set accel "[string toupper $key]"
-	    set event "<Key-$key>"
+	    set accel "$upc"
+	    set events [list "<Key-$key>"]
+	    if {$fKey} {
+		set blockEvents [list "<Shift-Key-$key>"]
+	    }
 	}
 	Shift {
 	    # Used only with Function keys.
-	    set accel "Shift+[string toupper $key]"
-	    set event "<Shift-Key-$key>"
+	    set accel "Shift+$upc"
+	    set events [list "<Shift-Key-$key>"]
 	}
 	Cmd {
-	    set accel "Cmd+[string toupper $key]"
-	    set event "<Command-Key-$key>"
+	    set accel "Cmd+$upc"
+
+	    if {    [string equal [tk windowingsystem] "aqua"] &&
+		   ([string first AppKit [winfo server .]] == -1)
+	    } {
+		# Carbon
+	        set events [list "<Command-Key-$key>" \
+	                    "<Lock-Command-Key-$upc>" ]
+		set blockEvents [list "<Lock-Shift-Command-Key-$upc>"]
+		# Both bindings must be included in $events -  the first binding
+		# does not fire if "Lock" is set, and this is as bind(n) states
+		# because the second binding is NOT a more specialized form of
+		# the first.
+	    } else {
+		# Cocoa and anything else that uses Cmd
+	        set events [list "<Command-Key-$key>"]
+	        # A binding to "<Lock-Command-Key-$upc>" must not be included
+	        # here - both events fire if "Lock" is set.
+		set blockEvents [list "<Shift-Command-Key-$key>"]
+	    }
 	}
 	ShiftCmd {
 	    if {    [string equal [tk windowingsystem] "aqua"] &&
-		    [string first AppKit [winfo server .]] == -1
+		    ([string first AppKit [winfo server .]] == -1)
 	    } {
 		# Carbon
-		set accel "Shift+Cmd+[string toupper $key]"
-		set event "<Shift-Command-Key-[string toupper $key]>"
+		set accel "Shift+Cmd+$upc"
+		set events [list "<Shift-Command-Key-$upc>" \
+			    "<Lock-Shift-Command-Key-$upc>"]
+		# Both bindings must be included here -  the first binding does
+		# not fire if "Lock" is set, even though the second binding
+		# should be recognized as a more specialized form of the first.
 	    } else {
 		# Cocoa and anything else that uses Cmd
-		set accel "Shift+Cmd+[string toupper $key]"
-		set event "<Shift-Command-Key-$key>"
+		set accel "Shift+Cmd+$upc"
+		set events [list "<Shift-Command-Key-$key>"]
+		# A binding to "<Lock-Shift-Command-Key-$key>" must not be
+		# included here - both events fire if "Lock" is set.
+		# Tk/Cocoa fails to recognize
+		# <Lock-Shift-Command-Key-$key> as a "more specialized" binding
+		# than <Shift-Command-Key-$key>.
+		# Perversely, Tk/Carbon (above) makes the opposite error.
 	    }
 	}
 	Ctrl {
-	    set accel "Ctrl+[string toupper $key]"
-	    set event "<Control-Key-$key>"
+	    set accel "Ctrl+$upc"
+	    set events [list "<Control-Key-$key>"]
 	}
 	Alt {
-	    set accel "Alt+[string toupper $key]"
-	    set event "<Alt-Key-$key>"
+	    set accel "Alt+$upc"
+	    set events [list "<Alt-Key-$key>"]
 	}
 	CtrlAlt {
-	    set accel "Ctrl+Alt+[string toupper $key]"
-	    set event "<Control-Alt-Key-$key>"
+	    set accel "Ctrl+Alt+$upc"
+	    set events [list "<Control-Alt-Key-$key>"]
 	}
 	default {
 	    return -code error "invalid accelerator code $seq"
 	}
     }
-    return [list $accel $event]
+
+    return [list $accel $events $blockEvents]
 }
