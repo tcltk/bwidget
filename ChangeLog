@@ -1,3 +1,9 @@
+2013-08-28 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* mainframe.tcl: Included Patch [9f67a66609]
+	curing issues of Shift-Accellerators with Shift-Lock
+	on Mac. By Keith Nash, Ticket [83ce3e84e7].
+
 2013-08-26 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* mainframe.tcl: Reverted Patch [1977644]
