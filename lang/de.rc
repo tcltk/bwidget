@@ -65,8 +65,6 @@
 
 ! --- dynamic help text for SelectColor dialog.  Lines 75 chars max, split by '\n'.
 
-*mouseHelpTextName:
-Um eine Farbe zu wählen bitte im Farbraum und im Helligkeitsregler\nklicken oder ziehen. Bleibt die gewählte Farbe wieder erwarten schwarz,\nso muß die Helligkeit ganz rechts erhöht werden.\n\nMit einem Klick auf die Grundfarbenpalette kann diese gewählt werden.\n\nEin benutzerdefinierter Farbspeicher kann durch einen Klick selektiert\nwerden. Ab dann wird jede Farbveränderung auch in den Farbspeicher\n geschrieben.
+*mouseHelpTextName: Um eine Farbe zu wählen bitte im Farbraum und im Helligkeitsregler\nklicken oder ziehen. Bleibt die gewählte Farbe wieder erwarten schwarz,\nso muß die Helligkeit ganz rechts erhöht werden.\n\nMit einem Klick auf die Grundfarbenpalette kann diese gewählt werden.\n\nEin benutzerdefinierter Farbspeicher kann durch einen Klick selektiert\nwerden. Ab dann wird jede Farbveränderung auch in den Farbspeicher\n geschrieben.
 
-*keyboardHelpTextName:
-Aktivieren sie das Texteingabefenster mit einem Klick oder mit der\nTabulatortaste. Eine Farbe kann als RGB-Wert eingegeben mit 3 oder 6\nhexadezimalen Ziffern eingegeben werden.\n\nDie Eingabe kann mit der Escape- oder Eingabetaste abgeschlossen werden.\n\nAusserhalb des Eingabefensters wird der Dialog mit der Eingabetaste\nbestätigt und mit der Escapetaste zurückgenommen.
+*keyboardHelpTextName: Aktivieren sie das Texteingabefenster mit einem Klick oder mit der\nTabulatortaste. Eine Farbe kann als RGB-Wert eingegeben mit 3 oder 6\nhexadezimalen Ziffern eingegeben werden.\n\nDie Eingabe kann mit der Escape- oder Eingabetaste abgeschlossen werden.\n\nAusserhalb des Eingabefensters wird der Dialog mit der Eingabetaste\nbestätigt und mit der Escapetaste zurückgenommen.
