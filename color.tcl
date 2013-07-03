@@ -857,8 +857,8 @@ proc SelectColor::_SetEntryValue {argVarName var2 op} {
 proc SelectColor::_CheckFocus {w} {
     variable _widget
 
-    if {    ! [string equal $w $_widget(en)] &&
-            [string equal [focus]  $_widget(en)]} {
+    if {    (! [string equal $w $_widget(en)]) &&
+            ([string equal [focus]  $_widget(en)])} {
         set top [winfo toplevel $_widget(en)]
         $top setfocus default
     }
