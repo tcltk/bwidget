@@ -1107,12 +1107,22 @@ proc NoteBook::_resize { path } {
     variable $path
     upvar 0  $path data
 
+    # Check if pages are fully initialized or if we are still initializing
+    if { 0 < [llength $data(pages)] &&
+	 ![info exists data([lindex $data(pages) end],width)] } {
+	return
+    }
+    
     if {!$data(realized)} {
-	if { [set width  [Widget::cget $path -width]]  == 0 ||
-	     [set height [Widget::cget $path -height]] == 0 } {
-	    compute_size $path
-	}
 	set data(realized) 1
+	if { [Widget::cget $path -width]  == 0 ||
+	     [Widget::cget $path -height] == 0 } {
+	    # This does an update allowing other events (resize) to enter
+	    # In addition, it does a redraw, so first set the realized and
+	    # then exit
+	    compute_size $path
+	    return
+	}
     }
 
     NoteBook::_redraw $path
