@@ -1,16 +1,21 @@
-2013-08-28 Harald Oehlmann <oehhar@users.sourceforge.net>
+2013-08-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* notebook.tcl: cured error in _resize, that
+	data($p,width) is not (jet) present. Ticket [a4cbba655d].
+
+2013-06-28 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* mainframe.tcl: Included Patch [9f67a66609]
 	curing issues of Shift-Accellerators with Shift-Lock
 	on Mac. By Keith Nash, Ticket [83ce3e84e7].
 
-2013-08-26 Harald Oehlmann <oehhar@users.sourceforge.net>
+2013-06-26 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* mainframe.tcl: Reverted Patch [1977644]
 	(-casesensitive for accellerators). It has
 	issues with shift-lock.
 
-2013-08-21 Harald Oehlmann <oehhar@users.sourceforge.net>
+2013-06-21 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	* labelentry.tcl: Bug fixed:
 	Methods from Tk entry widget restored [Bug 1002844].
