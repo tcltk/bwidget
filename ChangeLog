@@ -1,5 +1,10 @@
 2013-08-14 Harald Oehlmann <oehhar@users.sourceforge.net>
 
+	xpm2image.tcl: many issues fixed in xpm import
+	by Mattias Hembruch. Ticket [9a8b2ee42e]
+	
+2013-08-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+
 	* notebook.tcl: cured error in _resize, that
 	data($p,width) is not (jet) present. Ticket [a4cbba655d].
 
