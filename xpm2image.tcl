@@ -73,7 +73,7 @@ proc _xpm-to-image_process_line { line } {
         }
     }
     if { ![info exists data(color-$cname)] } {
-        error "color definition {$line} in $file failed to define a color"
+        error "color definition {$line} failed to define a color"
     }
 }
 
