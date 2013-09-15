@@ -1,4 +1,8 @@
-2013-08-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+2013-09-15 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.7 tagged ****
+
+2013-09-11 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	xpm2image.tcl: many issues fixed in xpm import
 	by Mattias Hembruch. Ticket [9a8b2ee42e]
