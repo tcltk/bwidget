@@ -726,6 +726,9 @@ proc DynamicHelp::_show_help { path w x y } {
 	if {![winfo exists $_top]} { return }
         wm deiconify $_top
         raise $_top
+        # Sometimes the tooltip does not occur under
+        # gnome/metacity on ubuntu.
+        after 5;
     }
 }
 

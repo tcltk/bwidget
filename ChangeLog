@@ -1,3 +1,8 @@
+2013-10-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+	dynhelp.tcl: Sometimes the tooltip does not occur under
+	gnome/metacity on ubuntu. By Wolfgang S. Kechel.
+	Ticket [a588d2f800]
+
 2013-09-15 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.7 tagged ****
