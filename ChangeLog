@@ -2,13 +2,17 @@
 	combobox.tcl: Fails in themed mode with "unknown
 	option -bg". Patch solves this but listbox items
 	are white on white when "-foreground" is specified.
-	By Wolfgang S. Kechel. Ticket [cc3b12e22f]
+	By Wolfgang S. Kechel. Ticket [6632134ce9]
 	
 	listbox.tcl: Update on option -deltay added.
 	Set x0 to 2 to make highlight work and look nice for
 	listbox with image.
 	Take image into account to show selection.
 	By Wolfgang S. Kechel. Ticket [ff1787af9c]
+
+	scrollw.tcl: Raise scrolled window if it is below in
+	the window hierarchy. By Wolfgang S. Kechel.
+	Ticket [ff1787af9c]
 
 2013-10-07 Harald Oehlmann <oehhar@users.sourceforge.net>
 	dynhelp.tcl: Sometimes the tooltip does not occur under
