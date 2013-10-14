@@ -138,6 +138,7 @@ proc ScrolledWindow::setwidget { path widget } {
     }
     set data(widget) $widget
     grid $widget -in $path -row 1 -column 1 -sticky news
+    raise $widget;
 
     $path.hscroll configure -command [list $widget xview]
     $path.vscroll configure -command [list $widget yview]
