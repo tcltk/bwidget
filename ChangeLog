@@ -1,4 +1,10 @@
 2013-10-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+	combobox.tcl: Fails in themed mode with "unknown
+	option -bg". Patch solves this but listbox items
+	are white on white when "-foreground" is specified.
+	By Wolfgang S. Kechel. Ticket [cc3b12e22f]
+
+2013-10-07 Harald Oehlmann <oehhar@users.sourceforge.net>
 	dynhelp.tcl: Sometimes the tooltip does not occur under
 	gnome/metacity on ubuntu. By Wolfgang S. Kechel.
 	Ticket [a588d2f800]

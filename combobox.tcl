@@ -10,7 +10,7 @@
 #     - ComboBox::setvalue
 #     - ComboBox::getvalue
 #     - ComboBox::clearvalue
-#     - ComboBox::getentrypath
+#     - ComboBox::getentry
 #     - ComboBox::_create_popup
 #     - ComboBox::_mapliste
 #     - ComboBox::_unmapliste
@@ -299,11 +299,16 @@ proc ComboBox::configure { path args } {
     #  colors into it. If it is not shown, the next time the dropdown
     #  is shown it'll get the actual colors anyway
     if {[winfo exists $path.shell.listb]} {
-	$path.shell.listb configure \
+	if {[Widget::theme]} {
+	    $path.shell.listb configure \
+		-fg [_getfg $path]
+	} else {
+	    $path.shell.listb configure \
 		-bg [Widget::cget $path -entrybg] \
 		-fg [Widget::cget $path -foreground] \
 		-selectbackground [Widget::cget $path -selectbackground] \
 		-selectforeground [Widget::cget $path -selectforeground]
+	}
     }
 
     return $res
@@ -458,6 +463,15 @@ proc ComboBox::getentry { path } {
     return $path.e
 }
 
+proc ComboBox::_getfg {path} {
+    # First try to retrieve option
+    set fg [Widget::cget $path -foreground];
+    if { 0 == [string length $fg] && [Widget::theme] } {
+	# fall back to style settings when not configured for widget
+	return [::ttk::style lookup TEntry -foreground];
+    }
+    return $fg;
+}
 # ----------------------------------------------------------------------------
 #  Command ComboBox::_create_popup
 # ----------------------------------------------------------------------------
@@ -506,7 +520,7 @@ proc ComboBox::_create_popup { path } {
                     -selectmode single -selectfill 1 -autofocus 0 -height $h \
                     -font [Widget::cget $path -font]  \
                     -bg [Widget::cget $path -entrybg] \
-                    -fg [Widget::cget $path -foreground]]
+                    -fg [_getfg $path]]
         } else {
             set listb  [ListBox $shell.listb \
                     -relief flat -borderwidth 0 -highlightthickness 0 \
@@ -536,8 +550,7 @@ proc ComboBox::_create_popup { path } {
                     -exportselection false \
                     -font	[Widget::cget $path -font]  \
                     -height $h \
-                    -bg [Widget::cget $path -entrybg] \
-                    -fg [Widget::cget $path -foreground] \
+                    -fg [_getfg $path] \
                     -listvariable [Widget::varForOption $path -values]]
         } else {
             set listb  [listbox $shell.listb \
@@ -609,10 +622,10 @@ proc ComboBox::_recreate_popup { path } {
     $listb configure \
             -height $h \
             -font   [Widget::cget $path -font] \
-            -bg     [Widget::cget $path -entrybg] \
-            -fg     [Widget::cget $path -foreground]
+            -fg     [_getfg $path]
     if {![Widget::theme]} {
         $listb configure \
+                -bg [Widget::cget $path -entrybg] \
                 -selectbackground [Widget::cget $path -selectbackground] \
                 -selectforeground [Widget::cget $path -selectforeground]
     }
