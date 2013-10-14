@@ -240,7 +240,8 @@ proc ListBox::configure { path args } {
         _configureSelectmode $path $selectmode $selectmodePrevious
     }
 
-    set ch1 [expr {[Widget::hasChanged $path -deltay dy]  |
+    set ch0 [expr {[Widget::hasChanged $path -deltay dy]}]
+    set ch1 [expr {$ch0  |
                    [Widget::hasChanged $path -padx val]   |
                    [Widget::hasChanged $path -multicolumn val]}]
 
@@ -248,9 +249,11 @@ proc ListBox::configure { path args } {
                    [Widget::hasChanged $path -selectforeground val]}]
 
     set redraw 0
-    if { [Widget::hasChanged $path -height h] } {
+    if { [Widget::hasChanged $path -height h] || $ch0 } {
         $path.c configure -height [expr {$h*$dy}]
-        set redraw 1
+        if {!$ch0} {
+            set redraw 1
+        }
     }
     if { [Widget::hasChanged $path -width w] } {
         $path.c configure -width [expr {$w*8}]
@@ -1046,7 +1049,8 @@ proc ListBox::_redraw_items { path } {
     set dy   [Widget::getoption $path -deltay]
     set padx [Widget::getoption $path -padx]
     set y0   [expr {$dy/2}]
-    set x0   4
+    # Changed from 4 to 2 to make highlight work and look nice for listbox with image as well
+    set x0   2
     set x1   [expr {$x0+$padx}]
     set nitem 0
     set width 0
@@ -1127,6 +1131,15 @@ proc ListBox::_redraw_selection { path } {
     foreach item $data(selitems) {
         set bbox [$path.c bbox "n:$item"]
         if { [llength $bbox] } {
+            set imgbox [$path.c bbox i:$item]
+            lassign $bbox x0 y0 x1 y1;
+            if {[string compare "" $imgbox]} {
+                # image may exist and may be heigher than text!
+                lassign $imgbox ix0 iy0 ix1 iy1;
+                set bbox [list $x0 [expr {min($iy0,$y0)}] $x1 [expr {max($iy1,$y1)}]];
+            } else {
+                set bbox [list $x0 [lindex $bbox 1] $x1 [lindex $bbox 3]]
+            }
 	    if { $selfill && !$multi } {
 		# With -selectfill, make box occupy full width of widget
 		set bbox [list 0 [lindex $bbox 1] $width [lindex $bbox 3]]
