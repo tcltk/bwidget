@@ -1,4 +1,8 @@
-2013-10-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+2013-10-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+	combobox.tcl: Themed ComboBox color specifications
+	are honored. By Wolfgang S. Kechel. Ticket [6c6704e40f]
+
+2013-10-14 Harald Oehlmann <oehhar@users.sourceforge.net>
 	combobox.tcl: Fails in themed mode with "unknown
 	option -bg". Patch solves this but listbox items
 	are white on white when "-foreground" is specified.
