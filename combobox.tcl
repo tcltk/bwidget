@@ -299,13 +299,11 @@ proc ComboBox::configure { path args } {
     #  colors into it. If it is not shown, the next time the dropdown
     #  is shown it'll get the actual colors anyway
     if {[winfo exists $path.shell.listb]} {
-	if {[Widget::theme]} {
+	$path.shell.listb configure \
+	    -bg [_getbg $path] \
+	    -fg [_getfg $path]
+	if {![Widget::theme]} {
 	    $path.shell.listb configure \
-		-fg [_getfg $path]
-	} else {
-	    $path.shell.listb configure \
-		-bg [Widget::cget $path -entrybg] \
-		-fg [Widget::cget $path -foreground] \
 		-selectbackground [Widget::cget $path -selectbackground] \
 		-selectforeground [Widget::cget $path -selectforeground]
 	}
@@ -472,6 +470,20 @@ proc ComboBox::_getfg {path} {
     }
     return $fg;
 }
+proc ComboBox::_getbg {path} {
+    if {[Widget::theme]} {
+	# First try to retrieve option
+	set bg [Widget::cget $path -background];
+	if {0 == [string length $bg]} {
+	    # fall back to style settings when not configured for widget
+	    return [::ttk::style lookup TEntry -backround];
+	}
+    } else {
+	# fetch the entrybg resource value
+	set bg [Widget::cget $path -entrybg]
+    }
+    return $bg;
+}
 # ----------------------------------------------------------------------------
 #  Command ComboBox::_create_popup
 # ----------------------------------------------------------------------------
@@ -518,16 +530,16 @@ proc ComboBox::_create_popup { path } {
             set listb  [ListBox $shell.listb \
                     -relief flat -borderwidth 0 -highlightthickness 0 \
                     -selectmode single -selectfill 1 -autofocus 0 -height $h \
-                    -font [Widget::cget $path -font]  \
-                    -bg [Widget::cget $path -entrybg] \
+                    -font [Widget::cget $path -font] \
+                    -bg [_getbg $path] \
                     -fg [_getfg $path]]
         } else {
             set listb  [ListBox $shell.listb \
                     -relief flat -borderwidth 0 -highlightthickness 0 \
                     -selectmode single -selectfill 1 -autofocus 0 -height $h \
                     -font [Widget::cget $path -font]  \
-                    -bg [Widget::cget $path -entrybg] \
-                    -fg [Widget::cget $path -foreground] \
+                    -bg [_getbg $path] \
+                    -fg [_getfg $path] \
                     -selectbackground [Widget::cget $path -selectbackground] \
                     -selectforeground [Widget::cget $path -selectforeground]]
         }
@@ -550,6 +562,7 @@ proc ComboBox::_create_popup { path } {
                     -exportselection false \
                     -font	[Widget::cget $path -font]  \
                     -height $h \
+                    -bg [_getbg $path] \
                     -fg [_getfg $path] \
                     -listvariable [Widget::varForOption $path -values]]
         } else {
@@ -558,8 +571,8 @@ proc ComboBox::_create_popup { path } {
                     -exportselection false \
                     -font	[Widget::cget $path -font]  \
                     -height $h \
-                    -bg [Widget::cget $path -entrybg] \
-                    -fg [Widget::cget $path -foreground] \
+                    -bg [_getbg $path] \
+                    -fg [_getfg $path] \
                     -selectbackground [Widget::cget $path -selectbackground] \
                     -selectforeground [Widget::cget $path -selectforeground] \
                     -listvariable [Widget::varForOption $path -values]]
@@ -622,10 +635,10 @@ proc ComboBox::_recreate_popup { path } {
     $listb configure \
             -height $h \
             -font   [Widget::cget $path -font] \
+            -bg     [_getbg $path] \
             -fg     [_getfg $path]
     if {![Widget::theme]} {
         $listb configure \
-                -bg [Widget::cget $path -entrybg] \
                 -selectbackground [Widget::cget $path -selectbackground] \
                 -selectforeground [Widget::cget $path -selectforeground]
     }
