@@ -1,4 +1,8 @@
-2013-10-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+2013-10-17 Harald Oehlmann <oehhar@users.sourceforge.net>
+	widget.tcl: Remove temporary widget.
+	By Wolfgang S. Kechel. Ticket [6cd041bcc1]
+
+2013-10-15 Harald Oehlmann <oehhar@users.sourceforge.net>
 	combobox.tcl: Themed ComboBox color specifications
 	are honored. By Wolfgang S. Kechel. Ticket [6c6704e40f]
 
