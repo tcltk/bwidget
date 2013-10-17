@@ -137,7 +137,6 @@ proc Widget::tkinclude { class tkwidget subpath args } {
     upvar 0 ${class}::map$subpath submap
     upvar 0 ${class}::optionExports exports
 
-    set foo [$tkwidget ".ericFoo###"]
     # create resources informations from tk widget resources
     foreach optdesc [_get_tkwidget_options $tkwidget] {
         set option [lindex $optdesc 0]
@@ -189,7 +188,6 @@ proc Widget::tkinclude { class tkwidget subpath args } {
             }
         }
     }
-    ::destroy $foo
 }
 
 
