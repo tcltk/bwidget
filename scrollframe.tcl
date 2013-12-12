@@ -116,19 +116,19 @@ proc ScrollableFrame::configure { path args } {
     set modcw [Widget::hasChanged $path -constrainedwidth cw]
     set modw  [Widget::hasChanged $path -areawidth w]
     if { $modcw || (!$cw && $modw) } {
-        if { $cw } {
-            set w [winfo width $path]
-        }
         set upd 1
+    }
+    if { $cw } {
+        set w [winfo width $path]
     }
 
     set modch [Widget::hasChanged $path -constrainedheight ch]
     set modh  [Widget::hasChanged $path -areaheight h]
     if { $modch || (!$ch && $modh) } {
-        if { $ch } {
-            set h [winfo height $path]
-        }
         set upd 1
+    }
+    if { $ch } {
+        set h [winfo height $path]
     }
 
     if { $upd } {

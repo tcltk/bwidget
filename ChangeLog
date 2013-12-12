@@ -1,4 +1,10 @@
-2013-10-17 Harald Oehlmann <oehhar@users.sourceforge.net>
+2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	scrollframe.tcl: Make -constrainedwidth 1 and
+	-constrainedheight 1 work together.
+	Patch by Simon Bachmann. Ticket [2fa44401d5]
+
+	2013-10-17 Harald Oehlmann <oehhar@users.sourceforge.net>
 	widget.tcl: Remove temporary widget.
 	By Wolfgang S. Kechel. Ticket [6cd041bcc1]
 
