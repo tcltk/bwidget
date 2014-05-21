@@ -13,6 +13,10 @@
 
         widget.tcl: Remove unneeded upvar. By Adrian Medrano Calvo.
         Ticket [43f93e0a97]
+        
+        widget.tcl et al: remove apparently unused procedure
+        Widget::syncoptions and all calls. By Adrian Medrano Calvo.
+        Ticket [3c2b8eafc6]
 
 
 2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>

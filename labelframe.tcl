@@ -33,8 +33,6 @@ namespace eval LabelFrame {
     Widget::addmap LabelFrame "" :cmd {-background {}}
     Widget::addmap LabelFrame "" .f   {-background {} -relief {} -borderwidth {}}
 
-    Widget::syncoptions LabelFrame Label .l {-text {} -underline {}}
-
     bind BwLabelFrame <FocusIn> [list Label::setfocus %W.l]
     bind BwLabelFrame <Destroy> [list LabelFrame::_destroy %W]
 }

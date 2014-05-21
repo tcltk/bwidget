@@ -24,9 +24,6 @@ namespace eval LabelEntry {
 
     Widget::addmap LabelEntry "" :cmd {-background {}}
 
-    Widget::syncoptions LabelEntry Entry .e {-text {}}
-    Widget::syncoptions LabelEntry LabelFrame .labf {-label -text -underline {}}
-
     ::bind BwLabelEntry <FocusIn> [list focus %W.labf]
     ::bind BwLabelEntry <Destroy> [list LabelEntry::_destroy %W]
 }

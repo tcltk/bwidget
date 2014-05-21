@@ -42,8 +42,6 @@ namespace eval Button {
 
     DynamicHelp::include Button balloon
 
-    Widget::syncoptions Button "" :cmd {-text {} -underline {}}
-
     variable _current ""
     variable _pressed ""
 

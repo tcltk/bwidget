@@ -48,8 +48,6 @@ namespace eval Label {
         COLOR   {move {}}
     }
 
-    Widget::syncoptions Label "" .l {-text {} -underline {}}
-
     bind BwLabel <FocusIn> [list Label::setfocus %W]
     bind BwLabel <Destroy> [list Label::_destroy %W]
 }
