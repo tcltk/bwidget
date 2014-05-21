@@ -3,6 +3,10 @@
         widget.tcl: Don't invoke unqualified upvar in callers
         scope. Patch by Andreas Kupries. Ticket [046fa04231]
 
+        widget.tcl: Don't double creation of temporary widget for
+        default values retrieval. Use result of _get_tkwidget_options
+        instead. By Adrian Medrano Calvo. Ticket [393b67ab19]
+
 2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	scrollframe.tcl: Make -constrainedwidth 1 and
