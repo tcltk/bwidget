@@ -372,24 +372,23 @@ proc Widget::declare { class optlist } {
         # retreive default value for TkResource
         if { [string equal $type "TkResource"] } {
             set tkwidget [lindex $arg 0]
-	    set foo [$tkwidget ".ericFoo##"]
             set realopt  [lindex $arg 1]
             if { ![string length $realopt] } {
                 set realopt $option
             }
+            set ind [lsearch $tkoptions [list $realopt *]]
+            set optdesc [lindex $tkoptions $ind];
             set tkoptions [_get_tkwidget_options $tkwidget]
             if { ![string length $value] } {
                 # We initialize default value
-		set ind [lsearch $tkoptions [list $realopt *]]
-                set value [lindex [lindex $tkoptions $ind] end]
+                set value [lindex $optdesc end]
             }
 	    set optionDbName ".[lindex [_configure_option $option ""] 0]"
 	    option add *${class}${optionDbName} $value widgetDefault
 	    set exports($option) $optionDbName
             set classopt($option) [list TkResource $value $ro \
 		    [list $tkwidget $realopt]]
-	    set optionClass($option) [lindex [$foo configure $realopt] 1]
-	    ::destroy $foo
+	    set optionClass($option) [lindex $optdesc 1]
             continue
         }
 
