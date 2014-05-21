@@ -1529,7 +1529,7 @@ proc Widget::getVariable { path varName {newVarName ""} } {
     variable _class
     set class $_class($path)
     if {![string length $newVarName]} { set newVarName $varName }
-    uplevel 1 [list upvar \#0 ${class}::$path:$varName $newVarName]
+    uplevel 1 [list ::upvar \#0 ${class}::$path:$varName $newVarName]
 }
 
 # Widget::options --
