@@ -376,6 +376,7 @@ proc Widget::declare { class optlist } {
             if { ![string length $realopt] } {
                 set realopt $option
             }
+            set tkoptions [_get_tkwidget_options $tkwidget]
             set ind [lsearch $tkoptions [list $realopt *]]
             set optdesc [lindex $tkoptions $ind];
             set tkoptions [_get_tkwidget_options $tkwidget]
@@ -1485,12 +1486,68 @@ proc Widget::traverseTo { w } {
     event generate $w <<TraverseIn>>
 }
 
+# Widget::which --
+#
+#	Retrieve a fully qualified variable name for the specified option or
+#	widget variable.
+#
+#	If the option is not one for which a variable exists, throw an error
+#	(ie, those options that map directly to widget options).
+#
+#	For widget variables, return the fully qualified name even if the
+#	variable had not been previously set, in order to allow adding variable
+#	traces prior to their creation.
+#
+# Arguments:
+#	path	megawidget to get an option var for.
+#	type	either -option or -variable.
+#	name    name of the option or widget variable.
+#
+# Results:
+#	Fully qualified name of the variable for the option or the widget
+#	variable.
+#
+proc Widget::which {path args} {
+    switch -- [llength $args] {
+	1 {
+	    set type -option;
+	    set name [lindex $args 0];
+	}
+	2 {
+	    set type [lindex $args 0];
+	    set name [lindex $args 1];
+	}
+	default {
+	    return -code error "incorrect number of arguments";
+	}
+    }
+
+    variable _class;
+    set class $_class($path);
+
+    switch -- $type {
+	-option {
+	    upvar 0 ${class}::$path:opt pathopt;
+
+	    if { ![info exists pathopt($option)] } {
+		error "unable to find variable for option \"$option\"";
+	    }
+
+	    return ::Widget::${class}::${path}:opt(${name});
+	}
+	-variable {
+	    return ${class}::${path}:${name};
+	}
+    }
+}
+
 
 # Widget::varForOption --
 #
 #	Retrieve a fully qualified variable name for the option specified.
 #	If the option is not one for which a variable exists, throw an error 
-#	(ie, those options that map directly to widget options).
+#	(ie, those options that map directly to widget options) Superseded by
+#       widget::which.
 #
 # Arguments:
 #	path	megawidget to get an option var for.
@@ -1500,17 +1557,7 @@ proc Widget::traverseTo { w } {
 #	varname	name of the variable, fully qualified, suitable for tracing.
 
 proc Widget::varForOption {path option} {
-    variable _class
-    variable _optiontype
-
-    set class $_class($path)
-    upvar 0 ${class}::$path:opt pathopt
-
-    if { ![info exists pathopt($option)] } {
-	error "unable to find variable for option \"$option\""
-    }
-    set varname "::Widget::${class}::$path:opt($option)"
-    return $varname
+    return [::Widget::which $path -option $option];
 }
 
 # Widget::getVariable --

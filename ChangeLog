@@ -1,11 +1,16 @@
 2014-05-21 Harald Oehlmann <oehhar@users.sourceforge.net>
 
         widget.tcl: Don't invoke unqualified upvar in callers
-        scope. Patch by Andreas Kupries. Ticket [046fa04231]
+        scope. Patch by Adrian Medrano Calvo. Ticket [046fa04231]
 
         widget.tcl: Don't double creation of temporary widget for
         default values retrieval. Use result of _get_tkwidget_options
         instead. By Adrian Medrano Calvo. Ticket [393b67ab19]
+
+        widget.tcl: New procedure Widget::which (as in [namespace which]),
+        that returns the fully qualified name for a widget option or
+        widget variable. By Adrian Medrano Calvo. Ticket [a8705e5fd9]
+
 
 2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>
 
