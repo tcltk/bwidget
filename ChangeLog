@@ -1,3 +1,8 @@
+2014-05-21 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+        widget.tcl: Don't invoke unqualified upvar in callers
+        scope. Patch by Andreas Kupries. Ticket [046fa04231]
+
 2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	scrollframe.tcl: Make -constrainedwidth 1 and
