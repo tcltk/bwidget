@@ -435,7 +435,6 @@ proc Widget::create { class path {rename 1} } {
 proc Widget::addmap { class subclass subpath options } {
     upvar 0 ${class}::opt classopt
     upvar 0 ${class}::optionExports exports
-    upvar 0 ${class}::optionClass optionClass
     upvar 0 ${class}::map classmap
     upvar 0 ${class}::map$subpath submap
 

@@ -11,6 +11,9 @@
         that returns the fully qualified name for a widget option or
         widget variable. By Adrian Medrano Calvo. Ticket [a8705e5fd9]
 
+        widget.tcl: Remove unneeded upvar. By Adrian Medrano Calvo.
+        Ticket [43f93e0a97]
+
 
 2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>
 
