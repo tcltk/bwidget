@@ -61,8 +61,6 @@ namespace eval ComboBox {
 	}
     }
 
-    Widget::syncoptions ComboBox Entry .e {-text {}}
-
     ::bind BwComboBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
     ::bind BwComboBox <Destroy> [list ComboBox::_destroy %W]
 

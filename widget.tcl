@@ -458,21 +458,6 @@ proc Widget::addmap { class subclass subpath options } {
 
 
 # ----------------------------------------------------------------------------
-#  Command Widget::syncoptions
-# ----------------------------------------------------------------------------
-proc Widget::syncoptions { class subclass subpath options } {
-    upvar 0 ${class}::sync classync
-
-    foreach {option realopt} $options {
-        if { ![string length $realopt] } {
-            set realopt $option
-        }
-        set classync($option) [list $subpath $subclass $realopt]
-    }
-}
-
-
-# ----------------------------------------------------------------------------
 #  Command Widget::init
 # ----------------------------------------------------------------------------
 proc Widget::init { class path options } {
