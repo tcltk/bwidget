@@ -1,3 +1,8 @@
+2014-09-05 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	widget.tcl: Widget::which errors when option not present.
+	Ticket [397db23424]
+
 2014-05-21 Harald Oehlmann <oehhar@users.sourceforge.net>
 
         widget.tcl: Don't invoke unqualified upvar in callers

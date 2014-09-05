@@ -1513,8 +1513,8 @@ proc Widget::which {path args} {
 	-option {
 	    upvar 0 ${class}::$path:opt pathopt;
 
-	    if { ![info exists pathopt($option)] } {
-		error "unable to find variable for option \"$option\"";
+	    if { ![info exists pathopt($name)] } {
+		error "unable to find variable for option \"$name\"";
 	    }
 
 	    return ::Widget::${class}::${path}:opt(${name});
