@@ -1,3 +1,7 @@
+2014-09-10 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.8 tagged ****
+
 2014-09-05 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	widget.tcl: Widget::which errors when option not present.
