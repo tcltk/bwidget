@@ -402,29 +402,86 @@ proc Widget::declare { class optlist } {
 }
 
 
+# ----------------------------------------------------------------------------
+#  Command Widget::define
+#  	Declares a new class and loads its dependencies.
+#
+# Arguments:
+#	class		megawidget class
+#	filename	file where the class resides
+#	options    	The following options are supported:
+#			-classonly	Prevents megawidget setup: creation of
+#					megawidget alias, binding of the
+#					<Destroy> event and stubbing of the
+#					'use' procedure.
+#			-namespace ns	Indicate the namespace where the
+#					megawidget's procedures reside. Defaults
+#					to ::${class}.
+#	dependencies   	classes the class being defined depends on.
+#
+# ----------------------------------------------------------------------------
 proc Widget::define { class filename args } {
     variable ::BWidget::use
+    set classonly 0;
+    set ns ::${class};
+    for {set i 0; set n [llength $args]} {$i < $n} {incr i} {
+	set option [lindex $args $i];
+	switch -- $option {
+	    -classonly {
+		set classonly 1;
+	    }
+	    -namespace {
+		incr i;
+		set ns [lindex $args $i];
+	    }
+	    default {
+		# stop processing options
+		break;
+	    }
+	}
+    }
+    set args [lrange $args $i end]
+
     set use($class)      $args
     set use($class,file) $filename
+    set use($class,namespace) $ns;
     lappend use(classes) $class
 
-    if {[set x [lsearch -exact $args "-classonly"]] > -1} {
-	set args [lreplace $args $x $x]
-    } else {
-	interp alias {} ::${class} {} ${class}::create
-	proc ::${class}::use {} {}
+    # Make sure the class description namespace exists.
+    namespace eval $class {}
+    # Make sure the megawidget namespace exists.
+    namespace eval $ns {}
 
+    if {!$classonly} {
+	interp alias {} ${ns} {} ${ns}::create
+	proc ${ns}::use {} {}
 	bind $class <Destroy> [list Widget::destroy %W]
     }
 
-    foreach class $args { ${class}::use }
+    foreach dep $args {
+	if {![info exists use(${dep},namespace)]} {
+	    # Lazy-loaded modules are not yet loaded (actually that seems to be
+	    # the whole point of this 'use' mechanism.) so they have not configured
+	    # a namespace. Use namespace=class convention. Note that the class MUST
+	    # not be prefixed by ::.
+	    ${dep}::use;
+	} else {
+	    $use(${dep},namespace)::use;
+	}
+    }
 }
 
 
 proc Widget::create { class path {rename 1} } {
     if {$rename} { rename $path ::$path:cmd }
+
+    variable ::BWidget::use;
+    set ns [expr {[info exists use(${class},namespace)]
+		  ? $use(${class},namespace)
+		  : $class}];
+
     proc ::$path { cmd args } \
-    	[subst {return \[eval \[linsert \$args 0 ${class}::\$cmd [list $path]\]\]}]
+	[subst {return \[eval \[linsert \$args 0 ${ns}::\$cmd [list $path]\]\]}]
     return $path
 }
 
@@ -754,8 +811,15 @@ proc Widget::destroy { path } {
 
     if {![string equal [info commands $path] ""]} { rename $path "" }
 
-    ## Unset any variables used in this widget.
-    foreach var [info vars ::${class}::$path:*] { unset $var }
+    # Unset any variables used in this widget.
+    # Guard, as some internal classes (Bitmap, LabelEntry, ListBox::Item,
+    # NoteBook::Page, PanedWindow::Pane, ScrollableFrame, ScrollableFrame,
+    # ScrollableFrame, Tree::Node, Wizard::Branch, Wizard::Step, Wizard::Widget)
+    # are declared but not defined.
+    if {[info exists ::BWidget::use(${class},namespace)]} {
+	set ns $::BWidget::use(${class},namespace);
+	foreach var [info vars ${ns}::${path}:*] { unset $var }
+    }
 
     unset _class($path)
 }
@@ -1520,7 +1584,8 @@ proc Widget::which {path args} {
 	    return ::Widget::${class}::${path}:opt(${name});
 	}
 	-variable {
-	    return ${class}::${path}:${name};
+	    set ns $::BWidget::use(${class},namespace);
+	    return ${ns}::${path}:${name};
 	}
     }
 }
@@ -1558,8 +1623,9 @@ proc Widget::varForOption {path option} {
 proc Widget::getVariable { path varName {newVarName ""} } {
     variable _class
     set class $_class($path)
+    set ns $::BWidget::use(${class},namespace);
     if {![string length $newVarName]} { set newVarName $varName }
-    uplevel 1 [list ::upvar \#0 ${class}::$path:$varName $newVarName]
+    uplevel 1 [list ::upvar \#0 ${ns}::${path}:${varName} $newVarName]
 }
 
 # Widget::options --
