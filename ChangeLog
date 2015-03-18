@@ -1,3 +1,10 @@
+2015-03-18 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	widget.tcl: Widget::define got new parameter -namespace,
+	allowing megawidget namespace be different to
+	class name. This allows lower case namespace names.
+	Patch by Adrian Medrano Calvo. Ticket [023a631b20]
+
 2014-09-10 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.8 tagged ****
@@ -9,23 +16,23 @@
 
 2014-05-21 Harald Oehlmann <oehhar@users.sourceforge.net>
 
-        widget.tcl: Don't invoke unqualified upvar in callers
-        scope. Patch by Adrian Medrano Calvo. Ticket [046fa04231]
+	widget.tcl: Don't invoke unqualified upvar in callers
+	scope. Patch by Adrian Medrano Calvo. Ticket [046fa04231]
 
-        widget.tcl: Don't double creation of temporary widget for
-        default values retrieval. Use result of _get_tkwidget_options
-        instead. By Adrian Medrano Calvo. Ticket [393b67ab19]
+	widget.tcl: Don't double creation of temporary widget for
+	default values retrieval. Use result of _get_tkwidget_options
+	instead. By Adrian Medrano Calvo. Ticket [393b67ab19]
 
-        widget.tcl: New procedure Widget::which (as in [namespace which]),
-        that returns the fully qualified name for a widget option or
-        widget variable. By Adrian Medrano Calvo. Ticket [a8705e5fd9]
+	widget.tcl: New procedure Widget::which (as in [namespace which]),
+	that returns the fully qualified name for a widget option or
+	widget variable. By Adrian Medrano Calvo. Ticket [a8705e5fd9]
 
-        widget.tcl: Remove unneeded upvar. By Adrian Medrano Calvo.
-        Ticket [43f93e0a97]
-        
-        widget.tcl et al: remove apparently unused procedure
-        Widget::syncoptions and all calls. By Adrian Medrano Calvo.
-        Ticket [3c2b8eafc6]
+	widget.tcl: Remove unneeded upvar. By Adrian Medrano Calvo.
+	Ticket [43f93e0a97]
+
+	widget.tcl et al: remove apparently unused procedure
+	Widget::syncoptions and all calls. By Adrian Medrano Calvo.
+	Ticket [3c2b8eafc6]
 
 
 2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>
