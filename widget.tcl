@@ -872,7 +872,7 @@ proc Widget::configure { path options } {
                     # | *        | :cmd    | own              | window         | current |
                     # | *        | *       | subwidget        | window.subpath | current |
                     if { [string length $subclass] && ! [string equal $subclass ":cmd"] } {
-                        if { ! [string equal $subpath ":cmd"] } {
+                        if { [string equal $subpath ":cmd"] } {
                             set subpath ""
                         }
                         set ns $::BWidget::use(${subclass},namespace);
