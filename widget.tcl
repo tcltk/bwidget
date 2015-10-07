@@ -871,12 +871,13 @@ proc Widget::configure { path options } {
                     # | ""       | *       | own              | window         | window  |
                     # | *        | :cmd    | own              | window         | current |
                     # | *        | *       | subwidget        | window.subpath | current |
-                    if { [string length $subclass] && ! [string equal $subclass ":cmd"] } {
-                        if { [string equal $subpath ":cmd"] } {
+                    if { "" ne $subclass && $subclass ne ":cmd" } {
+                        if { $subpath eq ":cmd" } {
                             set subpath ""
                         }
-                        set curval [${subclass}::cget $window$subpath $realopt]
-                        ${subclass}::configure $window$subpath $realopt $newval
+                        set ns $::BWidget::use(${subclass},namespace);
+                        set curval [${ns}::cget $window$subpath $realopt]
+                        ${ns}::configure $window$subpath $realopt $newval
                     } else {
                         set curval [$window$subpath cget $realopt]
                         $window$subpath configure $realopt $newval
