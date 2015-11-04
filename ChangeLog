@@ -1,3 +1,9 @@
+2015-11-04 Harald Oehlmann <oehhar@users.sourceforge.net>
+	dynhelp.tcl: Drop the asumption that all windows
+	screen are the same size (of fix dated 2009-06-26)
+	and use the virtual screen information to place the bubble
+	help. Ticket [b64e03e548].
+
 2015-10-18 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.9 tagged ****

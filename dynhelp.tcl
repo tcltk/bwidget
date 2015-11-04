@@ -113,7 +113,7 @@ proc DynamicHelp::sethelp { path subpath {force 0}} {
 	    -helptype -helptext -helpvar] break
     if { $force || $ctype || $ctext || $cvar } {
 	set htype [Widget::cget $path -helptype]
-        switch $htype {
+        switch -- $htype {
             balloon {
                 return [register $subpath balloon \
 			[Widget::cget $path -helptext]]
@@ -698,23 +698,23 @@ proc DynamicHelp::_show_help { path w x y } {
         set  width     [winfo reqwidth  $_top]
         set  height    [winfo reqheight $_top]
 
-        # On windows multi screen configurations, coordinates may get outside
-        # the main screen. We suppose that all screens have the same size
-        # because it is not possible to query the size of the other screens.
-        
-        set screenx [expr {$x % $scrwidth} ]
-        set screeny [expr {$y % $scrheight} ]
+        # On windows multi screen configurations, the virtual screen may start
+        # at negative positions.
+        set scrrootx [winfo vrootx .]
+        set scrrooty [winfo vrooty .]
         
         # Increment the required size by the deplacement from the passed point
         incr width 8
         incr height 12
         
-        if { $screenx+$width > $scrwidth } {
-            set x [expr {$x + ($scrwidth - $screenx) - ($width - 8)}]
+        # Put at the right border if going over it
+        if { $x+$width > $scrrootx+$scrwidth } {
+            set x [expr {$scrwidth + $scrrootx - $width + 8}]
         } else {
             incr x 8
         }
-        if { $screeny+$height > $scrheight } {
+        # Put above widget if below is no space
+        if { $y+$height > $scrrooty+$scrheight } {
             set y [expr {$y - $height}]
         } else {
             incr y 12
