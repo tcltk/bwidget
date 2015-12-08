@@ -1134,9 +1134,9 @@ proc ListBox::_redraw_selection { path } {
             set imgbox [$path.c bbox i:$item]
             lassign $bbox x0 y0 x1 y1;
             if {[string compare "" $imgbox]} {
-                # image may exist and may be heigher than text!
+                # image may exist and may be higher than text!
                 lassign $imgbox ix0 iy0 ix1 iy1;
-                set bbox [list $x0 [expr {min($iy0,$y0)}] $x1 [expr {max($iy1,$y1)}]];
+                set bbox [list $x0 [expr {$iy0<$y0?$iy0:$y0}] $x1 [expr {$iy1>$y1?$iy1:$y1}]];
             } else {
                 set bbox [list $x0 [lindex $bbox 1] $x1 [lindex $bbox 3]]
             }
