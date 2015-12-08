@@ -1,5 +1,9 @@
+2015-12-08 Harald Oehlmann <oehhar@users.sourceforge.net>
+	listbox.tcl: 8.4 compatibility was broken due to the use of
+	min/max math functions. Ticket [0aef856302]
+
 2015-11-04 Harald Oehlmann <oehhar@users.sourceforge.net>
-	dynhelp.tcl: Drop the asumption that all windows
+	dynhelp.tcl: Drop the assumption that all windows
 	screen are the same size (of fix dated 2009-06-26)
 	and use the virtual screen information to place the bubble
 	help. Ticket [b64e03e548].
