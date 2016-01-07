@@ -93,9 +93,9 @@ namespace eval Tree {
         {-height           TkResource "" 0 listbox}
         {-selectfill       Boolean 0  0}
         {-showlines        Boolean 1  0}
-        {-linesfill        TkResource black  0 {listbox -foreground}}
+        {-linesfill        TkResource ""  0 {listbox -foreground}}
         {-linestipple      TkResource ""     0 {label -bitmap}}
-	{-crossfill        TkResource black  0 {listbox -foreground}}
+	{-crossfill        TkResource ""  0 {listbox -foreground}}
         {-redraw           Boolean 1  0}
         {-opencmd          String  "" 0}
         {-closecmd         String  "" 0}
