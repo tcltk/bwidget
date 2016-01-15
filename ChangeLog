@@ -1,3 +1,7 @@
+2016-01-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+	tree.tcl: Tree lines are black by default even if background
+	is black. Ticket [ed4c1dab46]
+
 2015-12-08 Harald Oehlmann <oehhar@users.sourceforge.net>
 	listbox.tcl: 8.4 compatibility was broken due to the use of
 	min/max math functions. Ticket [0aef856302]
