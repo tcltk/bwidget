@@ -1,4 +1,9 @@
 2016-01-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+	lang/da.rc, lang/es.rc, lang/fr.rc, lang/no.rc:
+	Translations non portable on utf-8 systems.
+	Ticket [6c91e43d76]
+
+2016-01-07 Harald Oehlmann <oehhar@users.sourceforge.net>
 	tree.tcl: Tree lines are black by default even if background
 	is black. Ticket [ed4c1dab46]
 
