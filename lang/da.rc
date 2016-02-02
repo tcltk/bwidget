@@ -7,8 +7,8 @@
 
 ! --- symbolic names of buttons -----------------------------------------------
 
-*abortName:   &Annullér
-*retryName:   P&røv igen
+*abortName:   &AnnullÃ©r
+*retryName:   P&rÃ¸v igen
 *ignoreName:  &Ignorer
 *okName:      &OK
 *cancelName:  &Cancel
@@ -23,7 +23,7 @@
 *underlineName:     Understreg
 *overstrikeName:    Overstreg
 *fontName:          &Font
-*sizeName:          &Størrelse
+*sizeName:          &StÃ¸rrelse
 *styleName:         St&il
 *colorPickerName:   F&arve...
 
@@ -36,14 +36,14 @@
 ! --- resource for SelectFont dialog ------------------------------------------
 
 *SelectFont.title:	    Font-valg
-*SelectFont.sampletext:	    Eksempeltekst æøå
+*SelectFont.sampletext:	    Eksempeltekst Ã¦Ã¸Ã¥
 
 
 ! --- resource for MessageDlg dialog ------------------------------------------
 
 *MessageDlg.noneTitle:      Besked
 *MessageDlg.infoTitle:      Information
-*MessageDlg.questionTitle:  Spørgsmål
+*MessageDlg.questionTitle:  SpÃ¸rgsmÃ¥l
 *MessageDlg.warningTitle:   Advarsel
 *MessageDlg.errorTitle:     Fejl
 
