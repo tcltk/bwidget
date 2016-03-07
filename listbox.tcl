@@ -27,6 +27,7 @@
 #     - ListBox::_update_edit_size
 #     - ListBox::_destroy
 #     - ListBox::_see
+#     - ListBox::_see_item
 #     - ListBox::_update_scrollregion
 #     - ListBox::_draw_item
 #     - ListBox::_redraw_items
@@ -130,6 +131,7 @@ proc ListBox::create { path args } {
 
     # items informations
     set data(items)    {}
+    set data(seeitem)  {}
     set data(selitems) {}
 
     # update informations
@@ -740,17 +742,18 @@ proc ListBox::see { path item } {
     variable $path
     upvar 0  $path data
 
+    if {$data(nrows) == -1} {
+	# Not yet realized.
+	set data(seeitem) $item
+	return
+    }
+
     if { [Widget::getoption $path -redraw] && $data(upd,afterid) != "" } {
         after cancel $data(upd,afterid)
         _redraw_listbox $path
     }
-    set idn [$path.c find withtag n:$item]
-    if { $idn != "" } {
-        set idi [$path.c find withtag i:$item]
-        if { $idi == "" } { set idi $idn }
-        ListBox::_see $path $idn right
-        ListBox::_see $path $idi left
-    }
+
+    _see_item $path $item;
 }
 
 
@@ -960,6 +963,20 @@ proc ListBox::_see { path idn side } {
 
 
 # ----------------------------------------------------------------------------
+#  Command ListBox::_see_item
+# ----------------------------------------------------------------------------
+proc ListBox::_see_item { path item } {
+    set idn [$path.c find withtag n:$item]
+    if { $idn != "" } {
+        set idi [$path.c find withtag i:$item]
+        if { $idi == "" } { set idi $idn }
+        _see $path $idn right
+        _see $path $idi left
+    }
+}
+
+
+# ----------------------------------------------------------------------------
 #  Command ListBox::_update_scrollregion
 # ----------------------------------------------------------------------------
 proc ListBox::_update_scrollregion { path } {
@@ -1136,7 +1153,7 @@ proc ListBox::_redraw_selection { path } {
             if {[string compare "" $imgbox]} {
                 # image may exist and may be higher than text!
                 lassign $imgbox ix0 iy0 ix1 iy1;
-                set bbox [list $x0 [expr {$iy0<$y0?$iy0:$y0}] $x1 [expr {$iy1>$y1?$iy1:$y1}]];
+                set bbox [list $x0 [expr {$iy0<$y0?$iy0:$y0}] $x1 [expr {$iy1<$y1?$iy1:$y1}]];
             } else {
                 set bbox [list $x0 [lindex $bbox 1] $x1 [lindex $bbox 3]]
             }
@@ -1174,8 +1191,12 @@ proc ListBox::_redraw_listbox { path } {
         if {[Widget::cget $path -selectfill]} {
             _update_select_fill $path
         }
+	if {![string equal $data(seeitem) ""]} {
+	    _see_item $path $data(seeitem);
+	}
         set data(upd,level)   0
         set data(upd,afterid) ""
+	set data(seeitem) "";
     }
 }
 
