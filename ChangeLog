@@ -1,3 +1,7 @@
+2016-01-07 Adrian Medrano Calvo
+	listbox.tcl: Listbox did not scroll to current item on
+	startup. Ticket [ae238d5a7]
+
 2016-01-07 Harald Oehlmann <oehhar@users.sourceforge.net>
 	lang/da.rc, lang/es.rc, lang/fr.rc, lang/no.rc:
 	Translations non portable on utf-8 systems.
