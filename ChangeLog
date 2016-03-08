@@ -1,3 +1,7 @@
+2016-03-08 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.10 tagged ****
+
 2016-01-07 Adrian Medrano Calvo
 	listbox.tcl: Listbox did not scroll to current item on
 	startup. Ticket [ae238d5a7]
