@@ -1,3 +1,7 @@
+2016-03-15 Harald Oehlmann <oehhar@users.sourceforge.net>
+	mainframe.tcl: "Mainframe configure" caused error in themed
+	mode. Ticket [52273c0a4e]
+
 2016-03-08 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.10 tagged ****

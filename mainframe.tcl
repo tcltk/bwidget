@@ -37,29 +37,47 @@ namespace eval MainFrame {
 	-foreground -progressfg
     }
 
-    Widget::declare MainFrame {
-	{-width         TkResource 0      0 frame}
-	{-height        TkResource 0      0 frame}
-	{-background    TkResource ""     0 frame}
-	{-textvariable  String     ""     0}
-	{-menu          String     {}     1}
-	{-separator     Enum       both   1 {none top bottom both}}
-	{-bg            Synonym    -background}
+    if {[Widget::theme]} {
+        # No option -background for themed MainFrame
+        Widget::declare MainFrame {
+            {-width         TkResource 0      0 frame}
+            {-height        TkResource 0      0 frame}
+            {-textvariable  String     ""     0}
+            {-menu          String     {}     1}
+            {-separator     Enum       both   1 {none top bottom both}}
 
-	{-menubarfont   String     ""  0}
-	{-menuentryfont String     ""  0}
-	{-statusbarfont String     ""  0}
-	{-sizegrip      Boolean    0   1}
+            {-menubarfont   String     ""  0}
+            {-menuentryfont String     ""  0}
+            {-statusbarfont String     ""  0}
+            {-sizegrip      Boolean    0   1}
+        }
+
+        Widget::addmap MainFrame "" .frame  {-width {} -height {}}
+    } else {
+        Widget::declare MainFrame {
+            {-width         TkResource 0      0 frame}
+            {-height        TkResource 0      0 frame}
+            {-background    TkResource ""     0 frame}
+            {-textvariable  String     ""     0}
+            {-menu          String     {}     1}
+            {-separator     Enum       both   1 {none top bottom both}}
+            {-bg            Synonym    -background}
+
+            {-menubarfont   String     ""  0}
+            {-menuentryfont String     ""  0}
+            {-statusbarfont String     ""  0}
+            {-sizegrip      Boolean    0   1}
+        }
+
+        Widget::addmap MainFrame "" .frame  {-width {} -height {} -background {}}
+        Widget::addmap MainFrame "" .topf   {-background {}}
+        Widget::addmap MainFrame "" .botf   {-background {}}
+        Widget::addmap MainFrame "" .status {-background {}}
+        Widget::addmap MainFrame "" .status.label {-background {}}
+        Widget::addmap MainFrame "" .status.indf  {-background {}}
+        Widget::addmap MainFrame "" .status.prgf  {-background {}}
+        Widget::addmap MainFrame ProgressBar .status.prg {-background {} -background -troughcolor}
     }
-
-    Widget::addmap MainFrame "" .frame  {-width {} -height {} -background {}}
-    Widget::addmap MainFrame "" .topf   {-background {}}
-    Widget::addmap MainFrame "" .botf   {-background {}}
-    Widget::addmap MainFrame "" .status {-background {}}
-    Widget::addmap MainFrame "" .status.label {-background {}}
-    Widget::addmap MainFrame "" .status.indf  {-background {}}
-    Widget::addmap MainFrame "" .status.prgf  {-background {}}
-    Widget::addmap MainFrame ProgressBar .status.prg {-background {} -background -troughcolor}
 
     variable _widget
 }
