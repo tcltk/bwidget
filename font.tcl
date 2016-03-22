@@ -284,6 +284,7 @@ proc SelectFont::create { path args } {
 			 -state readonly]
 	    bind $lbf <<ComboboxSelected>> [list SelectFont::_update $path]
 	    bind $lbs <<ComboboxSelected>> [list SelectFont::_update $path]
+	    ttk::style configure BWSlim.Toolbutton -padding 0
 	} else {
 	    frame $path -background $bg
 	    set lbf [ComboBox::create $path.font \
@@ -304,7 +305,7 @@ proc SelectFont::create { path args } {
         pack $lbf -side left -anchor w
         pack $lbs -side left -anchor w -padx 4
         foreach st $_styles {
-	    if {$::Widget::_theme} {
+	    if {[Widget::theme]} {
 		ttk::checkbutton $path.$st -takefocus 0 \
 		    -style BWSlim.Toolbutton \
 		    -image [Bitmap::get $st] \

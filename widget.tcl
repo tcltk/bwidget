@@ -1705,12 +1705,9 @@ proc Widget::theme {{bool {}}} {
     variable _theme
     if {[llength [info level 0]] == 2} {
 	# set theme-ability
-	if {[catch {package require Tk 8.5a6}]
-	    && [catch {package require tile 0.6}]
-	    && [catch {package require tile 1}]} {
-	    return -code error "BWidget's theming requires tile 0.6+"
-	} else {
-	    catch {style default BWSlim.Toolbutton -padding 0}
+	if {[catch {package require Ttk}]
+	    && [catch {package require tile 0.8}]} {
+	    return -code error "BWidget's theming requires ttk/tile 0.8+"
 	}
 	set _theme [string is true -strict $bool]
     }
