@@ -1,3 +1,8 @@
+2016-03-22 Harald Oehlmann <oehhar@users.sourceforge.net>
+	Only support themed packages Tile 0.8 or Ttk.
+	Repair the button spacing in themed font toolbar.
+	Ticket [d7ea07c40a]
+
 2016-03-15 Harald Oehlmann <oehhar@users.sourceforge.net>
 	mainframe.tcl: "Mainframe configure" caused error in themed
 	mode. Ticket [52273c0a4e]
