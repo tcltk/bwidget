@@ -1,3 +1,7 @@
+2016-07-15 Adrian Madrano Calvo
+	pckIndex.tcl: auto-load commands also from global namespace
+	and not only from BWidget namespace. Ticket [c86207db01]
+
 2016-03-22 Harald Oehlmann <oehhar@users.sourceforge.net>
 	Only support themed packages Tile 0.8 or Ttk.
 	Repair the button spacing in themed font toolbar.
