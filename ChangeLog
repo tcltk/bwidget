@@ -1,3 +1,9 @@
+2016-07-21 Harald Oehlmann
+	util.tcl: BWidget::place moved away from visible screens
+	if the current window is on a virtual screen outside of
+	the main screen (Windows multi-screen configuration).
+	Ticket [5919a0ec2d]
+
 2016-07-15 Adrian Madrano Calvo
 	pckIndex.tcl: auto-load commands also from global namespace
 	and not only from BWidget namespace. Ticket [c86207db01]
