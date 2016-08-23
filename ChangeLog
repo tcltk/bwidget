@@ -1,3 +1,7 @@
+2016-08-23 Harald Oehlmann
+	button.tcl: configure option of a ::Button gave error in
+	themed mode. Ticket [845613e5590ae7cf]. Report by Adrian.
+
 2016-07-21 Harald Oehlmann
 	util.tcl: BWidget::place moved away from visible screens
 	if the current window is on a virtual screen outside of
