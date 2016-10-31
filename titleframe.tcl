@@ -49,20 +49,36 @@ namespace eval TitleFrame {
 proc TitleFrame::create { path args } {
     Widget::init TitleFrame $path $args
 
-    set frame  [eval [list frame $path] [Widget::subcget $path :cmd] \
-	    -class TitleFrame -relief flat -bd 0 -highlightthickness 0]
+if {[Widget::theme]} {
+      set frame [eval [list ttk::frame $path] [Widget::subcget $path :cmd] \
+                -class TitleFrame -relief flat -borderwidth 0]
 
-    set padtop [eval [list frame $path.p] [Widget::subcget $path :cmd] \
-	    -relief flat -borderwidth 0]
-    set border [eval [list frame $path.b] [Widget::subcget $path .b] -highlightthickness 0]
-    set label  [eval [list label $path.l] [Widget::subcget $path .l] \
-                    -highlightthickness 0 \
-                    -relief flat \
-                    -bd     0 -padx 2 -pady 0]
-    set padbot [eval [list frame $border.p] [Widget::subcget $path .p] \
-	    -relief flat -bd 0 -highlightthickness 0]
-    set frame  [eval [list frame $path.f] [Widget::subcget $path .f] \
-	    -relief flat -bd 0 -highlightthickness 0]
+      set padtop [eval [list ttk::frame $path.p] [Widget::subcget $path :cmd] \
+                -relief flat]
+      set border [eval [list ttk::frame $path.b] [Widget::subcget $path .b]]
+      set label  [eval [list ttk::label $path.l] [Widget::subcget $path .l] \
+                -relief flat]
+      set padbot [eval [list ttk::frame $border.p] [Widget::subcget $path .p]\
+                -relief flat]
+      set frame  [eval [list ttk::frame $path.f] [Widget::subcget $path .f]\
+                -relief flat]
+    } else {
+        set frame  [eval [list frame $path] [Widget::subcget $path :cmd] \
+                -class TitleFrame -relief flat -bd 0 -highlightthickness 0]
+    
+        set padtop [eval [list frame $path.p] [Widget::subcget $path :cmd] \
+                -relief flat -borderwidth 0]
+        set border [eval [list frame $path.b] [Widget::subcget $path .b] \
+                -highlightthickness 0]
+        set label  [eval [list label $path.l] [Widget::subcget $path .l] \
+                -highlightthickness 0 \
+                -relief flat \
+                -bd     0 -padx 2 -pady 0]
+        set padbot [eval [list frame $border.p] [Widget::subcget $path .p] \
+                -relief flat -bd 0 -highlightthickness 0]
+        set frame  [eval [list frame $path.f] [Widget::subcget $path .f] \
+                -relief flat -bd 0 -highlightthickness 0]
+    }
     set height [winfo reqheight $label]
 
     switch [Widget::getoption $path -side] {
