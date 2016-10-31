@@ -252,11 +252,11 @@ proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
     # use [winfo] to get height & width of frame
 
     # [winfo] doesn't work for unmapped frame
-    set frameh [expr {$unmap ? 0 : [winfo height $canvas.frame]}]
-    set framew [expr {$unmap ? 0 : [winfo width  $canvas.frame]}]
-
-    set height [_max $frameh [winfo height $canvas]]
-    set width  [_max $framew [winfo width  $canvas]]
+    if {$unmap} {
+		return
+	}
+    set height [_max [winfo height $canvas.frame] [winfo height $canvas]]
+    set width  [_max [winfo width  $canvas.frame] [winfo width  $canvas]]
 
     $canvas:cmd configure -scrollregion [list 0 0 $width $height]
 }
