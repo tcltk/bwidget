@@ -24,6 +24,12 @@ namespace eval Button {
     if {[info tclversion] > 8.3} {
 	lappend remove -repeatdelay -repeatinterval
     }
+    if {$::Widget::_theme} {
+        lappend remove -activebackground -activeforeground -anchor -background\
+                -bitmap -borderwidth -disabledforeground -font -foreground\
+                -height -highlightbackground -highlightcolor -highlightthickness\
+                -justify -overrelief -padx -pady -relief -wraplength
+    }
     Widget::tkinclude Button button :cmd remove $remove
 
     Widget::declare Button {
