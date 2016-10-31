@@ -97,8 +97,6 @@ proc ScrollableFrame::create { path args } {
     # but now we need to add a <map> binding too
     bind $frame <Map> \
         [list ScrollableFrame::_frameConfigure $canvas]
-    bind $frame <Unmap> \
-        [list ScrollableFrame::_frameConfigure $canvas 1]
 
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
@@ -246,15 +244,11 @@ proc ScrollableFrame::_resize { path } {
 #  Command ScrollableFrame::_frameConfigure
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::_max {a b} {return [expr {$a <= $b ? $b : $a}]}
-proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
+proc ScrollableFrame::_frameConfigure {canvas} {
     # This ensures that we don't get funny scrollability in the frame
     # when it is smaller than the canvas space
     # use [winfo] to get height & width of frame
 
-    # [winfo] doesn't work for unmapped frame
-    if {$unmap} {
-		return
-	}
     set height [_max [winfo height $canvas.frame] [winfo height $canvas]]
     set width  [_max [winfo width  $canvas.frame] [winfo width  $canvas]]
 
