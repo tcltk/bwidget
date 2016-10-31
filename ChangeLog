@@ -1,3 +1,8 @@
+2016-10-31 Harald Oehlmann
+	button.tcl: Reverted last change, Eric underlined to
+	not use ttk widgets as a base due to the option
+	data base. Traditional fix will follow
+
 2016-08-23 Harald Oehlmann
 	button.tcl: configure option of a ::Button gave error in
 	themed mode. Ticket [845613e5590ae7cf]. Report by Adrian.

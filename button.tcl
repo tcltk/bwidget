@@ -20,31 +20,25 @@
 namespace eval Button {
     Widget::define Button button DynamicHelp
 
-    set remove [list -command -text -textvariable -underline -state]
+    set remove [list -command -relief -text -textvariable -underline -state]
     if {[info tclversion] > 8.3} {
 	lappend remove -repeatdelay -repeatinterval
     }
-    if {$::Widget::_theme} {
-        set buttonwidget ::ttk::button
-    } else {
-        lappend remove -relief
-        set buttonwidget button
-    }
-    Widget::tkinclude Button $buttonwidget :cmd remove $remove
+    Widget::tkinclude Button button :cmd remove $remove
 
-    Widget::declare Button [list\
-        {-name            String "" 0}\
-        {-text            String "" 0}\
-        {-textvariable    String "" 0}\
-        {-underline       Int    -1 0 "%d >= -1"}\
-        {-armcommand      String "" 0}\
-        {-disarmcommand   String "" 0}\
-        {-command         String "" 0}\
-        [list -state           TkResource "" 0 $buttonwidget]\
-        {-repeatdelay     Int    0  0 "%d >= 0"}\
-        {-repeatinterval  Int    0  0 "%d >= 0"}\
-        {-relief          Enum   raised  0 {raised sunken flat ridge solid groove link}}\
-        ]
+    Widget::declare Button {
+        {-name            String "" 0}
+        {-text            String "" 0}
+        {-textvariable    String "" 0}
+        {-underline       Int    -1 0 "%d >= -1"}
+        {-armcommand      String "" 0}
+        {-disarmcommand   String "" 0}
+        {-command         String "" 0}
+        {-state           TkResource "" 0 button}
+        {-repeatdelay     Int    0  0 "%d >= 0"}
+        {-repeatinterval  Int    0  0 "%d >= 0"}
+        {-relief          Enum   raised  0 {raised sunken flat ridge solid groove link}}
+    }
 
     DynamicHelp::include Button balloon
 
