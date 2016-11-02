@@ -248,7 +248,7 @@ proc ScrollableFrame::_frameConfigure {canvas} {
     # This ensures that we don't get funny scrollability in the frame
     # when it is smaller than the canvas space
     # use [winfo] to get height & width of frame
-
+    if {![winfo ismapped $canvas.frame]} { return }
     set height [_max [winfo height $canvas.frame] [winfo height $canvas]]
     set width  [_max [winfo width  $canvas.frame] [winfo width  $canvas]]
 
