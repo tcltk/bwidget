@@ -1,4 +1,8 @@
 2016-10-31 Harald Oehlmann
+	scrollframe.tcl: Eric advised to check for unmapped window,
+	as the <Map> event may be executed in the unmapped state.
+
+2016-10-31 Harald Oehlmann
 	scrollframe.tcl: width changed when unmapped and mapped.
 	Checkge the Configure vound proc to not be active when
 	currently unmapped. Ticket [72a5727d1b]. Thanks to
