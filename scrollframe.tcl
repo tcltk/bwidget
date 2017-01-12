@@ -15,6 +15,9 @@
 # ----------------------------------------------------------------------------
 
 namespace eval ScrollableFrame {
+    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
+    array set mouseover {}
+
     Widget::define ScrollableFrame scrollframe
 
     # If themed, there is no background and -bg option
@@ -26,6 +29,7 @@ namespace eval ScrollableFrame {
             {-areaheight        Int        0  0 {}}
             {-constrainedwidth  Boolean    0 0}
             {-constrainedheight Boolean    0 0}
+            {-onlyhover         Boolean    1 1}
             {-xscrollcommand    TkResource "" 0 canvas}
             {-yscrollcommand    TkResource "" 0 canvas}
             {-xscrollincrement  TkResource "" 0 canvas}
@@ -40,6 +44,7 @@ namespace eval ScrollableFrame {
             {-areaheight        Int        0  0 {}}
             {-constrainedwidth  Boolean    0 0}
             {-constrainedheight Boolean    0 0}
+            {-onlyhover         Boolean    0 0}
             {-xscrollcommand    TkResource "" 0 canvas}
             {-yscrollcommand    TkResource "" 0 canvas}
             {-xscrollincrement  TkResource "" 0 canvas}
@@ -49,7 +54,7 @@ namespace eval ScrollableFrame {
     }
 
     Widget::addmap ScrollableFrame "" :cmd {
-        -width {} -height {} 
+        -width {} -height {}
         -xscrollcommand {} -yscrollcommand {}
         -xscrollincrement {} -yscrollincrement {}
     }
@@ -68,10 +73,19 @@ namespace eval ScrollableFrame {
 #  Command ScrollableFrame::create
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::create { path args } {
+    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
+    variable mouseover
+
     Widget::init ScrollableFrame $path $args
 
+    # Actually $canvas is the same as $path
     set canvas [eval [list canvas $path] [Widget::subcget $path :cmd] \
                     -highlightthickness 0 -borderwidth 0 -relief flat]
+
+    # Initialize it to 1 (mouse is over the frame)
+    set mouseover($canvas) 1
+
+    set onlyhover [Widget::cget $path -onlyhover]
 
     if {[Widget::theme]} {
 	set frame [eval [list ttk::frame $path.frame] \
@@ -97,12 +111,40 @@ proc ScrollableFrame::create { path args } {
     # but now we need to add a <map> binding too
     bind $frame <Map> \
         [list ScrollableFrame::_frameConfigure $canvas]
+    bind $frame <Unmap> \
+        [list ScrollableFrame::_frameConfigure $canvas 1]
 
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
+
+    if {$onlyhover} {
+        # This makes possible that the scrollbar is shown only when the mouse is over the frame
+        bind [winfo parent $path] <Enter> [list ScrollableFrame::enter $canvas]
+        # This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+        bind [winfo parent $path] <Leave> [list ScrollableFrame::leave $canvas]
+    }
 
     return [Widget::create ScrollableFrame $path]
 }
 
+# ----------------------------------------------------------------------------
+#  Command ScrollableFrame::enter
+# ----------------------------------------------------------------------------
+# This makes possible that the scrollbar is shown only when the mouse is over the frame
+proc ScrollableFrame::enter {canvas} {
+    variable mouseover
+    set mouseover($canvas) 1
+    ScrollableFrame::_frameConfigure $canvas
+}
+
+# ----------------------------------------------------------------------------
+#  Command ScrollableFrame::leave
+# ----------------------------------------------------------------------------
+# This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+proc ScrollableFrame::leave {canvas} {
+    variable mouseover
+    set mouseover($canvas) 0
+    ScrollableFrame::_frameConfigure $canvas 1
+}
 
 # ----------------------------------------------------------------------------
 #  Command ScrollableFrame::configure
@@ -165,7 +207,7 @@ proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOff
     set yb1 [$path:cmd canvasy [winfo height $path]]
     set dx  0
     set dy  0
-    
+
     if { [string equal $horz "left"] } {
 	if { $x1 > $xb1 } {
 	    set dx [expr {$x1-$xb1}]
@@ -244,13 +286,48 @@ proc ScrollableFrame::_resize { path } {
 #  Command ScrollableFrame::_frameConfigure
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::_max {a b} {return [expr {$a <= $b ? $b : $a}]}
-proc ScrollableFrame::_frameConfigure {canvas} {
+proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
+    variable mouseover
+    # This makes possible that the scrollbar is hidden when the mouse is not over the frame
+    if {$mouseover($canvas)==0} {
+        set unmap 1
+    }
     # This ensures that we don't get funny scrollability in the frame
     # when it is smaller than the canvas space
     # use [winfo] to get height & width of frame
-    if {![winfo ismapped $canvas.frame]} { return }
-    set height [_max [winfo height $canvas.frame] [winfo height $canvas]]
-    set width  [_max [winfo width  $canvas.frame] [winfo width  $canvas]]
+    # [winfo] doesn't work for unmapped frame
+    set frameh [expr {$unmap ? 0 : [winfo height $canvas.frame]}]
+    set framew [expr {$unmap ? 0 : [winfo width  $canvas.frame]}]
 
+    set height [_max $frameh [winfo height $canvas]]
+    set width  [_max $framew [winfo width  $canvas]]
+
+    $canvas:cmd configure -scrollregion [list 0 0 $width $height]
+}
+proc ::ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
+    variable mouseover
+    # This makes possible that the scrollbar is hidden when the mouse is not over the frame
+    if {$mouseover($canvas)==0} {
+        set unmap 1
+    }
+
+    ## There is a bug in BWidget 1.9.0 related to the ScrollableFrame.
+    # Described in https://groups.google.com/forum/#!topic/comp.lang.tcl/Q5prg9lsOYc
+    # This added code solves the problem (see https://core.tcl.tk/bwidget/tktview/72a5727d1b7fb76b32cea032eb7d4bf7c6fa28bf)
+    if {![winfo ismapped $canvas.frame]} {
+       return
+    }
+
+    # This ensures that we don't get funny scrollability in the frame
+    # when it is smaller than the canvas space
+    # use [winfo] to get height & width of frame
+
+    # [winfo] doesn't work for unmapped frame
+
+    set frameh [expr {$unmap ? 0 : [winfo height $canvas.frame]}]
+    set framew [expr {$unmap ? 0 : [winfo width  $canvas.frame]}]
+
+    set height [_max $frameh [winfo height $canvas]]
+    set width  [_max $framew [winfo width  $canvas]]
     $canvas:cmd configure -scrollregion [list 0 0 $width $height]
 }
