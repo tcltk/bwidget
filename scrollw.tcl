@@ -17,6 +17,9 @@
 # -----------------------------------------------------------------------------
 
 namespace eval ScrolledWindow {
+    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
+    array set mouseover {}
+
     Widget::define ScrolledWindow scrollw
 
     Widget::declare ScrolledWindow {
@@ -26,7 +29,8 @@ namespace eval ScrolledWindow {
 	{-sides	      Enum	 se   0 {ne en nw wn se es sw ws}}
 	{-size	      Int	 0    1 "%d >= 0"}
 	{-ipad	      Int	 1    1 "%d >= 0"}
-	{-managed     Boolean	 1    1}
+    {-managed     Boolean    1    1}
+	{-onlyhover   Boolean	 0    0}
 	{-relief      TkResource flat 0 frame}
 	{-borderwidth TkResource 0    0 frame}
 	{-bg	      Synonym	 -background}
@@ -41,12 +45,18 @@ namespace eval ScrolledWindow {
 #  Command ScrolledWindow::create
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::create { path args } {
+    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
+    variable mouseover
+    # Initialize it to 1 (mouse is over the frame)
+    set mouseover($path) 1
+
     Widget::init ScrolledWindow $path $args
 
     Widget::getVariable $path data
 
     set bg     [Widget::cget $path -background]
     set sbsize [Widget::cget $path -size]
+    set onlyhover [Widget::cget $path -onlyhover]
 
     if { $::Widget::_theme } {
         set sw     [eval [list ttk::frame $path \
@@ -98,11 +108,11 @@ proc ScrolledWindow::create { path args } {
     }
     set data(ipad) [Widget::cget $path -ipad]
 
-    if {$data(hsb,packed)} {
+    if {$data(hsb,packed) && $mouseover($path)} {
 	grid $path.hscroll -column 1 -row $data(hsb,row) \
 		-sticky ew -ipady $data(ipad)
     }
-    if {$data(vsb,packed)} {
+    if {$data(vsb,packed) && $mouseover($path)} {
 	grid $path.vscroll -column $data(vsb,column) -row 1 \
 		-sticky ns -ipadx $data(ipad)
     }
@@ -113,9 +123,56 @@ proc ScrolledWindow::create { path args } {
     bind $path <Configure> [list ScrolledWindow::_realize $path]
     bind $path <Destroy>   [list ScrolledWindow::_destroy $path]
 
+    if {$onlyhover} {
+        # This makes possible that the scrollbar is shown only when the mouse is over the frame
+        bind [winfo parent $path] <Enter> [list ScrolledWindow::enter $path]
+        # This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+        bind [winfo parent $path] <Leave> [list ScrolledWindow::leave $path]
+    }
+
     return [Widget::create ScrolledWindow $path]
 }
 
+
+# ----------------------------------------------------------------------------
+#  Command ScrolledWindow::enter
+# ----------------------------------------------------------------------------
+# This makes possible that the scrollbar is shown only when the mouse is over the frame
+proc ScrolledWindow::enter {path} {
+    variable mouseover
+    set mouseover($path) 1
+
+    Widget::getVariable $path data
+
+    foreach {vmin vmax} [$path.hscroll get] { break }
+    if {!$data(hsb,packed) && ($vmin != 0 || $vmax != 1)} {
+        grid $path.hscroll -column 1 -row $data(hsb,row) \
+            -sticky ew -ipady $data(ipad)
+    }
+    foreach {vmin vmax} [$path.vscroll get] { break }
+    if {!$data(vsb,packed) && ($vmin != 0 || $vmax != 1)} {
+        grid $path.vscroll -column $data(vsb,column) -row 1 \
+        -sticky ns -ipadx $data(ipad)
+    }
+    return -code continue
+}
+
+# ----------------------------------------------------------------------------
+#  Command ScrolledWindow::leave
+# ----------------------------------------------------------------------------
+# This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+proc ScrolledWindow::leave {path} {
+    variable mouseover
+    set mouseover($path) 0
+
+    Widget::getVariable $path data
+
+    set data(hsb,packed) 0
+    grid remove $path.hscroll
+    set data(vsb,packed) 0
+    grid remove $path.vscroll
+    return -code continue
+}
 
 # -----------------------------------------------------------------------------
 #  Command ScrolledWindow::getframe
@@ -152,6 +209,9 @@ proc ScrolledWindow::setwidget { path widget } {
 #  Command ScrolledWindow::configure
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::configure { path args } {
+    variable mouseover
+    set mouseover($path) 0
+
     Widget::getVariable $path data
 
     set res [Widget::configure $path $args]
@@ -174,7 +234,7 @@ proc ScrolledWindow::configure { path args } {
 
 	set data(ipad) [Widget::cget $path -ipad]
 
-	if {$data(hsb,packed)} {
+	if {$data(hsb,packed) && $mouseover($path)} {
 	    grid $path.hscroll -column 1 -row $data(hsb,row) \
 		-sticky ew -ipady $data(ipad)
 	} else {
@@ -183,7 +243,7 @@ proc ScrolledWindow::configure { path args } {
 		grid remove $path.hscroll
 	    }
 	}
-	if {$data(vsb,packed)} {
+	if {$data(vsb,packed) && $mouseover($path)} {
 	    grid $path.vscroll -column $data(vsb,column) -row 1 \
 		-sticky ns -ipadx $data(ipad)
 	} else {
@@ -209,6 +269,7 @@ proc ScrolledWindow::cget { path option } {
 #  Command ScrolledWindow::_set_hscroll
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::_set_hscroll { path vmin vmax } {
+    variable mouseover
     Widget::getVariable $path data
 
     if {$data(realized) && $data(hsb,present)} {
@@ -219,7 +280,7 @@ proc ScrolledWindow::_set_hscroll { path vmin vmax } {
 		set data(hlock) 1
 		update idletasks
 		unset data(hlock)
-	    } elseif {!$data(hsb,packed) && ($vmin != 0 || $vmax != 1)} {
+	    } elseif {!$data(hsb,packed) && ($vmin != 0 || $vmax != 1) && $mouseover($path)} {
 		set data(hsb,packed) 1
 		grid $path.hscroll -column 1 -row $data(hsb,row) \
 			-sticky ew -ipady $data(ipad)
@@ -237,6 +298,8 @@ proc ScrolledWindow::_set_hscroll { path vmin vmax } {
 #  Command ScrolledWindow::_set_vscroll
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::_set_vscroll { path vmin vmax } {
+    variable mouseover
+
     Widget::getVariable $path data
 
     if {$data(realized) && $data(vsb,present)} {
@@ -247,7 +310,7 @@ proc ScrolledWindow::_set_vscroll { path vmin vmax } {
 		set data(vlock) 1
 		update idletasks
 		unset data(vlock)
-	    } elseif {!$data(vsb,packed) && ($vmin != 0 || $vmax != 1) } {
+	    } elseif {!$data(vsb,packed) && ($vmin != 0 || $vmax != 1) && $mouseover($path)} {
 		set data(vsb,packed) 1
 		grid $path.vscroll -column $data(vsb,column) -row 1 \
 			-sticky ns -ipadx $data(ipad)
