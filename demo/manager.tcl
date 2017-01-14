@@ -80,7 +80,7 @@ proc DemoManager::_paned { parent } {
     }
 
     set sw [ScrolledWindow $pane3.sw -relief sunken -borderwidth 2]
-    set sf [ScrollableFrame $sw.f -onlyhover 1]
+    set sf [ScrollableFrame $sw.f]
     $sw setwidget $sf
     set subf [$sf getframe]
     set lab [label $subf.lab -text "This is a ScrollableFrame"]
