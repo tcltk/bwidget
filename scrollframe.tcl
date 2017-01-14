@@ -15,7 +15,7 @@
 # ----------------------------------------------------------------------------
 
 namespace eval ScrollableFrame {
-    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
+    # track scrollbar on hoover
     array set mouseover {}
 
     Widget::define ScrollableFrame scrollframe
@@ -29,7 +29,7 @@ namespace eval ScrollableFrame {
             {-areaheight        Int        0  0 {}}
             {-constrainedwidth  Boolean    0 0}
             {-constrainedheight Boolean    0 0}
-            {-onlyhover         Boolean    1 1}
+            {-onlyhover         Boolean    0 0}
             {-xscrollcommand    TkResource "" 0 canvas}
             {-yscrollcommand    TkResource "" 0 canvas}
             {-xscrollincrement  TkResource "" 0 canvas}
@@ -54,7 +54,7 @@ namespace eval ScrollableFrame {
     }
 
     Widget::addmap ScrollableFrame "" :cmd {
-        -width {} -height {}
+        -width {} -height {} 
         -xscrollcommand {} -yscrollcommand {}
         -xscrollincrement {} -yscrollincrement {}
     }
@@ -73,7 +73,6 @@ namespace eval ScrollableFrame {
 #  Command ScrollableFrame::create
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::create { path args } {
-    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
     variable mouseover
 
     Widget::init ScrollableFrame $path $args
@@ -82,7 +81,7 @@ proc ScrollableFrame::create { path args } {
     set canvas [eval [list canvas $path] [Widget::subcget $path :cmd] \
                     -highlightthickness 0 -borderwidth 0 -relief flat]
 
-    # Initialize it to 1 (mouse is over the frame)
+    # Initialization: mouse is within frame
     set mouseover($canvas) 1
 
     set onlyhover [Widget::cget $path -onlyhover]
@@ -117,9 +116,9 @@ proc ScrollableFrame::create { path args } {
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
     if {$onlyhover} {
-        # This makes possible that the scrollbar is shown only when the mouse is over the frame
+        # Show scrollbar if mouse within frame
         bind [winfo parent $path] <Enter> [list ScrollableFrame::enter $canvas]
-        # This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+        # Hide scrollbar if mouse leaves frame
         bind [winfo parent $path] <Leave> [list ScrollableFrame::leave $canvas]
     }
 
@@ -129,7 +128,7 @@ proc ScrollableFrame::create { path args } {
 # ----------------------------------------------------------------------------
 #  Command ScrollableFrame::enter
 # ----------------------------------------------------------------------------
-# This makes possible that the scrollbar is shown only when the mouse is over the frame
+# Show scrollbars as mouse entered frame
 proc ScrollableFrame::enter {canvas} {
     variable mouseover
     set mouseover($canvas) 1
@@ -139,7 +138,7 @@ proc ScrollableFrame::enter {canvas} {
 # ----------------------------------------------------------------------------
 #  Command ScrollableFrame::leave
 # ----------------------------------------------------------------------------
-# This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+# Hide scrollbars as mouse left frame
 proc ScrollableFrame::leave {canvas} {
     variable mouseover
     set mouseover($canvas) 0
@@ -207,7 +206,7 @@ proc ScrollableFrame::see { path widget {vert top} {horz left} {xOffset 0} {yOff
     set yb1 [$path:cmd canvasy [winfo height $path]]
     set dx  0
     set dy  0
-
+    
     if { [string equal $horz "left"] } {
 	if { $x1 > $xb1 } {
 	    set dx [expr {$x1-$xb1}]
@@ -286,27 +285,9 @@ proc ScrollableFrame::_resize { path } {
 #  Command ScrollableFrame::_frameConfigure
 # ----------------------------------------------------------------------------
 proc ScrollableFrame::_max {a b} {return [expr {$a <= $b ? $b : $a}]}
-proc ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
-    variable mouseover
-    # This makes possible that the scrollbar is hidden when the mouse is not over the frame
-    if {$mouseover($canvas)==0} {
-        set unmap 1
-    }
-    # This ensures that we don't get funny scrollability in the frame
-    # when it is smaller than the canvas space
-    # use [winfo] to get height & width of frame
-    # [winfo] doesn't work for unmapped frame
-    set frameh [expr {$unmap ? 0 : [winfo height $canvas.frame]}]
-    set framew [expr {$unmap ? 0 : [winfo width  $canvas.frame]}]
-
-    set height [_max $frameh [winfo height $canvas]]
-    set width  [_max $framew [winfo width  $canvas]]
-
-    $canvas:cmd configure -scrollregion [list 0 0 $width $height]
-}
 proc ::ScrollableFrame::_frameConfigure {canvas {unmap 0}} {
     variable mouseover
-    # This makes possible that the scrollbar is hidden when the mouse is not over the frame
+    # Allow to hide scrollbar
     if {$mouseover($canvas)==0} {
         set unmap 1
     }

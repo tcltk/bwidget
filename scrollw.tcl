@@ -17,7 +17,7 @@
 # -----------------------------------------------------------------------------
 
 namespace eval ScrolledWindow {
-    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
+    # hide scrollbars if mouse not within frame
     array set mouseover {}
 
     Widget::define ScrolledWindow scrollw
@@ -45,9 +45,8 @@ namespace eval ScrolledWindow {
 #  Command ScrolledWindow::create
 # -----------------------------------------------------------------------------
 proc ScrolledWindow::create { path args } {
-    # This new global variable makes possible that the scrollbar is shown only when the mouse is over the frame
     variable mouseover
-    # Initialize it to 1 (mouse is over the frame)
+    # Initialization: mouse within frame
     set mouseover($path) 1
 
     Widget::init ScrolledWindow $path $args
@@ -124,9 +123,9 @@ proc ScrolledWindow::create { path args } {
     bind $path <Destroy>   [list ScrolledWindow::_destroy $path]
 
     if {$onlyhover} {
-        # This makes possible that the scrollbar is shown only when the mouse is over the frame
+        # Show scrollbar if mouse within frame
         bind [winfo parent $path] <Enter> [list ScrolledWindow::enter $path]
-        # This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+        # Hide scrollbar if mouse leaves frame
         bind [winfo parent $path] <Leave> [list ScrolledWindow::leave $path]
     }
 
@@ -137,7 +136,7 @@ proc ScrolledWindow::create { path args } {
 # ----------------------------------------------------------------------------
 #  Command ScrolledWindow::enter
 # ----------------------------------------------------------------------------
-# This makes possible that the scrollbar is shown only when the mouse is over the frame
+# Show scrollbars as mouse entered frame
 proc ScrolledWindow::enter {path} {
     variable mouseover
     set mouseover($path) 1
@@ -160,7 +159,7 @@ proc ScrolledWindow::enter {path} {
 # ----------------------------------------------------------------------------
 #  Command ScrolledWindow::leave
 # ----------------------------------------------------------------------------
-# This makes possible that the scrollbar is hidden only when the mouse is not over the frame
+# Hide scrollbars as mouse left frame
 proc ScrolledWindow::leave {path} {
     variable mouseover
     set mouseover($path) 0
