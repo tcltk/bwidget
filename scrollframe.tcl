@@ -29,7 +29,7 @@ namespace eval ScrollableFrame {
             {-areaheight        Int        0  0 {}}
             {-constrainedwidth  Boolean    0 0}
             {-constrainedheight Boolean    0 0}
-            {-onlyhover         Boolean    0 0}
+            {-autohidescrollbar         Boolean    0 0}
             {-xscrollcommand    TkResource "" 0 canvas}
             {-yscrollcommand    TkResource "" 0 canvas}
             {-xscrollincrement  TkResource "" 0 canvas}
@@ -44,7 +44,7 @@ namespace eval ScrollableFrame {
             {-areaheight        Int        0  0 {}}
             {-constrainedwidth  Boolean    0 0}
             {-constrainedheight Boolean    0 0}
-            {-onlyhover         Boolean    0 0}
+            {-autohidescrollbar         Boolean    0 0}
             {-xscrollcommand    TkResource "" 0 canvas}
             {-yscrollcommand    TkResource "" 0 canvas}
             {-xscrollincrement  TkResource "" 0 canvas}
@@ -84,7 +84,7 @@ proc ScrollableFrame::create { path args } {
     # Initialization: mouse is within frame
     set mouseover($canvas) 1
 
-    set onlyhover [Widget::cget $path -onlyhover]
+    set autohidescrollbar [Widget::cget $path -autohidescrollbar]
 
     if {[Widget::theme]} {
 	set frame [eval [list ttk::frame $path.frame] \
@@ -115,7 +115,7 @@ proc ScrollableFrame::create { path args } {
 
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
-    if {$onlyhover} {
+    if {$autohidescrollbar} {
         # Show scrollbar if mouse within frame
         bind [winfo parent $path] <Enter> [list ScrollableFrame::enter $canvas]
         # Hide scrollbar if mouse leaves frame
