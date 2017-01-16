@@ -30,7 +30,7 @@ namespace eval ScrolledWindow {
 	{-size	      Int	 0    1 "%d >= 0"}
 	{-ipad	      Int	 1    1 "%d >= 0"}
     {-managed     Boolean    1    1}
-	{-onlyhover   Boolean	 0    0}
+	{-autohidescrollbar   Boolean	 0    0}
 	{-relief      TkResource flat 0 frame}
 	{-borderwidth TkResource 0    0 frame}
 	{-bg	      Synonym	 -background}
@@ -55,7 +55,7 @@ proc ScrolledWindow::create { path args } {
 
     set bg     [Widget::cget $path -background]
     set sbsize [Widget::cget $path -size]
-    set onlyhover [Widget::cget $path -onlyhover]
+    set autohidescrollbar [Widget::cget $path -autohidescrollbar]
 
     if { $::Widget::_theme } {
         set sw     [eval [list ttk::frame $path \
@@ -122,7 +122,7 @@ proc ScrolledWindow::create { path args } {
     bind $path <Configure> [list ScrolledWindow::_realize $path]
     bind $path <Destroy>   [list ScrolledWindow::_destroy $path]
 
-    if {$onlyhover} {
+    if {$autohidescrollbar} {
         # Show scrollbar if mouse within frame
         bind [winfo parent $path] <Enter> [list ScrolledWindow::enter $path]
         # Hide scrollbar if mouse leaves frame
