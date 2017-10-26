@@ -27,6 +27,7 @@
 #     - ListBox::_update_edit_size
 #     - ListBox::_destroy
 #     - ListBox::_see
+#     - ListBox::_see_item
 #     - ListBox::_update_scrollregion
 #     - ListBox::_draw_item
 #     - ListBox::_redraw_items
@@ -130,6 +131,7 @@ proc ListBox::create { path args } {
 
     # items informations
     set data(items)    {}
+    set data(seeitem)  {}
     set data(selitems) {}
 
     # update informations
@@ -240,7 +242,8 @@ proc ListBox::configure { path args } {
         _configureSelectmode $path $selectmode $selectmodePrevious
     }
 
-    set ch1 [expr {[Widget::hasChanged $path -deltay dy]  |
+    set ch0 [expr {[Widget::hasChanged $path -deltay dy]}]
+    set ch1 [expr {$ch0  |
                    [Widget::hasChanged $path -padx val]   |
                    [Widget::hasChanged $path -multicolumn val]}]
 
@@ -248,9 +251,11 @@ proc ListBox::configure { path args } {
                    [Widget::hasChanged $path -selectforeground val]}]
 
     set redraw 0
-    if { [Widget::hasChanged $path -height h] } {
+    if { [Widget::hasChanged $path -height h] || $ch0 } {
         $path.c configure -height [expr {$h*$dy}]
-        set redraw 1
+        if {!$ch0} {
+            set redraw 1
+        }
     }
     if { [Widget::hasChanged $path -width w] } {
         $path.c configure -width [expr {$w*8}]
@@ -737,17 +742,18 @@ proc ListBox::see { path item } {
     variable $path
     upvar 0  $path data
 
+    if {$data(nrows) == -1} {
+	# Not yet realized.
+	set data(seeitem) $item
+	return
+    }
+
     if { [Widget::getoption $path -redraw] && $data(upd,afterid) != "" } {
         after cancel $data(upd,afterid)
         _redraw_listbox $path
     }
-    set idn [$path.c find withtag n:$item]
-    if { $idn != "" } {
-        set idi [$path.c find withtag i:$item]
-        if { $idi == "" } { set idi $idn }
-        ListBox::_see $path $idn right
-        ListBox::_see $path $idi left
-    }
+
+    _see_item $path $item;
 }
 
 
@@ -957,6 +963,20 @@ proc ListBox::_see { path idn side } {
 
 
 # ----------------------------------------------------------------------------
+#  Command ListBox::_see_item
+# ----------------------------------------------------------------------------
+proc ListBox::_see_item { path item } {
+    set idn [$path.c find withtag n:$item]
+    if { $idn != "" } {
+        set idi [$path.c find withtag i:$item]
+        if { $idi == "" } { set idi $idn }
+        _see $path $idn right
+        _see $path $idi left
+    }
+}
+
+
+# ----------------------------------------------------------------------------
 #  Command ListBox::_update_scrollregion
 # ----------------------------------------------------------------------------
 proc ListBox::_update_scrollregion { path } {
@@ -1046,7 +1066,8 @@ proc ListBox::_redraw_items { path } {
     set dy   [Widget::getoption $path -deltay]
     set padx [Widget::getoption $path -padx]
     set y0   [expr {$dy/2}]
-    set x0   4
+    # Changed from 4 to 2 to make highlight work and look nice for listbox with image as well
+    set x0   2
     set x1   [expr {$x0+$padx}]
     set nitem 0
     set width 0
@@ -1127,6 +1148,15 @@ proc ListBox::_redraw_selection { path } {
     foreach item $data(selitems) {
         set bbox [$path.c bbox "n:$item"]
         if { [llength $bbox] } {
+            set imgbox [$path.c bbox i:$item]
+            lassign $bbox x0 y0 x1 y1;
+            if {[string compare "" $imgbox]} {
+                # image may exist and may be higher than text!
+                lassign $imgbox ix0 iy0 ix1 iy1;
+                set bbox [list $x0 [expr {$iy0<$y0?$iy0:$y0}] $x1 [expr {$iy1<$y1?$iy1:$y1}]];
+            } else {
+                set bbox [list $x0 [lindex $bbox 1] $x1 [lindex $bbox 3]]
+            }
 	    if { $selfill && !$multi } {
 		# With -selectfill, make box occupy full width of widget
 		set bbox [list 0 [lindex $bbox 1] $width [lindex $bbox 3]]
@@ -1161,8 +1191,12 @@ proc ListBox::_redraw_listbox { path } {
         if {[Widget::cget $path -selectfill]} {
             _update_select_fill $path
         }
+	if {![string equal $data(seeitem) ""]} {
+	    _see_item $path $data(seeitem);
+	}
         set data(upd,level)   0
         set data(upd,afterid) ""
+	set data(seeitem) "";
     }
 }
 

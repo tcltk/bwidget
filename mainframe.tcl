@@ -37,30 +37,47 @@ namespace eval MainFrame {
 	-foreground -progressfg
     }
 
-    Widget::declare MainFrame {
-	{-width         TkResource 0      0 frame}
-	{-height        TkResource 0      0 frame}
-	{-background    TkResource ""     0 frame}
-	{-textvariable  String     ""     0}
-	{-casesensitive Boolean    0      0}
-	{-menu          String     {}     1}
-	{-separator     Enum       both   1 {none top bottom both}}
-	{-bg            Synonym    -background}
+    if {[Widget::theme]} {
+        # No option -background for themed MainFrame
+        Widget::declare MainFrame {
+            {-width         TkResource 0      0 frame}
+            {-height        TkResource 0      0 frame}
+            {-textvariable  String     ""     0}
+            {-menu          String     {}     1}
+            {-separator     Enum       both   1 {none top bottom both}}
 
-	{-menubarfont   String     ""  0}
-	{-menuentryfont String     ""  0}
-	{-statusbarfont String     ""  0}
-	{-sizegrip      Boolean    0   1}
+            {-menubarfont   String     ""  0}
+            {-menuentryfont String     ""  0}
+            {-statusbarfont String     ""  0}
+            {-sizegrip      Boolean    0   1}
+        }
+
+        Widget::addmap MainFrame "" .frame  {-width {} -height {}}
+    } else {
+        Widget::declare MainFrame {
+            {-width         TkResource 0      0 frame}
+            {-height        TkResource 0      0 frame}
+            {-background    TkResource ""     0 frame}
+            {-textvariable  String     ""     0}
+            {-menu          String     {}     1}
+            {-separator     Enum       both   1 {none top bottom both}}
+            {-bg            Synonym    -background}
+
+            {-menubarfont   String     ""  0}
+            {-menuentryfont String     ""  0}
+            {-statusbarfont String     ""  0}
+            {-sizegrip      Boolean    0   1}
+        }
+
+        Widget::addmap MainFrame "" .frame  {-width {} -height {} -background {}}
+        Widget::addmap MainFrame "" .topf   {-background {}}
+        Widget::addmap MainFrame "" .botf   {-background {}}
+        Widget::addmap MainFrame "" .status {-background {}}
+        Widget::addmap MainFrame "" .status.label {-background {}}
+        Widget::addmap MainFrame "" .status.indf  {-background {}}
+        Widget::addmap MainFrame "" .status.prgf  {-background {}}
+        Widget::addmap MainFrame ProgressBar .status.prg {-background {} -background -troughcolor}
     }
-
-    Widget::addmap MainFrame "" .frame  {-width {} -height {} -background {}}
-    Widget::addmap MainFrame "" .topf   {-background {}}
-    Widget::addmap MainFrame "" .botf   {-background {}}
-    Widget::addmap MainFrame "" .status {-background {}}
-    Widget::addmap MainFrame "" .status.label {-background {}}
-    Widget::addmap MainFrame "" .status.indf  {-background {}}
-    Widget::addmap MainFrame "" .status.prgf  {-background {}}
-    Widget::addmap MainFrame ProgressBar .status.prg {-background {} -background -troughcolor}
 
     variable _widget
 }
@@ -181,7 +198,7 @@ proc MainFrame::create { path args } {
 
     set menu [Widget::getoption $path -menu]
     if { [llength $menu] } {
-        _create_menubar $path $menu [Widget::getoption $path -casesensitive]
+        _create_menubar $path $menu
     }
 
     bind $path <Destroy> [list MainFrame::_destroy %W]
@@ -204,7 +221,8 @@ proc MainFrame::configure { path args } {
 
     # The ttk frame has no -background
     if {![Widget::theme] && [Widget::hasChanged $path -background bg] } {
-	if {$::tcl_platform(platform) == "unix"} {
+	if {($::tcl_platform(platform) == "unix")
+	        && (0 != [string compare [tk windowingsystem] "aqua"])} {
 	    set listmenu [$_widget($path,top) cget -menu]
 	    while { [llength $listmenu] } {
 		set newlist {}
@@ -510,7 +528,7 @@ proc MainFrame::_destroy { path } {
 # ----------------------------------------------------------------------------
 #  Command MainFrame::_create_menubar
 # ----------------------------------------------------------------------------
-proc MainFrame::_create_menubar { path descmenu casesensitive } {
+proc MainFrame::_create_menubar { path descmenu } {
     variable _widget
     global    tcl_platform
 
@@ -562,7 +580,7 @@ proc MainFrame::_create_menubar { path descmenu casesensitive } {
             # menu has identifier
             set _widget($path,menuid,$menuid) $menu
         }
-        _create_entries $path $menu $menuopts $entries $casesensitive
+        _create_entries $path $menu $menuopts $entries
         incr count
     }
 }
@@ -571,7 +589,7 @@ proc MainFrame::_create_menubar { path descmenu casesensitive } {
 # ----------------------------------------------------------------------------
 #  Command MainFrame::_create_entries
 # ----------------------------------------------------------------------------
-proc MainFrame::_create_entries { path menu menuopts entries casesensitive } {
+proc MainFrame::_create_entries { path menu menuopts entries } {
     variable _widget
 
     set count      [$menu cget -tearoff]
@@ -609,7 +627,7 @@ proc MainFrame::_create_entries { path menu menuopts entries casesensitive } {
                 # menu has identifier
                 set _widget($path,menuid,$menuid) $submenu
             }
-            _create_entries $path $submenu $menuopts [lindex $entry 5] $casesensitive
+            _create_entries $path $submenu $menuopts [lindex $entry 5]
             incr count
             continue
         }
@@ -625,10 +643,19 @@ proc MainFrame::_create_entries { path menu menuopts entries casesensitive } {
         }
 
         # entry accelerator
-        set accel [_parse_accelerator [lindex $entry 4] $casesensitive]
+        set accel [_parse_accelerator [lindex $entry 4]]
         if { [llength $accel] } {
             lappend opt -accelerator [lindex $accel 0]
-            bind $_widget($path,top) [lindex $accel 1] [list $menu invoke $count]
+            foreach event [lindex $accel 1] {
+                bind $_widget($path,top) $event [list $menu invoke $count]
+            }
+            foreach event [lindex $accel 2] {
+                if {[bind $_widget($path,top) $event] == {}} {
+                    bind $_widget($path,top) $event { # do nothing }
+                } else {
+                    # The existing binding will intercept these events.
+                }
+            }
         }
 
         # user options
@@ -664,64 +691,134 @@ proc MainFrame::_parse_name { menuname } {
 # MainFrame::_parse_accelerator --
 #
 #	Given a key combo description, construct an appropriate human readable
-#	string (for display on as a menu accelerator) and the corresponding
-#	bind event.
+#	string (for display on as a menu accelerator), a list of the
+#	corresponding bind events, and a separate list of bind events that need
+#	to be blocked.
+#
+# 	When argument $desc does not include "Shift", the bindings to $events
+# 	will in some cases also intercept events that have the modifier "Shift",
+# 	unless more specific bindings $blockEvents exist to the latter.  This
+# 	situation occurs, for example, when a Cmd binding exists without a
+# 	corresponding ShiftCmd binding.  The list of events that need to be
+#       blocked is returned as the third element of the result.
 #
 # Arguments:
-#	desc		a list with the following format:
-#				?sequence? key
-#			sequence may be None, Ctrl, Alt, or CtrlAlt
-#			key may be any key
-#	casesensitive	Boolean if accelerator is case sensitive
+#	desc	a list with the following format:
+#			?sequence? key
+#		sequence may be None, Ctrl, Alt, CtrlAlt, Shift, Cmd or
+#			ShiftCmd
+#		key may be any key
 #
 # Results:
-#	{accel event}	a list containing the accelerator string and the event
+#	{accel events blockEvents}  a list containing the accelerator string and
+#	                            two lists of events
 
-proc MainFrame::_parse_accelerator { desc casesensitive} {
+proc MainFrame::_parse_accelerator { desc } {
+    variable _widget
+
+    set fKey 0
     if { [llength $desc] == 1 } {
 	set seq None
-	set key [lindex $desc 0]
+	set key [string tolower [lindex $desc 0]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} [string tolower $key]]} {
+	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} $key]} {
 	    set key [string toupper $key]
+	    set fKey 1
 	}
     } elseif { [llength $desc] == 2 } {
         set seq [lindex $desc 0]
-        set key [lindex $desc 1]
+        set key [string tolower [lindex $desc 1]]
 	# If the key is an F key (ie, F1, F2, etc), it has to be capitalized
-	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} [string tolower $key]]} {
+	if {[regexp {^f([1-9]|([12][0-9]|3[0-5]))$} $key]} {
 	    set key [string toupper $key]
+	    set fKey 1
 	}
     } else {
 	return {}
     }
-    if {! $casesensitive} {
- 	set akey [string toupper $key]
- 	set ekey [string tolower $key]
-    } else {
-	set akey $key
-	set ekey $key
+
+    # Plain "Shift" can be used only with F keys, but "ShiftCmd" is allowed.
+    if {[string equal $seq "Shift"] && (!$fKey)} {
+        return -code error {Shift accelerator can be used only with F keys}
     }
+
+    set blockEvents {}
+    set upc [string toupper $key]
+
     switch -- $seq {
 	None {
-	    set accel $akey
-	    set event "<Key-$ekey>"
+	    set accel "$upc"
+	    set events [list "<Key-$key>"]
+	    if {$fKey} {
+		set blockEvents [list "<Shift-Key-$key>"]
+	    }
+	}
+	Shift {
+	    # Used only with Function keys.
+	    set accel "Shift+$upc"
+	    set events [list "<Shift-Key-$key>"]
+	}
+	Cmd {
+	    set accel "Cmd+$upc"
+
+	    if {    [string equal [tk windowingsystem] "aqua"] &&
+		   ([string first AppKit [winfo server .]] == -1)
+	    } {
+		# Carbon
+	        set events [list "<Command-Key-$key>" \
+	                    "<Lock-Command-Key-$upc>" ]
+		set blockEvents [list "<Lock-Shift-Command-Key-$upc>"]
+		# Both bindings must be included in $events -  the first binding
+		# does not fire if "Lock" is set, and this is as bind(n) states
+		# because the second binding is NOT a more specialized form of
+		# the first.
+	    } else {
+		# Cocoa and anything else that uses Cmd
+	        set events [list "<Command-Key-$key>"]
+	        # A binding to "<Lock-Command-Key-$upc>" must not be included
+	        # here - both events fire if "Lock" is set.
+		set blockEvents [list "<Shift-Command-Key-$key>"]
+	    }
+	}
+	ShiftCmd {
+	    if {    [string equal [tk windowingsystem] "aqua"] &&
+		    ([string first AppKit [winfo server .]] == -1)
+	    } {
+		# Carbon
+		set accel "Shift+Cmd+$upc"
+		set events [list "<Shift-Command-Key-$upc>" \
+			    "<Lock-Shift-Command-Key-$upc>"]
+		# Both bindings must be included here -  the first binding does
+		# not fire if "Lock" is set, even though the second binding
+		# should be recognized as a more specialized form of the first.
+	    } else {
+		# Cocoa and anything else that uses Cmd
+		set accel "Shift+Cmd+$upc"
+		set events [list "<Shift-Command-Key-$key>"]
+		# A binding to "<Lock-Shift-Command-Key-$key>" must not be
+		# included here - both events fire if "Lock" is set.
+		# Tk/Cocoa fails to recognize
+		# <Lock-Shift-Command-Key-$key> as a "more specialized" binding
+		# than <Shift-Command-Key-$key>.
+		# Perversely, Tk/Carbon (above) makes the opposite error.
+	    }
 	}
 	Ctrl {
-	    set accel "Ctrl+$akey"
-	    set event "<Control-Key-$ekey>"
+	    set accel "Ctrl+$upc"
+	    set events [list "<Control-Key-$key>"]
 	}
 	Alt {
-	    set accel "Alt+$akey"
-	    set event "<Alt-Key-$ekey>"
+	    set accel "Alt+$upc"
+	    set events [list "<Alt-Key-$key>"]
 	}
 	CtrlAlt {
-	    set accel "Ctrl+Alt+$akey"
-	    set event "<Control-Alt-Key-$ekey>"
+	    set accel "Ctrl+Alt+$upc"
+	    set events [list "<Control-Alt-Key-$key>"]
 	}
 	default {
 	    return -code error "invalid accelerator code $seq"
 	}
     }
-    return [list $accel $event]
+
+    return [list $accel $events $blockEvents]
 }

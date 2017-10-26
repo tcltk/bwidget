@@ -326,8 +326,37 @@ proc BWidget::place { path w h args } {
                     set y0 [expr {[winfo rooty $widget] + ([winfo height $widget] - $h)/2}]
                 } else {
                     # center to screen
-                    set x0 [expr {($sw - $w)/2 - [winfo vrootx $path]}]
-                    set y0 [expr {($sh - $h)/2 - [winfo vrooty $path]}]
+                    set x [winfo rootx $path]
+                    set x0 [expr {($sw - $w)/2}]
+                    set vx [winfo vrootx $path]
+                    set vw [winfo vrootwidth $path]
+                    if {$x < 0 && $vx < 0} {
+                        # We are left to the main screen
+                        # Start of left screen: vx (negative)
+                        # End coordinate of left screen: -1
+                        # Width of left screen: vx * -1
+                        # x0 = vx + ( -vx - w ) / 2
+                        set x0 [expr {($vx - $w)/2}]
+                    } elseif {$x > $sw && $vx+$vw > $sw} {
+                        # We are right to the main screen
+                        # Start of right screen: sw
+                        # End of right screen: vx+vw-1
+                        # Width of right screen: vx+vw-sw
+                        # x0 = sw + ( vx + vw - sw - w ) / 2
+                        set x0 [expr {($vx+$vw+$sw-$w)/2}]
+                    }
+                    # Same for y
+                    set y [winfo rooty $path]
+                    set y0 [expr {($sh - $h)/2}]
+                    set vy [winfo vrooty $path]
+                    set vh [winfo vrootheight $path]
+                    if {$y < 0 && $vy < 0} {
+                        # We are above to the main screen
+                        set y0 [expr {($vy - $h)/2}]
+                    } elseif {$y > $sh && $vy+$vh > $sh} {
+                        # We are below to the main screen
+                        set x0 [expr {($vy+$vh-$sh-$h)/2+$sh}]
+                    }
                 }
                 set x "+$x0"
                 set y "+$y0"

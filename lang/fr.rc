@@ -8,7 +8,7 @@
 ! --- symbolic names of buttons ------------------------------------------------
 
 *abortName:    A&bandonner
-*retryName:    &Réessayer
+*retryName:    &RÃ©essayer
 *ignoreName:   &Ignorer
 *okName:       &OK
 *cancelName:   &Annuler
@@ -19,8 +19,8 @@
 
 *boldName:          &Gras
 *italicName:        &Italique
-*underlineName:     &Souligné
-*overstrikeName:    &Barré
+*underlineName:     &SoulignÃ©
+*overstrikeName:    &BarrÃ©
 *fontName:          &Police
 *sizeName:          &Taille
 *styleName:         St&yle
@@ -35,7 +35,7 @@
 
 ! --- resource for SelectFont dialog ------------------------------------------
 
-*SelectFont.title:        Sélection d'une police
+*SelectFont.title:        SÃ©lection d'une police
 *SelectFont.sampletext:	  Texte d'exemple
 
 

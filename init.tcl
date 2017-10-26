@@ -31,17 +31,18 @@ Widget::_opt_defaults
 
 # Try to load lang file corresponding to current msgcat locale
 proc Widget::_opt_lang {} {
-    set langfile [file join $::BWIDGET::LIBRARY "lang" "en.rc"]
     if {0 != [llength [info commands ::msgcat::mcpreferences]]} {
-        foreach lang [::msgcat::mcpreferences] {
-            set l [file join $::BWIDGET::LIBRARY "lang" "$lang.rc"]
-            if {[file readable $l]} {
-                set langfile $l
-                break
-            }
+        set langs [::msgcat::mcpreferences]
+    }
+    lappend langs en
+
+    foreach lang $langs {
+        set l [file join $::BWIDGET::LIBRARY "lang" "$lang.rc"]
+        if {(![catch {file readable $l} result]) && ($result)} {
+            option read $l
+            break
         }
     }
-    option read $langfile
 }
 Widget::_opt_lang
 

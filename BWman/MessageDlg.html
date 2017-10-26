@@ -86,6 +86,7 @@ Used to choose line length for text if <B>width</B> option
 isn't specified.
 Defaults to 150.
 
+The options <B>-width</B> and <B>-aspect</B> are directly heritated from the Tk message widget.
 </DD>
 </DL>
 <DL><DT><A NAME="-buttons"><B>-buttons</B></A></DT>
@@ -198,10 +199,12 @@ and <B>cancel</B>.
 <B>user</B>
 <DD>
 Displays buttons of <B>-buttons</B> option.<P>
-<DT>
-</DL COMPACT>
-
 </DD>
+
+<P>
+For any <B>-type</B> but <B>user</B>, the native Tk widget <B>tk_messageBox</B> is used.
+In this case, only the following options are considered: <B>-default</B>, <B>-icon</B>, <B>-message</B>, <B>-title</B> and <B>-type</B>.
+</P>
 </DL>
 <DL><DT><A NAME="-width"><B>-width</B></A></DT>
 <DD>

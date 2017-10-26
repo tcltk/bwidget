@@ -1,11 +1,4 @@
-2013-08-21 Harald Oehlmann <oehhar@users.sourceforge.net>
-
-	* labelentry.tcl: Bug fixed:
-	Methods from Tk entry widget restored [Bug 1002844].
-	
-	* mainframe.tcl: Allow case sensitive accelerators
-	by new option -casesensitive.
-	Patch by cmard [Patch 1977644]
+2017-##-## ########
 	
 	* color.tcl: New option -variable allows to give a
 	traceable variable with current user color choice.
@@ -16,6 +9,207 @@
 	conflict with keyboard traversal.
 	Shows entry widget for numerical color input/output.
 	Patch by Keith J. Nash [Patch 75101]
+
+2017-08-25 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.11 tagged ****
+
+2017-05-08 Harald Oehlmann
+	MessageDlg.html: Documented the use of the native widget for
+	"MessageDlg -type !user" and the limited set of recognized
+	options. Ticket [8edade3cea] by Gerhard Reithofer
+
+2016-10-31 Harald Oehlmann
+	scrollframe.tcl: Eric advised to check for unmapped window,
+	as the <Map> event may be executed in the unmapped state.
+
+2016-10-31 Harald Oehlmann
+	scrollframe.tcl: width changed when unmapped and mapped.
+	Checkge the Configure vound proc to not be active when
+	currently unmapped. Ticket [72a5727d1b]. Thanks to
+	Alexandru for the ticket and patch.
+
+2016-10-31 Harald Oehlmann
+	button.tcl: Reverted last change, Eric underlined to
+	not use ttk widgets as a base due to the option
+	data base. Did traditional fix to exclude all options
+	known by button and not known by ttk::button.
+	Ticket [845613e5590ae7cf]
+
+2016-08-23 Harald Oehlmann
+	button.tcl: configure option of a ::Button gave error in
+	themed mode. Ticket [845613e5590ae7cf]. Report by Adrian.
+
+2016-07-21 Harald Oehlmann
+	util.tcl: BWidget::place moved away from visible screens
+	if the current window is on a virtual screen outside of
+	the main screen (Windows multi-screen configuration).
+	Ticket [5919a0ec2d]
+
+2016-07-15 Adrian Madrano Calvo
+	pckIndex.tcl: auto-load commands also from global namespace
+	and not only from BWidget namespace. Ticket [c86207db01]
+
+2016-03-22 Harald Oehlmann <oehhar@users.sourceforge.net>
+	Only support themed packages Tile 0.8 or Ttk.
+	Repair the button spacing in themed font toolbar.
+	Ticket [d7ea07c40a]
+
+2016-03-15 Harald Oehlmann <oehhar@users.sourceforge.net>
+	mainframe.tcl: "Mainframe configure" caused error in themed
+	mode. Ticket [52273c0a4e]
+
+2016-03-08 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.10 tagged ****
+
+2016-01-07 Adrian Medrano Calvo
+	listbox.tcl: Listbox did not scroll to current item on
+	startup. Ticket [ae238d5a7]
+
+2016-01-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+	lang/da.rc, lang/es.rc, lang/fr.rc, lang/no.rc:
+	Translations non portable on utf-8 systems.
+	File encoding changed to utf-8. Ticket [6c91e43d76]
+
+2016-01-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+	tree.tcl: Tree lines are black by default even if background
+	is black. Ticket [ed4c1dab46]
+
+2015-12-08 Harald Oehlmann <oehhar@users.sourceforge.net>
+	listbox.tcl: 8.4 compatibility was broken due to the use of
+	min/max math functions. Ticket [0aef856302]
+
+2015-11-04 Harald Oehlmann <oehhar@users.sourceforge.net>
+	dynhelp.tcl: Drop the assumption that all windows
+	screen are the same size (of fix dated 2009-06-26)
+	and use the virtual screen information to place the bubble
+	help. Ticket [b64e03e548].
+
+2015-10-18 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.9 tagged ****
+
+2015-03-18 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	widget.tcl: Widget::define got new parameter -namespace,
+	allowing megawidget namespace be different to
+	class name. This allows lower case namespace names.
+	Patch by Adrian Medrano Calvo. Ticket [023a631b20]
+
+2014-09-10 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.8 tagged ****
+
+2014-09-05 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	widget.tcl: Widget::which errors when option not present.
+	Ticket [397db23424]
+
+2014-05-21 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	widget.tcl: Don't invoke unqualified upvar in callers
+	scope. Patch by Adrian Medrano Calvo. Ticket [046fa04231]
+
+	widget.tcl: Don't double creation of temporary widget for
+	default values retrieval. Use result of _get_tkwidget_options
+	instead. By Adrian Medrano Calvo. Ticket [393b67ab19]
+
+	widget.tcl: New procedure Widget::which (as in [namespace which]),
+	that returns the fully qualified name for a widget option or
+	widget variable. By Adrian Medrano Calvo. Ticket [a8705e5fd9]
+
+	widget.tcl: Remove unneeded upvar. By Adrian Medrano Calvo.
+	Ticket [43f93e0a97]
+
+	widget.tcl et al: remove apparently unused procedure
+	Widget::syncoptions and all calls. By Adrian Medrano Calvo.
+	Ticket [3c2b8eafc6]
+
+
+2013-12-13 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	scrollframe.tcl: Make -constrainedwidth 1 and
+	-constrainedheight 1 work together.
+	Patch by Simon Bachmann. Ticket [2fa44401d5]
+
+	2013-10-17 Harald Oehlmann <oehhar@users.sourceforge.net>
+	widget.tcl: Remove temporary widget.
+	By Wolfgang S. Kechel. Ticket [6cd041bcc1]
+
+2013-10-15 Harald Oehlmann <oehhar@users.sourceforge.net>
+	combobox.tcl: Themed ComboBox color specifications
+	are honored. By Wolfgang S. Kechel. Ticket [6c6704e40f]
+
+2013-10-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+	combobox.tcl: Fails in themed mode with "unknown
+	option -bg". Patch solves this but listbox items
+	are white on white when "-foreground" is specified.
+	By Wolfgang S. Kechel. Ticket [6632134ce9]
+	
+	listbox.tcl: Update on option -deltay added.
+	Set x0 to 2 to make highlight work and look nice for
+	listbox with image.
+	Take image into account to show selection.
+	By Wolfgang S. Kechel. Ticket [ff1787af9c]
+
+	scrollw.tcl: Raise scrolled window if it is below in
+	the window hierarchy. By Wolfgang S. Kechel.
+	Ticket [ff1787af9c]
+
+2013-10-07 Harald Oehlmann <oehhar@users.sourceforge.net>
+	dynhelp.tcl: Sometimes the tooltip does not occur under
+	gnome/metacity on ubuntu. By Wolfgang S. Kechel.
+	Ticket [a588d2f800]
+
+2013-09-15 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.7 tagged ****
+
+2013-09-11 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	xpm2image.tcl: many issues fixed in xpm import
+	by Mattias Hembruch. Ticket [9a8b2ee42e]
+	
+2013-08-14 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* notebook.tcl: cured error in _resize, that
+	data($p,width) is not (jet) present. Ticket [a4cbba655d].
+
+2013-06-28 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* mainframe.tcl: Included Patch [9f67a66609]
+	curing issues of Shift-Accellerators with Shift-Lock
+	on Mac. By Keith Nash, Ticket [83ce3e84e7].
+
+2013-06-26 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* mainframe.tcl: Reverted Patch [1977644]
+	(-casesensitive for accellerators). It has
+	issues with shift-lock.
+
+2013-06-21 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	* labelentry.tcl: Bug fixed:
+	Methods from Tk entry widget restored [Bug 1002844].
+	
+	* mainframe.tcl: Allow case sensitive accelerators
+	by new option -casesensitive.
+	Patch by cmard [Patch 1977644]
+	
+	* mainframe.tcl: Allow new modifiers Shift, Cmd and ShiftCmd
+	for accelerators. Patch by K.J.Nash [Patch-83ce3e84e7]
+
+	* mainframe.tcl: When changing MainFrame -background, do
+	not change menu colors on Aqua.
+	Fix by Keith J.Nash [Bug-a81b7afc1e]
+	
+	* init.tcl: Make loadable in save interpreter.
+	Fix by Keith J.Nash [Bug-4365a23bd3]
+
+	* combobox.tcl: Add method getentry to return entry
+	widget path for bind purposes.
+	Patch by Michael [Patch-2340355]
 	
 2013-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 

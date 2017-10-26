@@ -13,7 +13,7 @@
 *ignoreName:   &Ignorar
 *okName:       &OK
 *cancelName:   &Anular
-*yesName:      &Sí 
+*yesName:      &SÃ­ 
 *noName:       &No
 
 ! --- symbolic names of label of SelectFont dialog ----------------------------
@@ -23,7 +23,7 @@
 *underlineName:     &Subrayado
 *overstrikeName:    &Tachado
 *fontName:          &Fuente
-*sizeName:          &Tamaño
+*sizeName:          &TamaÃ±o
 *styleName:         &Estilo
 *colorPickerName:   &Color...
 
@@ -31,26 +31,26 @@
 ! --- symbolic names of label of PasswdDlg dialog -----------------------------
 
 *loginName:    Nombre de &usuario
-*passwordName: &Contraseña 
+*passwordName: &ContraseÃ±a 
 
 ! --- resource for SelectFont dialog ------------------------------------------
 
-*SelectFont.title:        Selección de fuente
+*SelectFont.title:        SelecciÃ³n de fuente
 *SelectFont.sampletext:   Texto de Ejemplo
 
 
 ! --- resource for MessageDlg dialog ------------------------------------------
 
-*MessageDlg.noneTitle:      Indicación
-*MessageDlg.infoTitle:      Información
+*MessageDlg.noneTitle:      IndicaciÃ³n
+*MessageDlg.infoTitle:      InformaciÃ³n
 *MessageDlg.questionTitle:  Pregunta
-*MessageDlg.warningTitle:   Atención
+*MessageDlg.warningTitle:   AtenciÃ³n
 *MessageDlg.errorTitle:     Error
 
 
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
-*PasswdDlg.title:  Introduzca su nombre de usuario y contraseña
+*PasswdDlg.title:  Introduzca su nombre de usuario y contraseÃ±a
 
 ! --- symbolic names of label of SelectColor dialog ----------------------------
 
