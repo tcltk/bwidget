@@ -4,8 +4,8 @@ namespace eval SelectColor {
     Widget::declare SelectColor {
         {-title      String     "Select a color" 0}
         {-parent     String     ""               0}
-        {-variable   String     ""               1}
-        {-help       Boolean    0                1}
+        {-command    String     ""               0}
+        {-help       Boolean    1                1}
         {-color      TkResource ""               0 {label -background}}
 	{-type       Enum       "dialog"         1 {dialog popup}}
 	{-placement  String     "center"         1}
@@ -35,7 +35,7 @@ namespace eval SelectColor {
     variable _image
     variable _hsv
 
-    variable _varName
+    variable _command
     variable _unsavedSelection
     variable _oldColor
     variable _entryColor
@@ -82,8 +82,7 @@ proc SelectColor::menu {path placement args} {
     variable _wcolor
     variable _selectype
     variable _selection
-    variable _varName
-    variable _unsavedSelection
+    variable _command
     variable _bgColor
     variable _rounds
 
@@ -95,11 +94,7 @@ proc SelectColor::menu {path placement args} {
     wm overrideredirect $top 1
     catch { wm attributes $top -topmost 1 }
 
-    set _varName [Widget::cget $path -variable]
-    if {! [string equal [string range $_varName 0 1] {::}]} {
-        set _varName ::SelectColor::_unsavedSelection
-    }
-
+    set _command  [Widget::cget $path -command]
     set _bgColor  [Widget::cget $path -background]
     set _rounds   {}
 
@@ -186,16 +181,26 @@ proc SelectColor::menu {path placement args} {
     } else {
 	# The user has either selected one of the palette colors, or has
 	# cancelled.  The full BWidget/native dialog was not called.
-	# Unless the user has cancelled, record the selected
-	# color in $_varName which may be traced by the caller.
+	# Unless the user has cancelled, pass the selected
+	# color to _userCommand.
 	set tmpCol [lindex $colors $_selection]
 	if {[string equal $tmpCol ""]} {
-	    # User has cancelled - no need to set $_varName
+	    # User has cancelled - no need to call _userCommand.
 	} else {
-	    set $_varName $tmpCol
+	    _userCommand $tmpCol
 	}
 	return $tmpCol
     }
+}
+
+
+proc SelectColor::_userCommand {color} {
+    variable _command
+    if {[string equal $_command {}]} {
+        return
+    }
+    uplevel #0 $_command [list $color]
+    return
 }
 
 
@@ -206,7 +211,7 @@ proc SelectColor::dialog {path args} {
     variable _selection
     variable _image
     variable _hsv
-    variable _varName
+    variable _command
     variable _unsavedSelection
     variable _oldColor
     variable _entryColor
@@ -227,17 +232,8 @@ proc SelectColor::dialog {path args} {
                    base _baseColors "Base colors" \
                    user _userColors "User colors"]
 
-    set _help [Widget::cget $path:SelectColor -help]
-
-    # Initialize _varName
-    # The initial value of [$w cget -variable] is ignored and is
-    # overwritten with [$w cget -color].
-    set _varName [Widget::cget $path:SelectColor -variable]
-    if {! [string equal [string range $_varName 0 1] {::}]} {
-        set _varName ::SelectColor::_unsavedSelection
-    }
-
-    # Initialize _bgColor and _rounds
+    set _help    [Widget::cget $path:SelectColor -help]
+    set _command [Widget::cget $path:SelectColor -command]
     set _bgColor [Widget::cget $path:SelectColor -background]
     set _rounds  {}
 
@@ -381,9 +377,9 @@ proc SelectColor::dialog {path args} {
     _set_hue_sat [lindex $_hsv 0] [lindex $_hsv 1]
     _set_value   [lindex $_hsv 2]
 
-    # Initialize _oldColor which is used to reset the traced -variable
-    # if the user cancels.
-    set _oldColor [set $_varName]
+    # Initialize _oldColor which is used to reset the color supplied to
+    # _userCommand if the user cancels.
+    set _oldColor [set _unsavedSelection]
     set tmp24     [::SelectColor::_24BitRgb $_oldColor]
     if {[_ValidateColorEntry forced $tmp24]} {
         set ::SelectColor::_entryColor $tmp24
@@ -396,21 +392,21 @@ proc SelectColor::dialog {path args} {
     # Validate input to the entry field.
     # To avoid conflict with the entry -variable (_entryColor), do not set the
     # latter directly (because a failed validation will switch off subsequent
-    # validations).  Either call _SetEntryValue, or set $_varName which triggers
-    # the trace.
+    # validations).  Either call _SetEntryValue, or set _unsavedSelection which
+    # triggers the trace.
 
     $fg.value configure -validate all -validatecommand \
             [list SelectColor::_ValidateColorEntry %V %P]
 
-    # Trace $_varName
-    # Subsequent modifications to $_varName will update the entry widget, if the
-    # value is valid.
+    # Trace _unsavedSelection
+    # Subsequent modifications to _unsavedSelection will update the entry
+    # widget, if the value is valid.
     # From now on, this is the only way that:
     # (1) ::SelectColor::_SetEntryValue is called
     # (2) ::SelectColor::_entryColor is modified (except by the user typing in
     #     the entry widget)
 
-    trace add variable $_varName write ::SelectColor::_SetEntryValue
+    trace add variable ::SelectColor::_unsavedSelection write ::SelectColor::_SetEntryValue
 
     $top add -text [lindex [BWidget::getname ok] 0]
     $top add -text [lindex [BWidget::getname cancel] 0]
@@ -442,12 +438,13 @@ proc SelectColor::dialog {path args} {
     if {$res == 0} {
         set color [$fg.color cget -background]
     } else {
-        # User has cancelled - reset $_varName in case it is being traced
-        set $_varName $_oldColor
+        # User has cancelled - call _userCommand to undo any changes made
+        # in the caller.
+        _userCommand $_oldColor
         set color ""
     }
 
-    trace remove variable $_varName write ::SelectColor::_SetEntryValue
+    trace remove variable ::SelectColor::_unsavedSelection write ::SelectColor::_SetEntryValue
 
     destroy $top
     return $color
@@ -479,7 +476,7 @@ proc SelectColor::_select_rgb {count} {
     variable _selection
     variable _widget
     variable _hsv
-    variable _varName
+    variable _unsavedSelection
     variable _bgColor
     variable _fgColor
 
@@ -511,9 +508,10 @@ proc SelectColor::_select_rgb {count} {
         _set_value   [lindex $_hsv 2]
         $frame.color configure -background $bg
 
-        # Display selected color in entry widget, and notify
-        # caller (if the variable is being traced).
-        set $_varName $bg
+        # Display selected color in entry widget (via trace on
+        # ::SelectColor::_unsavedSelection), and notify caller.
+        set ::SelectColor::_unsavedSelection $bg
+        _userCommand $bg
     }
 }
 
@@ -523,14 +521,15 @@ proc SelectColor::_set_rgb {rgb} {
     variable _baseColors
     variable _userColors
     variable _widget
-    variable _varName
+    variable _unsavedSelection
 
     set frame $_widget(fcolor)
     $frame.color configure -background $rgb
 
-    # Display selected color in entry widget, and notify
-    # aller (if the variable is being traced).
-    set $_varName $rgb
+    # Display selected color in entry widget (via trace on
+    # ::SelectColor::_unsavedSelection), and notify caller.
+    set ::SelectColor::_unsavedSelection $rgb
+    _userCommand $rgb
     set user [expr {$_selection-[llength $_baseColors]}]
     if {$user >= 0} {
         $frame.color$_selection configure -background $rgb
@@ -785,10 +784,14 @@ proc SelectColor::_24BitRgb {col} {
         # Truncate to 24-bit
         set delta  [expr {$lenny / 3}]
         set delta2 [expr {$delta * 2}]
+        set deltaP1  [incr delta]
+        set deltaP2  [incr delta]
+        set delta2P1 [incr delta2]
+        set delta2P2 [incr delta2]
         set result #
         append result [string range $col 1 2]
-        append result [string range $col $delta+1  $delta+2]
-        append result [string range $col $delta2+1 $delta2+2]
+        append result [string range $col $deltaP1  $deltaP2]
+        append result [string range $col $delta2P1 $delta2P2]
         return $result
     }
 }
@@ -799,9 +802,9 @@ proc SelectColor::_24BitRgb {col} {
 # ------------------------------------------------------------------------------
 # Command to update the (hexadecimal color displayed in the) entry widget
 # when there is a change in the color currently selected in the GUI, which is
-# stored in $::SelectColor::_varName.
+# stored in _unsavedSelection.
 #
-# This command is called by a write trace on $::SelectColor::_varName; if the
+# This command is called by a write trace on _unsavedSelection; if the
 # value of this variable is a valid color (i.e. "#" followed by 3N hex digits),
 # this command converts the value to 24 bits and sets ::SelectColor::_entryColor
 # to the result, thereby displaying it in the entry widget.  Therefore,
@@ -812,15 +815,16 @@ proc SelectColor::_24BitRgb {col} {
 # entry widget: that is done instead by the -vcmd of the entry widget, which
 # is SelectColor::_ValidateColorEntry.  When the user chooses a color by typing
 # in the entry widget, the command _ValidateColorEntry copies the value to
-# $_varName if a keystroke in the widget makes its contents 3N hex digits long.
+# _unsavedSelection if a keystroke in the widget makes its contents 3N hex
+# digits long.
 # ------------------------------------------------------------------------------
 
 proc SelectColor::_SetEntryValue {argVarName var2 op} {
     variable _entryColor
-    variable _varName
+    variable _unsavedSelection
 
     if {0} {
-    } elseif {[string equal $argVarName $_varName] &&
+    } elseif {[string equal $argVarName ::SelectColor::_unsavedSelection] &&
             [string equal $var2 {}] && [string equal $op "write"]} {
         # OK
     } else {
@@ -875,12 +879,12 @@ proc SelectColor::_CheckFocus {w} {
 # check values assigned to _entryColor.
 #
 # When the user chooses a color by typing in the entry widget, this command
-# copies the value to $_varName if a keystroke in the widget makes its contents
-# 3N hex digits long.
+# copies the value to _unsavedSelection if a keystroke in the widget makes its
+# contents 3N hex digits long.
 # ------------------------------------------------------------------------------
 
 proc SelectColor::_ValidateColorEntry {percentV percentP} {
-    variable _varName
+    variable _unsavedSelection
 
     set result [regexp -- {^#[0-9a-fA-F]*$} $percentP]
     set lenny  [string length $percentP]
@@ -897,12 +901,13 @@ proc SelectColor::_ValidateColorEntry {percentV percentP} {
             }
         } elseif {[string equal $percentV "focusout"]} {
             # If the color is valid it will already have been copied to the GUI
-            # by the "key" validation above.
+            # and to _userCommand by the "key" validation above.
             #
             # The code below only needs to reset the value in the entry widget.
             # Remove an invalid value, convert a valid one to 24-bit.
-            # Ignore $percentP, just fire the trace on $_varName.
-            after idle [list set $_varName [set $_varName]]
+            # Ignore $percentP, just fire the trace on _unsavedSelection.
+            set color $_unsavedSelection
+            after idle [list set ::SelectColor::_unsavedSelection $color]
         }
     }
 
@@ -913,16 +918,17 @@ proc SelectColor::_ValidateColorEntry {percentV percentP} {
 # ------------------------------------------------------------------------------
 # Command SelectColor::_SetWithoutTrace
 # ------------------------------------------------------------------------------
-# This command sets $_varName (using _set_rgb) without firing the trace that
-# copies the value to _entryColor.
+# This command sets _unsavedSelection (using _set_rgb) without firing the trace
+# that copies the value to _entryColor.
 # The command is called by SelectColor::_ValidateColorEntry to avoid a loop.
 # ------------------------------------------------------------------------------
 
 proc SelectColor::_SetWithoutTrace {value} {
-    variable _varName
-
-    trace remove variable $_varName write ::SelectColor::_SetEntryValue
+    trace remove variable ::SelectColor::_unsavedSelection write ::SelectColor::_SetEntryValue
     _set_rgb $value
-    trace add variable $_varName write ::SelectColor::_SetEntryValue
+    set _hsv [eval rgbToHsv [winfo rgb . $value]]
+    _set_hue_sat [lindex $_hsv 0] [lindex $_hsv 1]
+    _set_value   [lindex $_hsv 2]
+    trace add variable ::SelectColor::_unsavedSelection write ::SelectColor::_SetEntryValue
     return
 }
