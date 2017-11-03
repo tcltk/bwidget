@@ -46,13 +46,14 @@
 </TR>
 <TR>
 <TD>&nbsp;&nbsp;<A HREF="#-homogeneous">-homogeneous</A></TD>
+<TD>&nbsp;&nbsp;<A HREF="#-internalborderwidth">-internalborderwidth or -ibd</A></TD>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-side">-side</A></TD>
-</TR>
-<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-tabbevelsize">-tabbevelsize</A></TD>
-<TD>&nbsp;&nbsp;<A HREF="#-tabpady">-tabpady</A></TD>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-tabpady">-tabpady</A></TD>
 <TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TD>
 </TR>
 </TABLE></DD>
@@ -117,7 +118,11 @@
 <B><A NAME="descr"></A>DESCRIPTION</B><BR>
 <P>
 
-NoteBook widget manage a set of pages and displays one of them.
+The NoteBook widget manages a set of pages and displays one of them.  A page
+is a <B>frame</B> or <B>ttk::frame</B> that is included in the NoteBook by its
+<A HREF="#insert"><B>insert</B></A> command.  Each page is associated with a tab;
+the tabs are displayed in a band either above or below the pages, depending on
+the value of the option <A HREF="#-side">-side</A>.
 
 </P>
 <BR><HR WIDTH="50%"><BR>
@@ -142,10 +147,20 @@ enough to contains the largest page.
 <DL><DT><A NAME="-homogeneous"><B>-homogeneous</B></A></DT>
 <DD>
 
-Specifies wether or not the label of the pages must have the same width.
+Specifies whether or not the label of the pages must have the same width.
 
 </DD>
 </DL>
+
+<DL><DT><A NAME="-internalborderwidth"><B>-internalborderwidth</B> or <B>-ibd</B></A></DT>
+<DD>
+
+Value that is applied to each page in the NoteBook as its <B>-borderwidth</B> or <B>-bd</B>.
+
+</DD>
+</DL>
+
+
 <DL><DT><A NAME="-side"><B>-side</B></A></DT>
 <DD>
 
@@ -251,14 +266,85 @@ Return the numerical index corresponding to the item.
  ?<I>option value...</I>?
 </DT><DD>
 
-Insert a new page idendified by <I>page</I> at position <I>index</I> in the pages list.
+Insert a new page identified by <I>page</I> at position <I>index</I> in the pages list.
 <I>index</I> must be numeric or <B>end</B>. The pathname of the new page is returned.
+Dynamic help, if it is specified by the options, is
+displayed when the pointer hovers over the tab that belongs to the page.
 
 <P>
+<DL><DT><A NAME="Page-activebackground"><B>-activebackground</B></A></DT>
+<DD>
+
+Background color for the tab when it is active.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-activeforeground"><B>-activeforeground</B></A></DT>
+<DD>
+
+Color used for the tab's text when the tab is active.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-background"><B>-background</B></A></DT>
+<DD>
+
+Background color for the tab when it is not active.
+
+</DD>
+</DL>
 <DL><DT><A NAME="Page-createcmd"><B>-createcmd</B></A></DT>
 <DD>
 
 Specifies a command to be called the first time the page is raised.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-disabledforeground"><B>-disabledforeground</B></A></DT>
+<DD>
+
+Color used for the tab's text when the tab is disabled.
+
+</DD>
+</DL>
+
+<DL><DT><A NAME="Page-foreground"><B>-foreground</B></A></DT>
+<DD>
+
+Color used for the tab's text when the tab is neither active nor disabled.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-helpcmd"><B>-helpcmd</B></A></DT>
+<DD>
+
+Has no effect.
+See also <A HREF="DynamicHelp.html">DynamicHelp</A>.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-helptext"><B>-helptext</B></A></DT>
+<DD>
+
+Text for dynamic help. If empty, no help is available for this page.
+See also <A HREF="DynamicHelp.html">DynamicHelp</A>.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-helptype"><B>-helptype</B></A></DT>
+<DD>
+
+Type of dynamic help. Use <I>balloon</I> (the default for a NoteBook
+page) or <I>variable</I>.
+See also <A HREF="DynamicHelp.html">DynamicHelp</A>.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-helpvar"><B>-helpvar</B></A></DT>
+<DD>
+
+Variable to use when <B>-helptype</B> option is <I>variable</I>.
+See also <A HREF="DynamicHelp.html">DynamicHelp</A>.
 
 </DD>
 </DL>
@@ -277,10 +363,33 @@ The command must return 0 if the page can not be leaved, or 1 if it can.
 
 </DD>
 </DL>
+<DL><DT><A NAME="Page-ractiveimage"><B>-ractiveimage</B></A></DT>
+<DD>
+
+Image to show on the right of the tab when the tab is active.
+
+</DD>
+</DL>
 <DL><DT><A NAME="Page-raisecmd"><B>-raisecmd</B></A></DT>
 <DD>
 
 Specifies a command to be called each time the page is raised.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-rimage"><B>-rimage</B></A></DT>
+<DD>
+
+Image to show on the right of the tab when the tab is not active.
+
+</DD>
+</DL>
+<DL><DT><A NAME="Page-rimagecmd"><B>-rimagecmd</B></A></DT>
+<DD>
+
+Specifies a command to be evaluated, with two arguments appended, when the
+image shown on the right of the tab is clicked.  The first appended argument
+is the Tk window path of the NoteBook, the second is the name of the page.
 
 </DD>
 </DL>

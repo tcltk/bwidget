@@ -27,6 +27,21 @@ namespace eval Demo {
     }
 }
 
+image create photo bwidget16 -data {
+    R0lGODlhEAAQAOMJABat6IGYffaBCUSku/KCDcCMPomXdgCy//+AANnZ2dnZ2dnZ2dnZ2dnZ2dnZ
+    2dnZ2SH5BAEKAA8ALAAAAAAQABAAAAQ58MlJq70U6a0x/9c2iRb5mNmHjmpXuiecIpRA0JWJDEfw
+    HIffoWU4AIBBYKuABAoxSGEQ6oxins8IADs=
+}
+
+image create photo faded16 -data {
+    R0lGODlhEAAQAKEDAAAAAICAgKCgoP///yH5BAEKAAMALAAAAAAQABAAAAIjnI+py+1vQEABsDoH
+    blUI+XyAAImk033Zsmng8hoVRNd2XQAAOw==
+}
+
+image create photo stop16 -data {
+    R0lGODlhEAAQAMIFAAAAAC8DA3gKCpYMDPAUFP///////////yH5BAEKAAcALAAAAAAQABAAAAMm
+    SLrc/jDKqYBgAsB8CY/ZMFjTGAzUEACoFI7d83nkUysZpe/8ngAAOw==
+}
 
 proc Demo::create { } {
     global   tk_patchLevel
@@ -134,6 +149,14 @@ proc Demo::create { } {
     incr prgindic
     set f5 [DemoTree::create $notebook]
 
+    foreach page [$notebook pages] {
+        $notebook itemconfigure $page \
+                -image        bwidget16 \
+                -rimage       faded16 \
+                -ractiveimage stop16  \
+                -rimagecmd    {::Demo::_close_tab}
+    }
+
     set prgtext   "Done"
     incr prgindic
     $notebook compute_size
@@ -144,6 +167,31 @@ proc Demo::create { } {
     update idletasks
     destroy .intro
 }
+
+proc Demo::_close_tab { tabSet tabName } {
+    after idle [list $tabSet delete $tabName]
+
+    set tabIndex [$tabSet index $tabName]
+    set tabList  [$tabSet pages]
+    set tabTot   [llength $tabList]
+
+    # Pick another tab to raise.
+    if {$tabTot == 1} {
+        # No other tabs.
+        exit
+    } elseif {$tabIndex < $tabTot - 1} {
+        # Raise the tab to the right.
+        set raiseTabName [lindex $tabList [expr {$tabIndex + 1}]]
+    } else {
+        # This tab is furthest to the right. Raise the tab to the left.
+        set raiseTabName [lindex $tabList [expr {$tabIndex - 1}]]
+    }
+
+    $tabSet raise $raiseTabName
+    $tabSet see   $raiseTabName
+    return
+}
+
 
 
 proc Demo::update_font { newfont } {

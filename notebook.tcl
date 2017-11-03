@@ -43,6 +43,9 @@ namespace eval NoteBook {
             {-raisecmd   String     ""     0}
             {-leavecmd   String     ""     0}
             {-image      TkResource ""     0 label}
+            {-rimage     String     ""     0}
+            {-ractiveimage String   ""     0}
+            {-rimagecmd  String     ""     0}
             {-text       String     ""     0}
             {-foreground         String     ""     0}
             {-background         String     ""     0}
@@ -274,6 +277,7 @@ proc NoteBook::insert { path index page args } {
                 -borderwidth [Widget::cget $path -internalborderwidth]
         }
         set data($page,realized) 0
+        set data($page,rimage)   0
     } else {
         if { ! $::Widget::_theme} {
             $f configure -background  [Widget::cget $path -background]
@@ -309,7 +313,7 @@ proc NoteBook::delete { path page {destroyframe 1} } {
     }
     if { $destroyframe } {
         destroy $path.f$page
-        unset data($page,width) data($page,realized)
+        unset data($page,width) data($page,realized) data($page,rimage)
     }
     _redraw $path
 }
@@ -506,6 +510,9 @@ proc NoteBook::_itemconfigure { path page lres } {
     } elseif  { [Widget::hasChanged $path.f$page -image foo] } {
         _compute_height $path
         _compute_width  $path
+    } elseif  { [Widget::hasChanged $path.f$page -rimage foo] } {
+        _compute_height $path
+        _compute_width  $path
     }
     if { [Widget::hasChanged $path.f$page -state state] &&
          $state == "disabled" && $data(select) == $page } {
@@ -547,6 +554,13 @@ proc NoteBook::_compute_width { path } {
                 set hmax $himg
             }
         }
+        if { [set jmg [Widget::cget $path.f$page -rimage]] != "" } {
+            set wtext [expr {$wtext + [image width $jmg] + 4}]
+            set hjmg  [expr {[image height $jmg] + 6}]
+            if { $hjmg > $hmax } {
+                set hmax $hjmg
+            }
+        }
         set  wmax  [expr {$wtext > $wmax ? $wtext : $wmax}]
         incr wtot  $wtext
         set  data($page,width) $wtext
@@ -574,9 +588,11 @@ proc NoteBook::_compute_height { path } {
     set pady1   [Widget::_get_padding $path -tabpady 1]
     set metrics [font metrics $font -linespace]
     set imgh    0
+    set jmgh    0
     set lines   1
     foreach page $data(pages) {
         set img  [Widget::cget $path.f$page -image]
+        set jmg  [Widget::cget $path.f$page -rimage]
         set text [Widget::cget $path.f$page -text]
         set len [llength [split $text \n]]
         if {$len > $lines} { set lines $len}
@@ -584,9 +600,14 @@ proc NoteBook::_compute_height { path } {
             set h [image height $img]
             if {$h > $imgh} { set imgh $h }
         }
+        if {$jmg != ""} {
+            set h [image height $jmg]
+            if {$h > $jmgh} { set jmgh $h }
+        }
     }
     set height [expr {$metrics * $lines}]
     if {$imgh > $height} { set height $imgh }
+    if {$jmgh > $height} { set height $jmgh }
     set data(hpage) [expr {$height + $pady0 + $pady1}]
 }
 
@@ -662,6 +683,58 @@ proc NoteBook::_highlight { type path page } {
 		    -fill [_getoption $path $page -background]
             $path.c itemconfigure "$page:text" \
 		    -fill [_getoption $path $page -foreground]
+        }
+    }
+}
+
+
+# ---------------------------------------------------------------------------
+#  Command NoteBook::_rightImage
+# ---------------------------------------------------------------------------
+proc NoteBook::_rightImage { type path page } {
+    variable $path
+    upvar 0  $path data
+
+    if { [string equal [Widget::cget $path.f$page -state] "disabled"] } {
+        return
+    }
+
+    switch -- $type {
+        on {
+            set data($page,rimage) 1
+            set jmg  [Widget::cget $path.f$page -rimage]
+            set jamg [Widget::cget $path.f$page -ractiveimage]
+            if {    ($jmg  ne {})
+                 && ($jamg ne {})
+                 && ([image height $jmg] == [image height $jamg])
+                 && ([image width  $jmg] == [image width  $jamg])
+            } {
+            $path.c itemconfigure "$page:jmg" \
+		    -image $jamg
+            } else {
+                # Don't replace the -rimage with the -raimage if they are
+                # different sizes.
+            }
+        }
+        off {
+            set data($page,rimage) 0
+            $path.c itemconfigure "$page:jmg" \
+		    -image [Widget::cget $path.f$page -rimage]
+        }
+        command {
+	    set cmd [Widget::cget $path.f$page -rimagecmd]
+	    if {$cmd ne {}} {
+		after idle [list uplevel #0 [list NoteBook::_rightImage execute $path $page]]
+		# Call after idle so that, if the pointer has left the -rimage,
+		# the <Leave> event fires and resets data($page,rimage) before
+		# NoteBook::_rightImage execute is evaluated.
+	    }
+        }
+        execute {
+	    set cmd [Widget::cget $path.f$page -rimagecmd]
+	    if {$cmd ne {} && $data($page,rimage)} {
+		uplevel #0 [concat $cmd [list $path $page]]
+	    }
         }
     }
 }
@@ -838,6 +911,7 @@ proc NoteBook::_draw_page { path page create } {
     }
 
     set img [Widget::cget $path.f$page -image]
+    set jmg [Widget::cget $path.f$page -rimage]
 
     set ytext $top
     if { $tabsOnBottom } {
@@ -856,6 +930,15 @@ proc NoteBook::_draw_page { path page create } {
 	# if there's an image, put it on the left and move the text right
 	set ximg $xtext
 	incr xtext [expr {[image width $img] + 2}]
+    }
+
+    if { $jmg != "" } {
+	# if there's an image, put it on the right and leave the text
+	set xjmg $xtext
+	if { $img != "" } {
+	    set xjmg $ximg
+	}
+	incr xjmg [expr {$data($page,width) - [image width $jmg] - 10}]
     }
 	
     if { $data(select) == $page } {
@@ -927,6 +1010,26 @@ proc NoteBook::_draw_page { path page create } {
         # Sven end
     } else {
         $path.c delete $page:img
+    }
+
+    if { $jmg != "" } {
+	set id [$path.c find withtag $page:jmg]
+	if { [string equal $id ""] } {
+	    set id [$path.c create image $xjmg $ytext \
+		    -anchor nw    \
+		    -tags   [list page p:$page $page:jmg]]
+        }
+        $path.c coords $id $xjmg $ytext
+        $path.c itemconfigure $id -image $jmg
+
+        $path.c bind $page:jmg <Enter> \
+		[list NoteBook::_rightImage on  $path $page]
+        $path.c bind $page:jmg <Leave> \
+		[list NoteBook::_rightImage off $path $page]
+        $path.c bind $page:jmg <ButtonRelease-1> \
+		[list NoteBook::_rightImage command $path $page]
+    } else {
+        $path.c delete $page:jmg
     }
 
     if { $data(select) == $page } {
