@@ -8,7 +8,10 @@
 	conflict with keyboard traversal.
 	Shows entry widget for numerical color input/output.
 	New option -help to show a help area.
-	Patch by Keith J. Nash [Patch 75101]
+	Patch by Keith J. Nash
+	Ticket [75101bf5ce]
+	Translators: Jima (es), Vogel (fr)
+	Ticket [a947e33526]
 
 2017-11-03 Harald Oehlmann
 	notebook.tcl (+man,demo): Add possibility to NoteBook

@@ -57,14 +57,16 @@
 *baseColorsName: Couleurs de base
 *userColorsName: Couleurs utilisateur
 
-*yourSelectionName: Votre selection
-*colorSelectorsName: Gamme des Couleurs
-*hoverHelpName: Placez dessus pour afficher aide sur utilisation:
-*mouseHelpName: Sourie
+*yourSelectionName: Votre sélection
+*colorSelectorsName: Sélecteur de couleurs
+*hoverHelpName: Passez la souris sur les boutons pour afficher l'aide à l'utilisation :
+*mouseHelpName: Souris
 *keyboardHelpName: Clavier
 
 ! --- dynamic help text for SelectColor dialog.  Lines 75 chars max, split by '\n'.
 
-*mouseHelpTextName: Cliquez ou tirez avec la sourie dans la gamme des couleurs pour choisir une couleur.\nModifie la valeur de saturation a droite, si la couleur reste noir ou blanc.\n\nClickez sur couleurs de base pour choisir une de ces couleurs.\nCliquez sur une couleur d'utilisateur pour la choisir ou la modifier si libre.
 
-*keyboardHelpTextName: Cliquez dans le champ d'entré dans "votre selection". Entrez la couleur en notation hexadecimal RVB.\nL'entré de couleur est valable, si 3, 6 ou 9 characters sont entrés. La touche Entré valide l'entré et montre la couleur en clair et comme valeur de 24bit.\nSi le point focal n'est pas sur le champ d'entré, les touches Entrée et Échape fonctionnent comme\nles buttons "OK" et "Abadonner".
+*mouseHelpTextName: Cliquez ou déplacez la souris dans la palette pour choisir une couleur.\nSi la couleur affichée reste noire quelle que soit la sélection dans la palette (teinte et\nsaturation), vérifiez la position du pointeur dans le sélecteur de droite (luminosité).\n\nCliquez sur l'une des "Couleurs de base" pour la sélectionner.\n\nCliquez sur l'une des "Couleurs utilisateurs" pour la sélectionner, ou pour la\nsauver dans la palette utilisateur dans une case blanche. Les modifications via le\nsélecteur de couleurs sont alors propagées dans la case sélectionnée de la palette\nutilisateur jusqu'à ce qu'une autre couleur (de base ou utilisateur) soit sélectionnée.
+
+*keyboardHelpTextName: Cliquez dans la zone de saisie à gauche, dans la zone "Votre sélection".\n\nEntrez la couleur désirée au format RGB hexadécimal.\nLa valeur est validée lorsque le nombre de chiffres hexadécimaux est un multiple de 3.\nElle est alors propagée aux autres zones du sélecteur de couleurs.\n\nLa zone de saisie peut être quittée en cliquant n'importe où ailleurs ou en appuyant sur la\ntouche "Escape" ou "Entrée" du clavier. Bien que le sélecteur de couleurs utilise\n48 bits en interne, la zone de saisie affichera alors la couleur au format RGB en\nhexadécimal sur 24 bits.\n\nLorsque la zone de saisie n'a pas le focus (i.e. ne montre pas le curseur), les touches\n"Entrée" et "Escape" ont la même fonction que les boutons "OK" et "Annuler" respectivement.
+
