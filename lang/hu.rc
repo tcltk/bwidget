@@ -52,12 +52,10 @@
 
 *PasswdDlg.title:  Add meg a felhasználónevet és a jelszót
 
-
 ! --- symbolic names of label of SelectColor dialog ----------------------------
 
 *baseColorsName: Alapszínek
 *userColorsName: Felhasználói színek
-
 
 *yourSelectionName: Your Selection
 *colorSelectorsName: Color Selectors

@@ -5,7 +5,7 @@ namespace eval SelectColor {
         {-title      String     "Select a color" 0}
         {-parent     String     ""               0}
         {-command    String     ""               0}
-        {-help       Boolean    1                1}
+        {-help       Boolean    0                1}
         {-color      TkResource ""               0 {label -background}}
 	{-type       Enum       "dialog"         1 {dialog popup}}
 	{-placement  String     "center"         1}
@@ -823,8 +823,7 @@ proc SelectColor::_SetEntryValue {argVarName var2 op} {
     variable _entryColor
     variable _unsavedSelection
 
-    if {0} {
-    } elseif {[string equal $argVarName ::SelectColor::_unsavedSelection] &&
+    if {[string equal $argVarName ::SelectColor::_unsavedSelection] &&
             [string equal $var2 {}] && [string equal $op "write"]} {
         # OK
     } else {

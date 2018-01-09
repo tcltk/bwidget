@@ -27,6 +27,7 @@
 *styleName:         St&il
 *colorPickerName:   F&arve...
 
+
 ! --- symbolic names of label of PasswdDlg dialog -----------------------------
 
 *loginName:    &Brugernavn
@@ -46,7 +47,6 @@
 *MessageDlg.questionTitle:  Spørgsmål
 *MessageDlg.warningTitle:   Advarsel
 *MessageDlg.errorTitle:     Fejl
-
 
 ! --- resource for PasswdDlg dialog -------------------------------------------
 

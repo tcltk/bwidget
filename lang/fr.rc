@@ -15,6 +15,7 @@
 *yesName:      &Oui
 *noName:       &Non
 
+
 ! --- symbolic names of label of SelectFont dialog ----------------------------
 
 *boldName:          &Gras
@@ -47,24 +48,23 @@
 *MessageDlg.warningTitle:   Attention
 *MessageDlg.errorTitle:     Erreur
 
-
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
 *PasswdDlg.title:  Entrez le login et le mot de passe
 
 ! --- symbolic names of label of SelectColor dialog ----------------------------
 
-*baseColorsName: Base colors
-*userColorsName: User colors
+*baseColorsName: Couleurs de base
+*userColorsName: Couleurs utilisateur
 
-*yourSelectionName: Your Selection
-*colorSelectorsName: Color Selectors
-*hoverHelpName: Hover for help with color selection by:
-*mouseHelpName: Mouse
-*keyboardHelpName: Keyboard
+*yourSelectionName: Votre selection
+*colorSelectorsName: Gamme des Couleurs
+*hoverHelpName: Placez dessus pour afficher aide sur utilisation:
+*mouseHelpName: Sourie
+*keyboardHelpName: Clavier
 
 ! --- dynamic help text for SelectColor dialog.  Lines 75 chars max, split by '\n'.
 
-*mouseHelpTextName: Click or drag the mouse in the Color Selectors to choose a color.\nIf the selected color remains black, regardless of what you\ndo in the left-hand Color Selector (for hue and saturation), check\nthe position of the pointer in the right-hand Color Selector\n(for brightness).\n\nClick one of the "Base colors" to read a value from this palette.\n\nClick one of the "User colors" to read a value from this palette,\nor to write to the palette if the color is blank.  If you then\nuse the Color Selectors to change the color, your choice will be\nwritten to this (User) palette color until you select another\n(Base or User) palette color.
+*mouseHelpTextName: Cliquez ou tirez avec la sourie dans la gamme des couleurs pour choisir une couleur.\nModifie la valeur de saturation a droite, si la couleur reste noir ou blanc.\n\nClickez sur couleurs de base pour choisir une de ces couleurs.\nCliquez sur une couleur d'utilisateur pour la choisir ou la modifier si libre.
 
-*keyboardHelpTextName: Click in the text entry window in the left of the "Your\nSelection" area.\n\nType the color that you want in hexadecimal RGB format.\nWhenever the number of hexadecimal digits is a multiple\nof 3, the color value is valid and will be copied to the\nother parts of the Color Selector.\n\nLeave the text entry window by clicking anywhere else,\nor by pressing the "Escape" or "Return" key.  The text\nentry window will then display the color in 24-bit RGB\nformat, although internally the Color Selector uses\n48-bit colors.\n\nWhen the text entry widget does not have keyboard focus\n(i.e. does not show a cursor), the "Return" and "Escape"\nkeys do the same as the "OK" and "Cancel" buttons,\nrespectively.
+*keyboardHelpTextName: Cliquez dans le champ d'entré dans "votre selection". Entrez la couleur en notation hexadecimal RVB.\nL'entré de couleur est valable, si 3, 6 ou 9 characters sont entrés. La touche Entré valide l'entré et montre la couleur en clair et comme valeur de 24bit.\nSi le point focal n'est pas sur le champ d'entré, les touches Entrée et Échape fonctionnent comme\nles buttons "OK" et "Abadonner".

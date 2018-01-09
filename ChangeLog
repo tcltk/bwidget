@@ -1,13 +1,14 @@
-2017-##-## ########
+2018-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 	
-	* color.tcl: New option -variable allows to give a
-	traceable variable with current user color choice.
+	* color.tcl: New option -command allows to get a callback
+	when the user does an unvalidated choice.
 	New option -background and command SelectColor for
 	window background.
 	TitleFrames, Dynamic help and Aqua native buttons used.
 	Show current choice by highlighting, not focus, to avoid
 	conflict with keyboard traversal.
 	Shows entry widget for numerical color input/output.
+        New option -help to show a help area.
 	Patch by Keith J. Nash [Patch 75101]
 
 2017-08-25 Harald Oehlmann <oehhar@users.sourceforge.net>

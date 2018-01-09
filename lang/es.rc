@@ -16,6 +16,7 @@
 *yesName:      &Sí 
 *noName:       &No
 
+
 ! --- symbolic names of label of SelectFont dialog ----------------------------
 
 *boldName:          &Negrita
@@ -33,6 +34,7 @@
 *loginName:    Nombre de &usuario
 *passwordName: &Contraseña 
 
+
 ! --- resource for SelectFont dialog ------------------------------------------
 
 *SelectFont.title:        Selección de fuente
@@ -46,7 +48,6 @@
 *MessageDlg.questionTitle:  Pregunta
 *MessageDlg.warningTitle:   Atención
 *MessageDlg.errorTitle:     Error
-
 
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
