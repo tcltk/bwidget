@@ -13,14 +13,19 @@
 <DT><I><A HREF="#wso">WIDGET-SPECIFIC OPTIONS</A></I></DT>
 <DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-background">-background</A></td>
 <TD>&nbsp;&nbsp;<A HREF="#-color">-color</A></td>
+</TR>
+<TR>
+<TD>&nbsp;&nbsp;<A HREF="#-command">-command</A></td>
+<TD>&nbsp;&nbsp;<A HREF="#-help">-help</A></td>
+</TR>
+<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-parent">-parent</A></td>
-</TR>
-<TR>
 <TD>&nbsp;&nbsp;<A HREF="#-placement">-placement</A></td>
-<TD>&nbsp;&nbsp;<A HREF="#-title">-title</A></td>
 </TR>
 <TR>
+<TD>&nbsp;&nbsp;<A HREF="#-title">-title</A></td>
 <TD>&nbsp;&nbsp;<A HREF="#-type">-type</A></td>
 </TR>
 </TABLE></DD>
@@ -42,6 +47,10 @@
  <I>placement</I>
  <I>?option value ...?</I>
 </DD>
+<DD>SelectColor::<A HREF="#setbasecolor"><B>setbasecolor</B></A>
+ <I>index</I>
+ <I>color</I>
+</DD>
 <DD>SelectColor::<A HREF="#setcolor"><B>setcolor</B></A>
  <I>index</I>
  <I>color</I>
@@ -57,10 +66,39 @@ as a dialog box or as a menubutton.
 </P>
 <BR><HR WIDTH="50%"><BR>
 <B><A NAME="wso">WIDGET-SPECIFIC OPTIONS</A></B><BR>
+<DL><DT><A NAME="-background"><B>-background</B></A></DT>
+<DD>
+
+Specifies the background color of the widget. 
+ 
+</DD>
+</DL>
 <DL><DT><A NAME="-color"><B>-color</B></A></DT>
 <DD>
 
-Specifies the color value of the widget.
+Specifies the initial color used in the widget's color selectors.  When modifying a
+color that is used in the GUI, the value supplied is typically the existing value of
+that color.
+
+</DD>
+</DL>
+<DL><DT><A NAME="-command"><B>-command</B></A></DT>
+<DD>
+
+Specifies a command to be evaluated, with a color value appended, whenever
+the color selected in the dialog changes.  This facility can be used to modify
+a color in the calling GUI and preview the change before deciding whether or not
+to accept it.  If the user selects "Cancel" in the dialog, the command is called
+a final time to restore the initial color (supplied by option <B>-color</B>) that was
+used before the dialog was opened.
+
+</DD>
+</DL>
+<DL><DT><A NAME="-help"><B>-help</B></A></DT>
+<DD>
+
+This option takes a Boolean value.  If the value is Boolean true, the SelectColor
+dialog will include a panel that offers dynamic help to the user.
 
 </DD>
 </DL>
@@ -150,6 +188,15 @@ placement will be in relation to the parent widget.
 </p>
 
 </DD></DL>
+
+</DD></DL>
+<DL><DT><A NAME="setbasecolor">SelectColor::<B>setbasecolor</B></A>
+ <I>index</I>
+ <I>color</I>
+</DT><DD>
+
+Set the value of user predefined base color at index <I>index</I> to <I>color</I>.
+<I>index</I> must be between 0 and 10.
 
 </DD></DL>
 <DL><DT><A NAME="setcolor">SelectColor::<B>setcolor</B></A>

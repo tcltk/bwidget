@@ -142,7 +142,8 @@ proc DemoDlg::_stddlg { parent } {
 
 proc DemoDlg::_show_color {w} {
     set color [SelectColor::menu $w.color [list below $w] \
-                       -color [$w cget -background]]
+                       -color   [$w cget -background]     \
+                       -command [list $w configure -background]]
     if {[string length $color]} {
         $w configure -background $color
     }

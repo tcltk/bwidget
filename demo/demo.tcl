@@ -246,6 +246,18 @@ proc Demo::main {} {
 
     option add *TitleFrame.l.font {helvetica 11 bold italic}
 
+    if {$::tk_version < 8.5} {
+        set helpFont {helvetica 12}
+    } else {
+        set helpFont {TkDefaultFont 10}
+    }
+
+    DynamicHelp::configure      \
+            -background #FFFFC0 \
+            -foreground #141312 \
+            -padx       3       \
+            -font       $helpFont
+
     wm withdraw .
     wm title . "BWidget demo"
 

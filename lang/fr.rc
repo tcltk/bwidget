@@ -15,6 +15,7 @@
 *yesName:      &Oui
 *noName:       &Non
 
+
 ! --- symbolic names of label of SelectFont dialog ----------------------------
 
 *boldName:          &Gras
@@ -47,13 +48,23 @@
 *MessageDlg.warningTitle:   Attention
 *MessageDlg.errorTitle:     Erreur
 
-
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
 *PasswdDlg.title:  Entrez le login et le mot de passe
 
 ! --- symbolic names of label of SelectColor dialog ----------------------------
 
-*baseColorsName: Base colors
-*userColorsName: User colors
+*baseColorsName: Couleurs de base
+*userColorsName: Couleurs utilisateur
 
+*yourSelectionName: Votre selection
+*colorSelectorsName: Gamme des Couleurs
+*hoverHelpName: Placez dessus pour afficher aide sur utilisation:
+*mouseHelpName: Sourie
+*keyboardHelpName: Clavier
+
+! --- dynamic help text for SelectColor dialog.  Lines 75 chars max, split by '\n'.
+
+*mouseHelpTextName: Cliquez ou tirez avec la sourie dans la gamme des couleurs pour choisir une couleur.\nModifie la valeur de saturation a droite, si la couleur reste noir ou blanc.\n\nClickez sur couleurs de base pour choisir une de ces couleurs.\nCliquez sur une couleur d'utilisateur pour la choisir ou la modifier si libre.
+
+*keyboardHelpTextName: Cliquez dans le champ d'entré dans "votre selection". Entrez la couleur en notation hexadecimal RVB.\nL'entré de couleur est valable, si 3, 6 ou 9 characters sont entrés. La touche Entré valide l'entré et montre la couleur en clair et comme valeur de 24bit.\nSi le point focal n'est pas sur le champ d'entré, les touches Entrée et Échape fonctionnent comme\nles buttons "OK" et "Abadonner".
