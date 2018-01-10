@@ -60,9 +60,6 @@
 
 *yourSelectionName: Su Elección
 *colorSelectorsName: Selectores de Color
-*hoverHelpName: Pase el ratón por encima para obtener ayuda con la selección de color mediante:
-*mouseHelpName: Ratón
-*keyboardHelpName: Teclado
 
 ! --- dynamic help text for SelectColor dialog.  Lines 75 chars max, split by '\n'.
 

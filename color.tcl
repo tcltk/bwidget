@@ -42,7 +42,6 @@ namespace eval SelectColor {
     variable _bgColor
     variable _fgColor
     variable _rounds
-    variable _help
 }
 
 proc SelectColor::create { path args } {
@@ -218,13 +217,13 @@ proc SelectColor::dialog {path args} {
     variable _bgColor
     variable _fgColor
     variable _rounds
-    variable _help
+
 
     Widget::init SelectColor $path:SelectColor $args
     set top   [Dialog::create $path \
                    -title  [Widget::cget $path:SelectColor -title]  \
                    -parent [Widget::cget $path:SelectColor -parent] \
-                   -separator 1 -default 0 -cancel 1 -anchor e]
+                   -separator 0 -default 0 -cancel 1 -anchor e]
     wm resizable $top 0 0
     set dlgf  [$top getframe]
     set fg    [frame $dlgf.fg]
@@ -232,10 +231,15 @@ proc SelectColor::dialog {path args} {
                    base _baseColors "Base colors" \
                    user _userColors "User colors"]
 
-    set _help    [Widget::cget $path:SelectColor -help]
+    set help    [Widget::cget $path:SelectColor -help]
     set _command [Widget::cget $path:SelectColor -command]
     set _bgColor [Widget::cget $path:SelectColor -background]
     set _rounds  {}
+    set mouseHelpText ""
+    if {$help} {
+        append mouseHelpText [subst -nocommands -novariables\
+                [lindex [BWidget::getname mouseHelpText] 0]]
+    }
 
     set count 0
     foreach {type varcol defTitle} $desc {
@@ -260,6 +264,9 @@ proc SelectColor::dialog {path args} {
 
             bind $fround <ButtonPress-1> [list SelectColor::_select_rgb $count]
             bind $fcolor <ButtonPress-1> [list SelectColor::_select_rgb $count]
+            
+            DynamicHelp::add $fround -text $mouseHelpText
+            DynamicHelp::add $fcolor -text $mouseHelpText
 
 	    bind $fround <Double-1> \
 	    	"SelectColor::_select_rgb [list $count]; [list $top] invoke 0"
@@ -296,9 +303,14 @@ proc SelectColor::dialog {path args} {
     set subf2 $fg.vround
     frame $subf2 -highlightthickness 0 -relief sunken -borderwidth 2
     entry $fg.value -width 8 -relief sunken -bd 0 -highlightthickness 0 \
-	-bg white -textvariable ::SelectColor::_entryColor -font $fixedFont
+            -bg white -textvariable ::SelectColor::_entryColor -font $fixedFont
     pack  $subf2    -in $subf  -anchor w -side left
     pack  $fg.value -in $subf2 -anchor w -side left
+    
+    if {$help} {
+        DynamicHelp::add $fg.value -text [subst -nocommands -novariables\
+                    [lindex [BWidget::getname keyboardHelpText] 0]]
+    }
 
     # Remove focus from the entry widget by clicking anywhere...
     bind $top <1> [list ::SelectColor::_CheckFocus %W]
@@ -410,26 +422,6 @@ proc SelectColor::dialog {path args} {
 
     $top add -text [lindex [BWidget::getname ok] 0]
     $top add -text [lindex [BWidget::getname cancel] 0]
-
-    if {$_help} {
-        # Add labels to offer DynamicHelp
-        set helpWords         [lindex [BWidget::getname hoverHelp] 0]
-        set mouseWord       " [lindex [BWidget::getname mouseHelp] 0] "
-        set keyboardWord    " [lindex [BWidget::getname keyboardHelp] 0] "
-        set mouseHelpText     [lindex [BWidget::getname mouseHelpText] 0]
-        set keyboardHelpText  [lindex [BWidget::getname keyboardHelpText] 0]
-        set mouseHelpText     [subst -nocommands -novariables $mouseHelpText]
-        set keyboardHelpText  [subst -nocommands -novariables $keyboardHelpText]
-        frame $top.help
-        label $top.help.0 -text $helpWords    -relief flat   -bd 2
-        label $top.help.1 -text $mouseWord    -relief groove -bd 2
-        label $top.help.2 -text $keyboardWord -relief groove -bd 2
-        pack  $top.help.0 $top.help.1 $top.help.2 \
-                -anchor center -pady 4 -side left -padx 5
-        DynamicHelp::add $top.help.1 -text $mouseHelpText
-        DynamicHelp::add $top.help.2 -text $keyboardHelpText
-        after idle [list pack $top.help]
-    }
 
     # Override background color
     ReColor $path $_bgColor
@@ -701,32 +693,25 @@ proc SelectColor::rgbToHsv {red green blue} {
 # FIXME Ideally this would be called by "$w configure -background $value".
 # Currently a "configure -background" command is passed to Dialog and Widget
 # but does not change SelectColor.
+# HaO: it might also be possible that this is controled by the option data base.
 # ------------------------------------------------------------------------------
 
 proc SelectColor::ReColor {path newColor} {
     variable _bgColor
     variable _rounds
-    variable _help
 
     set _bgColor $newColor
 
-    $path:cmd configure -bg $_bgColor
+    $path configure -bg $_bgColor
 
+    # Use the internal names of the dialog widget - it would be nicer to
+    # use a colored dialog widget.
     foreach child {
-        .sep           .frame          .bbox
-        .frame.fd      .frame.fd.f.f1  .frame.fd.f.f2
-        .frame.fg      .frame.fg.base  .frame.fg.choice
-        .frame.fg.user .frame.fg.round .frame.fg.vround
+        fd      fd.f.f1  fd.f.f2
+        fg      fg.base  fg.choice
+        fg.user fg.round fg.vround
     } {
-        $path$child configure -bg $_bgColor
-    }
-
-    if {$_help} {
-        foreach child {
-            .help    .help.0    .help.1    .help.2
-        } {
-            $path$child configure -bg $_bgColor
-        }
+        $path.frame.$child configure -background $_bgColor
     }
 
     # Special treatment for Aqua native buttons.

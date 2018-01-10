@@ -1,3 +1,7 @@
+2018-01-10 Harald Oehlmann <oehhar@users.sourceforge.net>
+	color.tcl: replace the help widget by balloons bound to the
+	widgets. Ticket [2cc70ce1cb]
+
 2018-01-09 Harald Oehlmann <oehhar@users.sourceforge.net>
 	color.tcl: New option -command allows to get a callback
 	when the user does an unvalidated choice.
