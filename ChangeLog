@@ -1,4 +1,8 @@
 2018-01-10 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.12 tagged ****
+
+2018-01-10 Harald Oehlmann <oehhar@users.sourceforge.net>
 	color.tcl: replace the help widget by balloons bound to the
 	widgets. Ticket [2cc70ce1cb]
 
@@ -20,7 +24,7 @@
 2017-11-03 Harald Oehlmann
 	notebook.tcl (+man,demo): Add possibility to NoteBook
 	to add an image at the right of each tab.
-	Ticket [15e19fe9ec]. Patch by Keith Nash.
+	Ticket [15e19fe9ec]. Patch by Keith J. Nash.
 
 2017-08-25 Harald Oehlmann <oehhar@users.sourceforge.net>
 
