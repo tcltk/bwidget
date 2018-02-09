@@ -31,18 +31,16 @@ Widget::_opt_defaults
 
 # Try to load lang file corresponding to current msgcat locale
 proc Widget::_opt_lang {} {
-    if {0 != [llength [info commands ::msgcat::mcpreferences]]} {
-        set langs [::msgcat::mcpreferences]
-    }
-    lappend langs en
-
-    foreach lang $langs {
-        set l [file join $::BWIDGET::LIBRARY "lang" "$lang.rc"]
-        if {(![catch {file readable $l} result]) && ($result)} {
-            option read $l
-            break
-        }
-    }
+	if {![catch {package require msgcat}]} {
+		# package loaded
+		namespace import ::msgcat::*
+		if {![::msgcat::mcload [file join $::BWIDGET::LIBRARY "lang"]]} {
+			# no files loaded, default to english
+			::msgcat::mclocale en
+			::msgcat::mcload [file join $::BWIDGET::LIBRARY "lang"]
+		}
+		source [file join $::BWIDGET::LIBRARY "lang" "xopt.tcl"]
+	}
 }
 Widget::_opt_lang
 

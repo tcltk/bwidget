@@ -17,7 +17,7 @@ proc DemoDlg::create { nb } {
     set titf4 [TitleFrame $frame.titf4 -text "Other dialog"]
 
     set subf [$titf1 getframe]
-    set cmd  {option read [file join $::BWIDGET::LIBRARY "lang" $DemoDlg::resources.rc]}
+	set cmd  {BWidget::changeLang $DemoDlg::resources}
     set rad1 [radiobutton $subf.rad1 -text "English" \
                   -variable DemoDlg::resources -value en \
                   -command  $cmd]
@@ -27,7 +27,19 @@ proc DemoDlg::create { nb } {
     set rad3 [radiobutton $subf.rad3 -text "German" \
                   -variable DemoDlg::resources -value de \
                   -command  $cmd]
-    pack $rad1 $rad2 $rad3 -side left
+    set rad4 [radiobutton $subf.rad4 -text "Spanish" \
+                  -variable DemoDlg::resources -value es \
+                  -command  $cmd]
+    set rad5 [radiobutton $subf.rad5 -text "Polish" \
+                  -variable DemoDlg::resources -value po \
+                  -command  $cmd]
+    set rad6 [radiobutton $subf.rad6 -text "Norwegian" \
+                  -variable DemoDlg::resources -value no \
+                  -command  $cmd]
+    set rad7 [radiobutton $subf.rad7 -text "Nederlans" \
+                  -variable DemoDlg::resources -value nl \
+                  -command  $cmd]
+    pack $rad1 $rad2 $rad3 $rad4 $rad5 $rad6 $rad7 -side left
 
     _tmpldlg [$titf2 getframe]
     _msgdlg  [$titf3 getframe]
