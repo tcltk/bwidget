@@ -124,6 +124,10 @@ proc Dialog::create { path args } {
         wm protocol $path WM_DELETE_WINDOW [list ButtonBox::invoke $path.bbox $cancel]
     }
     bind $path <Return>  [list ButtonBox::invoke $path.bbox default]
+    # Tk8.5 (TIP158) separated numeric keyboard enter and main keyboard
+    # enter on Unix. So bind for both. This does not harm on Tk8.4 so no
+    # check required. BWidget Ticket [3e31f04367].
+    bind $path <KP_Enter>  [list ButtonBox::invoke $path.bbox default]
 
     return [Widget::create Dialog $path]
 }
