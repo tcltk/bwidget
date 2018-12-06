@@ -1,3 +1,7 @@
+2018-12-06 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.13 tagged ****
+
 2018-11-26 Harald Oehlmann <oehhar@users.sourceforge.net>
 	dialog.c: For Unix, also Bind KP_Enter for default dialog
 	button invokation. Ticket [3e31f04367].
