@@ -1,9 +1,9 @@
 if {[catch {package require Tcl}]} return
 # NOTE: auto_loaded top-level commands shall not be qualified (no leading ::)
 # but all others should.  See auto_qualify for details.
-package ifneeded BWidget 1.9.12 "\
+package ifneeded BWidget 1.9.13 "\
     package require Tk 8.1.1;\
-    [list tclPkgSetup $dir BWidget 1.9.12 {
+    [list tclPkgSetup $dir BWidget 1.9.13 {
 	{arrow.tcl       source {ArrowButton ::ArrowButton::create ::ArrowButton::use}}
 	{labelframe.tcl  source {LabelFrame ::LabelFrame::create ::LabelFrame::use}}
 	{labelentry.tcl  source {LabelEntry ::LabelEntry::create ::LabelEntry::use}}
