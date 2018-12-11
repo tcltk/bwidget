@@ -1,3 +1,8 @@
+2018-12-11 Harald Oehlmann <oehhar@users.sourceforge.net>
+	scrollframe.tcl: use Tk8.7 TIP 518 virtual event
+	<<NoManagedChild>> to resize client frame to 1x1 when
+	last child is unmapped.
+
 2018-12-06 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.13 tagged ****

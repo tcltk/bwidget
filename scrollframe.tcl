@@ -98,6 +98,11 @@ proc ScrollableFrame::create { path args } {
     bind $frame <Map> \
         [list ScrollableFrame::_frameConfigure $canvas]
 
+    # Tk 8.7/TIP518 allows to get an event when the last child is removed.
+    # In this case, we should resize to 1x1 pixel.
+    bind $frame <<NoManagedChild>>\
+            [list ScrollableFrame::_frameNoManagedChild $frame]
+    
     bindtags $path [list $path BwScrollableFrame [winfo toplevel $path] all]
 
     return [Widget::create ScrollableFrame $path]
@@ -253,4 +258,15 @@ proc ScrollableFrame::_frameConfigure {canvas} {
     set width  [_max [winfo width  $canvas.frame] [winfo width  $canvas]]
 
     $canvas:cmd configure -scrollregion [list 0 0 $width $height]
+}
+
+
+# ----------------------------------------------------------------------------
+#  Command ScrollableFrame::_frameNoManagedChild
+# ----------------------------------------------------------------------------
+proc ScrollableFrame::_frameNoManagedChild {frame} {
+    # There are no childs mapped any more, so resize frame to 1x1
+    $frame configure -width 1 -height 1
+    # Do not fix size, so set values to 0
+    $frame configure -width 0 -height 0
 }
