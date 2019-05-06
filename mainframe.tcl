@@ -528,11 +528,16 @@ proc MainFrame::_destroy { path } {
 # ----------------------------------------------------------------------------
 #  Command MainFrame::_create_menubar
 # ----------------------------------------------------------------------------
-proc MainFrame::_create_menubar { path descmenu } {
+# For Android, a menubutton is more appropriate.
+# To support this, the menubutton widget may be passed as 3rd
+# parameter.
+proc MainFrame::_create_menubar { path descmenu {top ""} } {
     variable _widget
     global    tcl_platform
 
-    set top $_widget($path,top)
+    if {![string length $top]} {
+        set top $_widget($path,top)
+    }
 
     foreach {v x} {mbfnt -menubarfont mefnt -menuentryfont} {
 	if {[string length [Widget::getoption $path $x]]} {
