@@ -5,7 +5,9 @@
 	The mainframe may be initialized with "- menu {}".
 	Then, the menubutton may be created and the menu may
 	by added by:
-	MainFrame::_create_menubar .mf $mitems $menubutton
+	MainFrame::_create_menubar .mf $mitems $menubutton.
+	Allow to skip a main menu level by empty menu label.
+	Purpose: support commands/checkboxes at first level.
 
 2018-12-11 Harald Oehlmann <oehhar@users.sourceforge.net>
 	scrollframe.tcl: use Tk8.7 TIP 518 virtual event

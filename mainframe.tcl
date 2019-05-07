@@ -559,31 +559,40 @@ proc MainFrame::_create_menubar { path descmenu {top ""} } {
 
     set count 0
     foreach {name tags menuid tearoff entries} $descmenu {
-        set opt  [_parse_name $name]
-        if {[string length $menuid]
-	    && ![info exists _widget($path,menuid,$menuid)] } {
-            # menu has identifier
-	    # we use it for its pathname, to enable special menu entries
-	    # (help, system, ...)
-	    set menu $menubar.$menuid
+        # Check if only one menu with an empty name is given
+        # In this case, remove the top level menu item
+        # This allows to also have checkboxes and commands at the top level.
+        if {![string length $name] && 5 == [llength $descmenu]} {
+            # A single namesless menu - skip the first level to allow other
+            # than cascade as first level.
+            set menu $menubar
         } else {
-	    set menu $menubar.menu$count
-	}
-        eval [list $menubar add cascade] $opt [list -menu $menu]
-        eval [list menu $menu -tearoff $tearoff] $menuopts $mefnt
-        foreach tag $tags {
-            lappend _widget($path,tags,$tag) $menubar $count
-	    # ericm@scriptics:  Add a tagstate tracker
-	    if { ![info exists _widget($path,tagstate,$tag)] } {
-		set _widget($path,tagstate,$tag) 1
-	    }
-        }
-	# ericm@scriptics:  Add mapping from menu items to tags
-	set _widget($path,menutags,[list $menubar $count]) $tags
+            set opt  [_parse_name $name]
+            if {[string length $menuid]
+                    && ![info exists _widget($path,menuid,$menuid)] } {
+                # menu has identifier
+                # we use it for its pathname, to enable special menu entries
+                # (help, system, ...)
+                set menu $menubar.$menuid
+            } else {
+                set menu $menubar.menu$count
+            }
+            eval [list $menubar add cascade] $opt [list -menu $menu]
+            eval [list menu $menu -tearoff $tearoff] $menuopts $mefnt
+            foreach tag $tags {
+                lappend _widget($path,tags,$tag) $menubar $count
+                # ericm@scriptics:  Add a tagstate tracker
+                if { ![info exists _widget($path,tagstate,$tag)] } {
+                    set _widget($path,tagstate,$tag) 1
+                }
+            }
+            # ericm@scriptics:  Add mapping from menu items to tags
+            set _widget($path,menutags,[list $menubar $count]) $tags
 
-        if { [string length $menuid] } {
-            # menu has identifier
-            set _widget($path,menuid,$menuid) $menu
+            if { [string length $menuid] } {
+                # menu has identifier
+                set _widget($path,menuid,$menuid) $menu
+            }
         }
         _create_entries $path $menu $menuopts $entries
         incr count
