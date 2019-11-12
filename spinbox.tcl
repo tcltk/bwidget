@@ -39,13 +39,24 @@ namespace eval SpinBox {
     }
 
     Widget::addmap SpinBox "" :cmd {-background {}}
-    Widget::addmap SpinBox ArrowButton .arrup {
-        -foreground {} -background {} -disabledforeground {} -state {} \
-		-repeatinterval {} -repeatdelay {}
-    }
-    Widget::addmap SpinBox ArrowButton .arrdn {
-        -foreground {} -background {} -disabledforeground {} -state {} \
-		-repeatinterval {} -repeatdelay {}
+    if {$::Widget::_theme} {
+        Widget::addmap SpinBox ArrowButton .arrup {
+                -foreground {} -background {} -state {} \
+                -repeatinterval {} -repeatdelay {}
+        }
+        Widget::addmap SpinBox ArrowButton .arrdn {
+                -foreground {} -background {} -state {} \
+                -repeatinterval {} -repeatdelay {}
+        }
+    } else {
+        Widget::addmap SpinBox ArrowButton .arrup {
+                -foreground {} -background {} -disabledforeground {} -state {} \
+                -repeatinterval {} -repeatdelay {}
+        }
+        Widget::addmap SpinBox ArrowButton .arrdn {
+                -foreground {} -background {} -disabledforeground {} -state {} \
+                -repeatinterval {} -repeatdelay {}
+        }
     }
 
     ::bind SpinBox <FocusIn> [list after idle {BWidget::refocus %W %W.e}]
@@ -65,7 +76,11 @@ proc SpinBox::create { path args } {
 	[list -highlightthickness 0 -takefocus 0 -class SpinBox]
     Widget::initFromODB SpinBox $path $maps(SpinBox)
 
-    set entry [eval [list Entry::create $path.e] $maps(.e) -relief flat -bd 0]
+    if {$Widget::_theme} {
+        set entry [eval [list Entry::create $path.e] $maps(.e)]
+    } else {
+        set entry [eval [list Entry::create $path.e] $maps(.e) -relief flat -bd 0]
+    }
     bindtags $path.e [linsert [bindtags $path.e] 1 SpinBoxEntry]
 
     set farr   [frame $path.farr -relief flat -bd 0 -highlightthickness 0]
