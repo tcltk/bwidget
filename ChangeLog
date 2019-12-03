@@ -1,3 +1,7 @@
+2019-12-03 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.14 tagged ****
+
 2019-11-12 Harald Oehlmann <oehhar@users.sourceforge.net>
 	spinbox.tcl: fix error about unsupported option
 	-disabledforeground when using themed widgets.
