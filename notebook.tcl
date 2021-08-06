@@ -101,6 +101,7 @@ namespace eval NoteBook {
 
     bind NoteBook <Configure> [list NoteBook::_resize  %W]
     bind NoteBook <Destroy>   [list NoteBook::_destroy %W]
+    bind NoteBook <<TkWorldChanged>> [list NoteBook::_worldchanged  %W %d]
 }
 
 
@@ -1284,3 +1285,18 @@ proc NoteBook::_set_help { path page } {
 proc NoteBook::_get_page_name { path {item current} {tagindex end-1} } {
     return [string range [lindex [$path.c gettags $item] $tagindex] 2 end]
 }
+
+# -----------------------------------------------------------------------------
+#  Command NoteBook::_worldchanged
+# -----------------------------------------------------------------------------
+proc NoteBook::_worldchanged { path type} {
+    # Check if font changed
+    if {$type == "FontChanged"} {
+        # The tabs are redraws, as the font of the labels may have changed in
+        # size. Note: the following operations are the same as "configure -font"
+        _compute_height $path
+        _compute_width $path
+        _redraw $path
+    }
+}
+
