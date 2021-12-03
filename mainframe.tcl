@@ -202,6 +202,7 @@ proc MainFrame::create { path args } {
     }
 
     bind $path <Destroy> [list MainFrame::_destroy %W]
+    bind $path <<TkWorldChanged>> [list MainFrame::_world_changed  %W %d]
 
     return [Widget::create MainFrame $path]
 }
@@ -290,15 +291,11 @@ proc MainFrame::configure { path args } {
 	    eval [list $indic configure] $sbfnt
 	}
 	eval [list $path.status.label configure] $sbfnt
-	$path.status configure -height [winfo reqheight $path.status.label]
-
-	$path.status.prg configure \
-		-height [expr {[winfo reqheight $path.status.label]-2}]
+        _evaluate_status_height $path
     }
 
     return $res
 }
-
 
 # ----------------------------------------------------------------------------
 #  Command MainFrame::cget
@@ -524,6 +521,28 @@ proc MainFrame::_destroy { path } {
     }
 }
 
+# -----------------------------------------------------------------------------
+#  Command MainFrame::_world_changed
+# -----------------------------------------------------------------------------
+proc MainFrame::_world_changed { path type} {
+    # Check if font changed
+    if {$type == "FontChanged"} {
+        _evaluate_status_height $path
+    }
+}
+
+# -----------------------------------------------------------------------------
+#  Command MainFrame::_evaluate_status_height
+# -----------------------------------------------------------------------------
+# Change the status bar height in dependence of the status bar font.
+# This is used on configure -statusfont and on world change, where the font
+# height may also change.
+proc MainFrame::_evaluate_status_height {path} {
+    $path.status configure -height [winfo reqheight $path.status.label]
+
+    $path.status.prg configure \
+            -height [expr {[winfo reqheight $path.status.label]-2}]
+}
 
 # ----------------------------------------------------------------------------
 #  Command MainFrame::_create_menubar
