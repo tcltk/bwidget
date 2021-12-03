@@ -1,4 +1,4 @@
-BWidget ToolKit 1.9.0				July 2009
+BWidget ToolKit 1.9.15				December 2021
 Copyright (c) 1998-1999 UNIFIX.
 Copyright (c) 2001-2002 ActiveState Corp. 
 

@@ -1,4 +1,8 @@
 2021-12-03 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.15 tagged ****
+
+2021-12-03 Harald Oehlmann <oehhar@users.sourceforge.net>
 	mainframe.tcl: Recalculate status bar height if the
 	text size is changed by a change of a used named font.
 	Ticket [acbd67752a]
