@@ -369,7 +369,7 @@ proc Widget::declare { class optlist } {
             continue
         }
 
-        # retreive default value for TkResource
+        # retrieve default value for TkResource
         if { [string equal $type "TkResource"] } {
             set tkwidget [lindex $arg 0]
             set realopt  [lindex $arg 1]
