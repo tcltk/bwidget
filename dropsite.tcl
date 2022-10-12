@@ -443,6 +443,11 @@ proc DropSite::_release { X Y } {
     if { $_status & 1 } {
         upvar \#0 DropSite::$_target drop
 
+        # Ticket [1ef1f56cd1] wke/amc 2022-10-12
+        # Prevent motion events to be handled as
+        # drop events when handler calls update and causes pending
+        # motion events to fire.
+        set _status [expr {$_status & ~1}];
         set res [uplevel \#0 $drop(dropcmd) [list $_target $_source $X $Y $_curop $_type $_data]]
         DragSite::_end_drag $_source $_target $drop($_type,ops,$_curop) $_type $_data $res
     } else {
