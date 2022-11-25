@@ -1,3 +1,7 @@
+2022-12-25 Harald Oehlmann <oehhar@users.sourceforge.net>
+
+	**** BWidget 1.9.16 tagged ****
+
 2022-10-12 Wolfgang Kechel <wolfgang.kechel@prs.de>
 	dropsite.tcl: Prevent multiple drops, when movement
 	while drop is processed. Ticket  [1ef1f56cd1]
