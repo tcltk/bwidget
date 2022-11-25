@@ -3,7 +3,7 @@ if {[catch {package require Tcl}]} return
 # but all others should.  See auto_qualify for details.
 package ifneeded BWidget 1.9.16 "\
     package require Tk 8.1.1;\
-    [list tclPkgSetup $dir BWidget 1.9.15 {
+    [list tclPkgSetup $dir BWidget 1.9.16 {
 	{arrow.tcl       source {ArrowButton ::ArrowButton::create ::ArrowButton::use}}
 	{labelframe.tcl  source {LabelFrame ::LabelFrame::create ::LabelFrame::use}}
 	{labelentry.tcl  source {LabelEntry ::LabelEntry::create ::LabelEntry::use}}
