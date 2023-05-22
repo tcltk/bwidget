@@ -1,4 +1,13 @@
 2023-05-22 Harald Oehlmann <oehhar@users.sourceforge.net>
+	TCL9.0/Tk8.7 compatibility issues found by Paul Obermeier.
+	https://wiki.tcl-lang.org/page/Porting+extensions+to+Tcl+9
+	* dropsite.tcl: Replaced "$tcl_platform" with "$::tcl_platform"
+	  in namespaces.
+	* widget.tcl: Replaced "package require Tcl 8.1.1" with
+	  "package require Tcl 8.1.1-".
+	Ticket [1bee17b353] 
+
+2023-05-22 Harald Oehlmann <oehhar@users.sourceforge.net>
 	tree.tcl: Bug: node names with leading colons gave error.
 	The node name solution was changed, that ":" is now
 	substituded by "\5", and not "::". Ticket [d075175ade].

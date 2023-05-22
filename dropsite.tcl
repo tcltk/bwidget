@@ -55,7 +55,7 @@ namespace eval DropSite {
         ops,link    1
     }
 
-    if { $tcl_platform(platform) == "unix" } {
+    if { $::tcl_platform(platform) == "unix" } {
         set _tabops(mod,alt) 8
     } else {
         set _tabops(mod,alt) 16
@@ -73,7 +73,7 @@ namespace eval DropSite {
     bind DragTop <KeyPress-Shift_R>     {DropSite::_update_operation [expr %s | 1]}
     bind DragTop <KeyPress-Control_L>   {DropSite::_update_operation [expr %s | 4]}
     bind DragTop <KeyPress-Control_R>   {DropSite::_update_operation [expr %s | 4]}
-    if { $tcl_platform(platform) == "unix" } {
+    if { $::tcl_platform(platform) == "unix" } {
         bind DragTop <KeyPress-Alt_L>       {DropSite::_update_operation [expr %s | 8]}
         bind DragTop <KeyPress-Alt_R>       {DropSite::_update_operation [expr %s | 8]}
     } else {
@@ -85,7 +85,7 @@ namespace eval DropSite {
     bind DragTop <KeyRelease-Shift_R>   {DropSite::_update_operation [expr %s & ~1]}
     bind DragTop <KeyRelease-Control_L> {DropSite::_update_operation [expr %s & ~4]}
     bind DragTop <KeyRelease-Control_R> {DropSite::_update_operation [expr %s & ~4]}
-    if { $tcl_platform(platform) == "unix" } {
+    if { $::tcl_platform(platform) == "unix" } {
         bind DragTop <KeyRelease-Alt_L>     {DropSite::_update_operation [expr %s & ~8]}
         bind DragTop <KeyRelease-Alt_R>     {DropSite::_update_operation [expr %s & ~8]}
     } else {

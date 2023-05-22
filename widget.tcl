@@ -56,7 +56,7 @@
 # 4. create subwidgets
 
 # Uses newer string operations
-package require Tcl 8.1.1
+package require Tcl 8.1.1-
 
 namespace eval Widget {
     variable _optiontype
