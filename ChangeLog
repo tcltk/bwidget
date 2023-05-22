@@ -1,3 +1,9 @@
+2023-05-22 Harald Oehlmann <oehhar@users.sourceforge.net>
+	tree.tcl: Bug: node names with leading colons gave error.
+	The node name solution was changed, that ":" is now
+	substituded by "\5", and not "::". Ticket [d075175ade].
+	Thanks to Rolf Ade for the ticket.
+
 2022-12-25 Harald Oehlmann <oehhar@users.sourceforge.net>
 
 	**** BWidget 1.9.16 tagged ****

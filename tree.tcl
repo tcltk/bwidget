@@ -2215,13 +2215,13 @@ proc Tree::_mouse_select { path cmd args } {
 
 proc Tree::_node_name { path node } {
     # Make sure node names are safe as tags and variable names
-    set map [list & \1 | \2 ^ \3 ! \4 :: \5]
+    set map [list & \1 | \2 ^ \3 ! \4 : \5]
     return  [string map $map $node]
 }
 
 proc Tree::_node_name_rev { path node } {
     # Allow reverse interpretation of node names
-    set map [list \1 & \2 | \3 ^ \4 ! \5 ::]
+    set map [list \1 & \2 | \3 ^ \4 ! \5 :]
     return  [string map $map $node]
 }
 

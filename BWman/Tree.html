@@ -486,10 +486,14 @@ Specifies the desired width for the tree in units of 8 pixels.
 <B><A NAME="nodes">NODE NAMES</A></B><BR>
 <p>
 Certain special characters in node names are automatically substituted
-by the tree during operation.  These characters are <b>&amp; | ^ !</b>.
-They are all substituted with a <b>_</b> character.  This is only to
-avoid errors because the characters are special to the tree widget.
+by the tree during operation.  These characters are <b>&amp; | ^ ! :</b>.
+They are internally substituted by non printable characters \1 to \5.
+This is only to avoid errors because the characters are special to the tree widget.
+In consequence, the characters \1 to \5 are not unique in node names and should be avoided.
 </p>
+<p>Note: until BWidget 1.9.16, a double colon ("::") was substituded by \5 and the
+single colon (":") lead to an error. This change is incompatible in the sense, that
+the generated node name changed between the versions.
 
 <B><A NAME="wc">WIDGET COMMAND</A></B><BR>
 <DL><DT><A NAME="bindArea"><I>pathName</I> <B>bindArea</B></A>
