@@ -30,7 +30,7 @@
 ! --- symbolic names of label of PasswdDlg dialog -----------------------------
 
 *loginName:    &Login
-*passwordName: &Password
+*passwordName: &Passwort
 
 
 ! --- resource for SelectFont dialog ------------------------------------------
@@ -50,7 +50,7 @@
 
 ! --- resource for PasswdDlg dialog -------------------------------------------
 
-*PasswdDlg.title:  Enter login and password
+*PasswdDlg.title:  Login und Passwort eingeben
 
 ! --- symbolic names of label of SelectColor dialog ----------------------------
 
