@@ -22,7 +22,7 @@ namespace eval Demo {
     cd $pwd
 
     foreach script {
-	manager.tcl basic.tcl select.tcl dnd.tcl tree.tcl tmpldlg.tcl
+	manager.tcl basic.tcl select.tcl dnd.tcl tree.tcl tmpldlg.tcl calendar.tcl
     } {
 	namespace inscope :: source $DEMODIR/$script
     }
@@ -149,6 +149,9 @@ proc Demo::create { } {
     set prgtext   "Creating Tree..."
     incr prgindic
     set f5 [DemoTree::create $notebook]
+    set prgtext   "Creating Calendar..."
+    incr prgindic
+    set f6 [DemoCalendar::create $notebook]
 
     foreach page [$notebook pages] {
         $notebook itemconfigure $page \

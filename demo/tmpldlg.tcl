@@ -15,6 +15,7 @@ proc DemoDlg::create { nb } {
     set titf2 [TitleFrame $frame.titf2 -text "Template Dialog"]
     set titf3 [TitleFrame $frame.titf3 -text "Message Dialog"]
     set titf4 [TitleFrame $frame.titf4 -text "Other dialog"]
+    set titf5 [TitleFrame $frame.titf5 -text "Calendars"]
 
     set subf [$titf1 getframe]
     set cmd  {option read [file join $::BWIDGET::LIBRARY "lang" $DemoDlg::resources.rc]}
@@ -32,9 +33,10 @@ proc DemoDlg::create { nb } {
     _tmpldlg [$titf2 getframe]
     _msgdlg  [$titf3 getframe]
     _stddlg  [$titf4 getframe]
+    _caldlg  [$titf5 getframe]
 
     pack $titf1 -fill x -pady 2 -padx 2
-    pack $titf4 -side bottom -fill x -pady 2 -padx 2
+    pack $titf4 $titf5 -side bottom -fill x -pady 2 -padx 2
     pack $titf2 $titf3 -side left -padx 2 -fill both -expand yes
 }
 
@@ -213,3 +215,18 @@ proc DemoDlg::_show_passdlg { } {
     PasswdDlg .passwd -parent .
 }
 
+
+proc DemoDlg::_caldlg { parent } {
+
+    set but0  [button $parent.but0 \
+                   -text "Single date" \
+                   -command "DemoCalendar::pickSingleDate $parent.but0cal"]
+    set but1  [button $parent.but1 \
+                   -text    "Multiple dates" \
+                   -command "DemoCalendar::pickMultipleDates $parent.but1cal"]
+    set but2  [button $parent.but2 \
+                   -text    "Colorful date" \
+                   -command "DemoCalendar::pickColorfulDate $parent.but2cal"]
+
+    pack $but0 $but1 $but2 -side left -padx 5 -anchor w
+}

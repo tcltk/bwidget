@@ -38,6 +38,7 @@ package ifneeded BWidget 1.10.1 "\
 	{messagedlg.tcl  source {MessageDlg ::MessageDlg::create ::MessageDlg::use}}
 	{font.tcl        source {SelectFont ::SelectFont::create ::SelectFont::use ::SelectFont::loadfont}}
 	{wizard.tcl      source {Wizard ::Wizard::create ::Wizard::use SimpleWizard ClassicWizard}}
+	{calendar.tcl    source {Calendar Calendar::create Calendar::use}}
 	{xpm2image.tcl   source {xpm-to-image}}
     }]; \
     [list namespace eval ::BWIDGET {}]; \
