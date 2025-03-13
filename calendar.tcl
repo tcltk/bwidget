@@ -7,6 +7,21 @@
 #   for the PgAccess project www.pgaccess.org
 #   (lots of work needs to be done to get the embedded widget
 #   method working, right now its just a simple dialog)
+#
+#   Enhanced for other languages by adding 2 options -months
+#   and -buttonnames; realize embedding in frame in main window;
+#   and corrected some lines (Thomas Wunderlich, 2025-03-13).
+#
+#   Known problems:
+#    1. Old context data still exists after destroy a calendar
+#    2. Some combinations of options are not useful
+#       (Which order of precedence to overwrite?)
+#    3. Embedding in a toplevel other than main don't work yet
+#    4. Option -startday has to be in English names (see Enum)!
+#    5. BWidget in themed mode using ttk was not checked
+#       (options redirecting to -font don't work in version 1.9.8)
+#    6. Some data could be centralized for less memory usage
+#    7. Unkown: How and when to destroy an embedded calendar?
 #==========================================================
 # Index of commands:
 #   Public commands
@@ -22,6 +37,7 @@ namespace eval Calendar {
     Widget::declare Calendar {
         {-background        TkResource  ""          0 "label -background"}
         {-backwardimage     String      ""          0}
+        {-buttonnames       String      "OK Cancel" 0}
         {-currentdatefont   TkResource  ""          0 "label -font"}
         {-datefont          TkResource  ""          0 "label -font"}
         {-daybackground     TkResource  ""          0 "label -background"}
@@ -34,6 +50,7 @@ namespace eval Calendar {
         {-highlightdaycolor      TkResource "" 0 "label -highlightcolor"}
         {-highlightdaythickness  TkResource "" 0 "label -highlightthickness"}
         {-highlightshowdate      TkResource "" 0 "label -highlightbackground"}
+        {-months            String      "January February March April May June July August September October November December" 0}
         {-multipleselection Int         1           0 "%d >= 0"}
         {-parent            String      ""          0}
         {-selectdates       String      ""          0}
@@ -62,6 +79,8 @@ namespace eval Calendar {
 #
 # Results:
 #   returns a sorted list of all selected dates
+#   Using option -type embedded the name of the variable
+#   holding the (unsorted) list is returned.
 #----------------------------------------------------------
 #
 proc Calendar::create { path args } {
@@ -70,6 +89,18 @@ proc Calendar::create { path args } {
     upvar 0  $path data
 
     set data(dotw) "sunday monday tuesday wednesday thursday friday saturday"
+    set data(backmonth,0) "January"
+    set data(backmonth,1) "February"
+    set data(backmonth,2) "March"
+    set data(backmonth,3) "April"
+    set data(backmonth,4) "May"
+    set data(backmonth,5) "June"
+    set data(backmonth,6) "July"
+    set data(backmonth,7) "August"
+    set data(backmonth,8) "September"
+    set data(backmonth,9) "October"
+    set data(backmonth,10) "November"
+    set data(backmonth,11) "December"
 
     Widget::init Calendar "$path#Calendar" $args
 
@@ -89,36 +120,27 @@ proc Calendar::create { path args } {
         $fr configure -relief flat
     }
 
+    set months [split [Widget::cget "$path#Calendar" -months]]
+
+    set opts [list highlightshowdate selectthickness currentdatefont \
+        datefont dayfont daybackground highlightdaybackground \
+        highlightdaycolor highlightdaythickness weekdaybackground \
+        weekendbackground background titlefont backwardimage \
+        forwardimage foreground multipleselection type showdate]
+    foreach opt $opts {
+        set data($opt) [Widget::cget "$path#Calendar" -$opt]
+    }
     # make it easier to know what month/year we are on
-    set data(showdate) [Widget::cget "$path#Calendar" -showdate]
     if {$data(showdate)==""} {
         set data(showdate) [clock seconds]
     } else {
         set data(showdate) [clock scan $data(showdate)]
     }
-    set data(showmonth) [clock format $data(showdate) -format %B]
+    set data(showmonthnr) [expr {[string trim [clock format $data(showdate) -format %N]]-1}]
+    set data(showmonth) [lindex $months $data(showmonthnr)]
     set data(showyear) [clock format $data(showdate) -format %Y]
     set data(showday) [clock format $data(showdate) -format %d]
     set data(showdate) [clock format $data(showdate) -format "%e-%B-%Y"]
-    set data(highlightshowdate) [Widget::cget "$path#Calendar" -highlightshowdate]
-
-    set data(selectthickness) [Widget::cget "$path#Calendar" -selectthickness]
-    set data(currentdatafont) [Widget::cget "$path#Calendar" -currentdatefont]
-    set data(datefont) [Widget::cget "$path#Calendar" -datefont]
-    set data(dayfont) [Widget::cget "$path#Calendar" -dayfont]
-    set data(daybackground) [Widget::cget "$path#Calendar" -daybackground]
-    set data(highlightdaybackground) [Widget::cget "$path#Calendar" -highlightdaybackground]
-    set data(highlightdaycolor) [Widget::cget "$path#Calendar" -highlightdaycolor]
-    set data(highlightdaythickness) [Widget::cget "$path#Calendar" -highlightdaythickness]
-    set data(weekdaybackground) [Widget::cget "$path#Calendar" -weekdaybackground]
-    set data(weekendbackground) [Widget::cget "$path#Calendar" -weekendbackground]
-    set data(background) [Widget::cget "$path#Calendar" -background]
-    set data(titlefont) [Widget::cget "$path#Calendar" -titlefont]
-    set data(backwardimage) [Widget::cget "$path#Calendar" -backwardimage]
-    set data(forwardimage) [Widget::cget "$path#Calendar" -forwardimage]
-    set data(foreground) [Widget::cget "$path#Calendar" -foreground]
-    set data(multipleselection) [Widget::cget "$path#Calendar" -multipleselection]
-    set data(type) [Widget::cget "$path#Calendar" -type]
     # lets us pass in multiple pre-selected dates
     set data(selectdates) [list]
     foreach date [split [Widget::cget "$path#Calendar" -selectdates] {, }] {
@@ -143,21 +165,14 @@ proc Calendar::create { path args } {
             -image $data(forwardimage)
     }
 
-    # create a list of full month names
-    set months [list]
-    for {set i 1} {$i <= 12} {incr i} {
-        set yr [clock format [clock seconds] -format %Y]
-        set mo [clock format [clock scan "$yr-$i-1"] -format %B]
-        lappend months $mo
-    }
-
     # lets us pick the month
     ComboBox $fr.monthcombo \
         -font $data(titlefont) \
-        -text $data(showmonth) \
+        -text $data(backmonth,$data(showmonthnr)) \
         -textvariable ::Calendar::[subst {$path}](showmonth) \
         -editable 1 \
         -width 16 \
+        -height 12 \
         -values $months \
         -modifycmd [list Calendar::_flipMonth $path 0]
 
@@ -200,10 +215,9 @@ proc Calendar::create { path args } {
     set startday [Widget::cget "$path#Calendar" -startday]
     set data(startdayidx) [lsearch $data(dotw) $startday]
     set days [split [Widget::cget "$path#Calendar" -days]]
-    for {set i $data(startdayidx)} {$i < [expr {$data(startdayidx) + 7}]} {incr i} {
+    for {set i $data(startdayidx)} {$i<($data(startdayidx)+7)} {incr i} {
         set day [lindex $days [expr {$i % 7}]]
-        set someday "_"
-        append someday $day "_1-" $i
+        set someday "_${day}_1-$i"
         Label $fr.$someday \
             -font $data(dayfont) \
             -text $day \
@@ -218,8 +232,7 @@ proc Calendar::create { path args } {
     # draw all the buttons we will use for days of the month
     for {set j 2} {$j < 8} {incr j} {
         for {set i 0} {$i < 7} {incr i} {
-            set btn "_"
-            append btn $i "x" $j
+            set btn "_${i}x$j"
             Button $fr.$btn \
                 -relief flat \
                 -borderwidth $data(selectthickness) \
@@ -238,12 +251,13 @@ proc Calendar::create { path args } {
     # the selection of dates, but only when we are a dialog
     # (not popup or embedded modes)
     if {[string match $data(type) "dialog"]} {
+        set buttonnames [Widget::cget "$path#Calendar" -buttonnames]
         Button $fr.okbtn \
-            -text "OK" \
+            -text [lindex $buttonnames 0] \
             -font $data(titlefont) \
             -command [list destroy $path]
         Button $fr.cancelbtn \
-            -text "Cancel" \
+            -text [lindex $buttonnames 1] \
             -font $data(titlefont) \
             -command [list Calendar::_clearDates $path 1]
         grid $fr.okbtn \
@@ -283,6 +297,14 @@ proc Calendar::create { path args } {
         Dialog::draw $path
         return [lsort -dictionary $data(selectdates)]
     }
+    # We don't know the manager for embedding!
+    # Supported are only pack and grid.
+    if {[catch {pack $path -in [winfo parent $path]}]} {
+        grid $path -in [winfo parent $path]
+    }
+    update idletasks
+    # We deliver the qualified variable name holding the changes
+    return "::Calendar::${path}(selectdates)"
 
 }; # end proc Calendar::create
 
@@ -295,7 +317,7 @@ proc Calendar::create { path args } {
 #
 proc Calendar::configure { path args } {
     return [Widget::configure "$path#Calendar" $args]
-}; #end proc Calendar::configure
+}; # end proc Calendar::configure
 
 
 #----------------------------------------------------------
@@ -343,40 +365,43 @@ proc Calendar::_flipMonth { path flipday_ } {
     }
 
     if {$flipday_ == -1} {
-        set flipday_ "1-$data(showmonth)-$data(showyear)"
+        set flipday_ "1-$data(backmonth,$data(showmonthnr))-$data(showyear)"
         set flipday_ [clock format [clock scan "last month" \
             -base [clock scan $flipday_]] -format "%D"]
     } elseif {$flipday_ == 1} {
-        set flipday_ "1-$data(showmonth)-$data(showyear)"
+        set flipday_ "1-$data(backmonth,$data(showmonthnr))-$data(showyear)"
         set flipday_ [clock format [clock scan "next month" \
             -base [clock scan $flipday_]] -format "%D"]
     } elseif {$flipday_ == 0} {
-        set flipday_ "1-$data(showmonth)-$data(showyear)"
+        set months [split [Widget::cget "$path#Calendar" -months]]
+        set flipday_ "1-$data(backmonth,[lsearch -nocase -exact $months $data(showmonth)])-$data(showyear)"
     }
 
+    set months [split [Widget::cget "$path#Calendar" -months]]
+
     # crunching on some dates to make placement easier below
-    set firstday [clock format [clock scan $flipday_] -format "%m/1/%y"]
+    set firstday [clock format [clock scan $flipday_] -format "%m/1/%Y"]
     set firstdayow [expr {([clock format [clock scan $firstday] -format "%w"]-$data(startdayidx)) % 7}]
-    set lastday [clock format [clock scan "yesterday" -base [clock scan [clock format [clock scan "next month" -base [clock scan $firstday]] -format "%m/1/%y"]]] -format "%D"]
+    set lastday [clock format [clock scan "yesterday" -base [clock scan [clock format [clock scan "next month" -base [clock scan $firstday]] -format "%m/1/%Y"]]] -format "%D"]
     set lastdayom [clock format [clock scan $lastday] -format "%e"]
-    set data(showmonth) [clock format [clock scan $firstday] -format "%B"]
+    set data(showmonthnr) [expr {[string trim [clock format [clock scan $firstday] -format "%N"]]-1}]
+    set data(showmonth) [lindex $months $data(showmonthnr)]
     set data(showyear) [clock format [clock scan $firstday] -format "%Y"]
     set placeday 0
     set todayis [clock format [clock seconds] -format "%e-%B-%Y"]
 
     for {set j 2} {$j < 8} {incr j} {
         for {set i 0} {$i < 7} {incr i} {
-            set btn "_"
-            append btn $i "x" $j
+            set btn "_${i}x$j"
             if {!$placeday && $firstdayow == $i} {
                 set placeday 1
             }
             if {$placeday && $placeday <= $lastdayom} {
-                set curday "$placeday-$data(showmonth)-$data(showyear)"
+                set curday "$placeday-$data(backmonth,$data(showmonthnr))-$data(showyear)"
                 # if this is today, use the right font
                 if {[string match [string trim $curday] [string trim $todayis]]} {
                     $fr.$btn configure \
-                        -font $data(currentdatafont)
+                        -font $data(currentdatefont)
                 } else {
                     $fr.$btn configure \
                         -font $data(datefont)
@@ -458,6 +483,11 @@ proc Calendar::_flipMonth { path flipday_ } {
 proc Calendar::_selectDate { btnpath clkd_ refresh_ } {
 
     set path [winfo toplevel $btnpath]
+    # Check for Embedding,
+    # Embedding in toplevels NOT supported yet!
+    if {$path=="."} {
+        set path [winfo parent $btnpath]
+    }
     variable $path
     upvar 0  $path data
 

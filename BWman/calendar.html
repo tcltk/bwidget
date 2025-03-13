@@ -1,233 +1,236 @@
-<HTML>
-<HEAD><TITLE>Calendar</TITLE></HEAD>
-<BODY BGCOLOR=white>
-<DL><DT><I><A HREF="#descr">NAME</A></I></DT>
-<DD><B>Calendar</B>
+<html>
+<head><title>Calendar</title></head>
+<body alink="#800080" bgcolor="#ffffff" text="#000000" link="#000080" vlink="#800000">
+<!--
+CHANGES:
+2004 - initial version
+2025 - 1. Correct HTML structure, syntax, links etc.
+       2. Describe option -type 'embedded' as new possibility
+       3. Add Documentation for new options -buttonnames and -months
+          for use of other languages
+-->
+<dl><dt><i><a href="#descr">NAME</a></i></dt>
+<dd><b>Calendar</b>
  - Calendar view by month to return selected date(s)
-</DD></DL>
-<DL>
-<DT><I>CREATION</I></DT>
-<DD><A HREF="#descr"><B>Calendar</B></A> <I>pathName</I> ?<I>option value...</I>?</DD>
-</DL>
-<DL>
-<DT><I><A HREF="Dialog.html">OPTIONS from <B>Dialog</B></A></I></DT>
-<DD><TABLE CELLSPACING=0 CELLPADDING=0 BORDER=0>
-<TR>
-<TD>&nbsp;&nbsp;-background or -bg</TD>
-</TR>
-<TR>
-<TD>&nbsp;&nbsp;-parent</TD>
-</TR>
-<TR>
-<TD>&nbsp;&nbsp;-title</TD>
-</TR>
-</TABLE></DD>
-</DL>
-<DL>
-<DT><I><A HREF="#wso">WIDGET-SPECIFIC OPTIONS</A></I></DT>
-<DD><TABLE CELLSPACING=0 CELLSPACING=0 BORDER=0>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-background">-background</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-backwardimage">-backwardimage</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-currentdatefont">-currentdatefont</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-datefont">-datefont</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-daybackground">-daybackground</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-dayfont">-dayfont</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-days">-days</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-forwardimage">-forwardimage</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-foreground">-foreground</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-height">-height</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-highlightdaybackground">-highlightdaybackground</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-highlightdaycolor">-highlightdaycolor</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-highlightdaythickness">-highlightdaythickness</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-highlightshowdate">-highlightshowdate</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-multipleselection">-multipleselection</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-selectdates">-selectdates</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-selectthickness">-selectthickness</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-showdate">-showdate</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-startday">-startday</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-titlefont">-titlefont</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-type">-type</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-weekdaybackground">-weekdaybackground</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-weekendbackground">-weekendbackground</A></TR>
-<TR><TD>&nbsp;&nbsp;<A HREF="#-width">-width</A></TR>
-</TABLE></DD>
-</DL>
-<DL>
-<DT><I><A HREF="#wc">WIDGET COMMAND</A></I></DT>
-<DD><I>none</I>
-</DD>
-</DL>
-<BR><HR WIDTH="100%"><BR>
-<B><A NAME="descr"></A>DESCRIPTION</B><BR>
-<P>
-
+</dd></dl>
+<dl>
+<dt><i>CREATION</i></dt>
+<dd><a href="#descr"><b>Calendar</b></a> <i>pathName</i> ?<i>option value...</i>?</dd>
+</dl>
+<dl>
+<dt><i><a href="Dialog.html">OPTIONS from <b>Dialog</b></a></i></dt>
+<dd><table cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td>&nbsp;&nbsp;-background or -bg</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;-parent</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;-title</td>
+</tr>
+</table></dd>
+</dl>
+<dl>
+<dt><i><a href="#wso">WIDGET-SPECIFIC OPTIONS</a></i></dt>
+<dd><table cellspacing="0" cellpadding="0" border="0">
+<tr><td>&nbsp;&nbsp;<a href="#opt_backwardimage">-backwardimage</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_buttonnames">-buttonnames</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_currentdatefont">-currentdatefont</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_datefont">-datefont</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_daybackground">-daybackground</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_dayfont">-dayfont</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_days">-days</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_foreground">-foreground</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_forwardimage">-forwardimage</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_height">-height</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_highlightdaybackground">-highlightdaybackground</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_highlightdaycolor">-highlightdaycolor</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_highlightdaythickness">-highlightdaythickness</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_highlightshowdate">-highlightshowdate</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_months">-months</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_multipleselection">-multipleselection</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_selectdates">-selectdates</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_selectthickness">-selectthickness</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_showdate">-showdate</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_startday">-startday</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_titlefont">-titlefont</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_type">-type</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_weekdaybackground">-weekdaybackground</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_weekendbackground">-weekendbackground</a></td></tr>
+<tr><td>&nbsp;&nbsp;<a href="#opt_width">-width</a></td></tr>
+</table></dd>
+</dl>
+<dl>
+<dt><i><a name="wc">WIDGET COMMAND</a></i></dt>
+<dd><i>none</i>
+</dd>
+</dl>
+<br><hr width="100%"><br>
+<b><a name="descr"></a>DESCRIPTION</b><br>
+<p>
 Calendar widget enables the user to create a monthly Calendar box.
-The selected date(s) are returned when the widget is destroyed.  The widget is a Dialog, therefore, it cannot be embedded in a frame.  It can be operated as a popup to allow for selecting just one date.
-
-</P>
-<BR><HR WIDTH="50%"><BR>
-<B><A NAME="wso">WIDGET-SPECIFIC OPTIONS</A></B><BR>
-<DL><DT><A NAME="-backwardimage"><B>-backwardimage</B></A></DT>
-<DD>
-
-Specifies an image name to display instead of a less-than sign for selecting previous months.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-currentdatefont"><B>-currentdatefont</B></A></DT>
-<DD>
-
-Specifies a font to use for the <A HREF="#-showdate">-showdate</A>.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-datefont"><B>-datefont</B></A></DT>
-<DD>
-
+The selected date(s) are returned when the widget is destroyed.
+The widget is basically a Dialog, and it can be embedded in an
+existing frame (returning the variable name for the date selection).
+It can be operated as a popup to allow for selecting just one date.
+</p>
+<br><hr width="50%"><br>
+<b><a name="wso">WIDGET-SPECIFIC OPTIONS</a></b><br>
+<dl><dt><a name="opt_backwardimage"><b>-backwardimage</b></a></dt>
+<dd>
+Specifies an image name to display instead of a less-than sign for
+selecting previous months.
+</dd>
+</dl>
+<dl><dt><a name="opt_buttonnames"><b>-buttonnames</b></a></dt>
+<dd>
+Specifies a list of two strings (label's text) for the both buttons
+'OK' and 'Cancel' (in that order) for other languages than English.
+Defaults to <b>&quot;OK Cancel&quot;</b>
+</dd>
+</dl>
+<dl><dt><a name="opt_currentdatefont"><b>-currentdatefont</b></a></dt>
+<dd>
+Specifies a font to use for the <a href="#opt_showdate">-showdate</a>.
+</dd>
+</dl>
+<dl><dt><a name="opt_datefont"><b>-datefont</b></a></dt>
+<dd>
 Specifies a font to use for days other than the current day.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-daybackground"><B>-daybackground</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_daybackground"><b>-daybackground</b></a></dt>
+<dd>
 Specifies a background to use for the colors of the days of the week.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-dayfont"><B>-dayfont</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_dayfont"><b>-dayfont</b></a></dt>
+<dd>
 Specifies a font to use for the names of the days of the week.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-days"><B>-days</B></A></DT>
-<DD>
-
-Specifies a string of whitespace separated abbreviations to use for the days of the week, starting with Sunday.  Defaults to <B>"Su Mo Tu We Th Fr Sa"</B>
-
-</DD>
-</DL>
-<DL><DT><A NAME="-foreground"><B>-foreground</B></A></DT>
-<DD>
-
-Specifies a foreground color to use for the buttons that make up the days of the month.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-forwardimage"><B>-forwardimage</B></A></DT>
-<DD>
-
-Specifies an image name to display instead of a greater-than sign for selecting previous months.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-height"><B>-height</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_days"><b>-days</b></a></dt>
+<dd>
+Specifies a string of whitespace separated abbreviations (list) to
+use for the days of the week, starting with Sunday.
+Defaults to <b>&quot;Su Mo Tu We Th Fr Sa&quot;</b>
+</dd>
+</dl>
+<dl><dt><a name="opt_foreground"><b>-foreground</b></a></dt>
+<dd>
+Specifies a foreground color to use for the buttons that make up the
+days of the month.
+</dd>
+</dl>
+<dl><dt><a name="opt_forwardimage"><b>-forwardimage</b></a></dt>
+<dd>
+Specifies an image name to display instead of a greater-than sign
+for selecting previous months.
+</dd>
+</dl>
+<dl><dt><a name="opt_height"><b>-height</b></a></dt>
+<dd>
 Specifies the height of the Calendar window.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-highlightdaybackground"><B>-highlightdaybackground</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_highlightdaybackground"><b>-highlightdaybackground</b></a></dt>
+<dd>
 Specifies the color to highlight the background of a selected day.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-highlightdaycolor"><B>-highlightdaycolor</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_highlightdaycolor"><b>-highlightdaycolor</b></a></dt>
+<dd>
 Specifies the color to highlight the edges of a selected day.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-highlightdaythickness"><B>-highlightdaythickness</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_highlightdaythickness"><b>-highlightdaythickness</b></a></dt>
+<dd>
 Specifies the thickness of the highlight around a selected day.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-highlightshowdate"><B>-highlightshowdate</B></A></DT>
-<DD>
-
-Specifies the color to highlight the edges of a date to show, either today or the date specified by <A HREF="#-showdate">-showdate</A>.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-multipleselection"><B>-multipleselection</B></A></DT>
-<DD>
-
-Specifies whether or not to allow selecting multiple dates.  When the value is 0, mutlipleselection is off and only single selection is allowed.  When it is 1, multiple selection is on and allows infinite date selection.  Any other value, N, will allow for N selections before returning automatically.  Defaults to <B>1</B>.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-selectdates"><B>-selectdates</B></A></DT>
-<DD>
-
-Specifies a list of pre-selected dates to appear as selected in the Calendar, comma or whitespace separated in any proper Tcl date format.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-selectthickness"><B>-selectthickness</B></A></DT>
-<DD>
-
-Specifies the border width to use for selected dates.  Defaults to <B>3</B>.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-showdate"><B>-showdate</B></A></DT>
-<DD>
-
-Specifies the date to use as the current date for display.  Defaults to today.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-startday"><B>-startday</B></A></DT>
-<DD>
-
-Specifies the name of the day to place in the first column, in effect, what day to start the week on.  Can be <B>sunday, monday, tuesday, wednesday, thursday, friday, saturday</B>.  Defaults to <B>sunday</B>.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-titlefont"><B>-titlefont</B></A></DT>
-<DD>
-
-Specifies font to use for the month, year, and also possibly the previous/next month selectors if no image is defined by <A HREF="#-backwardimage">-backwardimage</A> or <A HREF="#-forwardimage">-forwardimage</A>.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-type"><B>-type</B></A></DT>
-<DD>
-
-Type of the widget, either the default <B>dialog</B> or a <B>popup</B>.  The latter will return immediately after selecting just one date.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-weekdaybackground"><B>-weekdaybackground</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_highlightshowdate"><b>-highlightshowdate</b></a></dt>
+<dd>
+Specifies the color to highlight the edges of a date to show,
+either today or the date specified by <a href="#opt_showdate">-showdate</a>.
+</dd>
+</dl>
+<dl><dt><a name="opt_months"><b>-months</b></a></dt>
+<dd>
+Specifies a list of 12 strings (text) for the names of the
+months of a year, starting with January, for other languages
+than English.
+Defaults to <b>&quot;January February March April May June July
+August September October November December&quot;</b>
+</dd>
+</dl>
+<dl><dt><a name="opt_multipleselection"><b>-multipleselection</b></a></dt>
+<dd>
+Specifies whether or not to allow selecting multiple dates.
+When the value is 0, mutlipleselection is off and only single selection is allowed.
+When it is 1, multiple selection is on and allows infinite date selection.
+Any other value, N, will allow for N selections before returning automatically.
+Defaults to <b>1</b>.
+</dd>
+</dl>
+<dl><dt><a name="opt_selectdates"><b>-selectdates</b></a></dt>
+<dd>
+Specifies a list of pre-selected dates to appear as selected in the Calendar,
+comma or whitespace separated in any proper Tcl date format.
+</dd>
+</dl>
+<dl><dt><a name="opt_selectthickness"><b>-selectthickness</b></a></dt>
+<dd>
+Specifies the border width to use for selected dates.
+Defaults to <b>3</b>.
+</dd>
+</dl>
+<dl><dt><a name="opt_showdate"><b>-showdate</b></a></dt>
+<dd>
+Specifies the date to use as the current date for display.
+Defaults to today.
+</dd>
+</dl>
+<dl><dt><a name="opt_startday"><b>-startday</b></a></dt>
+<dd>
+Specifies the name of the day to place in the first column,
+in effect, what day to start the week on.
+Can be <b>sunday, monday, tuesday, wednesday, thursday, friday, saturday</b>.
+Defaults to <b>sunday</b>.
+</dd>
+</dl>
+<dl><dt><a name="opt_titlefont"><b>-titlefont</b></a></dt>
+<dd>
+Specifies font to use for the month, year, and also possibly the
+previous/next month selectors if no image is defined by
+<a href="#opt_backwardimage">-backwardimage</a> or
+<a href="#opt_forwardimage">-forwardimage</a>.
+</dd>
+</dl>
+<dl><dt><a name="opt_type"><b>-type</b></a></dt>
+<dd>
+Type of the widget, either the default <b>dialog</b>, a <b>popup</b> or
+<b>embedded</b>.
+The <b>popup</b> will return immediately after selecting just one date.
+The <b>embedded</b> will also return immediately after creating the widget,
+returning the value name for the use of getting the result.
+</dd>
+</dl>
+<dl><dt><a name="opt_weekdaybackground"><b>-weekdaybackground</b></a></dt>
+<dd>
 Specifies the color to use as the background for the weekdays.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-weekendbackground"><B>-weekendbackground</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_weekendbackground"><b>-weekendbackground</b></a></dt>
+<dd>
 Specifies the color to use as the background for the weekends.
-
-</DD>
-</DL>
-<DL><DT><A NAME="-width"><B>-width</B></A></DT>
-<DD>
-
+</dd>
+</dl>
+<dl><dt><a name="opt_width"><b>-width</b></a></dt>
+<dd>
 Specifies the width of Calendar.
-
-</DD>
-</DL>
-
-</DD></DL>
-</BODY></HTML>
+</dd>
+</dl>
+<small>Copyright &copy; 2004 Chris Maj<br>
+Copyright &copy; 2025 Th. Wunderlich</small>
+</body></html>
