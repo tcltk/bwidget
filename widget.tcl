@@ -92,7 +92,7 @@ namespace eval Widget {
 #  class      class name of the BWidget
 #  tkwidget   tk widget to include
 #  subpath    subpath to configure
-#  args       additionnal args for included options
+#  args       additional args for included options
 # ----------------------------------------------------------------------------
 proc Widget::tkinclude { class tkwidget subpath args } {
     foreach {cmd lopt} $args {
@@ -137,7 +137,7 @@ proc Widget::tkinclude { class tkwidget subpath args } {
     upvar 0 ${class}::map$subpath submap
     upvar 0 ${class}::optionExports exports
 
-    # create resources informations from tk widget resources
+    # create resources information from tk widget resources
     foreach optdesc [_get_tkwidget_options $tkwidget] {
         set option [lindex $optdesc 0]
         if { (![info exists include] || [info exists include($option)]) &&
@@ -197,7 +197,7 @@ proc Widget::tkinclude { class tkwidget subpath args } {
 #  class    class name of the BWidget
 #  subclass BWidget class to include
 #  subpath  subpath to configure
-#  args     additionnal args for included options
+#  args     additional args for included options
 # ----------------------------------------------------------------------------
 proc Widget::bwinclude { class subclass subpath args } {
     foreach {cmd lopt} $args {
@@ -244,7 +244,7 @@ proc Widget::bwinclude { class subclass subpath args } {
     upvar 0 ${subclass}::opt subclassopt
     upvar 0 ${subclass}::optionExports subexports
 
-    # create resources informations from BWidget resources
+    # create resources information from BWidget resources
     foreach {option optdesc} [array get subclassopt] {
 	set subOption $option
         if { (![info exists include] || [info exists include($option)]) &&

@@ -206,7 +206,7 @@ proc BWidget::XLFDfont { cmd args } {
             set args [lrange $args 1 end]
         }
         default {
-            return -code error "XLFDfont: commande incorrect: $cmd"
+            return -code error "XLFDfont: command incorrect: $cmd"
         }
     }
     set lfont [split $font "-"]
@@ -221,7 +221,7 @@ proc BWidget::XLFDfont { cmd args } {
             -weight  { set index 3 }
             -slant   { set index 4 }
             -size    { set index 7 }
-            default  { return -code error "XLFDfont: option incorrecte: $option" }
+            default  { return -code error "XLFDfont: option incorrect: $option" }
         }
         set lfont [lreplace $lfont $index $index $value]
     }
