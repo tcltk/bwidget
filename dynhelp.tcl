@@ -705,7 +705,7 @@ proc DynamicHelp::_show_help { path w x y } {
         set scrrootx [winfo vrootx .]
         set scrrooty [winfo vrooty .]
         
-        # Increment the required size by the deplacement from the passed point
+        # Increment the required size by the displacement from the passed point
         incr width 8
         incr height 12
         

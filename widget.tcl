@@ -605,7 +605,7 @@ proc Widget::init { class path options } {
 # Bastien Chevreux (bach@mwgdna.com)
 #
 # copyinit performs basically the same job as init, but it uses a
-#  existing template to initialize its values. So, first a perferct copy
+#  existing template to initialize its values. So, first a perfect copy
 #  from the template is made just to be altered by any existing options
 #  afterwards.
 # But this still saves time as the first initialization parsing block is

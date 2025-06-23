@@ -126,21 +126,21 @@ proc ListBox::create { path args } {
 	-takefocus 0
     # For 8.4+ we don't want to inherit the padding
     catch {$path configure -padx 0 -pady 0}
-    # widget informations
+    # widget information
     set data(nrows) -1
 
-    # items informations
+    # items information
     set data(items)    {}
     set data(seeitem)  {}
     set data(selitems) {}
 
-    # update informations
+    # update information
     set data(upd,level)   0
     set data(upd,afterid) ""
     set data(upd,level)   0
     set data(upd,delete)  {}
 
-    # drag and drop informations
+    # drag and drop information
     set data(dnd,scroll)   ""
     set data(dnd,afterid)  ""
     set data(dnd,item)     ""

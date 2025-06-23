@@ -21,7 +21,7 @@ namespace eval Entry {
 
     # Note:  -textvariable is pulled off of the tk entry and put onto the
     # BW Entry so that we avoid the TkResource test for it, which screws up
-    # the existance/non-existance bits of the -textvariable.
+    # the existence/non-existence bits of the -textvariable.
     if {[Widget::theme]} {
 	Widget::tkinclude Entry ttk::entry :cmd \
 	    remove { -state -textvariable }

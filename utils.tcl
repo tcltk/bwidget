@@ -521,7 +521,7 @@ proc BWidget::refocus {container component} {
 ## These mirror tk::(Set|Restore)FocusGrab
 
 # BWidget::SetFocusGrab --
-#   swap out current focus and grab temporarily (for dialogs)
+#   swap out current focus and grab temporarily (for dialogues)
 # Arguments:
 #   grab	new window to grab
 #   focus	window to give focus to
@@ -547,7 +547,7 @@ proc BWidget::SetFocusGrab {grab {focus {}}} {
 }
 
 # BWidget::RestoreFocusGrab --
-#   restore old focus and grab (for dialogs)
+#   restore old focus and grab (for dialogues)
 # Arguments:
 #   grab	window that had taken grab
 #   focus	window that had taken focus

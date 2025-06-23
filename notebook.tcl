@@ -546,7 +546,7 @@ proc NoteBook::_compute_width { path } {
     $path.c itemconfigure $id -font $font
     foreach page $data(pages) {
         $path.c itemconfigure $id -text [Widget::cget $path.f$page -text]
-	# Get the bbox for this text to determine its width, then substract
+	# Get the bbox for this text to determine its width, then subtract
 	# 6 from the width to account for canvas bbox oddness w.r.t. widths of
 	# simple text.
 	foreach {x1 y1 x2 y2} [$path.c bbox $id] break

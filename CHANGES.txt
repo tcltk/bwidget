@@ -4,7 +4,7 @@ BWidget 1.2.1 (07/09/1999)
 CHANGES FROM 1.2 TO 1.2.1
 
   This version is the first patch of 1.2. It does not introduce
-  incompatibilites.
+  incompatibilities.
   This patch include some new requested features, that I think
   can't wait for 1.3:
      - special menu handling (see MainFrame)
@@ -105,7 +105,7 @@ CHANGES FROM 1.1 TO 1.2
     - new command: setmenustate
 
 * DropSite
-    - operations completly reworked
+    - operations completely reworked
     - option -droptypes modified (INCOMPATIBILITY)
     - return code of -dropovercmd modified
       bit 'ok' and bit 'recall' reverted
@@ -144,7 +144,7 @@ CHANGES FROM 1.1 TO 1.2
     - added option -leavecmd on pages
     - option -image implemented
     - new command: move
-    - delete command now accept an optionnal argument specifying 
+    - delete command now accept an optional argument specifying 
       whether the frame of the page should be destroyed or not.
       If not, this frame is reused by insert command for the same page.
 
@@ -161,7 +161,7 @@ CHANGES FROM 1.1 TO 1.2
     - floating point fixed - work needed
 
 * ProgressBar:
-    - now can be incremental or not limited ('unknow-time' processing)
+    - now can be incremental or not limited ('unknown-time' processing)
 
 * Bitmap:
     - xpm image type added with use of xpm-to-image by Roger E. Critchlow Jr.
@@ -174,7 +174,7 @@ CHANGES FROM 1.1 TO 1.2
 INCOMPATIBILITIES
 
   Incompatibilities are very localized, so we hope that it will
-  not be painfull to upgrade to 1.2.
+  not be painful to upgrade to 1.2.
 
 * MainFrame related imcompatibilities
     - Upgrade MainFrame -menu option and change -variable option
@@ -209,7 +209,7 @@ Following widget have been reworked:
     - ListBox items have now a -indent option.
     - insert command modified to look more as a tk
       listbox insert command (see  INCOMPATIBILITIES)
-    - item command added to retreive one or more items
+    - item command added to retrieve one or more items
 
 * Tree:
     - insert command modified to look more as a
@@ -228,7 +228,7 @@ Following widget have been reworked:
 * NoteBook:
     - Pages have now an identifier.
     - insert command modififed (see  INCOMPATIBILITIES)
-    - page command added to retreive one or more pages
+    - page command added to retrieve one or more pages
     - getframe command added
 
 

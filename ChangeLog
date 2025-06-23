@@ -698,7 +698,7 @@
 	[Patch 2807227] by Koen Danckaert (comment)
 	
 	* scrollw.tcl (ScrolledWindow::_set_hscroll, ScrolledWindow::_set_vscroll)
-	Bug corrected: enless loop when both scrollbars where automatically
+	Bug corrected: enldess loop when both scrollbars where automatically
 	mapped and the window size was changed by this action (on linux).
 	Scrollbar unmapping and mapping secured by a locked update [Bug 2783019]
 
@@ -720,7 +720,7 @@
 	Dynamic help baloon was on the main screen, if it touched the border on
 	a windows multi screen configuration.
 	The fix assumes, that all screens have same dimensions and no gaps in-
-	between. This is necessary, because multi-screen configuration paramters
+	between. This is necessary, because multi-screen configuration parameters
 	may not be interrogated by tk (despite of coordinates out of the screen)
 	[Bug 1499135] reported by Gregor
 
@@ -739,9 +739,9 @@
 	* scrollframe.tcl (ScrollableFrame::create, ScrollableFrame::_resize,
 	ScrollableFrame::_frameConfigure) fixed two issues:
 	- Scrollbar activated even if not necessary
-	  Fix: update scrolling reagion on configure event of the frame
-	- Disfunction if the frame got to small to be on the current view
-	  Fix: update scrolling reagion on map or unmap events
+	  Fix: update scrolling region on configure event of the frame
+	- Dysfunction if the frame got to small to be on the current view
+	  Fix: update scrolling region on map or unmap events
 	[Patch 2807227] by Koen Danckaert
 	
 	* buttonbox.tcl (ButtonBox::_redraw) Bug: homogeneous button width
@@ -752,7 +752,7 @@
 2009-06-16 Harald Oehlmann  <oehhar@users.sourceforge.net>
 
 	* combobox.tcl (ComboBox::_create_popup) In dropdown list,
-	a vertical scrollbar was always shown if horizantal is used.
+	a vertical scrollbar was always shown if horizontal is used.
 	ScrolledWindow is now called with "-managed 1".
 	[Patch 2807160] by Koen Danckaert
 
@@ -1096,7 +1096,7 @@
 	* dialog.tcl: default button width to -11 on Win8.4, 8 otherwise
 
 	* color.tcl, font.tcl, messagedlg.tcl:
-	* passwddlg.tcl, progressdlg.tcl: change dialogs to anchor buttons e
+	* passwddlg.tcl, progressdlg.tcl: change dialogues to anchor buttons e
 
 	* statusbar.tcl: better -bg handling (configure too), and tighten
 	up spacing on resize control to place it flush bottom right
@@ -1576,7 +1576,7 @@
 	to be an issue with shrinking smaller than one scrollbar width /
 	height in size, but that's not common (nor fatal).  Addresses
 	[Patch #671821, #520903] [Bug #472718, #564691]
-	This may introduce new incompatabilities, but it does work as
+	This may introduce new incompatibilities, but it does work as
 	expected for noted bugs and in the demos.
 
 	* widget.tcl: code cleanup
@@ -1987,7 +1987,7 @@
 
 	* titleframe.tcl: Added a '-state' flag that is associated to the
 	state of the label.  Now that labels can be disabled (in 8.3 and
-	beyond) this allows for the titleframe to have a disabled appearence.
+	beyond) this allows for the titleframe to have a disabled appearance.
 
 2000-05-02  Eric Melski  <ericm@scriptics.com>
 
