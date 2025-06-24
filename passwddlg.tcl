@@ -144,7 +144,7 @@ proc PasswdDlg::create { path args } {
 # -----------------------------------------------------------------------------
 
 proc PasswdDlg::configure { path args } {
-    set res [Widget::configure "$path#PasswdDlg" $args]
+    set res [Widget::configure $path $args]
 }
 
 # -----------------------------------------------------------------------------
@@ -152,7 +152,7 @@ proc PasswdDlg::configure { path args } {
 # -----------------------------------------------------------------------------
 
 proc PasswdDlg::cget { path option } {
-    return [Widget::cget "$path#PasswdDlg" $option]
+    return [Widget::cget $path $option]
 }
 
 

@@ -75,7 +75,7 @@ proc ProgressDlg::create { path args } {
 #  Command ProgressDlg::configure
 # ----------------------------------------------------------------------------
 proc ProgressDlg::configure { path args } {
-    return [Widget::configure "$path#ProgressDlg" $args]
+    return [Widget::configure $path $args]
 }
 
 
@@ -83,5 +83,5 @@ proc ProgressDlg::configure { path args } {
 #  Command ProgressDlg::cget
 # ----------------------------------------------------------------------------
 proc ProgressDlg::cget { path option } {
-    return [Widget::cget "$path#ProgressDlg" $option]
+    return [Widget::cget $path $option]
 }
