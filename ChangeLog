@@ -1,3 +1,6 @@
+2026-03-11 Harald Oehlmann <oehhar@users.sourceforge.net>
+	* Fix entry tests with tk9. Ticket [59ff5a99c0]
+
 2025-06-24 Harald Oehlmann <oehhar@users.sourceforge.net>
 	* Add "::SelectColor::use" to pckIndex.tcl.
 	Thanks to Thomas Wunderlich

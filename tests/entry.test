@@ -14,6 +14,8 @@ Entry .e
 pack .e
 update
 set i 0
+# Check if we are running Tk 9.0 or higher
+set isTk9 [expr {[package vcompare [package provide Tk] 9.0] >= 0}]
 foreach test {
     {-background #ff0000 #ff0000 non-existent \
 	    {unknown color name "non-existent"}}
@@ -55,10 +57,16 @@ foreach test {
     {-xscrollcommand {Some command} {Some command} {} {}}
 } {
     set name [lindex $test 0]
+    set value [lindex $test 1]
+    set expected [lindex $test 2]
+    # bug 59ff5a99c0: in Tk9, -borderwidth is a float.
+    if {$isTk9 && [string match "-*borderwidth" $name]} {
+        set expected $value
+    }
     test entry-1.$i {configuration options} {
-        .e configure $name [lindex $test 1]
+        .e configure $name $value
         list [lindex [.e configure $name] 4] [.e cget $name]
-    } [list [lindex $test 2] [lindex $test 2]]
+    } [list $expected $expected]
     incr i
 }
 destroy .e
